@@ -51,11 +51,11 @@
    "label": "Your patch"
   },
   {
-   "src": "../img/tank-en.webp",
+   "src": "../img/day-en.webp",
    "sizes": "780x1560",
    "type": "image/webp",
    "form_factor": "narrow",
-   "label": "What’s in the tank"
+   "label": "Every day"
   }
  ]
 }
