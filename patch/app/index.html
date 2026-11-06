@@ -205,6 +205,8 @@ textarea.out.live{min-height:240px;font-size:0.875rem;line-height:1.4}
 .strip .bx i.e1,.strip .bx i.e2{background:#d23b2a} .strip .bx i.e3{background:#c99a1a} .strip .bx i.e4,.strip .bx i.e5{background:#1fa64a}
 .strip .sc.td{font-weight:800}
 .strip .sc.nc{opacity:.4}
+@media (max-width:400px){ .strip{font-size:0.68rem;gap:3px 1px} .strip .sl{font-size:0.8rem;padding-right:2px} .strip .sc{letter-spacing:-0.03em} }
+@media (max-width:340px){ .strip{font-size:0.62rem} .strip > .sc:nth-last-child(2n+2):nth-last-child(-n+14){visibility:hidden} .topbar .in{gap:4px;padding:8px} .tb.ttl{font-size:1rem} .lang button{padding:6px 10px} .tb.gls{padding:6px} }
 .chain{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:8px 0}
 .chain span{background:var(--chip);border-radius:10px;padding:6px 10px;font-weight:700;font-size:.9rem}
 .chain b{color:var(--muted)}
@@ -315,7 +317,7 @@ ul.pay{padding-left:18px} ul.pay li{margin:.2em 0}
 let S = {a:{}, step:0, started:null, checkins:[], lang:null, mode:null, c:{}, cstep:0, crashes:[], intent:null, tank:null, tstep:0};
 const KEY='thepatch.v1';
 try{ const s=localStorage.getItem(KEY)||localStorage.getItem('patch'); if(s) S=Object.assign(S, JSON.parse(s)); if(!localStorage.getItem(KEY)&&s) localStorage.setItem(KEY,s); if(localStorage.getItem('patch')) localStorage.removeItem('patch'); }catch(e){}
-const VER='1.2.33'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
+const VER='1.2.34'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
 /* v1.2.21 (5 Nov 2026): prenatal / folic-acid and pregnancy-iron lines aligned with Health Canada; Quebec route for bloodwork; hard-stool branch;
    pattern messages match the 5-a-side rule; iPhone storage note + persist(); protein note by life stage; French fixes; "about $8" in English. */
 /* v1.2.22 (6 Nov 2026): one-screen result (plain-words test card, three-line week, one notes card with the crisis line kept open); glossary words underlined once per screen;
@@ -363,6 +365,14 @@ const VER='1.2.33'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
    with no number and says why. */
 /* v1.2.33 (6 Nov 2026): the hours before. For each crash, headache or itch with a time, the meals logged in the 4 hours
    before (6 for loose stools or bloating), against the same hours on days without it, with the suspects' bar. */
+/* v1.2.34 (6 Nov 2026): small screens — the History strip's sleep and date labels no longer run together under 400 px,
+   and the header's title fits at 320 px. Two ferritin tests under 4 weeks apart are too close to read a trend from.
+   A restored backup is checked first: malformed days, times and symptom kinds are dropped.
+   From ChatGPT's review, each reproduced first: deleting a crash report un-ticks the ⚡ it ticked; a test's "came back"
+   needs the food to have been back; the crash report's 4 hours before reach across the day's start; daylight saving can't
+   move the day's start; a year of meals, symptoms and crash reports is kept (was 90 days and 30 reports); the hours before
+   look at every crash or symptom whose window doesn't overlap the one before it, not just the first of the day, and each
+   is compared with the same clock hours on days without it. */
 if(!S.lang){ S.lang = (navigator.language||'en').toLowerCase().startsWith('fr') ? 'fr' : 'en'; }
 /* v0.7: three doors. Older saves have no mode — someone mid-questions lands back on their question, everyone else on the chooser. */
 if(!S.mode){ S.mode = S.step>0 ? 'patch' : 'home'; }
@@ -375,7 +385,7 @@ if(!S.tank.closedMig){ for(const k of Object.keys(S.tank.log)){ if(Object.keys(S
 /* check-in: first completion kept separately from later edits */
 try{ for(const r of Object.values(S.tank.rate||{})){ if(r&&r.fin&&r.at&&!r.firstAt) r.firstAt=r.at; } }catch(e){}
 if(!S.tank.rate||typeof S.tank.rate!=='object') S.tank.rate={}; delete S.rsel; if(S.tank.roll==null) S.tank.roll=4; if(!S.tank.view) S.tank.view='normal';
-(function prune(){ const cut=(()=>{ const d=new Date(Date.now()-90*86400000); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); })(); for(const k of Object.keys(S.tank.log)){ if(k<cut||!Object.keys(S.tank.log[k]||{}).length) delete S.tank.log[k]; } for(const k of Object.keys(S.tank.rate)){ if(k<cut||!Object.keys(S.tank.rate[k]||{}).length) delete S.tank.rate[k]; } for(const k of Object.keys(S.tank.closed)){ if(k<cut) delete S.tank.closed[k]; } })();
+(function prune(){ const cut=rateCut(); for(const k of Object.keys(S.tank.log)){ if(k<cut||!Object.keys(S.tank.log[k]||{}).length) delete S.tank.log[k]; } for(const k of Object.keys(S.tank.rate)){ if(k<cut||!Object.keys(S.tank.rate[k]||{}).length) delete S.tank.rate[k]; } for(const k of Object.keys(S.tank.closed)){ if(k<cut) delete S.tank.closed[k]; } })();
 let saveOk=true; let persistAsked=false;
 function save(){ try{ syncMeals(); localStorage.setItem(KEY, JSON.stringify(S)); if(!saveOk){ saveOk=true; saveBar(); } askPersist(); return true; }catch(e){ saveOk=false; saveBar(); return false; } }
 /* v1.2.21: once per session, ask the browser to keep this storage where it supports that */
@@ -569,8 +579,8 @@ const G = {
     s:['A food becomes a lead only when bad days come with it so often that luck would do that less than 1 time in 50 — and even then, it’s just a reason to test. One change, two weeks, then back to how it was. Two weeks because bad days come and go: at three crashes a week, one quiet week happens by luck about 1 time in 5; two quiet weeks, rarely. The swap keeps the protein the same so it can’t cause its own crash, and coffee and sleep stay put so the answer is about one thing. A slipped day just drops out. If the crashes come back when the food does, that’s the clearest answer one person can get. The odds shown assume your days are otherwise alike — they never quite are, so read them as rough.',
        'Un aliment devient une piste seulement quand les mauvaises journées l’accompagnent si souvent que le hasard ferait ça moins d’une fois sur 50 — et même là, c’est juste une raison de tester. Un seul changement, deux semaines, puis retour comme avant. Deux semaines parce que les mauvaises journées vont et viennent : à trois crashs par semaine, une semaine calme arrive par hasard environ 1 fois sur 5; deux semaines calmes, rarement. Le remplacement garde autant de protéines pour ne pas causer son propre crash, et le café et le sommeil restent pareils pour que la réponse porte sur une seule chose. Une journée d’écart est simplement retirée. Si les crashs reviennent quand l’aliment revient, c’est la réponse la plus claire qu’une personne puisse avoir. Les chances affichées supposent que tes journées se ressemblent autrement — ce n’est jamais tout à fait vrai, alors prends-les comme un ordre de grandeur.']},
   hours:{g:'likely', t:['The hours before','Les heures d’avant'],
-    s:['Some reactions come within hours, so the time matters, not just the day. For each crash, headache or itch you note with a time, the app looks at the meals you logged in the 4 hours before; for loose stools or bloating, the 6 hours before. Then it looks at the same hours on days without it — days with a finished check-in that say it didn’t happen. A lead needs the same bar as the other suspects: at least 3 times with the food, a gap of 30 points, and a split luck would give less than 1 time in 50. Only meals with a time count, and a “no” only counts on days marked complete. Why those windows: a crash after a meal usually comes within a few hours; lactose shows up 30 minutes to 2 hours later; what ferments in the large bowel takes a few hours more. A lead is a reason to test, not proof.',
-       'Certaines réactions arrivent en quelques heures, alors l’heure compte, pas juste la journée. Pour chaque crash, mal de tête ou démangeaison que tu notes avec l’heure, l’app regarde les repas notés dans les 4 heures avant; pour les selles molles ou les ballonnements, les 6 heures avant. Ensuite, elle regarde les mêmes heures les jours sans — des journées avec un bilan terminé qui dit que ça n’est pas arrivé. Une piste demande la même barre que les autres suspects : au moins 3 fois avec l’aliment, un écart de 30 points, et un partage que la chance donnerait moins d’une fois sur 50. Seuls les repas avec l’heure comptent, et un « non » compte seulement les jours marqués complets. Pourquoi ces fenêtres : un crash après un repas arrive d’habitude en quelques heures; le lactose se fait sentir de 30 minutes à 2 heures après; ce qui fermente dans le gros intestin prend quelques heures de plus. Une piste, c’est une raison de tester, pas une preuve.']},
+    s:['Some reactions come within hours, so the time matters, not just the day. For each crash, headache or itch you note with a time, the app looks at the meals you logged in the 4 hours before; for loose stools or bloating, the 6 hours before. Then, for each one, it looks at the same clock hours on days without it — days with a finished check-in that say it didn’t happen. So a 9 a.m. headache is compared with mornings and a 4 p.m. crash with afternoons, and a food you usually have at breakfast can’t look guilty just because some problems happen in the morning. A lead needs the same bar as the other suspects: at least 3 times with the food, a gap of 30 points, and a split luck would give less than 1 time in 50. Only meals with a time count, and a “no” only counts on days marked complete. Why those windows: a crash after a meal usually comes within a few hours; lactose shows up 30 minutes to 2 hours later; what ferments in the large bowel takes a few hours more. A lead is a reason to test, not proof.',
+       'Certaines réactions arrivent en quelques heures, alors l’heure compte, pas juste la journée. Pour chaque crash, mal de tête ou démangeaison que tu notes avec l’heure, l’app regarde les repas notés dans les 4 heures avant; pour les selles molles ou les ballonnements, les 6 heures avant. Ensuite, pour chacun, elle regarde les mêmes heures les jours sans — des journées avec un bilan terminé qui dit que ça n’est pas arrivé. Un mal de tête à 9 h est donc comparé aux matins, un crash à 16 h aux après-midis, et un aliment que tu prends d’habitude au déjeuner ne peut pas avoir l’air coupable juste parce que certains problèmes arrivent le matin. Une piste demande la même barre que les autres suspects : au moins 3 fois avec l’aliment, un écart de 30 points, et un partage que la chance donnerait moins d’une fois sur 50. Seuls les repas avec l’heure comptent, et un « non » compte seulement les jours marqués complets. Pourquoi ces fenêtres : un crash après un repas arrive d’habitude en quelques heures; le lactose se fait sentir de 30 minutes à 2 heures après; ce qui fermente dans le gros intestin prend quelques heures de plus. Une piste, c’est une raison de tester, pas une preuve.']},
   sugarloop:{g:'likely', t:['The sugar loop','La boucle du sucre'],
     s:['Sugar on its own is absorbed in the first stretch of the gut. The signals that say “full” fire further down, when protein, fat and fibre get there — so after sugar alone, hunger comes back sooner, and the fastest fix for hunger is more sugar. Fat with it slows the sugar, but makes the mix the body stores best and the brain wants most. The way out isn’t no sugar: it’s sugar after protein, not instead of it.',
        'Le sucre seul est absorbé dans le premier bout de l’intestin. Les signaux qui disent « plein » partent plus loin, quand les protéines, le gras et les fibres y arrivent — alors après du sucre seul, la faim revient plus vite, et le moyen le plus rapide de la calmer, c’est encore du sucre. Du gras avec ça ralentit le sucre, mais ça donne le mélange que le corps stocke le mieux et que le cerveau veut le plus. La sortie, ce n’est pas zéro sucre : c’est du sucre après les protéines, pas à leur place.']},
@@ -911,8 +921,8 @@ const EV = {
     e:['Changing one thing in one person, with a before, a during and a return, is the logic of an N-of-1 trial. A real N-of-1 trial adds blinding and repeats; this one can’t, so expectation and everything else that changes in two weeks can fool it. The odds come from a simple binomial model of bad days.',
        'Changer une seule chose chez une seule personne, avec un avant, un pendant et un retour, c’est la logique d’un essai N-de-1. Un vrai essai N-de-1 se fait à l’insu et se répète; celui-ci ne peut pas, alors les attentes et tout ce qui change en deux semaines peuvent le fausser. Les chances viennent d’un simple modèle binomial des mauvaises journées.']},
   hours:{src:['nihLact','ebert2016','maintz'],
-    e:['The windows: lactose symptoms come 30 minutes to 2 hours after (NIDDK); unabsorbed fructose causes symptoms once it reaches the large bowel and ferments (Ebert 2016); histamine reactions come within minutes to a few hours (Maintz & Novak 2007). The 4-hour crash window is the one the crash report already uses. The lead rule is the suspects’ rule; on simulated people with no food effect, 5% got a lead from the hours (3% from the day counts). With afternoon crashes coming only after sweets at lunch, and sweets at breakfast most days too, the hours found it for 29% of people by six weeks; the day counts, which can’t see the time, for 3%.',
-       'Les fenêtres : les symptômes du lactose arrivent de 30 minutes à 2 heures après (NIDDK); le fructose non absorbé cause des symptômes quand il atteint le gros intestin et fermente (Ebert 2016); les réactions à l’histamine arrivent de quelques minutes à quelques heures après (Maintz & Novak 2007). La fenêtre de 4 heures pour les crashs est celle que le rapport de crash utilise déjà. La règle est celle des suspects; sur des personnes simulées sans aucun effet des aliments, 5 % ont eu une piste par les heures (3 % par les journées). Avec des crashs d’après-midi qui suivent seulement les sucreries au dîner, et des sucreries au déjeuner presque tous les jours aussi, les heures l’ont trouvé chez 29 % des gens en six semaines; les journées, qui ne voient pas l’heure, chez 3 %.']},
+    e:['The windows: lactose symptoms come 30 minutes to 2 hours after (NIDDK); unabsorbed fructose causes symptoms once it reaches the large bowel and ferments (Ebert 2016); histamine reactions come within minutes to a few hours (Maintz & Novak 2007). The 4-hour crash window is the one the crash report already uses. The lead rule is the suspects’ rule; on simulated people with no food effect, 4% got a lead from the hours (4% from the day counts). With afternoon crashes coming only after sweets at lunch, and sweets at breakfast most days too, the hours found it for 48% of people by six weeks; the day counts, which can’t see the time, for 1%.',
+       'Les fenêtres : les symptômes du lactose arrivent de 30 minutes à 2 heures après (NIDDK); le fructose non absorbé cause des symptômes quand il atteint le gros intestin et fermente (Ebert 2016); les réactions à l’histamine arrivent de quelques minutes à quelques heures après (Maintz & Novak 2007). La fenêtre de 4 heures pour les crashs est celle que le rapport de crash utilise déjà. La règle est celle des suspects; sur des personnes simulées sans aucun effet des aliments, 4 % ont eu une piste par les heures (4 % par les journées). Avec des crashs d’après-midi qui suivent seulement les sucreries au dîner, et des sucreries au déjeuner presque tous les jours aussi, les heures l’ont trouvé chez 48 % des gens en six semaines; les journées, qui ne voient pas l’heure, chez 1 %.']},
   sugarloop:{src:['hall2019','difeli2018','brake2013'],
     e:['An inpatient trial (Hall 2019, 20 adults): on ultra-processed food, people ate about 500 kcal a day more and gained weight within two weeks. A brain-imaging study (DiFeliceantonio 2018): people paid more for snacks with fat and carbohydrate together than for snacks with only one, at the same calories. A review (2013): nutrients that reach the end of the small intestine slow the stomach and add fullness — the “ileal brake”. The loop itself, sugar to quick hunger to more sugar, is our reading of these, not a trial.',
        'Un essai en milieu hospitalier (Hall 2019, 20 adultes) : avec de la nourriture ultra-transformée, les gens ont mangé environ 500 kcal de plus par jour et pris du poids en deux semaines. Une étude d’imagerie du cerveau (DiFeliceantonio 2018) : les gens payaient plus pour des collations avec du gras et des glucides ensemble que pour des collations avec un seul des deux, à calories égales. Une revue (2013) : les nutriments qui atteignent la fin de l’intestin grêle ralentissent l’estomac et donnent le sentiment d’être plein — le « frein iléal ». La boucle elle-même, du sucre à la faim rapide à encore du sucre, c’est notre lecture de ces études, pas un essai.']},
@@ -1503,9 +1513,9 @@ function crashText(){
   return t;
 }
 function crashPattern(){
-  const n=S.crashes.length; if(n<3) return null;
+  const C=S.crashes.slice(-30), n=C.length; if(n<3) return null;
   const M=MECH(); const cnt={}; const whenCnt={};
-  for(const x of S.crashes){ if(x.top&&M[x.top]){ cnt[x.top]=(cnt[x.top]||0)+1; } if(x.when){ whenCnt[x.when]=(whenCnt[x.when]||0)+1; } }
+  for(const x of C){ if(x.top&&M[x.top]){ cnt[x.top]=(cnt[x.top]||0)+1; } if(x.when){ whenCnt[x.when]=(whenCnt[x.when]||0)+1; } }
   const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0]; const w=Object.entries(whenCnt).sort((a,b)=>b[1]-a[1])[0];
   const out=[];
   if(top && top[1]>=2 && top[1]/n>=0.5) out.push(L(`<b>${top[1]} of your last ${n} crashes read as “${P2(M[top[0]].t)}”.</b> That’s a recurring association — yours, not the population’s. It doesn’t prove the mechanism; it’s enough to run that move for a week instead of a day and see.`, `<b>${top[1]} de tes ${n} derniers crashs se lisent comme « ${P2(M[top[0]].t)} ».</b> C’est une association qui revient — la tienne, pas celle de la population. Ça ne prouve pas le mécanisme; c’est assez pour faire ce geste-là une semaine au lieu d’une journée, et voir.`));
@@ -1667,7 +1677,7 @@ migrateSup();
 /* v1.2.31: vitamin E in IU — food is the natural form, 1 mg = 1.49 IU */
 for(const f of TF){ if(f&&f.n&&f.n.e) f.n.e=Math.round(f.n.e*1.49*100)/100; }
 migrateE();
-function dayKey(d){ const t=new Date((d?d.getTime():Date.now())-(S.tank.roll||0)*3600000); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); }
+function dayKey(d){ const t=new Date(d?d.getTime():Date.now()); const r=S.tank.roll||0, h=t.getHours(); if(r>0&&h<r) t.setDate(t.getDate()-1); else if(r<0&&h>=24+r) t.setDate(t.getDate()+1); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); }
 function keyAdd(k,n){ const [y,m,d]=k.split('-').map(Number); const t=new Date(y,m-1,d+n); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); }
 function tlog(){ if(!S.tank.log||typeof S.tank.log!=='object') S.tank.log={}; return S.tank.log; }
 /* v1.2.27: food goes into a meal; the day log is rebuilt from meals, so the only other thing edited directly is the normal day */
@@ -2147,7 +2157,7 @@ function vHomeBack(o){
   <p class="small muted" style="margin-top:16px"><b>${L('Not a doctor.','Pas un médecin.')}</b> ${L('Chest pain, fainting or black stool: 911. Thinking about ending your life: call or text 9-8-8 (988 in the US).','Douleur à la poitrine, évanouissement ou selles noires : 911. Tu penses à mettre fin à tes jours : appelle ou texte le 9-8-8 (988 aux É.-U.).')} <button type="button" class="btn ghost sm" id="aboutBtn" style="margin-top:6px">${L('About & privacy','À propos et confidentialité')}</button></p>`; }
 function openAbout(){ showSheet(`<div class="handle"></div><h3 id="sheetTitle">${L('About & privacy','À propos et confidentialité')}</h3>${tagline()}
   <p class="small">${L('Education, not medical, pharmacist or dietitian advice. It starts from how you live now, and you decide what to do with it.','De l’éducation, pas un avis médical, pharmaceutique ou diététique. Ça part de ta vie telle qu’elle est, et c’est toi qui décides quoi en faire.')}</p>
-  <p class="small">${L('Provided as-is, without warranty of any kind. Your answers stay in this browser’s storage until you share them or erase them — that storage isn’t encrypted, so anyone who can unlock this phone can read it. Nothing here replaces a clinician who can examine you.','Fourni tel quel, sans garantie d’aucune sorte. Tes réponses restent dans la mémoire de ce navigateur tant que tu ne les partages pas ou ne les effaces pas — cette mémoire n’est pas chiffrée, alors quiconque peut déverrouiller ce téléphone peut les lire. Rien ici ne remplace un clinicien qui peut t’examiner.')}</p>
+  <p class="small">${L('Provided as-is, without warranty of any kind. Your answers stay in this browser’s storage until you share them or erase them — that storage isn’t encrypted, so anyone who can unlock this phone can read it. Meals, symptoms and crash reports are kept for a year; a backup saves what’s there. Nothing here replaces a clinician who can examine you.','Fourni tel quel, sans garantie d’aucune sorte. Tes réponses restent dans la mémoire de ce navigateur tant que tu ne les partages pas ou ne les effaces pas — cette mémoire n’est pas chiffrée, alors quiconque peut déverrouiller ce téléphone peut les lire. Les repas, les symptômes et les rapports de crash sont gardés un an; une sauvegarde garde ce qui est là. Rien ici ne remplace un clinicien qui peut t’examiner.')}</p>
   <p class="small">${L('Any underlined word can be tapped to see what it means, how sure we are, and the sources.','N’importe quel mot souligné peut être touché pour voir ce que ça veut dire, à quel point on en est sûr, et les sources.')}</p>
   <p class="small muted">v${VER} · ${L('sources checked','sources vérifiées le')} ${P2(CHECKED)} · ${L('pharmacist review: not yet','révision par un pharmacien : pas encore')}</p><p style="margin:10px 0 0"><button type="button" class="btn ghost sm" id="aboutTobie">${L('Tell Tobie','Dis-le à Tobie')}</button></p>`, null); const at=document.getElementById('aboutTobie'); if(at) at.onclick=e=>openTobie(e.currentTarget); }
 function vStart(){
@@ -2177,7 +2187,7 @@ function vStart(){
   ${iosNote()}
 `:''}
   <p class="small muted" style="margin-top:14px">${L('Any','N’importe quel')} <span class="t" data-t="loop">${L('underlined word','mot souligné')}</span> ${L('can be tapped to see what it means, how sure we are, and the sources.','peut être touché pour voir ce que ça veut dire, à quel point on en est sûr, et les sources.')}${(Object.keys(S.a).length||nC||S.cstep||S.tstep)?` <button class="btn ghost sm" id="reset" style="margin-left:6px">${L('Erase my answers','Effacer mes réponses')}</button>`:''}</p>
-  <p class="small muted" style="margin-top:14px">${L('Provided as-is, without warranty of any kind. Your answers stay in this browser’s storage until you share them or erase them — that storage isn’t encrypted, so anyone who can unlock this phone can read it. Nothing here replaces a clinician who can examine you.','Fourni tel quel, sans garantie d’aucune sorte. Tes réponses restent dans la mémoire de ce navigateur tant que tu ne les partages pas ou ne les effaces pas — cette mémoire n’est pas chiffrée, alors quiconque peut déverrouiller ce téléphone peut les lire. Rien ici ne remplace un clinicien qui peut t’examiner.')}</p>
+  <p class="small muted" style="margin-top:14px">${L('Provided as-is, without warranty of any kind. Your answers stay in this browser’s storage until you share them or erase them — that storage isn’t encrypted, so anyone who can unlock this phone can read it. Meals, symptoms and crash reports are kept for a year; a backup saves what’s there. Nothing here replaces a clinician who can examine you.','Fourni tel quel, sans garantie d’aucune sorte. Tes réponses restent dans la mémoire de ce navigateur tant que tu ne les partages pas ou ne les effaces pas — cette mémoire n’est pas chiffrée, alors quiconque peut déverrouiller ce téléphone peut les lire. Les repas, les symptômes et les rapports de crash sont gardés un an; une sauvegarde garde ce qui est là. Rien ici ne remplace un clinicien qui peut t’examiner.')}</p>
   <p class="small muted" style="margin-top:8px">v${VER} · ${L('sources checked','sources vérifiées le')} ${P2(CHECKED)} · ${L('pharmacist review: not yet','révision par un pharmacien : pas encore')}</p>`;
 }
 /* high-histamine servings logged on the crash's day — the bucket fills across the day, not only in the last 4 hours */
@@ -2215,7 +2225,7 @@ function vCrashRes(){
   if(pat){
     const weeks=S.madeAt?Math.floor((Date.now()-new Date(S.madeAt).getTime())/(7*86400000)):null;
     const stale = !R.profile ? L('<b>Three crashes and no Patch.</b> Three minutes of questions give these reads something to be read against — your meds, your fuel, your week.','<b>Trois crashs et pas de Patch.</b> Trois minutes de questions donnent un point de repère à ces lectures — tes médicaments, ton carburant, ta semaine.') : (weeks!=null&&weeks>=4 ? L(`<b>These crashes are being read against a Patch from ${weeks} weeks ago.</b> Re-run it — what you keep and what leaks has probably moved, and that changes the read more than another log would.`,`<b>Ces crashs sont lus selon une Patch d’il y a ${weeks} semaines.</b> Refais-la — ce que tu gardes et ce qui fuit a probablement bougé, et ça change la lecture plus qu’un autre journal.`) : '');
-    h+=`<div class="card soft"><div class="eyebrow">${L('The pattern','La tendance')} · ${S.crashes.length} ${L('crashes','crashs')}</div>${pat.map(p=>`<p class="small" style="margin:.3em 0">${p}</p>`).join('')}${stale?`<p class="small" style="margin:.5em 0 0">${stale}</p><div class="row" style="margin-top:8px"><button class="btn sm" data-go="${R.profile?'redo':'patch'}">${R.profile?L('Re-run the Patch','Refaire la Patch'):L('Do the Patch · about 3 minutes','Faire la Patch · environ 3 minutes')}</button></div>`:''}</div>`;
+    h+=`<div class="card soft"><div class="eyebrow">${L('The pattern','La tendance')} · ${Math.min(30,S.crashes.length)} ${L('crashes','crashs')}</div>${pat.map(p=>`<p class="small" style="margin:.3em 0">${p}</p>`).join('')}${stale?`<p class="small" style="margin:.5em 0 0">${stale}</p><div class="row" style="margin-top:8px"><button class="btn sm" data-go="${R.profile?'redo':'patch'}">${R.profile?L('Re-run the Patch','Refaire la Patch'):L('Do the Patch · about 3 minutes','Faire la Patch · environ 3 minutes')}</button></div>`:''}</div>`;
   }
   h+=gapTipCard();
   if(!R.top){
@@ -2230,7 +2240,7 @@ function vCrashRes(){
     F(L('the fingerprint','l’empreinte'),`<div class="card patch"><h3><span class="tag">${L('Fingerprint','Empreinte')}</span> <span class="small muted">${L('for next time','pour la prochaine fois')}</span></h3><p style="margin:0">${P2(top.fp)}</p></div>`);
   }
   h+=crashPrefillNote();
-  const entries=S.crashes.length?`<ul class="small" style="margin:6px 0 10px">${S.crashes.map((x,i)=>`<li><span class="pat">${crashDay(x)}</span> · ${x.top&&M[x.top]?P2(M[x.top].t):L('no clear cause','pas de cause claire')} <button class="btn ghost sm" data-delcrash="${i}" aria-label="${L('Delete this entry','Supprimer cette entrée')}" style="padding:2px 8px;margin-left:4px;min-width:44px">×</button></li>`).join('')}</ul>`:'';
+  const entries=S.crashes.length?`<ul class="small" style="margin:6px 0 10px">${S.crashes.map((x,i)=>[x,i]).slice(-30).map(([x,i])=>`<li><span class="pat">${crashDay(x)}</span> · ${x.top&&M[x.top]?P2(M[x.top].t):L('no clear cause','pas de cause claire')} <button class="btn ghost sm" data-delcrash="${i}" aria-label="${L('Delete this entry','Supprimer cette entrée')}" style="padding:2px 8px;margin-left:4px;min-width:44px">×</button></li>`).join('')}</ul>${S.crashes.length>30?`<p class="small muted" style="margin:-4px 0 10px">${L(`The last 30 of ${S.crashes.length}. The older ones are kept — they’re on the calendar in History.`,`Les 30 derniers sur ${S.crashes.length}. Les plus anciens sont gardés — ils sont sur le calendrier dans Historique.`)}</p>`:''}`:'';
   let nudge=''; { const n=usableKeys().length; nudge=`<div class="card soft"><p class="small" style="margin:0 0 8px">${n>=MINR?L('Your daily ratings can show what came before this — the night before, the caffeine, the drinks.','Tes notes du jour peuvent montrer ce qui est venu avant — la nuit d’avant, la caféine, l’alcool.'):L('A crash is often set up the day before: late caffeine, a short night, drinks. Four taps a day — energy, sleep, caffeine, alcohol — and after two or three weeks the app can show you what comes before yours.','Un crash se prépare souvent la veille : caféine tardive, nuit courte, alcool. Quatre réponses par jour — énergie, sommeil, caféine, alcool — et après deux ou trois semaines, l’app peut te montrer ce qui vient avant les tiens.')}</p><button class="btn ghost sm" ${n>=MINR?'data-go="pat"':`data-dayopen="${dayKey()}"`}>${n>=MINR?L('History →','Historique →'):L('Daily check-in →','Bilan du jour →')}</button></div>`; }
   h+=`<div class="card"><h3>${L('The log','Le journal')}</h3>${pat?'':`<p class="small">${L(`${S.crashes.length} logged so far. The pattern shows after three — that’s when a read becomes something that keeps happening to you.`,`${S.crashes.length} au journal jusqu’ici. La tendance se montre après trois — c’est là qu’une lecture devient quelque chose qui t’arrive pour vrai.`)}</p>`}${entries}<div class="row">${logged?`<span class="small muted">✓ ${L('Logged','Au journal')}</span>`:`<button class="btn sm" id="logCrash">${L('Log this crash','Mettre ce crash au journal')}</button>`}<button class="btn ghost sm" id="newCrash">${L('New crash','Nouveau crash')}</button>${S.crashes.length?`<button class="btn ghost sm" id="clearLog">${L('Clear log','Vider le journal')}</button>`:''}</div></div>`;
   if(fold.length) h+=`<details class="note crashmore"><summary>${L('More','Plus')} · ${foldNames.join(' · ')}</summary>${fold.join('')}</details>`;
@@ -2401,8 +2411,8 @@ function testVerdict(t){ const slips=testSlips(t);
   const [yb,nb]=pickOut(before,t.out), [yd,nd]=pickOut(during,t.out), [yr,nr]=pickOut(back,t.out);
   let code, p=null;
   if(nb<7||nd<7) code='thin'; else if(yb===0) code='nobase'; else { const p0=yb/nb; p=binomCDF(yd,nd,p0); code=(yd<p0*nd&&p<0.1)?'fewer':'same'; }
-  const came=(code==='fewer'&&nr>=2)?yr>=1:null;
-  return {code,p,yb,nb,yd,nd,yr,nr,came,before,during,back,slips:slips.size}; }
+  const bb=backBack(t); const came=(code==='fewer'&&bb.known>=1)?(bb.hit>=1?true:(bb.known>=2?false:null)):null;
+  return {code,p,yb,nb,yd,nd,yr,nr,came,bx:bb.ex,bk:bb.known,bh:bb.hit,before,during,back,slips:slips.size}; }
 function verdictHTML(t,v){ const OD=cap1(P2(OUTN[t.out]));
   const nums=L(`${OD}: ${v.yd} of ${v.nd} days during the test, ${v.yb} of ${v.nb} before.`,`${OD} : ${v.yd} sur ${v.nd} jours pendant le test, ${v.yb} sur ${v.nb} avant.`);
   if(v.code==='thin') return L('<b>Too few finished days to compare.</b> The numbers are here, but they can’t settle it.','<b>Trop peu de journées terminées pour comparer.</b> Les chiffres sont là, mais ils ne peuvent pas trancher.');
@@ -2410,8 +2420,9 @@ function verdictHTML(t,v){ const OD=cap1(P2(OUTN[t.out]));
   if(v.code==='same') return L(`<b>No clear change.</b> ${nums} Probably not this one — next suspect, or leave it.`,`<b>Pas de changement clair.</b> ${nums} Probablement pas celui-là — prochain suspect, ou on laisse faire.`);
   const odds=v.p<0.01?L('less than 1 time in 100','moins d’une fois sur 100'):L(`about 1 time in ${Math.round(1/v.p)}`,`environ 1 fois sur ${Math.round(1/v.p)}`);
   let h=L(`<b>Fewer during the test.</b> ${nums} If it made no difference, a stretch this quiet would come ${odds}.`,`<b>Moins pendant le test.</b> ${nums} Si ça ne changeait rien, une période aussi calme arriverait ${odds}.`);
-  if(v.came===true) h+=' '+L(`And they came back when you went back (${v.yr} of ${v.nr} days) — the clearest sign one person can get. Your call: keep it out, keep it small, or save it for days off.`,`Et ça a repris quand tu as recommencé comme avant (${v.yr} jours sur ${v.nr}) — le signe le plus clair qu’une personne puisse avoir. À toi de voir : le laisser de côté, en prendre moins, ou le garder pour tes congés.`);
-  else if(v.came===false) h+=' '+L(`None came back in the ${v.nr} days after — could be chance, or it takes longer.`,`Rien n’est revenu dans les ${v.nr} jours après — ça peut être le hasard, ou ça prend plus de temps.`);
+  if(v.came===true) h+=' '+L(`And they came back when you had it again (${v.bh} of the ${v.bk} days you had it) — the clearest sign one person can get. Your call: keep it out, keep it small, or save it for days off.`,`Et c’est revenu quand tu en as repris (${v.bh} des ${v.bk} jours où tu en as pris) — le signe le plus clair qu’une personne puisse avoir. À toi de voir : le laisser de côté, en prendre moins, ou le garder pour tes congés.`);
+  else if(v.came===false) h+=' '+L(`You had it again on ${v.bk} days and nothing came back — could be chance, or it takes longer.`,`Tu en as repris ${v.bk} jours et rien n’est revenu — ça peut être le hasard, ou ça prend plus de temps.`);
+  else if(!v.bx&&t.fam!=='alcohol3') h+=' '+L(`To be surer: have it again on a day or two and log it. If ${P2(OUTB[t.out])} come back, that’s the clearest sign one person can get.`,`Pour être plus sûr : reprends-en un jour ou deux et note-le. Si les ${P2(OUTB[t.out])} reviennent, c’est le signe le plus clair qu’une personne puisse avoir.`);
   return h; }
 function testTable(t,v){ const W=[v.before,v.during,v.back]; const frac=(y,n)=>n?`${y}/${n}`:'—'; const avg=(s,n)=>n?fmt1(s/n):'—';
   const rows=[[cap1(P2(OUTN[t.out])),...W.map(st=>frac(...pickOut(st,t.out)))]];
@@ -2475,7 +2486,7 @@ function meals(){ if(!S.tank.mealsMig||!Array.isArray(S.tank.meals)) migrateMeal
 function syncMeals(){ try{ if(!S.tank||!S.tank.mealsMig||!Array.isArray(S.tank.meals)) return; const by={};
   for(const m of S.tank.meals){ if(!m||!m.day||!m.items) continue; const t=by[m.day]||(by[m.day]={}); for(const [id,n] of Object.entries(m.items)){ if(!(n>0)) continue; t[id]=Math.round(((t[id]||0)+n)*100)/100; } }
   const lg=tlog(); for(const k of Object.keys(lg)) if(!by[k]||!mapCount(by[k])) delete lg[k]; for(const [k,t] of Object.entries(by)) if(mapCount(t)) lg[k]=t; }catch(e){} syncEv(); }
-function pruneMeals(){ const cut=keyAdd(dayKey(),-90); S.tank.meals=meals().filter(m=>m&&m.day&&m.day>=cut&&m.items&&mapCount(m.items)>0); }
+function pruneMeals(){ const cut=keyAdd(dayKey(),-365); S.tank.meals=meals().filter(m=>m&&m.day&&m.day>=cut&&m.items&&mapCount(m.items)>0); }
 function curMeal(){ return (S.meal&&S.tank&&Array.isArray(S.tank.meals))?(S.tank.meals.find(m=>m&&m.id===S.meal)||null):null; }
 migrateMeals(); pruneMeals(); syncMeals();
 if(S.mode==='meal'&&!curMeal()) S.mode='home';
@@ -2544,14 +2555,15 @@ function mealsText(){ const today=dayKey(), lines=[];
   return lines.length?L('== MEALS, LAST 3 DAYS (with the time I ate) ==','== REPAS, 3 DERNIERS JOURS (avec l’heure) ==')+'\n'+lines.join('\n'):''; }
 /* ---------- crash report: the 4 hours before, from meals with a time ---------- */
 function crashMealPrefill(){ const k=S.c._day||dayKey(); delete S.c._preSure; if(S.c.cfood&&!S.c._pre) return;
-  if(!S.c._at||!meals().some(m=>m.day===k&&m.at)) return;
+  if(!S.c._at||!meals().some(m=>m.at&&(m.day===k||m.day===keyAdd(k,-1)))) return;
   const t=atMs(k,S.c._at), from=t-4*3600000;
   const inW=meals().filter(m=>m.at&&(m.day===k||m.day===keyAdd(k,-1))&&atMs(m.day,m.at)<=t&&atMs(m.day,m.at)>=from);
   const items={}; for(const m of inW) for(const [id,n] of Object.entries(m.items)) items[id]=(items[id]||0)+n;
   const cats=logCats(items); const big=Math.min(1000,tankReady()?0.4*tankTargets().kcal:1000);
   if(inW.some(m=>(tankTotals(m.items).tot.kcal||0)>=big)) cats.push('big');
-  if(cats.length){ S.c.cfood=cats; S.c._pre='meal'; S.c._preSure=true; }
-  else if(!inW.length){ S.c.cfood=['nothing']; S.c._pre='meal'; S.c._preSure=isClosed(k); }
+  const sure=winMeals(from,t).sure;
+  if(cats.length){ S.c.cfood=cats; S.c._pre='meal'; S.c._preSure=sure; }
+  else if(!inW.length){ S.c.cfood=['nothing']; S.c._pre='meal'; S.c._preSure=sure; }
   else { delete S.c.cfood; delete S.c._pre; } }
 /* asked only if the logs can't answer: sleep and caffeine from that day's check-in, food from meals in the 4 hours before */
 function crashSkipped(){ if(!S.c||S.c._noskip) return []; const s=(S.c._preC||[]).filter(id=>S.c[id]!=null); if(S.c._pre==='meal'&&S.c._preSure&&S.c.cfood) s.push('cfood'); return s; }
@@ -2595,13 +2607,13 @@ function dayEvents(k){ return evs().filter(e=>e.day===k); }
 function syncEv(){ try{ if(!S.tank||!S.tank.evMig||!Array.isArray(S.tank.ev)) return; const R=rates(); const by={};
   for(const e of S.tank.ev){ if(!e||!e.day||!SYMK.includes(e.k)) continue; (by[e.day]||(by[e.day]=[])).push(e); }
   for(const [k,r] of Object.entries(R)){ if(!r) continue; if(!by[k]){ delete r.offw; delete r.lwA; if(r.offA){ if(r.fl) delete r.fl.off; delete r.offA; } } }
-  for(const [k,list] of Object.entries(by)){ const r=R[k]||(R[k]={}); r.offw={}; for(const e of list) r.offw[e.k]=true; r.fl=r.fl||{}; if(!r.fl.off) r.offA=true; r.fl.off=true;
+  const rc=rateCut(); for(const [k,list] of Object.entries(by)){ if(k<rc) continue; const r=R[k]||(R[k]={}); r.offw={}; for(const e of list) r.offw[e.k]=true; r.fl=r.fl||{}; if(!r.fl.off) r.offA=true; r.fl.off=true;
     const L0=list.filter(e=>e.k==='loose'&&e.at); const ms=(S.tank.meals||[]).filter(m=>m&&m.day===k&&m.at&&m.items&&mapCount(m.items));
     if(L0.length&&ms.length){ const first=Math.min(...ms.map(m=>atMs(m.day,m.at))); const pre=L0.some(e=>atMs(e.day,e.at)<first), post=L0.some(e=>atMs(e.day,e.at)>=first); r.lwA=pre&&post?'both':pre?'wake':'meal'; }
     else delete r.lwA; } }catch(e){} }
 function lwOf(k){ const r=rates()[k]; return r?(r.lwA||r.lw):undefined; }
 function lwLabel(v){ return v==='both'?L('on waking and after a meal','au réveil et après un repas'):((LW.find(x=>x[0]===v)||[null,null])[1]?P2(LW.find(x=>x[0]===v)[1]):''); }
-function pruneEv(){ const cut=keyAdd(dayKey(),-90); S.tank.ev=evs().filter(e=>e&&e.day&&e.day>=cut&&(SYMK.includes(e.k)||e.k==='blood'||e.k==='black')); }
+function pruneEv(){ const cut=keyAdd(dayKey(),-365); S.tank.ev=evs().filter(e=>e&&e.day&&e.day>=cut&&(SYMK.includes(e.k)||e.k==='blood'||e.k==='black')); }
 migrateEv(); pruneEv(); syncMeals();
 if(S.mode==='sym'&&!S.sym) S.mode='home';
 /* ---------- time since the last meal ---------- */
@@ -2846,12 +2858,14 @@ function paperN(pp){ const a=pp.nReal, b=pp.nAss;
 function paperText(pp,need){ return L(`<b>Since that test, on paper:</b> about ${fmt(pp.avg,1)} mg of iron a day in what you logged (${paperN(pp)}), against a need of ${fmt(need.ear,1)} to ${fmt(need.rda,0)} mg — ${paperVerdict(pp.avg,need)}. Paper can’t see what you absorb, or what leaves (periods, blood loss); the next test can.`,
   `<b>Depuis ce test, sur papier :</b> environ ${fmt(pp.avg,1)} mg de fer par jour dans ce que tu as noté (${paperN(pp)}), pour un besoin de ${fmt(need.ear,1)} à ${fmt(need.rda,0)} mg — ${paperVerdict(pp.avg,need)}. Le papier ne voit pas ce que tu absorbes, ni ce qui sort (règles, pertes de sang); le prochain test, oui.`); }
 function ferTrend(){ const F=labsSorted().filter(x=>x.fer!=null); if(F.length<2) return null; const b=F[F.length-1], a=F[F.length-2];
-  const days=Math.max(1,Math.round((new Date(b.day)-new Date(a.day))/86400000)); const res={a,b,days,mo:days/30.44};
+  const rd=Math.round((new Date(b.day)-new Date(a.day))/86400000), days=Math.max(1,rd); const res={a,b,days,rd,mo:days/30.44}; if(rd<28){ res.kind='close'; return res; }
   if(b.inf||b.don){ res.kind='event'; return res; } if(inflamed(a)||inflamed(b)){ res.kind='inflamed'; return res; }
   const d=b.fer-a.fer; res.per=d/res.mo; res.kind=Math.abs(d)<=Math.max(5,0.1*a.fer)?'hold':d<0?'fall':'rise'; if(a.inf) res.afterInf=true;
   res.paper=paperAvg('fe',a.day,b.day); return res; }
-function trendText(tr){ const span=tr.days<60?L(`${Math.max(1,Math.round(tr.days/7))} weeks`,`${Math.max(1,Math.round(tr.days/7))} semaines`):L(`${Math.round(tr.mo)} months`,`${Math.round(tr.mo)} mois`);
-  const head=L(`<b>Measured:</b> ferritin ${fmt(tr.a.fer,0)} → ${fmt(tr.b.fer,0)} in ${span}`,`<b>Mesuré :</b> ferritine ${fmt(tr.a.fer,0)} → ${fmt(tr.b.fer,0)} en ${span}`);
+function trendText(tr){ const rd=tr.rd!=null?tr.rd:tr.days, w=Math.max(1,Math.round(rd/7));
+  const span=rd<=0?L('on the same day','le même jour'):rd<14?L(`in ${rd} day${rd===1?'':'s'}`,`en ${rd} jour${rd>1?'s':''}`):rd<60?L(`in ${w} week${w===1?'':'s'}`,`en ${w} semaine${w>1?'s':''}`):L(`in ${Math.round(tr.mo)} months`,`en ${Math.round(tr.mo)} mois`);
+  const head=L(`<b>Measured:</b> ferritin ${fmt(tr.a.fer,0)} → ${fmt(tr.b.fer,0)} ${span}`,`<b>Mesuré :</b> ferritine ${fmt(tr.a.fer,0)} → ${fmt(tr.b.fer,0)} ${span}`);
+  if(tr.kind==='close') return head+L(' — under 4 weeks apart, too close to read: ferritin moves slowly, and it varies a little from one draw to the next.',' — moins de 4 semaines d’écart, trop rapproché pour lire : la ferritine bouge lentement, et elle varie un peu d’une prise à l’autre.');
   if(tr.kind==='event') return head+L(' — an iron infusion or a blood donation in between, so the change isn’t a read on food.',' — une perfusion de fer ou un don de sang entre les deux, alors le changement ne dit rien sur la nourriture.');
   if(tr.kind==='inflamed') return head+L(' — CRP was up on one of the two draws, so the change can’t be read.',' — la CRP était élevée sur une des deux prises, alors le changement n’est pas lisible.');
   if(tr.kind==='hold') return head+L(' — holding.',' — stable.');
@@ -3030,40 +3044,50 @@ function clk(min){ min=((Math.round(min)%1440)+1440)%1440; return String(Math.fl
 function hFams(){ return FAMS.filter(f=>(f.ids&&!f.ci&&!f.logOnly)||f.id==='bigmeal'); }
 function bigKcal(){ return Math.min(1000,tankReady()?0.4*tankTargets().kcal:1000); }
 /* meals in [from,to]: null if a day the window touches isn't complete or has an untimed meal (the "no" can't be known) */
-function winMeals(from,to){ const k0=dayKey(new Date(from)), k1=dayKey(new Date(to)); const ks=[k0]; while(ks[ks.length-1]<k1&&ks.length<4) ks.push(keyAdd(ks[ks.length-1],1));
-  const ms=meals().filter(m=>m&&m.items&&mapCount(m.items)&&(ks.includes(m.day)||m.day===keyAdd(k0,-1)));
+function winMeals(from,to){ const ck=from+'|'+to; if(hWM&&hWM.has(ck)) return hWM.get(ck); const k0=dayKey(new Date(from)), k1=dayKey(new Date(to)); const ks=[k0]; while(ks[ks.length-1]<k1&&ks.length<4) ks.push(keyAdd(ks[ks.length-1],1));
+  const pool=hMBD?[].concat(...ks.map(k=>hMBD[k]||[]), hMBD[keyAdd(k0,-1)]||[]):meals().filter(m=>m&&(ks.includes(m.day)||m.day===keyAdd(k0,-1)));
+  const ms=pool.filter(m=>m&&m.items&&mapCount(m.items));
   const inW=ms.filter(m=>m.at&&atMs(m.day,m.at)>=from&&atMs(m.day,m.at)<=to);
   const sure=ks.every(k=>isClosed(k)&&!ms.some(m=>m.day===k&&!m.at));
-  return {inW, sure}; }
-function famIn(f,W){ if(f.id==='bigmeal'){ const b=bigKcal(); return W.inW.some(m=>(tankTotals(m.items).tot.kcal||0)>=b); } return W.inW.some(m=>f.ids.some(id=>m.items[id]>0)); }
+  const r={inW, sure}; if(hWM) hWM.set(ck,r); return r; }
+function famIn(f,W){ if(f.id==='bigmeal'){ const b=bigKcal(); return W.inW.some(m=>mealKcal(m)>=b); } return W.inW.some(m=>f.ids.some(id=>m.items[id]>0)); }
 function hExpo(f,from,to){ const W=winMeals(from,to); if(famIn(f,W)) return true; return W.sure?false:null; }
-/* the first timed crash or symptom of each day, by outcome */
-function hEvents(o,days){ const out=[];
-  for(const k of days){ let t=null;
-    if(o==='crash'){ for(const x of (S.crashes||[])){ if(crashDay(x)===k&&x.at){ const v=atMs(k,x.at); if(t==null||v<t) t=v; } } }
-    else { for(const e of evs()){ if(e&&e.day===k&&e.at&&HOUT[o].includes(e.k)){ const v=atMs(k,e.at); if(t==null||v<t) t=v; } } }
-    if(t!=null) out.push({k,t}); }
+/* every timed crash or symptom whose window doesn't overlap the one before it that day (v1.2.34), by outcome */
+function hEvents(o,days){ const out=[], H=HRS[o]*3600000, set=new Set(days), ts={};
+  if(o==='crash'){ for(const x of (S.crashes||[])){ const k=crashDay(x); if(k&&set.has(k)&&x.at) (ts[k]||(ts[k]=[])).push(atMs(k,x.at)); } }
+  else { for(const e of evs()){ if(e&&set.has(e.day)&&e.at&&HOUT[o].includes(e.k)) (ts[e.day]||(ts[e.day]=[])).push(atMs(e.day,e.at)); } }
+  for(const k of days){ const a=(ts[k]||[]).filter(Number.isFinite).sort((x,y)=>x-y); let last=-Infinity; for(const t of a){ if(t-last>=H){ out.push({k,t}); last=t; } } }
   return out; }
 /* a day without it: the finished check-in says so */
 function hNone(o,k){ if(o==='crash') return crashP(k)===false; if(!usable(k)) return false; const r=rates()[k]; const w=(r.fl&&r.fl.off&&r.offw)||{}; return !HOUT[o].some(x=>w[x]); }
-function hoursLeads(){ const today=dayKey(); const all=[...Array(60)].map((_,i)=>keyAdd(today,-i));
+function hoursLeads(){ hMBD={}; hWM=new Map(); hKC=new Map(); for(const m of meals()) if(m&&m.day) (hMBD[m.day]||(hMBD[m.day]=[])).push(m); try{ return hoursLeads0(); } finally { hMBD=null; hWM=null; hKC=null; } }
+function hoursLeads0(){ const today=dayKey(); const all=[...Array(60)].map((_,i)=>keyAdd(today,-i));
   const since={}; for(const x of (S.tests||[])){ if(!x||!x.start) continue; const end=x.stopped?keyAdd(x.start,Math.max(0,(+x.day||1)-1)):keyAdd(x.start,16); if(!since[x.fam]||end>since[x.fam]) since[x.fam]=end; }
   const day=new Set(suspects().filter(s=>s.kind==='lead').map(s=>s.f.id+'|'+s.o));
   const leads=[], seen={}; let nEv=0, nCt=0;
   for(const o of ['crash','gut','hs']){ const ev=hEvents(o,all); if(!ev.length) continue;
-    const offs=ev.map(e=>e.t-dayStart(e.k)).sort((a,b)=>a-b); const off=offs[Math.floor(offs.length/2)]; const H=HRS[o]*3600000;
+    const offs=ev.map(e=>hOff(e.t)).sort((a,b)=>a-b); const off=offs[Math.floor(offs.length/2)]; const H=HRS[o]*3600000;
     const evDays=new Set(ev.map(e=>e.k)); const ctl=all.filter(k=>!evDays.has(k)&&hNone(o,k));
-    { const cov=ev.filter(e=>winMeals(e.t-H,e.t).sure).length, cc=ctl.filter(k=>winMeals(dayStart(k)+off-H,dayStart(k)+off).sure).length; nEv+=cov; if(cc>nCt) nCt=cc; seen[o]={ev:cov, ctl:cc}; }
+    { const cov=ev.filter(e=>winMeals(e.t-H,e.t).sure).length, cc=ctl.filter(k=>winMeals(atOff(k,off)-H,atOff(k,off)).sure).length; nEv+=cov; if(cc>nCt) nCt=cc; seen[o]={ev:cov, ctl:cc}; }
+    /* each event is compared with the same clock hours on the days without (v1.2.34): a 9 a.m. event with 3 a.m.–9 a.m. on
+       those days, a 4 p.m. one with noon–4 p.m. So breakfast foods can't look guilty just because morning events' windows
+       hold breakfast. The test: how many events had the food, against what the matched hours predict (exact, one-sided);
+       still at least 3 with it, a 30-point gap and less than 1 in 50 by luck. */
     for(const f of hFams()){ if(!(f.outs||['crash']).includes(o)) continue; if(day.has(f.id+'|'+o)) continue; const s0=since[f.id];
-      let wy=0,wn=0,oy=0,on=0;
-      for(const e of ev){ if(s0&&e.k<=s0) continue; const x=hExpo(f,e.t-H,e.t); if(x==null) continue; wn++; if(x) wy++; }
-      for(const k of ctl){ if(s0&&k<=s0) continue; const t=dayStart(k)+off; const x=hExpo(f,t-H,t); if(x==null) continue; on++; if(x) oy++; }
-      if(wy>=3&&on>=3&&wy/wn-oy/on>=0.3){ const p=fisherP(wy,wn,oy,on); if(p<HOURS_P) leads.push({f,o,wy,wn,oy,on,p,score:wy/wn-oy/on,from:clk((off-H)/60000+(S.tank.roll||0)*60),to:clk(off/60000+(S.tank.roll||0)*60),h:HRS[o]}); }
+      let O=0,n=0,cy=0,cn=0; const ps=[], used=new Set(), offs2=[];
+      for(const e of ev){ if(s0&&e.k<=s0) continue; const x=hExpo(f,e.t-H,e.t); if(x==null) continue; const oe=hOff(e.t);
+        let y=0,kn=0; for(const k of ctl){ if(s0&&k<=s0) continue; const t=atOff(k,oe); const z=hExpo(f,t-H,t); if(z==null) continue; kn++; used.add(k); if(z) y++; }
+        if(kn<3) continue; n++; if(x) O++; ps.push((y+0.5)/(kn+1)); cy+=y; cn+=kn; offs2.push(oe); }
+      if(O>=3&&n&&O/n-cy/cn>=0.3){ const p=pbTail(ps,O); if(p<HOURS_P){ offs2.sort((a,b)=>a-b); const med=offs2[Math.floor(offs2.length/2)], tight=offs2.every(v=>Math.abs(v-med)<=120);
+        leads.push({f,o,wy:O,wn:n,r0:cy/cn,cy,nd:used.size,p,score:O/n-cy/cn,from:tight?clk(med-HRS[o]*60+(S.tank.roll||0)*60):null,to:tight?clk(med+(S.tank.roll||0)*60):null,h:HRS[o]}); } }
     } }
   return {leads:leads.sort((a,b)=>b.score-a.score), nEv, nCt, seen}; }
-function hoursLine(s){ const F=`<b>${P2(s.f.l)}</b>`;
-  return L(`${F} — in the ${s.h} hours before ${s.wy} ${HOF[s.o][0]} ${s.wn} ${P2(HOUTB[s.o])}. The same hours (${s.from}–${s.to}) on days without: ${s.oy} of ${s.on}.`,
-    `${F} — dans les ${s.h} heures avant ${s.wy} ${HOF[s.o][1]} ${s.wn} ${P2(HOUTB[s.o])}. Les mêmes heures (${s.from}–${s.to}), les jours sans : ${s.oy} sur ${s.on}.`); }
+function hoursLine(s){ const F=`<b>${P2(s.f.l)}</b>`, pc=Math.round(s.r0*100), rg=s.from?` (${s.from}–${s.to})`:'';
+  const en=!s.cy?'never had it':pc<1?'had it less than 1% of the time':`had it about ${pc}% of the time`, fr=!s.cy?`il n’y en avait jamais aux mêmes heures${rg}`:`il y en avait aux mêmes heures${rg} ${pc<1?'moins de 1':'environ '+pc} % du temps`;
+  return L(`${F} — in the ${s.h} hours before ${s.wy} ${HOF[s.o][0]} ${s.wn} ${P2(HOUTB[s.o])}. On days without, the same hours${rg} ${en} (${s.nd} day${s.nd===1?'':'s'} compared).`,
+    `${F} — dans les ${s.h} heures avant ${s.wy} ${HOF[s.o][1]} ${s.wn} ${P2(HOUTB[s.o])}. Les jours sans, ${fr} (${s.nd} journée${s.nd>1?'s':''} comparée${s.nd>1?'s':''}).`); }
+/* P(X >= k) when each event has its own chance p_i (Poisson-binomial), exact */
+function pbTail(ps,k){ let dp=[1]; for(const p of ps){ const nx=new Array(dp.length+1).fill(0); for(let j=0;j<dp.length;j++){ nx[j]+=dp[j]*(1-p); nx[j+1]+=dp[j]*p; } dp=nx; } let s=0; for(let j=k;j<dp.length;j++) s+=dp[j]; return Math.min(1,Math.max(0,s)); }
 function hoursCard(){ const H=hoursLeads(); const shown=new Set(suspects().slice(0,4).map(s=>s.f.id+'|'+s.o)); /* the suspects card above already offers that test */
   if(H.leads.length) return `<div class="card"><div class="eyebrow">${L('The hours before · leads, not proof','Les heures d’avant · des pistes, pas des preuves')}</div><ul class="sus">${H.leads.slice(0,3).map(s=>`<li><p>${hoursLine(s)}</p>${shown.has(s.f.id+'|'+s.o)?'':testBtn(s)}</li>`).join('')}</ul><p class="small" style="margin:6px 0 0">${T('hours',L('How this works','Comment ça marche'),L('How this works','Comment ça marche'))}</p></div>`;
   if(!H.nEv&&!hEventsAny()) return '';
@@ -3074,6 +3098,38 @@ function hoursText(){ const H=hoursLeads(); if(!H.leads.length&&!H.nEv) return '
   const lines=H.leads.length?H.leads.slice(0,3).map(s=>'- '+hPlain(hoursLine(s))):[L(`Nothing stands out yet: ${H.nEv} times with the hours before logged, ${H.nCt} days to compare.`,`Rien ne ressort encore : ${H.nEv} fois avec les heures d’avant notées, ${H.nCt} journées pour comparer.`)];
   return head+'\n'+lines.join('\n'); }
 function hPlain(h){ return String(h).replace(/<[^>]+>/g,''); }
+/* ===================== v1.2.34: a restored backup is checked before it's used ===================== */
+/* A backup is a file someone could hand you. Before it replaces anything, entries with a malformed day or time, or a symptom
+   kind the app doesn't know, are dropped, so nothing in it can end up rendered as markup. */
+function cleanState(){ const okD=s=>typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(s), okT=s=>s==null||(typeof s==='string'&&/^\d{1,2}:\d{2}$/.test(s));
+  const KS=new Set(SYMK.concat(['blood','black'])); let n=0; const keep=(a,f)=>{ if(!Array.isArray(a)) return a; const b=a.filter(x=>{ try{ return !!(x&&f(x)); }catch(e){ return false; } }); n+=a.length-b.length; return b; };
+  try{ const T=S.tank||{};
+    T.meals=keep(T.meals,m=>okD(m.day)&&okT(m.at)&&m.items&&typeof m.items==='object');
+    T.ev=keep(T.ev,e=>okD(e.day)&&okT(e.at)&&KS.has(e.k));
+    S.crashes=keep(S.crashes,x=>(x.day==null||okD(x.day))&&okT(x.at));
+    S.labs=keep(S.labs,x=>okD(x.day)&&['fer','crp','hb','b12','d'].every(k=>x[k]==null||Number.isFinite(+x[k])));
+    for(const o of [T.log,T.closed,T.rate]) if(o&&typeof o==='object') for(const k of Object.keys(o)) if(!okD(k)){ delete o[k]; n++; }
+    if(S.learn&&(typeof S.learn.text!=='string'||!okD(S.learn.day))){ delete S.learn; n++; }
+  }catch(e){} return n; }
+/* A crash report ticks the day's ⚡; it remembers it did (crA), so deleting the report un-ticks it. A ⚡ the person ticked
+   themselves stays; if a deleted report leaves one behind, the toast says where to change it. */
+function crashFlagAfterDelete(k){ if(!k||crashKeys().has(k)) return ''; const r=rates()[k]; if(!r||!r.fl||!r.fl.cr) return '';
+  if(r.crA){ delete r.fl.cr; delete r.crA; return ''; }
+  return L('Deleted. That day’s check-in still says you crashed — change it there if that’s wrong.','Supprimé. Le bilan de cette journée dit encore que tu as crashé — change-le là si ce n’est pas juste.'); }
+/* a year of crash reports, not the last 30 */
+function pruneCrashes(){ const cut=keyAdd(dayKey(),-365); S.crashes=(S.crashes||[]).filter(x=>{ const k=crashDay(x); return !k||k>=cut; }).slice(-500); }
+/* the bring-back days count only where the log (or the check-in, for coffee and drinks) shows it was back */
+function backBack(t){ const f=famById(t.fam); let ex=0, known=0, hit=0; if(!f) return {ex,known,hit}; const today=dayKey();
+  for(let i=0;i<3;i++){ const k=keyAdd(t.start,14+i); if(k>today) break; if(!slipOn(f,k)) continue; ex++; const y=famOut(f,t.out,k); if(y==null) continue; known++; if(y) hit++; }
+  return {ex,known,hit}; }
+/* the hours before: meals indexed by day for one pass, instead of a scan of every meal per window */
+/* check-ins, the day log's "complete" marks and day flags are kept 90 days (meals, symptoms and crash reports a year) */
+function rateCut(){ const d=new Date(Date.now()-90*86400000); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+let hMBD=null, hWM=null, hKC=null;  /* meals by day, windows and meal kcal, kept only while hoursLeads runs */
+/* minutes since the start of the day (the roll hour), from the clock, and back: a 15:00 event lines up with 15:00 on another day even across a clock change */
+function hOff(t){ const d=new Date(t); return ((d.getHours()*60+d.getMinutes()-(S.tank.roll||0)*60)%1440+1440)%1440; }
+function atOff(k,m){ const [y,mo,d]=k.split('-').map(Number); return new Date(y,mo-1,d,S.tank.roll||0,m).getTime(); }
+function mealKcal(m){ if(!hKC) return tankTotals(m.items).tot.kcal||0; let v=hKC.get(m); if(v==null){ v=tankTotals(m.items).tot.kcal||0; hKC.set(m,v); } return v; }
 /* ===================== v1.2.22: ONE-SCREEN RESULT ===================== */
 function plainName(s){ return String(s||'').replace(/<[^>]+>/g,'').split(' — ')[0].trim(); }
 /* the week in three lines; the full patch further down has the why */
@@ -3202,10 +3258,10 @@ function bind(){
   document.querySelectorAll('[data-rk]').forEach(b=>{ b.onclick=()=>{ const k=b.dataset.rk, q=b.dataset.rq; let v=b.dataset.rv; if(q==='e'||q==='s') v=+v; const R=rates(); const r=R[k]||(R[k]={}); if(String(r[q])===String(v)) delete r[q]; else r[q]=v; if(r.fin){ r.fin=false; } if(!Object.keys(r).length) delete R[k]; refocus=`[data-rk="${k}"][data-rq="${q}"][data-rv="${b.dataset.rv}"]`; save(); render(true); }; });
   document.querySelectorAll('[data-cday]').forEach(b=>{ b.onclick=()=>{ crashSetDay(b.dataset.cday); delete S.c._logged; refocus=`[data-cday="${b.dataset.cday}"]`; save(); render(true); }; });
   document.querySelectorAll('[data-crashday]').forEach(b=>{ b.onclick=()=>NAV.crash(b.dataset.crashday); });
-  document.querySelectorAll('[data-rconf]').forEach(b=>{ b.onclick=()=>{ const r=rates()[b.dataset.rconf]; if(r){ r.fl=r.fl||{}; r.fl.cr=true; r.at=new Date().toISOString(); } refocus='#checkin'; save(); render(true); }; });
+  document.querySelectorAll('[data-rconf]').forEach(b=>{ b.onclick=()=>{ const r=rates()[b.dataset.rconf]; if(r){ r.fl=r.fl||{}; r.fl.cr=true; delete r.crA; r.at=new Date().toISOString(); } refocus='#checkin'; save(); render(true); }; });
   document.querySelectorAll('[data-roff]').forEach(b=>{ b.onclick=()=>{ const k=b.dataset.rk3, v=b.dataset.roff; const r=rates()[k]||(rates()[k]={}); const had=evs().some(e=>e.day===k&&e.k===v); if(had) S.tank.ev=evs().filter(e=>!(e.day===k&&e.k===v)); else evs().push({id:'c'+Date.now().toString(36)+v, day:k, at:null, k:v}); if(v==='loose'&&had) delete r.lw; if(r.fin) r.fin=false; refocus=`[data-roff="${v}"][data-rk3="${k}"]`; save(); render(true); }; });
   document.querySelectorAll('[data-rlw]').forEach(b=>{ b.onclick=()=>{ const k=b.dataset.rk4, v=b.dataset.rlw; const r=rates()[k]||(rates()[k]={}); if(r.lw===v) delete r.lw; else r.lw=v; if(r.fin) r.fin=false; refocus=`[data-rlw="${v}"][data-rk4="${k}"]`; save(); render(true); }; });
-  document.querySelectorAll('[data-rflag]').forEach(b=>{ b.onclick=()=>{ const k=b.dataset.rk2, f=b.dataset.rflag; const R=rates(); const r=R[k]||(R[k]={}); r.fl=r.fl||{}; if(r.fl[f]) delete r.fl[f]; else r.fl[f]=true; if(f==='off'){ delete r.offA; if(!r.fl.off){ S.tank.ev=evs().filter(e=>e.day!==k); delete r.lw; } } if(r.fin) r.fin=false; refocus=`[data-rflag="${f}"][data-rk2="${k}"]`; save(); render(true); }; });
+  document.querySelectorAll('[data-rflag]').forEach(b=>{ b.onclick=()=>{ const k=b.dataset.rk2, f=b.dataset.rflag; const R=rates(); const r=R[k]||(R[k]={}); r.fl=r.fl||{}; if(r.fl[f]) delete r.fl[f]; else r.fl[f]=true; if(f==='cr') delete r.crA; if(f==='off'){ delete r.offA; if(!r.fl.off){ S.tank.ev=evs().filter(e=>e.day!==k); delete r.lw; } } if(r.fin) r.fin=false; refocus=`[data-rflag="${f}"][data-rk2="${k}"]`; save(); render(true); }; });
   document.querySelectorAll('[data-rfin]').forEach(b=>{ b.onclick=()=>{ const k=b.dataset.rfin; const R=rates(); const r=R[k]||(R[k]={}); r.fl=r.fl||{}; r.fin=true; const now=new Date().toISOString(); if(!r.firstAt) r.firstAt=now; r.at=now; rEdit=null; refocus='#checkin'; const ok=save(); render(true); if(ok) toast(k===dayKey()?L('Day finished','Journée terminée'):L('Saved for '+dayLabel(k),'Noté pour '+dayLabel(k))); }; });
   document.querySelectorAll('[data-redit]').forEach(b=>{ b.onclick=()=>{ rEdit=b.dataset.redit||null; refocus='#checkin'; render(true); }; });
   document.querySelectorAll('[data-rday]').forEach(b=>{ b.onclick=()=>{ S.rsel=b.dataset.rday; rEdit=null; refocus=`[data-rday="${b.dataset.rday}"]`; save(); render(true); }; });
@@ -3230,11 +3286,11 @@ function bind(){
     save(); render(); };
   if($('urgentAck')) $('urgentAck').onclick=()=>{ S.urgentAck=true; save(); render(true); };
   if($('startWeek')) $('startWeek').onclick=()=>{ S.started=new Date().toISOString(); S.checkins=[]; save(); render(true); toast(L('Week started','Semaine commencée')); };
-  if($('logCrash')) $('logCrash').onclick=()=>{ const R=buildCrash(); const id=Date.now(); const ans={}; for(const [k2,v2] of Object.entries(S.c)) if(k2[0]!=='_') ans[k2]=Array.isArray(v2)?[...v2]:v2; S.crashes.push({id, d:new Date().toISOString(), day:S.c._day||dayKey(), at:S.c._at||null, answers:ans, ver:VER, when:S.c.cwhen||null, feel:Array.isArray(S.c.cfeel)?[...S.c.cfeel]:[], top:R.top, second:R.second, conf:R.conf}); { const dk=S.c._day||dayKey(); const rr=rates()[dk]||(rates()[dk]={}); rr.fl=rr.fl||{}; rr.fl.cr=true; } /* v1.2.25: the check-in agrees with the log; "Which is right?" only if ⚡ is unticked later */
-    if(S.crashes.length>30) S.crashes=S.crashes.slice(-30); S.c._logged=id; save(); render(true); toast(L('Logged','Au journal')); };
+  if($('logCrash')) $('logCrash').onclick=()=>{ const R=buildCrash(); const id=Date.now(); const ans={}; for(const [k2,v2] of Object.entries(S.c)) if(k2[0]!=='_') ans[k2]=Array.isArray(v2)?[...v2]:v2; S.crashes.push({id, d:new Date().toISOString(), day:S.c._day||dayKey(), at:S.c._at||null, answers:ans, ver:VER, when:S.c.cwhen||null, feel:Array.isArray(S.c.cfeel)?[...S.c.cfeel]:[], top:R.top, second:R.second, conf:R.conf}); { const dk=S.c._day||dayKey(); const rr=rates()[dk]||(rates()[dk]={}); rr.fl=rr.fl||{}; if(!rr.fl.cr){ rr.fl.cr=true; rr.crA=true; } } /* v1.2.25: the check-in agrees with the log; "Which is right?" only if ⚡ is unticked later */
+    pruneCrashes(); S.c._logged=id; save(); render(true); toast(L('Logged','Au journal')); };
   if($('newCrash')) $('newCrash').onclick=()=>{ S.c={_st:Date.now()}; S.cstep=1; save(); render(); };
-  if($('clearLog')) $('clearLog').onclick=function(){ if(!this.dataset.sure){ this.dataset.sure='1'; this.textContent=L('Tap again to clear the crash log','Appuie encore pour vider le journal'); return; } S.crashes=[]; delete S.c._logged; save(); render(true); toast(L('Log cleared','Journal vidé')); };
-  document.querySelectorAll('[data-delcrash]').forEach(b=>{ b.onclick=()=>{ const i=+b.dataset.delcrash; const x=S.crashes[i]; const isCurrent = S.c._logged===true ? i===S.crashes.length-1 : (x&&x.id===S.c._logged); S.crashes.splice(i,1); if(isCurrent||!S.crashes.length) delete S.c._logged; save(); render(true); toast(L('Deleted','Supprimé')); }; });
+  if($('clearLog')) $('clearLog').onclick=function(){ if(!this.dataset.sure){ this.dataset.sure='1'; this.textContent=L('Tap again to clear the crash log','Appuie encore pour vider le journal'); return; } const ks=[...new Set(S.crashes.map(crashDay).filter(Boolean))]; S.crashes=[]; delete S.c._logged; let note=''; for(const k of ks){ const n=crashFlagAfterDelete(k); if(n) note=n; } save(); render(true); toast(note?L('Log cleared. Some check-ins still say you crashed — change them there if that’s wrong.','Journal vidé. Certains bilans disent encore que tu as crashé — change-les là si ce n’est pas juste.'):L('Log cleared','Journal vidé')); };
+  document.querySelectorAll('[data-delcrash]').forEach(b=>{ b.onclick=()=>{ const i=+b.dataset.delcrash; const x=S.crashes[i]; const isCurrent = S.c._logged===true ? i===S.crashes.length-1 : (x&&x.id===S.c._logged); S.crashes.splice(i,1); if(isCurrent||!S.crashes.length) delete S.c._logged; const left=x?crashFlagAfterDelete(crashDay(x)):''; save(); render(true); toast(left||L('Deleted','Supprimé')); }; });
   bindFoods(); bindRest(); bind127(); bind128(); bind129(); bind130(); bind132();
   if($('foodQ')) $('foodQ').onblur=()=>{ qBlurAt=Date.now(); };
   if($('foodQ')) $('foodQ').oninput=(e)=>{ foodQ=e.target.value; const fl=$('foodList'); if(fl){ fl.innerHTML=foodsHTML(editMap(),S.tank.grp); bindFoods(); } document.querySelectorAll('.fgrp').forEach(g=>{ g.hidden=!!foodQ.trim(); }); };
@@ -3315,7 +3371,7 @@ function parseBackup(text){
     if(!o||o.app!=='the-patch'||!o.state||typeof o.state!=='object'){ toast(L('That file isn’t a Patch backup','Ce fichier n’est pas une sauvegarde de la Patch')); return; }
     const when=(o.saved||'').slice(0,10);
     showSheet(`<div class="handle"></div><h3 id="sheetTitle">${L('Restore this backup?','Restaurer cette sauvegarde?')}</h3><p>${L(`It’s from ${when}. Everything on this phone gets replaced by it — answers, crash log, food days.`,`Elle date du ${when}. Tout ce qui est sur ce téléphone sera remplacé — réponses, journal des crashs, journées notées.`)}</p><div class="row"><button class="btn primary sm" id="doRestore">${L('Replace everything','Tout remplacer')}</button><button class="btn ghost sm" id="closeSheet">${L('Cancel','Annuler')}</button></div>`, null);
-    document.getElementById('doRestore').onclick=()=>{ const lang=S.lang; S=Object.assign({a:{},step:0,started:null,checkins:[],lang,mode:'home',c:{},cstep:0,crashes:[],intent:null,tank:{p:{},day:{},log:{},rate:{},roll:4,view:'normal'},tstep:0}, o.state); if(!S.tank||typeof S.tank!=='object') S.tank={p:{},day:{}}; if(!S.tank.log) S.tank.log={}; if(!S.tank.rate) S.tank.rate={}; if(!S.tank.closed){ S.tank.closed={}; for(const k of Object.keys(S.tank.log)) if(Object.keys(S.tank.log[k]||{}).length) S.tank.closed[k]=true; } S.mode='home'; try{ for(const r of Object.values(S.tank.rate||{})){ if(r&&r.fin&&r.at&&!r.firstAt) r.firstAt=r.at; } }catch(e){} migrateSup(); try{ migrateMeals(); migrateE(); syncMeals(); }catch(e){} save(); closeSheet(true); render(); toast(L('Restored','Restauré')); };
+    document.getElementById('doRestore').onclick=()=>{ const lang=S.lang; S=Object.assign({a:{},step:0,started:null,checkins:[],lang,mode:'home',c:{},cstep:0,crashes:[],intent:null,tank:{p:{},day:{},log:{},rate:{},roll:4,view:'normal'},tstep:0}, o.state); if(!S.tank||typeof S.tank!=='object') S.tank={p:{},day:{}}; if(!S.tank.log) S.tank.log={}; if(!S.tank.rate) S.tank.rate={}; if(!S.tank.closed){ S.tank.closed={}; for(const k of Object.keys(S.tank.log)) if(Object.keys(S.tank.log[k]||{}).length) S.tank.closed[k]=true; } S.mode='home'; try{ for(const r of Object.values(S.tank.rate||{})){ if(r&&r.fin&&r.at&&!r.firstAt) r.firstAt=r.at; } }catch(e){} const dropped=cleanState(); migrateSup(); try{ migrateMeals(); migrateE(); syncMeals(); }catch(e){} save(); closeSheet(true); render(); toast(dropped?L(`Restored — ${dropped} broken entr${dropped===1?'y':'ies'} skipped`,`Restauré — ${dropped} entrée${dropped>1?'s':''} brisée${dropped>1?'s':''} ignorée${dropped>1?'s':''}`):L('Restored','Restauré')); };
   }
 }
 function eraseAll(){ const l=S.lang, ack=S.ack; try{ localStorage.removeItem(KEY); localStorage.removeItem('patch'); localStorage.removeItem(SEEN); }catch(e){} S={a:{},step:0,started:null,checkins:[],lang:l,done:false,ack,mode:'home',c:{},cstep:0,crashes:[],intent:null,madeAt:null,tank:{p:{},day:{},log:{},rate:{},closed:{},closedMig:true,eIU:true,roll:4,view:'normal'},tstep:0}; save(); render(); toast(L('Erased','Effacé')); }
