@@ -289,6 +289,16 @@ div.tlr{cursor:default}
 ul.pay{padding-left:18px} ul.pay li{margin:.2em 0}
 #bar .in .btn{white-space:nowrap;flex:none}
 #bar .in > span.small{flex:1;min-width:0;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* v1.2.30 */
+.tagline{font-size:1.2rem;font-weight:700;line-height:1.3;margin:6px 0 10px}
+.card.hint,[data-payoffcard]{position:relative;cursor:pointer}
+.card.hint > p:first-of-type,[data-payoffcard] > .eyebrow{padding-right:38px}
+.card .x{position:absolute;top:2px;right:2px;width:44px;height:44px;border:0;background:transparent;color:var(--muted);font-size:1.5rem;line-height:1;cursor:pointer;border-radius:22px}
+.card .x:focus-visible{outline:3px solid var(--accent)}
+.chip.alarm{border-color:var(--warn)} .chip.alarm[aria-pressed="true"]{background:var(--warn);border-color:var(--warn);color:#fff}
+.labgrid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px} @media(min-width:520px){.labgrid{grid-template-columns:1fr 1fr}}
+.labgrid label.lab{display:flex;flex-direction:column;gap:4px;font-size:.95rem} .labgrid label.lab span{font-weight:600}
+.labform input.sel{min-height:44px} .labform input[type=date]{max-width:220px}
 </style>
 </head>
 <body>
@@ -304,7 +314,7 @@ ul.pay{padding-left:18px} ul.pay li{margin:.2em 0}
 let S = {a:{}, step:0, started:null, checkins:[], lang:null, mode:null, c:{}, cstep:0, crashes:[], intent:null, tank:null, tstep:0};
 const KEY='thepatch.v1';
 try{ const s=localStorage.getItem(KEY)||localStorage.getItem('patch'); if(s) S=Object.assign(S, JSON.parse(s)); if(!localStorage.getItem(KEY)&&s) localStorage.setItem(KEY,s); if(localStorage.getItem('patch')) localStorage.removeItem('patch'); }catch(e){}
-const VER='1.2.29'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
+const VER='1.2.30'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
 /* v1.2.21 (5 Nov 2026): prenatal / folic-acid and pregnancy-iron lines aligned with Health Canada; Quebec route for bloodwork; hard-stool branch;
    pattern messages match the 5-a-side rule; iPhone storage note + persist(); protein note by life stage; French fixes; "about $8" in English. */
 /* v1.2.22 (6 Nov 2026): one-screen result (plain-words test card, three-line week, one notes card with the crisis line kept open); glossary words underlined once per screen;
@@ -340,6 +350,10 @@ const VER='1.2.29'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
    minutes keeps the screen; 15 minutes away from an open page also comes back on home). Picking a food clears the search, and the
    list stays under the thumb: the tank's editor, "Same as" and "More foods" no longer move it. Typing hides the food groups,
    not "Your usual". A crash report left half done on an earlier day no longer comes back as today's. */
+/* v1.2.30 (6 Nov 2026): the purpose on the first screen — find the foods that work for you, with everything your body needs.
+   Hints go away with a tap. Warning signs (blood, black stool) in the symptom report go to a doctor, not into the patterns.
+   Blood results: where the stores are, whether the iron logged since holds them, and what changed between two tests. A month
+   in: one thing learned. Tell Tobie. The gauge says why a nutrient matters. The sugar loop, named; fructose as a gut suspect. */
 if(!S.lang){ S.lang = (navigator.language||'en').toLowerCase().startsWith('fr') ? 'fr' : 'en'; }
 /* v0.7: three doors. Older saves have no mode — someone mid-questions lands back on their question, everyone else on the chooser. */
 if(!S.mode){ S.mode = S.step>0 ? 'patch' : 'home'; }
@@ -545,6 +559,18 @@ const G = {
   selftest:{g:'reason', t:['Your own test','Ton propre test'],
     s:['A food becomes a lead only when bad days come with it so often that luck would do that less than 1 time in 50 — and even then, it’s just a reason to test. One change, two weeks, then back to how it was. Two weeks because bad days come and go: at three crashes a week, one quiet week happens by luck about 1 time in 5; two quiet weeks, rarely. The swap keeps the protein the same so it can’t cause its own crash, and coffee and sleep stay put so the answer is about one thing. A slipped day just drops out. If the crashes come back when the food does, that’s the clearest answer one person can get. The odds shown assume your days are otherwise alike — they never quite are, so read them as rough.',
        'Un aliment devient une piste seulement quand les mauvaises journées l’accompagnent si souvent que le hasard ferait ça moins d’une fois sur 50 — et même là, c’est juste une raison de tester. Un seul changement, deux semaines, puis retour comme avant. Deux semaines parce que les mauvaises journées vont et viennent : à trois crashs par semaine, une semaine calme arrive par hasard environ 1 fois sur 5; deux semaines calmes, rarement. Le remplacement garde autant de protéines pour ne pas causer son propre crash, et le café et le sommeil restent pareils pour que la réponse porte sur une seule chose. Une journée d’écart est simplement retirée. Si les crashs reviennent quand l’aliment revient, c’est la réponse la plus claire qu’une personne puisse avoir. Les chances affichées supposent que tes journées se ressemblent autrement — ce n’est jamais tout à fait vrai, alors prends-les comme un ordre de grandeur.']},
+  sugarloop:{g:'likely', t:['The sugar loop','La boucle du sucre'],
+    s:['Sugar on its own is absorbed in the first stretch of the gut. The signals that say “full” fire further down, when protein, fat and fibre get there — so after sugar alone, hunger comes back sooner, and the fastest fix for hunger is more sugar. Fat with it slows the sugar, but makes the mix the body stores best and the brain wants most. The way out isn’t no sugar: it’s sugar after protein, not instead of it.',
+       'Le sucre seul est absorbé dans le premier bout de l’intestin. Les signaux qui disent « plein » partent plus loin, quand les protéines, le gras et les fibres y arrivent — alors après du sucre seul, la faim revient plus vite, et le moyen le plus rapide de la calmer, c’est encore du sucre. Du gras avec ça ralentit le sucre, mais ça donne le mélange que le corps stocke le mieux et que le cerveau veut le plus. La sortie, ce n’est pas zéro sucre : c’est du sucre après les protéines, pas à leur place.']},
+  fructose:{g:'likely', t:['Fructose','Fructose'],
+    s:['Fruit sugar. It gets in through a slow, small door in the gut, and glucose alongside helps it through. When a food has more fructose than glucose — apples, pears, mango, watermelon, honey, apple juice — the extra can reach the colon, pull water in and ferment: gas, bloating, loose stools. It depends on the dose and the person, which is why it’s a test, not a rule. Berries, citrus, kiwi and banana usually go down easier.',
+       'Le sucre des fruits. Il passe par une petite porte lente dans l’intestin, et le glucose qui l’accompagne l’aide à passer. Quand un aliment a plus de fructose que de glucose — pommes, poires, mangue, melon d’eau, miel, jus de pomme — le surplus peut se rendre au côlon, y attirer de l’eau et fermenter : gaz, ballonnements, selles molles. Ça dépend de la dose et de la personne, et c’est pour ça que c’est un test, pas une règle. Les petits fruits, les agrumes, le kiwi et la banane passent d’habitude mieux.']},
+  warn:{g:'solid', t:['Warning signs: where tuning stops','Signes d’alarme : là où les tests s’arrêtent'],
+    s:['Some things aren’t for a two-week test. Blood in the toilet or on the paper, black or tar-like stool, diarrhea with blood, losing weight without trying, diarrhea that wakes you at night, or a fever with it: these go to a doctor. Most turn out to be something small — the visit is how you find out. In Canada, 811 is the nurse line; a lot of blood or feeling faint is 911.',
+       'Certaines affaires ne se règlent pas avec un test de deux semaines. Du sang dans la toilette ou sur le papier, des selles noires comme du goudron, de la diarrhée avec du sang, une perte de poids sans raison, de la diarrhée qui te réveille la nuit, ou de la fièvre avec ça : ça va chez le médecin. La plupart du temps, c’est quelque chose de petit — la visite, c’est comme ça qu’on le sait. Au Canada, le 811, c’est la ligne infirmière; beaucoup de sang ou un malaise, c’est le 911.']},
+  labs:{g:'likely', t:['How the app reads blood results','Comment l’app lit tes résultats'],
+    s:['Ferritin: under 15 is empty and under 30 low; under 70 still counts as low when CRP is over 5, because inflammation pushes ferritin up. Each point is roughly 8 to 10 mg of iron in storage. Hemoglobin: anemia is under 130 g/L for men, 120 for women, 110 in pregnancy. B12: under 133 pmol/L is a shortage, 133 to 258 a grey zone. Vitamin D: under 30 nmol/L is low, 50 or more is enough for almost everyone. “On paper” compares the iron you logged with what most people need and what almost everyone needs. It can’t see what you absorb or lose — only a second test can. Your lab’s range and your doctor have the last word.',
+       'Ferritine : sous 15, c’est vide, et sous 30, bas; sous 70, ça compte encore comme bas quand la CRP dépasse 5, parce que l’inflammation gonfle la ferritine. Chaque point, c’est environ 8 à 10 mg de fer en réserve. Hémoglobine : l’anémie, c’est sous 130 g/L chez les hommes, 120 chez les femmes, 110 pendant la grossesse. B12 : sous 133 pmol/L, c’est un manque; de 133 à 258, une zone grise. Vitamine D : sous 30 nmol/L, c’est bas; 50 ou plus, c’est assez pour presque tout le monde. « Sur papier » compare le fer que tu as noté avec ce dont la plupart des gens ont besoin et ce dont presque tout le monde a besoin. Ça ne voit pas ce que tu absorbes ou perds — seul un deuxième test le peut. Les valeurs de ton labo et ton médecin ont le dernier mot.']},
   coffeeiron:{g:'solid', t:['Coffee and iron','Café et fer'],
     s:['Coffee or tea with a meal blocks part of the iron in plant foods and iron pills. In a controlled study a cup of coffee with a meal cut iron absorption by about 40%, tea by about 60%, and stronger coffee blocked more. Coffee an hour before the meal didn’t block it; an hour after, it still did. Meat’s iron is far less affected. So: coffee before meals, not with them or right after, and away from iron pills — no need to give it up. Coffee alone rarely explains low iron; periods, blood loss and low intake are the usual causes, so the question of why it’s low stays open.',
        'Le café ou le thé pris avec un repas bloque une partie du fer des végétaux et des comprimés de fer. Dans une étude contrôlée, une tasse de café avec le repas a réduit l’absorption du fer d’environ 40 %, le thé d’environ 60 %, et un café plus fort bloquait davantage. Le café pris une heure avant le repas ne bloquait rien; une heure après, oui. Le fer de la viande est beaucoup moins touché. Donc : le café avant les repas, pas pendant ni juste après, et loin des comprimés de fer — pas besoin de l’abandonner. Le café seul explique rarement un fer bas; les règles, une perte de sang et un apport faible sont les causes habituelles, alors la question de pourquoi il est bas reste ouverte.']}
@@ -675,6 +701,18 @@ const SRC = {
   cnf:{l:['Canadian Nutrient File (Health Canada)','Fichier canadien sur les éléments nutritifs (Santé Canada)'], u:'https://www.canada.ca/en/health-canada/services/food-nutrition/healthy-eating/nutrient-data/canadian-nutrient-file-2015-download-files.html'},
   morck:{l:['Morck 1983 (coffee and iron absorption)','Morck 1983 (café et absorption du fer)'], u:PM(6402915)},
   sportsProt:{l:['Dietitians of Canada / AND / ACSM 2016','Diététistes du Canada / AND / ACSM 2016'], u:'https://www.dietitians.ca/DietitiansOfCanada/media/Documents/Resources/noap-position-paper.pdf'},
+  /* v1.2.30 additions, checked 2026-11-06 */
+  hall2019:{l:['Hall 2019 (ultra-processed diet trial)','Hall 2019 (essai sur l’alimentation ultra-transformée)'], u:PM(31105044)},
+  difeli2018:{l:['DiFeliceantonio 2018 (fat + carbohydrate and reward)','DiFeliceantonio 2018 (gras + glucides et récompense)'], u:PM(29909968)},
+  brake2013:{l:['Ileal brake review (Physiology & Behavior, 2013)','Revue sur le frein iléal (Physiology & Behavior, 2013)'], u:'https://doi.org/10.1016/j.physbeh.2013.07.008'},
+  ebert2016:{l:['Ebert 2016 (fructose malabsorption review)','Ebert 2016 (revue sur la malabsorption du fructose)'], u:PM(26883354)},
+  latulippe2011:{l:['Latulippe 2011 (fructose and glucose in foods)','Latulippe 2011 (fructose et glucose dans les aliments)'], u:PM(21793722)},
+  nhsrb:{l:['NHS — bleeding from the bottom','NHS — saignement par l’anus'], u:'https://www.nhs.uk/conditions/bleeding-from-the-bottom-rectal-bleeding/'},
+  who2024hb:{l:['WHO 2024 — haemoglobin cut-offs','OMS 2024 — seuils d’hémoglobine'], u:'https://www.who.int/publications/i/item/9789240088542'},
+  walters73:{l:['Walters 1973 (ferritin and iron stores)','Walters 1973 (ferritine et réserves de fer)'], u:PM(4750458)},
+  nice239:{l:['NICE NG239 (2024) — vitamin B12','NICE NG239 (2024) — vitamine B12'], u:'https://www.nice.org.uk/guidance/ng239'},
+  statcanD:{l:['Statistics Canada — vitamin D of Canadians','Statistique Canada — la vitamine D des Canadiens'], u:'https://www150.statcan.gc.ca/n1/pub/82-625-x/2014001/article/14125-eng.pdf'},
+  iomAssess:{l:['IOM 2000 — DRIs in dietary assessment','IOM 2000 — les ANREF pour évaluer l’alimentation'], u:'https://doi.org/10.17226/9956'},
   /* v1.2.26 addition, checked 2026-11-06 against the PubMed abstract */
   morck83:{l:['Morck 1983 (iron isotope study)','Morck 1983 (étude du fer aux isotopes)'], u:PM(6402915)}
 };
@@ -859,6 +897,18 @@ const EV = {
   selftest:{src:[],
     e:['Changing one thing in one person, with a before, a during and a return, is the logic of an N-of-1 trial. A real N-of-1 trial adds blinding and repeats; this one can’t, so expectation and everything else that changes in two weeks can fool it. The odds come from a simple binomial model of bad days.',
        'Changer une seule chose chez une seule personne, avec un avant, un pendant et un retour, c’est la logique d’un essai N-de-1. Un vrai essai N-de-1 se fait à l’insu et se répète; celui-ci ne peut pas, alors les attentes et tout ce qui change en deux semaines peuvent le fausser. Les chances viennent d’un simple modèle binomial des mauvaises journées.']},
+  sugarloop:{src:['hall2019','difeli2018','brake2013'],
+    e:['An inpatient trial (Hall 2019, 20 adults): on ultra-processed food, people ate about 500 kcal a day more and gained weight within two weeks. A brain-imaging study (DiFeliceantonio 2018): people paid more for snacks with fat and carbohydrate together than for snacks with only one, at the same calories. A review (2013): nutrients that reach the end of the small intestine slow the stomach and add fullness — the “ileal brake”. The loop itself, sugar to quick hunger to more sugar, is our reading of these, not a trial.',
+       'Un essai en milieu hospitalier (Hall 2019, 20 adultes) : avec de la nourriture ultra-transformée, les gens ont mangé environ 500 kcal de plus par jour et pris du poids en deux semaines. Une étude d’imagerie du cerveau (DiFeliceantonio 2018) : les gens payaient plus pour des collations avec du gras et des glucides ensemble que pour des collations avec un seul des deux, à calories égales. Une revue (2013) : les nutriments qui atteignent la fin de l’intestin grêle ralentissent l’estomac et donnent le sentiment d’être plein — le « frein iléal ». La boucle elle-même, du sucre à la faim rapide à encore du sucre, c’est notre lecture de ces études, pas un essai.']},
+  fructose:{src:['ebert2016','latulippe2011'],
+    e:['A review (Ebert 2016): fructose is absorbed through a low-capacity transporter, the part that isn’t absorbed ferments in the colon, and the same dose with an equal amount of glucose is usually absorbed without symptoms. An apple carries about 7 g of fructose to 2.3 g of glucose. A food-composition review (Latulippe 2011) uses fructose minus glucose — “net fructose” — as the amount that matters.',
+       'Une revue (Ebert 2016) : le fructose est absorbé par un transporteur de faible capacité, la partie non absorbée fermente dans le côlon, et la même dose prise avec autant de glucose passe d’habitude sans symptômes. Une pomme contient environ 7 g de fructose pour 2,3 g de glucose. Une revue sur la composition des aliments (Latulippe 2011) utilise le fructose moins le glucose — le « fructose net » — comme la quantité qui compte.']},
+  warn:{src:['nhsrb','nice12','bsg2021'],
+    e:['The NHS: black or dark red stool and bloody diarrhea are for an urgent appointment or the phone line the same day; bleeding that won’t stop, or a lot of blood, is for the emergency department. The UK referral guideline for suspected cancer (NICE NG12) and the British iron-deficiency guideline (2021): rectal bleeding at 50 or over, or with other signs, gets looked at. In Canada, 811 reaches a nurse.',
+       'Le NHS : des selles noires ou rouge foncé et de la diarrhée avec du sang, c’est un rendez-vous urgent ou la ligne téléphonique le jour même; un saignement qui n’arrête pas, ou beaucoup de sang, c’est l’urgence. Le guide britannique de référence pour un cancer soupçonné (NICE NG12) et le guide britannique sur le manque de fer (2021) : un saignement rectal à 50 ans ou plus, ou avec d’autres signes, se fait examiner. Au Canada, le 811 te met en contact avec une infirmière.']},
+  labs:{src:['who2020','bsg2021','vaucher','walters73','who2024hb','nice239','statcanD','iomAssess'],
+    e:['Ferritin cut-offs: WHO 2020 and the UK guideline (2021); the fatigue trial treated people under 50. Storage iron: in healthy adults each µg/L of ferritin is about 8 to 10 mg of stored iron (phlebotomy studies, Walters 1973). Hemoglobin: WHO 2024. B12: NICE 2024. Vitamin D: the Institute of Medicine’s 2011 cut-offs, used by Statistics Canada. “On paper” uses the Institute of Medicine’s rule for one person: below the EAR, intake is likely short; at or above the RDA, it very likely isn’t. What it can’t see — what you absorb, what you lose — is why only a second test answers the question.',
+       'Seuils de ferritine : OMS 2020 et le guide britannique (2021); l’essai sur la fatigue traitait les gens sous 50. Fer en réserve : chez l’adulte en santé, chaque µg/L de ferritine représente environ 8 à 10 mg de fer stocké (études par saignées, Walters 1973). Hémoglobine : OMS 2024. B12 : NICE 2024. Vitamine D : les seuils de l’Institute of Medicine (2011), utilisés par Statistique Canada. « Sur papier » suit la règle de l’Institute of Medicine pour une personne : sous le BME, l’apport est probablement insuffisant; au niveau de l’ANR ou plus, il ne l’est très probablement pas. Ce que ça ne voit pas — ce que tu absorbes, ce que tu perds — c’est pour ça que seul un deuxième test répond à la question.']},
   coffeeiron:{src:['morck83'],
     e:['Morck 1983 (dual-isotope study, adults without iron deficiency): a cup of coffee with a hamburger meal reduced iron absorption by 39%, tea by 64%. With a test meal, drip coffee cut absorption from 5.9% to 1.6% and instant to 1.0%; instant at double strength, to 0.5%. No reduction when the coffee came an hour before the meal; the same reduction an hour after. The study measured non-heme iron — the kind in plant foods and pills.',
        'Morck 1983 (étude aux isotopes, adultes sans carence en fer) : une tasse de café avec un repas de hamburger a réduit l’absorption du fer de 39 %, le thé de 64 %. Avec un repas test, le café filtre l’a fait passer de 5,9 % à 1,6 %, le café instantané à 1,0 %, et l’instantané deux fois plus fort à 0,5 %. Aucune baisse quand le café venait une heure avant le repas; la même baisse une heure après. L’étude mesurait le fer non héminique — celui des végétaux et des comprimés.']}
@@ -1477,6 +1527,7 @@ function packetText(compact){
   if(S.crashes.length){ o.push(L('== PAST CRASHES LOGGED ==','== CRASHS PASSÉS AU JOURNAL ==')); const M=MECH(); for(const x of S.crashes.slice(-8)){ o.push(`${crashDay(x)}${x.at?' '+x.at:''} — ${x.when?P2((CQ[0].opts.find(op=>op.v===x.when)||{l:[x.when,x.when]}).l):'?'} — ${x.top&&M[x.top]?P2(M[x.top].t):L('no clear cause','pas de cause claire')} (${x.conf?P2(CONF[x.conf]).toLowerCase():''})`); } const pat=crashPattern(); if(pat) o.push(...pat.map(strip)); o.push(''); }
   { const ml=mealsText(); if(ml){ o.push(ml); o.push(''); } }
   { const st=symText(); if(st){ o.push(st); o.push(''); } }
+  { const lt=labsText(); if(lt){ o.push(lt); o.push(''); } }
   if(tankReady() && (mapCount(S.tank.day)||realDays().length)){ o.push(L('== MY TANK (from the Canadian Nutrient File) ==','== MON RÉSERVOIR (selon le Fichier canadien sur les éléments nutritifs) ==')); o.push(tankText().split('\n').slice(1).join('\n').trim()); o.push(''); }
   { const pt=patternsText(); if(pt){ o.push(pt); o.push(''); } }
   if(profile && !compact){ o.push(L('== THE PATCH THE APP GAVE ME THIS WEEK ==','== LA PATCH QUE L’APP M’A DONNÉE CETTE SEMAINE ==')); o.push(patchText().trim()); o.push(''); }
@@ -1927,6 +1978,7 @@ function vPat(){
   h+=`<p class="small muted" style="margin-top:-4px">${L('Your own days compared with each other — nobody else’s data, no averages from a study.','Tes journées comparées entre elles — pas les données de quelqu’un d’autre, pas des moyennes d’étude.')}</p>`;
   h+=testCard('pat');
   h+=suspectsCard();
+  h+=labsPatCard()+learnPatCard();
   h+=`<div class="card">${stripHTML()}</div>`;
   { const R=rates(); const today=dayKey(); const keys=[...Array(14)].map((_,i)=>keyAdd(today,-i)); let fin=0, same=0, later=0, core=0; for(const k of keys){ const r=R[k]; if(r&&(r.firstAt||r.fin)){ fin++; const t0=r.firstAt||r.at; if(t0 && dayKey(new Date(t0))===k) same++; else later++; if(RATEQ.every(q=>r[q.id]!=null)) core++; } }
     if(Object.keys(R).length) h+=`<div class="card soft"><p class="small" style="margin:0"><b>${L('Your check-in habit:','Ton habitude de bilan :')}</b> ${L(`finished ${fin} of the last 14 days (${core} with all four answers) — finished on the day itself: ${same}, later: ${later}.`,`${fin} journées terminées sur les 14 dernières (${core} avec les quatre réponses) — terminées le jour même : ${same}, plus tard : ${later}.`)}</p></div>`; }
@@ -2018,6 +2070,7 @@ function view(){
   if(S.mode==='day') return 'day';
   if(S.mode==='sym' && S.sym) return 'sym';
   if(S.mode==='nday') return 'nday';
+  if(S.mode==='labs') return 'labs';
   if(S.mode==='tank' && S.tstep>0) return S.tstep>tqList().length ? 'tank' : 'tq';
   if(S.mode==='patch' && S.step>0) return S.step>QL().length ? 'patch' : 'q';
   return 'start';
@@ -2038,11 +2091,12 @@ function render(keep){
   document.documentElement.lang=S.lang;
   if(S.meal&&S.mode!=='meal'){ dropEmptyMeal(); delete S.meal; }
   if(S.sym&&S.mode!=='sym') delete S.sym;
+  if(S.labEdit&&S.mode!=='labs') delete S.labEdit;
   const v=view();
   if(v!==lastView){ if(lastView!==null){ foodQ=''; ndMore=false; } lastView=v; }
-  if(v==='patch'){ try{ tankPrefill(); }catch(e){} if(!S.done){ S.done=true; S.madeAt=new Date().toISOString(); save(); }
+  if(v==='patch'){ try{ tankPrefill(); }catch(e){} if(!S.done){ S.done=true; S.madeAt=new Date().toISOString(); if(!S.since) S.since=S.madeAt; save(); }
     else if(S.redo){ S.redo=false; S.madeAt=new Date().toISOString(); const d=S.started?Math.floor((Date.now()-new Date(S.started).getTime())/86400000)+1:0; if(d>=28){ S.started=null; S.checkins=[]; } save(); } }
-  const body = v==='start'?vStart() : v==='q'?vQ(S.step-1) : v==='patch'?vPatch() : v==='cq'?vCQ(S.cstep-1) : v==='crashres'?vCrashRes() : v==='tq'?vTQ(S.tstep-1) : v==='tank'?vTank() : v==='pat'?vPat() : v==='meal'?vMeal() : v==='day'?vDay() : v==='sym'?vSym() : v==='nday'?vNday() : vAI();
+  const body = v==='start'?vStart() : v==='q'?vQ(S.step-1) : v==='patch'?vPatch() : v==='cq'?vCQ(S.cstep-1) : v==='crashres'?vCrashRes() : v==='tq'?vTQ(S.tstep-1) : v==='tank'?vTank() : v==='pat'?vPat() : v==='meal'?vMeal() : v==='day'?vDay() : v==='sym'?vSym() : v==='nday'?vNday() : v==='labs'?vLabs() : vAI();
   renderTop();
   app.innerHTML = body;
   renderBar(v); bind();
@@ -2067,13 +2121,13 @@ function homeOne(){ if(!S.done) return ''; const day=S.started?Math.floor((Date.
   const o=oneThing(buildPatch(),'home'); return `<div class="card one"><div class="eyebrow">${(day==null||day<=7)?L('If you do one thing this week','Si tu fais une seule chose cette semaine'):L('If you do one thing','Si tu fais une seule chose')}</div><p style="margin:0;font-weight:700">${o.t}</p><div class="row" style="margin-top:8px"><button type="button" class="btn ghost sm" data-door="patch">${L('My week →','Ma semaine →')}</button></div></div>`; }
 /* v1.2.27: the week's one line, the test if one is running, the fuel gauge, three buttons; the day's state and one hint below */
 function vHomeBack(o){
-  return `${tabsHTML('home')}${S.done?weekLine():startCard()}${testCard('home')}${fuelCard()}${mainBtns()}${todayCard()}${payoffCard()}${S.started?dayCheck(buildPatch(),'home'):''}${hintCard()}${iosNote()}
+  return `${tabsHTML('home')}${alarmCard()}${S.done?weekLine():startCard()}${testCard('home')}${fuelCard()}${mainBtns()}${todayCard()}${monthCard()}${payoffCard()}${S.started?dayCheck(buildPatch(),'home'):''}${hintCard()}${iosNote()}
   <p class="small muted" style="margin-top:16px"><b>${L('Not a doctor.','Pas un médecin.')}</b> ${L('Chest pain, fainting or black stool: 911. Thinking about ending your life: call or text 9-8-8 (988 in the US).','Douleur à la poitrine, évanouissement ou selles noires : 911. Tu penses à mettre fin à tes jours : appelle ou texte le 9-8-8 (988 aux É.-U.).')} <button type="button" class="btn ghost sm" id="aboutBtn" style="margin-top:6px">${L('About & privacy','À propos et confidentialité')}</button></p>`; }
-function openAbout(){ showSheet(`<div class="handle"></div><h3 id="sheetTitle">${L('About & privacy','À propos et confidentialité')}</h3>
+function openAbout(){ showSheet(`<div class="handle"></div><h3 id="sheetTitle">${L('About & privacy','À propos et confidentialité')}</h3>${tagline()}
   <p class="small">${L('Education, not medical, pharmacist or dietitian advice. It starts from how you live now, and you decide what to do with it.','De l’éducation, pas un avis médical, pharmaceutique ou diététique. Ça part de ta vie telle qu’elle est, et c’est toi qui décides quoi en faire.')}</p>
   <p class="small">${L('Provided as-is, without warranty of any kind. Your answers stay in this browser’s storage until you share them or erase them — that storage isn’t encrypted, so anyone who can unlock this phone can read it. Nothing here replaces a clinician who can examine you.','Fourni tel quel, sans garantie d’aucune sorte. Tes réponses restent dans la mémoire de ce navigateur tant que tu ne les partages pas ou ne les effaces pas — cette mémoire n’est pas chiffrée, alors quiconque peut déverrouiller ce téléphone peut les lire. Rien ici ne remplace un clinicien qui peut t’examiner.')}</p>
   <p class="small">${L('Any underlined word can be tapped to see what it means, how sure we are, and the sources.','N’importe quel mot souligné peut être touché pour voir ce que ça veut dire, à quel point on en est sûr, et les sources.')}</p>
-  <p class="small muted">v${VER} · ${L('sources checked','sources vérifiées le')} ${P2(CHECKED)} · ${L('pharmacist review: not yet','révision par un pharmacien : pas encore')}</p>`, null); }
+  <p class="small muted">v${VER} · ${L('sources checked','sources vérifiées le')} ${P2(CHECKED)} · ${L('pharmacist review: not yet','révision par un pharmacien : pas encore')}</p><p style="margin:10px 0 0"><button type="button" class="btn ghost sm" id="aboutTobie">${L('Tell Tobie','Dis-le à Tobie')}</button></p>`, null); const at=document.getElementById('aboutTobie'); if(at) at.onclick=e=>openTobie(e.currentTarget); }
 function vStart(){
   const done=!!S.done || S.step>QL().length;
   const started=S.started?Math.floor((Date.now()-new Date(S.started).getTime())/86400000)+1:null;
@@ -2088,7 +2142,7 @@ function vStart(){
   const homeOld = !!(done||nC||tReady||ratedKeys().length); const homeCheck = S.ack ? vCheck(S.rsel==='y'?keyAdd(dayKey(),-1):dayKey(),'home') : '';
   const aStatus = (done||nC||tankOn) ? L(`Attached: ${[done?'your week':null,nC?nC+' crash'+(nC>1?'es':''):null,tankOn?'your tank':null].filter(Boolean).join(' · ')} →`,`Attaché : ${[done?'ta semaine':null,nC?nC+' crash'+(nC>1?'s':''):null,tankOn?'ton réservoir':null].filter(Boolean).join(' · ')} →`) : '';
   if(S.ack && homeOld) return vHomeBack({pStatus,cStatus,tStatus,aStatus,homeCheck});
-  return `<p style="font-size:1.08rem;margin-top:6px">${L('You’re not broken and you’re not lazy. Three minutes of questions: it looks at how you sleep, eat and get through the day — coffee and all — and patches what’s running low, without taking anything away.','Il n’y a rien de brisé en toi, et ce n’est pas de la paresse. Trois minutes de questions : ça regarde comment tu dors, manges et passes à travers ta journée — café compris — et ça patche ce qui manque, sans rien t’enlever.')}</p>
+  return `${tagline()}${alarmCard()}<p style="font-size:1.08rem;margin-top:6px">${L('You’re not broken and you’re not lazy. Three minutes of questions: it looks at how you sleep, eat and get through the day — coffee and all — and patches what’s running low, without taking anything away.','Il n’y a rien de brisé en toi, et ce n’est pas de la paresse. Trois minutes de questions : ça regarde comment tu dors, manges et passes à travers ta journée — café compris — et ça patche ce qui manque, sans rien t’enlever.')}</p>
   <p class="small muted" style="margin:-6px 0 12px">${L('Made by Tobie, for family first.','Fait par Tobie, pour la famille d’abord.')}</p>
   <div class="card flag small" style="padding:10px 14px"><b>${L('Not a doctor.','Pas un médecin.')}</b> ${L('Chest pain, fainting or black stool: 911. Thinking about ending your life: call or text 9-8-8 (988 in the US).','Douleur à la poitrine, évanouissement ou selles noires : 911. Tu penses à mettre fin à tes jours : appelle ou texte le 9-8-8 (988 aux É.-U.).')}</div>
   ${S.ack ? `<button class="chip ack" id="ack" aria-pressed="true" aria-disabled="true">${L('I understand this is education, not medical, pharmacist or dietitian advice — and I decide what to do with it.','Je comprends que c’est de l’éducation, pas un avis médical, pharmaceutique ou diététique — et que c’est moi qui décide quoi en faire.')}</button>`
@@ -2205,6 +2259,8 @@ const FAMS=[
     swap:{vegan:['soy milk, or an unflavoured pea protein','de la boisson de soya, ou une protéine de pois nature'], any:['plain Greek yogurt, or an unflavoured one-ingredient protein powder','du yogourt grec nature, ou une poudre de protéines nature à un seul ingrédient']}},
   {id:'sweets', l:['Sweets and sugary drinks','Sucreries et boissons sucrées'], title:['Without sweets or sugary drinks','Sans sucreries ni boissons sucrées'], ids:CRASHCAT.sweet, cat:'sweet', outs:['crash','gut'],
     swap:{any:['fruit with nuts or yogurt','un fruit avec des noix ou du yogourt']}},
+  {id:'fructose', l:['Apples, pears, mango, watermelon','Pommes, poires, mangue, melon d’eau'], title:['Without apples, pears, mango or watermelon','Sans pommes, poires, mangue ni melon d’eau'], ids:[1696,1731,1603,1691], outs:['gut'],
+    swap:{any:['berries, an orange, kiwi or a banana instead','des petits fruits, une orange, un kiwi ou une banane à la place']}},
   {id:'edrinks', l:['Energy drinks','Boissons énergisantes'], title:['Without energy drinks','Sans boissons énergisantes'], ids:EDIDS, outs:['crash','gut'],
     swap:{any:['coffee or tea before noon','du café ou du thé avant midi']}},
   {id:'latecoffee', l:['Coffee late in the day','Café tard dans la journée'], title:['Coffee done by noon','Café fini à midi'], ci:'cf', next:true, outs:['crash'],
@@ -2376,7 +2432,7 @@ function agedSignal(){ const today=dayKey(); const cu=famById('cured'); let n=0;
   n+=(S.crashes||[]).filter(x=>{ const c=x.answers&&x.answers.cfood; return Array.isArray(c)&&c.includes('hist')&&!loggedDay(crashDay(x)); }).length; return n>=2; }
 function coffeeIronSignal(){ if(!S.done) return false; const P=buildPatch(); const iron=(P.number||[]).some(x=>/ferritin/i.test(String(x)));
   return iron&&(any('fuel','coffee')||Object.values(rates()).some(r=>r&&r.cf&&r.cf!=='none')); }
-function hintCard(){ if(!hintsOn()) return ''; const today=dayKey(); const H=S.hints||{}; if(H.lastOk===today) return ''; const ok=H.ok||{}; const t=activeTest(); const C=[]; { const gt=gapTip(); if(gt) C.push({id:'gap-'+gt.kind, gl:'protein', html:gapTipText(gt)}); }
+function hintCard(){ if(!hintsOn()) return ''; const today=dayKey(); const H=S.hints||{}; if(H.lastOk===today) return ''; const ok=H.ok||{}; const t=activeTest(); const C=[]; { const gt=gapTip(); if(gt) C.push({id:'gap-'+gt.kind, gl:gt.kind==='short'?'sugarloop':'protein', html:gapTipText(gt)}); }
   if(!t){ const s=suspects().find(x=>x.kind==='lead'&&!(x.f.id==='alcohol3'&&drinkerDaily())); if(s) C.push({id:'lead-'+s.f.id+'-'+s.o, html:suspectLine(s), gl:'selftest', test:[s.f.id,s.o]}); }
   if(t&&testDay(t)<=14) C.push({id:'plain', gl:'selftest', html:L('<b>Plain foods give clear answers.</b> A shake with 20 ingredients is 20 suspects; plain yogurt is one.','<b>Les aliments simples donnent des réponses claires.</b> Un shake à 20 ingrédients, c’est 20 suspects; un yogourt nature, c’est un seul.')});
   if(shakeSignal()) C.push({id:'shake', gl:'sweeteners', test:t?null:['shakes','gut'], html:L('<b>Shake and loose stools? It’s often not the protein.</b> Check the label for a sweetener ending in -ol (maltitol, sorbitol), inulin or chicory root. Whey concentrate carries lactose; isolate, much less.','<b>Shake et selles molles? Souvent, ce n’est pas la protéine.</b> Cherche sur l’étiquette un édulcorant en -ol (maltitol, sorbitol), de l’inuline ou de la racine de chicorée. Le concentré de lactosérum contient du lactose; l’isolat, beaucoup moins.')});
@@ -2384,7 +2440,7 @@ function hintCard(){ if(!hintsOn()) return ''; const today=dayKey(); const H=S.h
   if(coffeeIronSignal()) C.push({id:'coffeeiron', gl:'coffeeiron', html:L('<b>Coffee before a meal, not with it or right after.</b> That’s when it blocks the iron in plant foods and pills — no need to give it up.','<b>Le café avant le repas, pas pendant ni juste après.</b> C’est là qu’il bloque le fer des végétaux et des comprimés — pas besoin de l’abandonner.')});
   if((S.tests||[]).length||(S.crashes||[]).length>=3) C.push({id:'onechange', gl:'random', html:L('<b>One change at a time.</b> Two at once, and you can’t tell which one worked.','<b>Un changement à la fois.</b> Deux en même temps, et tu ne sais pas lequel a marché.')});
   const c=C.find(x=>!ok[x.id]); if(!c) return '';
-  return `<div class="card hint"><p style="margin:0 0 8px">${c.html}</p><div class="row">${c.test?`<button type="button" class="btn sm" data-tstart="${c.test[0]}" data-tout="${c.test[1]}">${L('Test it','Tester ça')}</button>`:''}<button type="button" class="btn ghost sm" data-gloss="${c.gl}">${L('Why?','Pourquoi?')}</button><button type="button" class="btn ghost sm" data-hintok="${esc(c.id)}">${L('Got it','Compris')}</button></div></div>`; }
+  return `<div class="card hint" data-hintcard="${esc(c.id)}"><button type="button" class="x" data-hintok="${esc(c.id)}" aria-label="${L('Hide this hint','Masquer ce conseil')}">×</button><p style="margin:0 0 8px">${c.html}</p><div class="row">${c.test?`<button type="button" class="btn sm" data-tstart="${c.test[0]}" data-tout="${c.test[1]}">${L('Test it','Tester ça')}</button>`:''}<button type="button" class="btn ghost sm" data-gloss="${c.gl}">${L('Why?','Pourquoi?')}</button><button type="button" class="btn ghost sm" data-hintok="${esc(c.id)}">${L('Got it','Compris')}</button></div></div>`; }
 
 /* ===================== v1.2.27: ONE PROFILE, THREE BUTTONS, MEALS WITH A TIME =====================
    Meals carry a time (S.tank.meals). S.tank.log[day] is rebuilt from them on every save, so the patterns, suspects, tests, crash
@@ -2523,7 +2579,7 @@ function syncEv(){ try{ if(!S.tank||!S.tank.evMig||!Array.isArray(S.tank.ev)) re
     else delete r.lwA; } }catch(e){} }
 function lwOf(k){ const r=rates()[k]; return r?(r.lwA||r.lw):undefined; }
 function lwLabel(v){ return v==='both'?L('on waking and after a meal','au réveil et après un repas'):((LW.find(x=>x[0]===v)||[null,null])[1]?P2(LW.find(x=>x[0]===v)[1]):''); }
-function pruneEv(){ const cut=keyAdd(dayKey(),-90); S.tank.ev=evs().filter(e=>e&&e.day&&e.day>=cut&&SYMK.includes(e.k)); }
+function pruneEv(){ const cut=keyAdd(dayKey(),-90); S.tank.ev=evs().filter(e=>e&&e.day&&e.day>=cut&&(SYMK.includes(e.k)||e.k==='blood'||e.k==='black')); }
 migrateEv(); pruneEv(); syncMeals();
 if(S.mode==='sym'&&!S.sym) S.mode='home';
 /* ---------- time since the last meal ---------- */
@@ -2533,7 +2589,7 @@ function durText(min){ if(min<60) return `${min} min`; const h=Math.floor(min/60
 function shortNames(items){ const n=[]; for(const [id,c] of Object.entries(items||{})){ if(!(c>0)||String(id).startsWith('x_')) continue; const f=TF.find(z=>z.id==id); if(f) n.push(P2(f.l).split(',')[0].toLowerCase()); }
   return n.length>2?n.slice(0,2).join(', ')+'…':n.join(L(' and ',' et ')); }
 function afterText(k,t,what){ const s=sinceMeal(k,t); if(!s) return ''; const w=what?` (${shortNames(s.m.items)})`:''; return L(`${durText(s.min)} after your ${s.m.at} meal${w}`,`${durText(s.min)} après ton repas de ${s.m.at}${w}`); }
-function symLabel(v){ const o=OFFW.find(x=>x[0]===v); return o?cap1(P2(o[1])):v; }
+function symLabel(v){ const o=OFFW.find(x=>x[0]===v); if(o) return cap1(P2(o[1])); return ALARML[v]?cap1(P2(ALARML[v])):v; }
 /* ---------- today in order ---------- */
 function dayItems(k){ const out=[];
   for(const m of dayMeals(k)) if(mapCount(m.items)) out.push({t:m.at?atMs(m.day,m.at):null, at:m.at, kind:'meal', m});
@@ -2545,7 +2601,7 @@ function timelineHTML(k){ const items=dayItems(k); if(!items.length) return `<p 
   return `<ul class="tl">${items.map(it=>{ const tm=`<span class="tt">${it.at||'—'}</span>`;
     if(it.kind==='meal') return `<li><button type="button" class="tlr" data-meal="${it.m.id}">${tm}<span class="ti" aria-hidden="true">🍽️</span><span class="tx">${esc(mealNames(it.m.items,3))}</span></button></li>`;
     const after=it.t!=null?afterText(k,it.t):'';
-    if(it.kind==='sym') return `<li><button type="button" class="tlr" data-symedit="${it.e.id}">${tm}<span class="ti" aria-hidden="true">😣</span><span class="tx"><b>${esc(symLabel(it.e.k))}</b>${after?`<small>${esc(after)}</small>`:''}</span></button></li>`;
+    if(it.kind==='sym') return `<li><button type="button" class="tlr" data-symedit="${it.e.id}">${tm}<span class="ti" aria-hidden="true">${symIcon(it.e.k)}</span><span class="tx"><b>${esc(symLabel(it.e.k))}</b>${after&&!isAlarm(it.e.k)?`<small>${esc(after)}</small>`:''}</span></button></li>`;
     return `<li><div class="tlr">${tm}<span class="ti" aria-hidden="true">⚡</span><span class="tx"><b>${L('Crash','Crash')}</b>${it.x.top&&M[it.x.top]?' · '+esc(P2(M[it.x.top].t)):''}${after?`<small>${esc(after)}</small>`:''}</span></div></li>`; }).join('')}</ul>`; }
 function tabsHTML(on){ return `<div class="gtabs seg toptabs" role="tablist"><button type="button" role="tab" data-tab="home" aria-pressed="${on==='home'}">${L('Today','Aujourd’hui')}</button><button type="button" role="tab" data-tab="pat" aria-pressed="${on==='pat'}">${L('History','Historique')}</button></div>`; }
 function weekLine(){ if(!S.done) return ''; const day=S.started?Math.floor((Date.now()-new Date(S.started).getTime())/86400000)+1:null; if(day!=null&&day>=28) return '';
@@ -2562,7 +2618,7 @@ function ring(pct,label,big,small){ const r=33, c=2*Math.PI*r, p=Math.max(0,Math
 function gapFix(){ const ws=weekSrc(); if(!ws.days||(ws.nReal<3&&!mapCount(S.tank.day))) return ''; const R=buildTank(ws); const PRI=['fe','b12','mg','b1','fol','d','zn','k','c','fib']; const F=(R.fills||[]).filter(x=>x.c&&x.c[0]&&x.c[0].share>=0.3); if(!F.length) return ''; const f=F.slice().sort((a,b)=>((PRI.indexOf(a.r.k)+99)%99)-((PRI.indexOf(b.r.k)+99)%99))[0];
   const lc=s=>s.toLowerCase().replace(/vitamin(e)? ([a-z])/g,(m,e,x)=>'vitamin'+(e||'')+' '+x.toUpperCase()).replace(/\bb(\d{1,2})\b/g,'B$1'); const c=f.c[0]; const pct=Math.min(100,Math.round(c.share*100));
   const nm=lc(P2(f.r.l)); const art=/^[aeiouyhéè]/i.test(nm)?'l’':/^(vitamine|thiamine|riboflavine|niacine|b\d)/i.test(nm)?'la ':/s$/.test(nm)?'les ':'le ';
-  const sv=P2(c.f.s).replace(/(\d) /g,'$1 '); return L(` For ${nm}: ${P2(c.f.l).toLowerCase()} (${sv}) covers ${pct}% of the gap.`,` Pour ${art}${nm} : ${P2(c.f.l).toLowerCase()} (${sv}), ça couvre ${pct} % du manque.`); }
+  const sv=P2(c.f.s).replace(/(\d) /g,'$1 '); return whyLine(f.r.k)+L(` For ${nm}: ${P2(c.f.l).toLowerCase()} (${sv}) covers ${pct}% of the gap.`,` Pour ${art}${nm} : ${P2(c.f.l).toLowerCase()} (${sv}), ça couvre ${pct} % du manque.`); }
 function fuelCard(){
   if(!tankReady()){ try{ tankPrefill(); }catch(e){} }
   if(!tankReady()){ const p=S.tank.p; const miss=tqList().filter(q=>q.multi?!(Array.isArray(p[q.id])&&p[q.id].length):p[q.id]==null).length;
@@ -2574,11 +2630,11 @@ function fuelCard(){
   let line = useN ? L('Your normal day — log a meal to see today.','Ta journée normale — note un repas pour voir aujourd’hui.') : (la!=null?L(`Last ate ${agoText(la)}.`,`Dernier repas ${agoText(la)}.`):(hasT?'':L('Nothing logged today yet.','Rien de noté aujourd’hui.')));
   const lw = low ? (low.length?L(`<b>Low this week:</b> ${low.join(', ')}.`,`<b>Bas cette semaine :</b> ${low.join(', ')}.`)+(low.length?gapFix():''):L('Nothing low this week.','Rien de bas cette semaine.')) : '';
   const prompt = (!hasT&&!hasN) ? `<div class="row" style="margin-top:8px"><button type="button" class="btn sm" data-nday>${L('Fill the gauge: tap a normal day →','Remplis la jauge : coche une journée normale →')}</button></div><p class="small muted" style="margin:6px 0 0">${L('About a minute. Rough is fine.','Environ une minute. Approximatif, c’est correct.')}</p>` : '';
-  return `<div class="card fuel"><div class="fuelhd"><div class="eyebrow">${useN?L('Fuel tank · your normal day','Réservoir · ta journée normale'):L('Fuel tank · today','Réservoir · aujourd’hui')}</div><button type="button" class="btn ghost sm" data-fueldetail>${L('Details →','Détails →')}</button></div>${rings}<p class="small" style="margin:8px 0 0">${line}${line&&lw?' ':''}${lw}</p>${prompt}</div>`; }
+  return `<div class="card fuel"><div class="fuelhd"><div class="eyebrow">${useN?L('Fuel tank · your normal day','Réservoir · ta journée normale'):L('Fuel tank · today','Réservoir · aujourd’hui')}</div><button type="button" class="btn ghost sm" data-fueldetail>${L('Details →','Détails →')}</button></div>${rings}<p class="small" style="margin:8px 0 0">${line}${line&&lw?' ':''}${lw}</p>${prompt}${storesLine()}</div>`; }
 function mainBtns(){ return `<div class="mainbtns"><button type="button" class="mb crash" data-go="crash"><span class="mi" aria-hidden="true">⚡</span>${L('Crash report','Noter un crash')}</button><button type="button" class="mb meal" data-addmeal="${dayKey()}"><span class="mi" aria-hidden="true">🍽️</span>${L('Meal report','Noter un repas')}</button><button type="button" class="mb sym" data-addsym="${dayKey()}"><span class="mi" aria-hidden="true">😣</span>${L('Symptom report','Noter un symptôme')}</button></div>`; }
 /* what the app gives back, and when — so day 3 isn't the day people give up; gone after "Got it" */
 function payoffCard(){ if(!S.done||S.payoffOk) return '';
-  return `<div class="card soft"><div class="eyebrow">${L('What you’ll see, and when','Ce que tu vas voir, et quand')}</div><ul class="small pay" style="margin:0 0 8px">
+  return `<div class="card soft" data-payoffcard><button type="button" class="x" data-payoffok aria-label="${L('Hide','Masquer')}">×</button><div class="eyebrow">${L('What you’ll see, and when','Ce que tu vas voir, et quand')}</div><ul class="small pay" style="margin:0 0 8px">
   <li><b>${L('Today:','Aujourd’hui :')}</b> ${L('your patch, and what’s low on a normal day.','ta patch, et ce qui est bas une journée normale.')}</li>
   <li><b>${L('After 7 finished days:','Après 7 journées terminées :')}</b> ${L('your first comparison.','ta première comparaison.')}</li>
   <li><b>${L('Weeks 2 to 3:','Semaines 2 à 3 :')}</b> ${L('a first suspect, if there is one.','un premier suspect, s’il y en a un.')}</li>
@@ -2587,6 +2643,7 @@ function payoffCard(){ if(!S.done||S.payoffOk) return '';
 function vSym(){ const d=S.sym; if(!d) return ''; const t=dayKey(), y=keyAdd(t,-1); const tm=d.at?atMs(d.day,d.at):null; const after=tm!=null?afterText(d.day,tm,true):'';
   let h=`<div class="eyebrow">${L('Symptom report','Noter un symptôme')}</div><div class="card mealhd"><div class="row" style="gap:8px"><div class="gtabs seg" role="tablist" style="margin:0"><button type="button" role="tab" data-sday="${t}" aria-pressed="${d.day===t}">${L('Today','Aujourd’hui')}</button><button type="button" role="tab" data-sday="${y}" aria-pressed="${d.day===y}">${L('Yesterday','Hier')}</button>${d.day!==t&&d.day!==y?`<button type="button" role="tab" aria-pressed="true">${dayLabel(d.day)}</button>`:''}</div><label class="small" for="symAt">${L('at','à')}</label><input type="time" id="symAt" class="sel tm" value="${d.at||''}"><button type="button" class="btn ghost sm" id="symNow">${L('Now','Maintenant')}</button></div>${after?`<p class="small" style="margin:8px 0 0"><b>${esc(cap1(after))}</b> — ${L('the time between is what the patterns read.','c’est l’écart que les tendances lisent.')}</p>`:''}</div>`;
   h+=`<h2 style="margin-top:14px">${L('What is it?','C’est quoi?')}</h2>${pickAll()}<div class="chips pickn">${OFFW.map(([v,l,ds])=>`<button type="button" class="chip" data-symk="${v}" aria-pressed="${d.ks.includes(v)}"><span>${esc(cap1(P2(l)))}${ds?` <small class="muted">· ${esc(P2(ds))}</small>`:''}</span></button>`).join('')}</div>`;
+  h+=symAlarmPick(d);
   h+=`<p class="small" style="margin:4px 0 0"><button type="button" class="btn ghost sm" data-go="crash">${L('A crash? Crash report →','Un crash? Noter un crash →')}</button></p>`;
   if(d.edit) h+=`<div class="row" style="margin-top:10px"><button type="button" class="btn ghost sm" id="symDel">${L('Delete this','Supprimer ça')}</button></div>`;
   return h; }
@@ -2647,8 +2704,8 @@ function hrs(x){ return fmt(x,1).replace(/[.,]0$/,''); }
 function gapTipText(g){ if(!g) return '';
   if(g.kind==='long') return L(`<b>Your last ${g.n} crashes came ${g.lo===g.hi?'about '+hrs(g.lo):hrs(g.lo)+'–'+hrs(g.hi)} h after you’d last eaten.</b> Eat something with protein about ${hrs(g.at)} h after a meal, before the gap gets that long. A pattern in your crashes, not proof — try it for a week.`,
     `<b>Tes ${g.n} derniers crashs sont arrivés ${g.lo===g.hi?'environ '+hrs(g.lo):hrs(g.lo)+' à '+hrs(g.hi)} h après ton dernier repas.</b> Mange quelque chose avec des protéines environ ${hrs(g.at)} h après un repas, avant que l’écart devienne aussi long. Une tendance dans tes crashs, pas une preuve — essaie-le une semaine.`);
-  return L(`<b>Your last ${g.n} crashes came within ${g.hi} h of eating.</b> The meal itself is the suspect: a smaller portion, with protein and less sugar or white bread, is the usual fix. A pattern, not proof — try it for a week.`,
-    `<b>Tes ${g.n} derniers crashs sont arrivés moins de ${g.hi} h après avoir mangé.</b> Le repas lui-même est le suspect : une plus petite portion, avec des protéines et moins de sucre ou de pain blanc, c’est la solution habituelle. Une tendance, pas une preuve — essaie-le une semaine.`); }
+  return L(`<b>Your last ${g.n} crashes came within ${g.hi} h of eating.</b> The meal itself is the suspect — often ${T('sugarloop','the sugar loop')}: a smaller portion, with protein and less sugar or white bread, is the usual fix. A pattern, not proof — try it for a week.`,
+    `<b>Tes ${g.n} derniers crashs sont arrivés moins de ${g.hi} h après avoir mangé.</b> Le repas lui-même est le suspect — souvent ${T('sugarloop','la boucle du sucre','la boucle du sucre')} : une plus petite portion, avec des protéines et moins de sucre ou de pain blanc, c’est la solution habituelle. Une tendance, pas une preuve — essaie-le une semaine.`); }
 function gapTipCard(){ const g=gapTip(); if(!g) return ''; return `<div class="card soft"><div class="eyebrow">${L('The time before your crashes','Le temps avant tes crashs')}</div><p class="small" style="margin:0">${gapTipText(g)}</p></div>`; }
 /* ---------- for "Ask an AI": symptoms with their times ---------- */
 function symText(){ const today=dayKey(), lines=[];
@@ -2665,7 +2722,7 @@ function bind128(){ const $=id=>document.getElementById(id);
   if($('symAt')) $('symAt').onchange=e=>{ if(!S.sym) return; S.sym.at=e.target.value||null; save(); render(true); };
   if($('symNow')) $('symNow').onclick=()=>{ if(!S.sym) return; S.sym.day=dayKey(); S.sym.at=nowHM(); refocus='#symNow'; save(); render(true); };
   if($('symDone')) $('symDone').onclick=()=>{ const d=S.sym; if(!d){ S.mode='home'; render(); return; } const E=evs(); if(d.edit) S.tank.ev=E.filter(x=>x.id!==d.edit);
-    for(const k of d.ks) S.tank.ev.push({id:'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,5)+k, day:d.day, at:d.at||null, k});
+    for(const k of d.ks) S.tank.ev.push({id:'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,5)+k, day:d.day, at:d.at||null, k, t:Date.now()});
     const n=d.ks.length, at=d.at; symBack(); const ok=save(); render(); if(ok&&n) toast(L(`Saved${at?' · '+at:''}`,`Noté${at?' · '+at:''}`)); };
   if($('symDel')) $('symDel').onclick=function(){ if(!this.dataset.sure){ this.dataset.sure='1'; this.textContent=L('Tap again to delete','Appuie encore pour supprimer'); return; } const d=S.sym; if(d&&d.edit) S.tank.ev=evs().filter(x=>x.id!==d.edit); symBack(); save(); render(); toast(L('Deleted','Supprimé')); };
   document.querySelectorAll('[data-dayci]').forEach(b=>{ b.onclick=()=>{ S.daySel=b.dataset.dayci; S.mode='day'; rEdit=null; save(); render(); const c=document.getElementById('checkin'); if(c){ try{ c.scrollIntoView({block:'start'}); }catch(e){} } }; });
@@ -2681,7 +2738,7 @@ function bind128(){ const $=id=>document.getElementById(id);
 const SEEN='thepatch.seen', AWAY=15*60000;
 function seen(){ try{ localStorage.setItem(SEEN,String(Date.now())); }catch(e){} }
 function seenAgo(){ try{ const t=+localStorage.getItem(SEEN); return t>0?Date.now()-t:Infinity; }catch(e){ return Infinity; } }
-function homeReset(){ try{ closeSheet(true); }catch(e){} if(S.meal){ dropEmptyMeal(); delete S.meal; } delete S.sym; S.mode='home'; foodQ=''; ndMore=false; rEdit=null; }
+function homeReset(){ try{ closeSheet(true); }catch(e){} if(S.meal){ dropEmptyMeal(); delete S.meal; } delete S.sym; delete S.labEdit; S.mode='home'; foodQ=''; ndMore=false; rEdit=null; }
 function bootView(){ let nav=''; try{ const e=performance.getEntriesByType('navigation')[0]; nav=e?e.type:''; }catch(e){}
   const soft=(nav==='reload'||nav==='back_forward'||document.wasDiscarded===true)&&seenAgo()<AWAY;
   try{ history.scrollRestoration=soft?'auto':'manual'; }catch(e){}
@@ -2700,6 +2757,211 @@ function crashStale(){ const c=S.c||{}; if(!S.cstep||c._logged) return false; if
 let ndMore=false, anchorSel=null, lastView=null, qBlurAt=0;
 function anchorTop(sel){ const el=sel&&document.querySelector(sel); if(!el||!el.getClientRects().length) return null; return el.getBoundingClientRect().top; }
 function bind129(){ const d=document.getElementById('ndMore'); if(d) d.ontoggle=()=>{ ndMore=d.open; }; }
+/* ===================== v1.2.30: what it's for, warning signs, blood results, a month in, Tell Tobie ===================== */
+/* The purpose in one line: the first screen and About. */
+function tagline(){ return `<p class="tagline">${L('Find the foods that work for you, with everything your body needs. Energy for living, not just surviving.','Trouve les aliments qui marchent pour toi, avec tout ce dont ton corps a besoin. De l’énergie pour vivre, pas juste pour survivre.')}</p>`; }
+/* a hint goes away with a tap anywhere on it, the same as "Got it" */
+function hintDismiss(id){ const H=S.hints=S.hints||{}; H.ok=H.ok||{}; H.ok[id]=dayKey(); H.lastOk=dayKey(); save(); render(true); }
+
+/* ---------- warning signs: the check-engine light. Logged like any symptom, kept out of the patterns: bleeding isn't tuned ---------- */
+const ALARMK=['blood','black'];
+const ALARML={blood:['blood in the toilet or on the paper','du sang dans la toilette ou sur le papier'], black:['black, tar-like stool','des selles noires, comme du goudron']};
+function isAlarm(k){ return k==='blood'||k==='black'; }
+function symIcon(k){ return k==='blood'?'🩸':k==='black'?'⚠️':'😣'; }
+function alarmText(k){
+  if(k==='black') return L(`<b>Black, tar-like stool can be bleeding higher up, in the stomach.</b> Iron pills and Pepto-Bismol darken stool too — usually firm and dark green-black, not sticky like tar. Sticky like tar, or not sure: call 811 or get seen today. Dizzy, faint, or a lot of blood: 911.`,
+    `<b>Des selles noires, comme du goudron, peuvent venir d’un saignement plus haut, dans l’estomac.</b> Le fer en comprimés et le Pepto-Bismol foncent aussi les selles — d’habitude fermes et vert-noir, pas collantes comme du goudron. Collantes comme du goudron, ou dans le doute : appelle le 811 ou fais-toi voir aujourd’hui. Étourdissements, malaise ou beaucoup de sang : 911.`);
+  return L(`<b>Blood in the toilet or on the paper isn’t something to tune.</b> Most of the time it’s a small tear or hemorrhoids, and firm stools fix those. But an app can’t tell that apart from something serious, and neither can you. ${T('rectal','50 or over, or with belly pain, a change in how you go, weight loss or low iron')}: book the appointment this week, whether or not it stops. Under 50 with none of those: if it still bleeds once stools are firm, it needs a look. Diarrhea with blood in it: call 811 today. A lot of blood, clots, or feeling faint: 911.`,
+    `<b>Du sang dans la toilette ou sur le papier, ça ne se règle pas avec un test.</b> La plupart du temps, c’est une petite fissure ou des hémorroïdes, et des selles fermes règlent ça. Mais une app ne peut pas faire la différence avec quelque chose de grave, et toi non plus. ${T('rectal','50 ans ou plus, ou avec des douleurs au ventre, un changement dans ta façon d’aller à la selle, une perte de poids ou un manque de fer','50 ans ou plus, ou avec des douleurs au ventre, un changement dans ta façon d’aller à la selle, une perte de poids ou un manque de fer')} : prends le rendez-vous cette semaine, que ça arrête ou pas. Sous 50 ans sans rien de ça : si ça saigne encore une fois les selles fermes, ça prend un examen. De la diarrhée avec du sang : appelle le 811 aujourd’hui. Beaucoup de sang, des caillots ou un malaise : 911.`); }
+function symAlarmPick(d){ const on=ALARMK.filter(k=>d.ks.includes(k));
+  return `<p class="small muted" style="margin:14px 0 6px">${L('Warning signs — these go to a doctor, not into a test:','Signes d’alarme — ça va chez le médecin, pas dans un test :')}</p><div class="chips pickn">${ALARMK.map(v=>`<button type="button" class="chip alarm" data-symk="${v}" aria-pressed="${d.ks.includes(v)}"><span>${esc(cap1(P2(ALARML[v])))}</span></button>`).join('')}</div>${on.map(k=>`<div class="card flag" style="margin-top:8px"><p class="small" style="margin:0">${alarmText(k)}</p></div>`).join('')}`; }
+function alarmCard(){ const ok=+S.alarmOk||0; const cut=keyAdd(dayKey(),-14);
+  const list=evs().filter(e=>e&&isAlarm(e.k)&&e.day>=cut&&(+e.t||0)>ok).sort((a,b)=>(+b.t||0)-(+a.t||0)); if(!list.length) return ''; const e=list[0];
+  return `<div class="card flag alarm"><div class="eyebrow">${L('Warning sign','Signe d’alarme')} · ${esc(labDate(e.day))}${e.at?' · '+e.at:''}</div><p class="small" style="margin:0 0 8px">${alarmText(e.k)}</p><div class="row"><button type="button" class="btn sm" data-alarmok>${L('Got it','Compris')}</button><button type="button" class="btn ghost sm" data-gloss="warn">${L('Why?','Pourquoi?')}</button></div></div>`; }
+
+/* ---------- blood results: where the stores are, and whether they're holding from that point ---------- */
+/* S.labs=[{id, day, fer, crp, hb, b12, d, inf, don}] — inf/don: an iron infusion or a blood donation since the test before.
+   Ferritin: WHO 2020 (under 15 empty, under 70 low with inflammation, over 150/200 a question), UK 2021 (under 30 low), the
+   fatigue trial (under 50). About 8–10 mg of stored iron per µg/L. Haemoglobin: WHO 2024 cut-offs. B12: NICE 2024
+   (under 133 pmol/L confirmed, 133–258 possible). Vitamin D: IOM 2011 / Health Canada (under 30 low, 50+ enough, over 125 high).
+   "On paper": the iron logged since the test against the EAR (most people's need) and the RDA (nearly everyone's) — the IOM's
+   rule for one person's intake. Only a second test says what actually happened. */
+const LABF=[['fer',['Ferritin','Ferritine'],'µg/L'],['crp',['CRP','CRP'],'mg/L'],['hb',['Hemoglobin','Hémoglobine'],'g/L'],['b12',['Vitamin B12','Vitamine B12'],'pmol/L'],['d',['Vitamin D (25-OH)','Vitamine D (25-OH)'],'nmol/L']];
+const LABN={fer:['ferritin','ferritine'],crp:['CRP','CRP'],hb:['hemoglobin','hémoglobine'],b12:['B12','B12'],d:['vitamin D','vitamine D']};
+function labs(){ if(!Array.isArray(S.labs)) S.labs=[]; return S.labs; }
+function labsSorted(){ return labs().filter(x=>x&&x.day).slice().sort((a,b)=>a.day<b.day?-1:a.day>b.day?1:0); }
+function lastWith(k){ const A=labsSorted().filter(x=>x[k]!=null); return A.length?A[A.length-1]:null; }
+function labDate(k){ const [y,m,d]=String(k).split('-').map(Number); return new Date(y,m-1,d).toLocaleDateString(S.lang==='fr'?'fr-CA':'en-CA',{month:'short',day:'numeric',year:'numeric'}); }
+function inflamed(x){ return !!(x&&x.crp!=null&&x.crp>5); }
+function premeno(){ const p=S.tank.p||{}; return p.sex==='f'&&(p.age==='a1'||p.age==='a2'||p.age==='minor'); }
+function ferHi(){ return premeno()&&!tankLife().preg?150:200; }
+function hbCut(){ const p=S.tank.p||{}; if(tankLife().preg) return 110; return p.sex==='m'?130:120; }
+function ironNeed(){ const p=S.tank.p||{}, life=tankLife(); const rda=tankTargets().fe; let ear;
+  if(life.preg) ear=22; else if(life.bf) ear=6.5; else if(p.sex==='m') ear=6; else if(p.sex==='f') ear=(p.age==='a3'||p.age==='a4')?5:8.1; else ear=(p.age==='a3'||p.age==='a4')?6:8.1;
+  if(life.veg&&!life.preg) ear=Math.round(ear*18)/10; return {ear, rda}; }
+function b12Need(){ const life=tankLife(); return {ear:life.preg?2.2:life.bf?2.4:2.0, rda:tankTargets().b12}; }
+/* average daily intake of one nutrient on the days after `from` (to `to`, or today), the last 90 days at most:
+   days logged in full count as logged, other days as the normal day; at least 7 such days or nothing */
+function paperAvg(key,from,to){ const today=dayKey(); const end=to&&to<today?to:today; let k=keyAdd(from,1); const cut=keyAdd(today,-89); if(k<cut) k=cut;
+  let n=0,nReal=0,nAss=0,sum=0;
+  for(let i=0; k<=end&&i<400; k=keyAdd(k,1),i++){ let m=tlog()[k]; if(m&&mapCount(m)&&isClosed(k)) nReal++; else if(mapCount(S.tank.day)){ m=S.tank.day; nAss++; } else continue; n++; sum+=tankTotals(m).tot[key]||0; }
+  return n>=7?{avg:sum/n,n,nReal,nAss}:null; }
+function ferRead(x){ const F=x.fer; const hi=ferHi();
+  if(inflamed(x)) return F<70?{band:'low', t:L('low — with inflammation, under 70 counts as low (WHO)','basse — avec de l’inflammation, sous 70 compte comme bas (OMS)')}:{band:'unclear', t:L('can’t be read right now: CRP is up, and that pushes ferritin up. Retest once you’re well','pas lisible pour l’instant : la CRP est élevée, et ça gonfle la ferritine. Refais le test quand tu vas bien')};
+  if(F<15) return {band:'empty', t:L('empty — iron deficiency by every guideline','vide — un manque de fer selon tous les guides')};
+  if(F<30) return {band:'low', t:L('low — under 30 is low by the UK guideline','basse — sous 30, c’est bas selon le guide britannique')};
+  if(F<50) return {band:'lownormal', t:L('low-normal — the trial that eased tiredness treated people under 50','normale-basse — l’essai qui a soulagé la fatigue traitait les gens sous 50')};
+  if(F<=hi) return {band:'ok', t:L('in range — above 50, more iron hasn’t shown a benefit','dans la zone — au-dessus de 50, plus de fer n’a pas montré d’avantage')};
+  return {band:'high', t:L(`high — over ${hi} is a question in itself: inflammation, liver, or the iron-overload gene. Don’t push it higher; ask about it`,`élevée — au-dessus de ${hi}, c’est une question en soi : inflammation, foie ou le gène de la surcharge en fer. Ne le pousse pas plus haut; parles-en à ton médecin`)}; }
+function r10(v){ return Math.round(v/10)*10; }
+function storesText(x){ return L(`About ${fmt(r10(x.fer*8),0)}–${fmt(r10(x.fer*10),0)} mg of iron in storage (8 to 10 mg per point).`,`Environ ${fmt(r10(x.fer*8),0)} à ${fmt(r10(x.fer*10),0)} mg de fer en réserve (8 à 10 mg par point).`); }
+function paperVerdict(a,need){ return a<need.ear?L('below what most people need — on paper, the stores are being drawn down','sous ce dont la plupart des gens ont besoin — sur papier, tu puises dans tes réserves'):a<need.rda?L('enough for many people, not for all — the next test decides','assez pour bien des gens, pas pour tous — le prochain test va trancher'):L('enough to hold the stores for almost everyone','assez pour maintenir les réserves de presque tout le monde'); }
+function paperShort(a,need){ return a<need.ear?L('drawing down on paper','en baisse sur papier'):a<need.rda?L('the next test decides','le prochain test va trancher'):L('holding on paper','stable sur papier'); }
+function paperN(pp){ const a=pp.nReal, b=pp.nAss;
+  return a&&b?L(`${a} day${a===1?'':'s'} in full, ${b} counted as your normal day`,`${a} jour${a>1?'s':''} au complet, ${b} compté${b>1?'s':''} comme ta journée normale`)
+    :a?L(`${a} complete day${a===1?'':'s'}`,`${a} jour${a>1?'s':''} au complet`)
+    :L(`your normal day, counted for ${b} day${b===1?'':'s'}`,`ta journée normale, comptée pour ${b} jour${b>1?'s':''}`); }
+function paperText(pp,need){ return L(`<b>Since that test, on paper:</b> about ${fmt(pp.avg,1)} mg of iron a day in what you logged (${paperN(pp)}), against a need of ${fmt(need.ear,1)} to ${fmt(need.rda,0)} mg — ${paperVerdict(pp.avg,need)}. Paper can’t see what you absorb, or what leaves (periods, blood loss); the next test can.`,
+  `<b>Depuis ce test, sur papier :</b> environ ${fmt(pp.avg,1)} mg de fer par jour dans ce que tu as noté (${paperN(pp)}), pour un besoin de ${fmt(need.ear,1)} à ${fmt(need.rda,0)} mg — ${paperVerdict(pp.avg,need)}. Le papier ne voit pas ce que tu absorbes, ni ce qui sort (règles, pertes de sang); le prochain test, oui.`); }
+function ferTrend(){ const F=labsSorted().filter(x=>x.fer!=null); if(F.length<2) return null; const b=F[F.length-1], a=F[F.length-2];
+  const days=Math.max(1,Math.round((new Date(b.day)-new Date(a.day))/86400000)); const res={a,b,days,mo:days/30.44};
+  if(b.inf||b.don){ res.kind='event'; return res; } if(inflamed(a)||inflamed(b)){ res.kind='inflamed'; return res; }
+  const d=b.fer-a.fer; res.per=d/res.mo; res.kind=Math.abs(d)<=Math.max(5,0.1*a.fer)?'hold':d<0?'fall':'rise'; if(a.inf) res.afterInf=true;
+  res.paper=paperAvg('fe',a.day,b.day); return res; }
+function trendText(tr){ const span=tr.days<60?L(`${Math.max(1,Math.round(tr.days/7))} weeks`,`${Math.max(1,Math.round(tr.days/7))} semaines`):L(`${Math.round(tr.mo)} months`,`${Math.round(tr.mo)} mois`);
+  const head=L(`<b>Measured:</b> ferritin ${fmt(tr.a.fer,0)} → ${fmt(tr.b.fer,0)} in ${span}`,`<b>Mesuré :</b> ferritine ${fmt(tr.a.fer,0)} → ${fmt(tr.b.fer,0)} en ${span}`);
+  if(tr.kind==='event') return head+L(' — an iron infusion or a blood donation in between, so the change isn’t a read on food.',' — une perfusion de fer ou un don de sang entre les deux, alors le changement ne dit rien sur la nourriture.');
+  if(tr.kind==='inflamed') return head+L(' — CRP was up on one of the two draws, so the change can’t be read.',' — la CRP était élevée sur une des deux prises, alors le changement n’est pas lisible.');
+  if(tr.kind==='hold') return head+L(' — holding.',' — stable.');
+  const per=Math.abs(tr.per), p1=Math.max(1,Math.round(per)), lo=Math.max(5,Math.round(per*8/5)*5), hi=Math.max(5,Math.round(per*10/5)*5);
+  if(tr.kind==='rise') return head+L(` — rising about ${p1} a month. The stores are filling.`,` — en hausse d’environ ${p1} par mois. Les réserves se remplissent.`);
+  let t=head+L(` — falling about ${p1} a month, roughly ${lo} to ${hi} mg of iron a month out of the stores.`,` — en baisse d’environ ${p1} par mois, à peu près ${lo} à ${hi} mg de fer par mois qui sortent des réserves.`);
+  if(tr.afterInf) return t+' '+L('The first draw came after an iron infusion, and ferritin reads high for weeks after one — so part of this drop is the number settling. If it keeps falling between the next two tests, that part is loss.','La première prise suivait une perfusion de fer, et la ferritine lit trop haut pendant des semaines après — alors une partie de la baisse, c’est le chiffre qui se replace. Si ça continue de baisser entre les deux prochains tests, cette partie-là, c’est une perte.');
+  const pp=tr.paper, need=ironNeed();
+  if(pp&&pp.avg>=need.rda) t+=' '+L('<b>Food can’t explain this drop:</b> what you logged covers your need, so iron is leaving faster than food replaces it — periods, blood loss you can’t see, or poor absorption. Bring both numbers to your doctor.','<b>La nourriture n’explique pas cette baisse :</b> ce que tu as noté couvre ton besoin, alors le fer sort plus vite que la nourriture le remplace — règles, pertes de sang invisibles ou mauvaise absorption. Apporte les deux chiffres à ton médecin.');
+  else if(pp&&pp.avg<need.ear) t+=' '+L('The log fits the drop: less iron going in than most people need.','Le journal concorde avec la baisse : moins de fer qui entre que ce dont la plupart des gens ont besoin.');
+  return t; }
+function hbText(h,x){ const c=hbCut(); const p=S.tank.p||{}, life=tankLife(); const low=h.hb<c; const other=(p.sex!=='m'&&p.sex!=='f'&&!life.preg)?L(' (130 for men)',' (130 pour les hommes)'):'';
+  let t=L(`<b>Hemoglobin ${fmt(h.hb,0)}</b> (${esc(labDate(h.day))}): `,`<b>Hémoglobine ${fmt(h.hb,0)}</b> (${esc(labDate(h.day))}) : `)+(low?L(`anemia — under the WHO cut-off of ${c}${other}.`,`de l’anémie — sous le seuil de l’OMS de ${c}${other}.`):L(`no anemia — the WHO cut-off is ${c}${other}.`,`pas d’anémie — le seuil de l’OMS est ${c}${other}.`));
+  if(life.preg) t+=' '+L('(In the second trimester the cut-off is 105.)','(Au deuxième trimestre, le seuil est 105.)');
+  if(!low) return t;
+  const fl=x&&['empty','low'].includes(ferRead(x).band);
+  if(!fl) return t+' '+L('Anemia without low iron has other causes — B12, folate, kidneys — that’s a doctor question.','Une anémie sans manque de fer a d’autres causes — B12, folate, reins — c’est une question pour ton médecin.');
+  if(life.preg) return t+' '+L('With low ferritin, that’s iron-deficiency anemia — one for your next prenatal visit, where iron is the usual answer.','Avec une ferritine basse, c’est une anémie par manque de fer — à apporter à ta prochaine visite de grossesse, où le fer est la réponse habituelle.');
+  if(life.bf||has('safety','pp')) return t+' '+L('With low ferritin, that’s iron-deficiency anemia. Pregnancy and birth often leave the stores empty — bring it to your doctor.','Avec une ferritine basse, c’est une anémie par manque de fer. La grossesse et l’accouchement vident souvent les réserves — apporte-le à ton médecin.');
+  if(premeno()) return t+' '+L('With low ferritin, that’s iron-deficiency anemia. Heavy periods are the usual cause — it’s still a doctor visit.','Avec une ferritine basse, c’est une anémie par manque de fer. Les règles abondantes en sont la cause habituelle — ça reste une visite chez le médecin.');
+  return t+' '+L('With low ferritin, that’s iron-deficiency anemia. In men and after menopause, guidelines treat it as blood loss from the gut until a scope shows otherwise — this one goes to your doctor.','Avec une ferritine basse, c’est une anémie par manque de fer. Chez les hommes et après la ménopause, les guides la traitent comme une perte de sang par l’intestin jusqu’à preuve du contraire par un examen — ça, c’est pour ton médecin.'); }
+function b12Read(v){ if(v<133) return L('low — a shortage by the NICE cut-off (133)','basse — un manque selon le seuil de NICE (133)'); if(v<=258) return L('in the grey zone — between 133 and 258 a follow-up test (MMA) or your doctor’s read decides','en zone grise — entre 133 et 258, un test de suivi (acide méthylmalonique) ou ton médecin tranche'); return L('fine — a shortage is unlikely','correct — un manque est peu probable'); }
+function b12Paper(b){ const pp=paperAvg('b12',b.day); if(!pp) return ''; const n=b12Need();
+  const v=pp.avg<n.ear?L('below what most people need — the stores run down slowly, over years','sous ce dont la plupart des gens ont besoin — les réserves baissent lentement, sur des années'):pp.avg<n.rda?L('enough for many, not all','assez pour bien des gens, pas pour tous'):L('covered','couvert');
+  return ' '+L(`On paper since: about ${fmt(pp.avg,1)} µg a day against ${fmt(n.rda,1)} — ${v}.`,`Sur papier depuis : environ ${fmt(pp.avg,1)} µg par jour pour ${fmt(n.rda,1)} — ${v}.`); }
+function dRead(v,day){ let t=v<30?L('low — at risk of deficiency','basse — à risque de carence'):v<50?L('maybe not enough — between 30 and 50 some people are short','peut-être pas assez — entre 30 et 50, certaines personnes en manquent'):v<=125?L('enough for almost everyone','assez pour presque tout le monde'):L('high — above 125 nothing is gained, and pills can be eased off','élevée — au-dessus de 125, on ne gagne rien, et on peut réduire les pilules');
+  const mo=+String(day).slice(5,7); if(v>=30&&mo>=5&&mo<=10) t+=L('. A summer number drops by spring: from October to March, the skin makes almost none in Canada','. Un chiffre d’été baisse d’ici le printemps : d’octobre à mars, la peau n’en fabrique presque pas au Canada'); return t; }
+function recheckLine(){ const x=lastWith('fer'), h=lastWith('hb'), tr=ferTrend(); let low=false;
+  if(x&&['empty','low','lownormal','unclear'].includes(ferRead(x).band)) low=true; if(h&&h.hb<hbCut()) low=true; if(tr&&tr.kind==='fall') low=true;
+  let t=low?L('Recheck in about 3 months, once a change has had time to work.','Refais le test dans environ 3 mois, le temps qu’un changement fasse effet.'):L('No rush: once a year, or sooner if the old tiredness comes back.','Pas pressé : une fois par année, ou plus tôt si la vieille fatigue revient.');
+  if(x&&x.crp==null) t+=' '+L('Next time, ask for CRP on the same draw.','La prochaine fois, demande la CRP sur la même prise de sang.'); return t; }
+function labReadCard(){ const x=lastWith('fer'), h=lastWith('hb'), b=lastWith('b12'), dv=lastWith('d'); const out=[];
+  if(x){ const r=ferRead(x); let t=L(`<b>Ferritin ${fmt(x.fer,0)}</b> (${esc(labDate(x.day))}): ${r.t}.`,`<b>Ferritine ${fmt(x.fer,0)}</b> (${esc(labDate(x.day))}) : ${r.t}.`);
+    if(!inflamed(x)&&r.band!=='empty') t+=' '+storesText(x);
+    if(x.inf) t+=' '+L('An iron infusion before this test makes ferritin read high for weeks after it.','Une perfusion de fer avant ce test fait lire la ferritine trop haut pendant des semaines.');
+    out.push(t); const tr=ferTrend(); if(tr) out.push(trendText(tr));
+    const pp=paperAvg('fe',x.day); out.push(pp?paperText(pp,ironNeed()):L('<b>Since that test:</b> not enough days logged to say, on paper, whether the iron going in holds the stores. A normal day, or a week of complete days, makes it possible.','<b>Depuis ce test :</b> pas assez de journées notées pour dire, sur papier, si le fer qui entre maintient les réserves. Une journée normale, ou une semaine de journées complètes, rend ça possible.')); }
+  if(h) out.push(hbText(h,x));
+  if(b) out.push(L(`<b>B12 ${fmt(b.b12,0)}</b> (${esc(labDate(b.day))}): ${b12Read(b.b12)}.`,`<b>B12 ${fmt(b.b12,0)}</b> (${esc(labDate(b.day))}) : ${b12Read(b.b12)}.`)+b12Paper(b));
+  if(dv) out.push(L(`<b>Vitamin D ${fmt(dv.d,0)}</b> (${esc(labDate(dv.day))}): ${dRead(dv.d,dv.day)}.`,`<b>Vitamine D ${fmt(dv.d,0)}</b> (${esc(labDate(dv.day))}) : ${dRead(dv.d,dv.day)}.`));
+  out.push(`<span class="muted">${recheckLine()}</span>`);
+  return `<div class="card"><div class="eyebrow">${L('What the numbers say','Ce que les chiffres disent')}</div>${out.map(t=>`<p class="small" style="margin:0 0 8px">${t}</p>`).join('')}</div>`; }
+function labLine(x){ return LABF.filter(([k])=>x[k]!=null).map(([k,l,u])=>`${P2(LABN[k])} ${fmt(x[k],k==='crp'?1:0)}${k==='crp'?'':' '+u}`).join(' · ')+(x.inf?L(' · after an iron infusion',' · après une perfusion de fer'):'')+(x.don?L(' · after giving blood',' · après un don de sang'):''); }
+function labForm(E){ const prev=labsSorted().filter(x=>x.id!==E.id&&x.day<E.day).pop();
+  return `<div class="card labform"><label class="small" for="labDay"><b>${L('Date of the blood draw','Date de la prise de sang')}</b></label><input type="date" id="labDay" class="sel" value="${esc(E.day||'')}" max="${dayKey()}">
+  <div class="labgrid">${LABF.map(([k,l,u])=>`<label class="lab"><span>${P2(l)} <small class="muted">${u}</small></span><input type="number" inputmode="decimal" step="any" min="0" id="lab_${k}" class="sel" value="${E[k]!=null?E[k]:''}"></label>`).join('')}</div>
+  ${prev?`<p class="small muted" style="margin:12px 0 6px">${L(`Since the test before (${labDate(prev.day)}):`,`Depuis le test d’avant (${labDate(prev.day)}) :`)}</p><div class="chips"><button type="button" class="chip" data-labflag="inf" aria-pressed="${!!E.inf}"><span>${L('Iron infusion','Perfusion de fer')}</span></button><button type="button" class="chip" data-labflag="don" aria-pressed="${!!E.don}"><span>${L('Gave blood','Don de sang')}</span></button></div>`:''}
+  <p class="small" id="labMsg" role="status" style="margin:8px 0 0;color:var(--warn)"></p>
+  <div class="row" style="margin-top:10px"><button type="button" class="btn sm" id="labSave">${L('Save','Enregistrer')}</button><button type="button" class="btn ghost sm" id="labCancel">${L('Cancel','Annuler')}</button>${E.id?`<button type="button" class="btn ghost sm" id="labDel">${L('Delete','Supprimer')}</button>`:''}</div></div>`; }
+function vLabs(){ const E=S.labEdit, A=labsSorted();
+  let h=`<div class="eyebrow">${L('Blood results','Résultats de prise de sang')}</div><h2>${L('Where your stores are','Où en sont tes réserves')}</h2><p class="small muted" style="margin:-4px 0 10px">${L('Type what’s on the lab sheet — any of these. It stays on this phone.','Entre ce qui est sur la feuille du labo — n’importe lesquels. Ça reste sur ce téléphone.')}</p>`;
+  if(E) h+=labForm(E); else h+=`<div class="row" style="margin:0 0 12px"><button type="button" class="btn sm" id="labAdd">+ ${L('Add a result','Ajouter un résultat')}</button></div>`;
+  if(A.length&&!E) h+=labReadCard();
+  if(A.length) h+=`<div class="card"><div class="eyebrow">${L('Your results','Tes résultats')}</div>${A.slice().reverse().map(x=>`<button type="button" class="dl" data-labedit="${esc(x.id)}"><span><b>${esc(labDate(x.day))}</b> · ${esc(labLine(x))}</span><span aria-hidden="true">→</span></button>`).join('')}</div>`;
+  else if(!E) h+=`<div class="card soft"><p class="small" style="margin:0">${L('No results yet. The patch’s blood test is ferritin with CRP; a CBC gives hemoglobin. Add B12 and vitamin D if they were on the sheet.','Pas encore de résultats. La prise de sang de ta patch, c’est la ferritine avec la CRP; la FSC donne l’hémoglobine. Ajoute la B12 et la vitamine D si elles étaient sur la feuille.')}</p></div>`;
+  h+=`<p class="small muted">${T('labs',L('How this reads your numbers','Comment ça lit tes chiffres'),L('Comment ça lit tes chiffres','Comment ça lit tes chiffres'))} · ${L('Your lab’s own range and your doctor have the last word.','Les valeurs de ton labo et ton médecin ont le dernier mot.')}</p>`;
+  return h; }
+function labReadInputs(){ const E=S.labEdit; if(!E) return; for(const [k] of LABF){ const el=document.getElementById('lab_'+k); if(!el) continue; const v=String(el.value).replace(',','.').trim(); E[k]=v===''?null:(isFinite(+v)?+v:null); } }
+function labCheck(E){ if(!E.day) return L('Pick the date of the blood draw.','Choisis la date de la prise de sang.');
+  if(E.day>dayKey()) return L('That date is in the future.','Cette date est dans le futur.');
+  if(!LABF.some(([k])=>E[k]!=null)) return L('Type at least one number.','Entre au moins un chiffre.');
+  if(E.hb!=null&&E.hb>0&&E.hb<25){ E.hb=Math.round(E.hb*10); E._conv=true; }
+  const R={fer:[1,5000],crp:[0,500],hb:[30,250],b12:[20,5000],d:[5,500]};
+  for(const [k,l] of LABF){ if(E[k]==null) continue; const [lo,hi]=R[k]; if(E[k]<lo||E[k]>hi) return L(`${P2(l)} looks off — check the number and the unit.`,`${P2(l)} semble bizarre — vérifie le chiffre et l’unité.`); }
+  return ''; }
+function storesLine(){ const x=lastWith('fer'); if(!x) return ''; const pp=paperAvg('fe',x.day);
+  return `<p class="small" style="margin:8px 0 0"><button type="button" class="btn ghost sm" data-labs>${L(`Iron stores: ferritin ${fmt(x.fer,0)} (${labDate(x.day)})`,`Réserves de fer : ferritine ${fmt(x.fer,0)} (${labDate(x.day)})`)}${pp?' · '+paperShort(pp.avg,ironNeed()):''} →</button></p>`; }
+function labsPatCard(){ const A=labsSorted();
+  if(!A.length) return `<div class="card soft"><p class="small" style="margin:0 0 8px">${L('Got blood results? The app reads where your stores are, and whether what you eat is holding them.','Tu as des résultats de prise de sang? L’app lit où en sont tes réserves, et si ce que tu manges les maintient.')}</p><button type="button" class="btn ghost sm" data-labs>${L('Add blood results →','Ajouter des résultats →')}</button></div>`;
+  const x=A[A.length-1]; return `<div class="card"><div class="fuelhd"><div class="eyebrow">${L('Blood results','Résultats de prise de sang')}</div><button type="button" class="btn ghost sm" data-labs>${L('Open →','Ouvrir →')}</button></div><p class="small" style="margin:0"><b>${esc(labDate(x.day))}</b> · ${esc(labLine(x))}</p></div>`; }
+function labsText(){ const A=labsSorted(); if(!A.length) return '';
+  const lines=A.slice(-6).map(x=>`${x.day}: `+LABF.filter(([k])=>x[k]!=null).map(([k,l,u])=>`${P2(LABN[k])} ${x[k]} ${u}`).join(', ')+(x.inf?L(' (iron infusion since the test before)',' (perfusion de fer depuis le test d’avant)'):'')+(x.don?L(' (gave blood since the test before)',' (don de sang depuis le test d’avant)'):''));
+  const x=lastWith('fer'), pp=x?paperAvg('fe',x.day):null, need=ironNeed();
+  if(pp) lines.push(L(`Iron logged since the last ferritin: about ${fmt(pp.avg,1)} mg/day (${pp.nReal} complete days, ${pp.nAss} counted as my normal day); my need: ${fmt(need.ear,1)} (EAR) to ${fmt(need.rda,0)} (RDA) mg/day.`,`Fer noté depuis la dernière ferritine : environ ${fmt(pp.avg,1)} mg/jour (${pp.nReal} journées complètes, ${pp.nAss} comptées comme ma journée normale); mon besoin : ${fmt(need.ear,1)} (BME) à ${fmt(need.rda,0)} (ANR) mg/jour.`));
+  return L('== MY BLOOD RESULTS ==','== MES RÉSULTATS DE PRISE DE SANG ==')+'\n'+lines.join('\n'); }
+
+/* ---------- a month in: the test Tobie set — did they learn something about their own body? ---------- */
+let learnDraft='', tobieDraft='';
+function monthCard(){ if(!S.done||S.learnDone) return ''; const t0=S.since||S.madeAt; if(!t0) return '';
+  const d=Math.floor((Date.now()-new Date(t0).getTime())/86400000); if(d<30||d>120) return ''; if(S.learnLater&&dayKey()<S.learnLater) return '';
+  if(S.learn) return `<div class="card soft"><div class="eyebrow">${L('A month in','Un mois plus tard')}</div><p class="small" style="margin:0 0 8px">${L('You wrote:','Tu as écrit :')} “${esc(S.learn.text)}”</p><div class="row"><button type="button" class="btn sm" id="learnTell">${L('Tell Tobie','Dis-le à Tobie')}</button><button type="button" class="btn ghost sm" id="learnDone">${L('Done','Terminé')}</button></div></div>`;
+  return `<div class="card soft"><div class="eyebrow">${L('A month in','Un mois plus tard')}</div><p style="margin:0 0 8px;font-weight:700">${L('What’s one thing you know about your body now that you didn’t before?','C’est quoi, une chose que tu sais sur ton corps maintenant et que tu ne savais pas avant?')}</p><textarea id="learnText" class="out" style="min-height:80px" aria-label="${L('Your answer','Ta réponse')}">${esc(learnDraft)}</textarea><div class="row" style="margin-top:8px"><button type="button" class="btn sm" id="learnSave">${L('Save','Enregistrer')}</button><button type="button" class="btn ghost sm" id="learnLater">${L('Later','Plus tard')}</button></div></div>`; }
+function learnPatCard(){ if(!S.learn) return ''; return `<div class="card soft"><div class="eyebrow">${L('What you learned','Ce que tu as appris')} · ${esc(labDate(S.learn.day))}</div><p class="small" style="margin:0">“${esc(S.learn.text)}”</p></div>`; }
+/* Tell Tobie: only what they type leaves, and only through their own share sheet — no address in the app */
+function openTobie(opener,pre){ if(pre!=null) tobieDraft=pre;
+  showSheet(`<div class="handle"></div><h3 id="sheetTitle">${L('Tell Tobie','Dis-le à Tobie')}</h3><p class="small">${L('What bugs you, what’s confusing, what helped. Only what you type here gets sent — your answers and logs stay on this phone.','Ce qui t’agace, ce qui est mêlant, ce qui a aidé. Seul ce que tu écris ici est envoyé — tes réponses et ton journal restent sur ce téléphone.')}</p><textarea id="tobieText" class="out" style="min-height:120px" aria-label="${L('Your message','Ton message')}">${esc(tobieDraft)}</textarea><div class="row" style="margin-top:10px"><button type="button" class="btn sm" id="tobieSend">${L('Send','Envoyer')}</button><button type="button" class="btn ghost sm" id="closeSheet">${L('Close','Fermer')}</button></div>`, opener);
+  const ta=document.getElementById('tobieText'); if(ta) ta.oninput=()=>{ tobieDraft=ta.value; };
+  const b=document.getElementById('tobieSend'); if(b) b.onclick=async()=>{ const txt=(ta&&ta.value||'').trim(); if(!txt){ toast(L('Type something first','Écris quelque chose d’abord')); return; }
+    const msg=txt+'\n\n— '+L('The Patch','La Patch')+' v'+VER+' ('+String(S.lang||'en').toUpperCase()+')';
+    try{ if(navigator.share){ await navigator.share({text:msg}); tobieDraft=''; return; } }catch(e){ if(e&&e.name==='AbortError') return; }
+    try{ await navigator.clipboard.writeText(msg); tobieDraft=''; toast(L('Copied — paste it in a message to Tobie','Copié — colle-le dans un message à Tobie')); }catch(e){ if(ta){ ta.value=msg; ta.select(); } toast(L('Select and copy','Sélectionne et copie')); } }; }
+
+/* ---------- the gauge's fix line says why that nutrient matters, before the food that covers it ---------- */
+const WHY={fe:['Iron carries oxygen — run low and everything feels like a flat battery.','Le fer transporte l’oxygène — quand il manque, tout donne l’impression d’une batterie à plat.'],
+  b12:['B12 keeps nerves and blood cells working, and only comes from animal foods, enriched foods or a pill.','La B12 fait fonctionner les nerfs et les globules rouges, et elle vient seulement des produits animaux, des aliments enrichis ou d’une pilule.'],
+  mg:['Magnesium matters for sleep, muscles and cramps.','Le magnésium compte pour le sommeil, les muscles et les crampes.'],
+  b1:['B1 turns food — and alcohol — into energy.','La B1 transforme la nourriture — et l’alcool — en énergie.'],
+  fol:['Folate builds new blood cells.','Le folate fabrique les nouvelles cellules du sang.'],
+  d:['Vitamin D is for bones and immunity; in Canada the sun makes almost none from October to March.','La vitamine D, c’est pour les os et l’immunité; au Canada, le soleil n’en fait presque pas d’octobre à mars.'],
+  zn:['Zinc is for healing, taste and immunity.','Le zinc sert à la guérison, au goût et à l’immunité.'],
+  k:['Potassium helps with cramps and blood pressure.','Le potassium aide pour les crampes et la pression.'],
+  c:['Vitamin C helps iron get in and wounds heal.','La vitamine C aide le fer à passer et les plaies à guérir.'],
+  fib:['Fibre makes stools steadier and keeps hunger off longer.','Les fibres rendent les selles plus régulières et retardent la faim.'],
+  ca:['Calcium is for bones and muscles.','Le calcium, c’est pour les os et les muscles.'],
+  va:['Vitamin A is for eyes, skin and immunity.','La vitamine A, c’est pour les yeux, la peau et l’immunité.'],
+  vk:['Vitamin K helps blood clot and bones hold calcium.','La vitamine K aide le sang à coaguler et les os à garder le calcium.'],
+  e:['Vitamin E protects the walls of your cells.','La vitamine E protège les membranes de tes cellules.'],
+  b2:['B vitamins turn food into energy.','Les vitamines B transforment la nourriture en énergie.'], b3:['B vitamins turn food into energy.','Les vitamines B transforment la nourriture en énergie.'], b6:['B vitamins turn food into energy.','Les vitamines B transforment la nourriture en énergie.'],
+  se:['Selenium helps the thyroid.','Le sélénium aide la thyroïde.'], ala:['Plant omega-3 is for the heart and brain.','Les oméga-3 végétaux, c’est pour le cœur et le cerveau.']};
+function whyLine(k){ const w=WHY[k]; return w?' '+L(w[0],w[1]):''; }
+
+function bind130(){ const $=id=>document.getElementById(id);
+  document.querySelectorAll('[data-hintcard]').forEach(c=>{ c.onclick=e=>{ if(e.target.closest('button,a,input,textarea,[data-t]')) return; hintDismiss(c.dataset.hintcard); }; });
+  document.querySelectorAll('[data-payoffcard]').forEach(c=>{ c.onclick=e=>{ if(e.target.closest('button,a,input,textarea,[data-t]')) return; S.payoffOk=true; save(); render(true); }; });
+  document.querySelectorAll('[data-alarmok]').forEach(b=>{ b.onclick=()=>{ S.alarmOk=Date.now(); save(); render(true); }; });
+  document.querySelectorAll('[data-labs]').forEach(b=>{ b.onclick=()=>{ if(!S.ack) return; S.labsFrom=S.mode==='pat'?'pat':S.mode==='patch'?'patch':'home'; delete S.labEdit; S.mode='labs'; save(); render(); }; });
+  if($('labAdd')) $('labAdd').onclick=()=>{ S.labEdit={day:dayKey()}; save(); render(true); };
+  document.querySelectorAll('[data-labedit]').forEach(b=>{ b.onclick=()=>{ const x=labs().find(y=>y.id===b.dataset.labedit); if(!x) return; S.labEdit=JSON.parse(JSON.stringify(x)); save(); render(); }; });
+  if($('labDay')) $('labDay').onchange=e=>{ if(!S.labEdit) return; labReadInputs(); const v=e.target.value; if(v) S.labEdit.day=v; save(); render(true); };
+  for(const [k] of LABF){ const el=$('lab_'+k); if(el) el.oninput=()=>{ labReadInputs(); }; }
+  document.querySelectorAll('[data-labflag]').forEach(b=>{ b.onclick=()=>{ const E=S.labEdit; if(!E) return; labReadInputs(); const f=b.dataset.labflag; E[f]=!E[f]; refocus=`[data-labflag="${f}"]`; save(); render(true); }; });
+  if($('labCancel')) $('labCancel').onclick=()=>{ delete S.labEdit; save(); render(); };
+  if($('labDel')) $('labDel').onclick=function(){ if(!this.dataset.sure){ this.dataset.sure='1'; this.textContent=L('Tap again to delete','Appuie encore pour supprimer'); return; } const E=S.labEdit; if(E&&E.id) S.labs=labs().filter(x=>x.id!==E.id); delete S.labEdit; save(); render(); toast(L('Deleted','Supprimé')); };
+  if($('labSave')) $('labSave').onclick=()=>{ labReadInputs(); const E=S.labEdit; if(!E) return; const msg=labCheck(E); if(msg){ const m=$('labMsg'); if(m) m.textContent=msg; return; }
+    const rec={id:E.id||('l'+Date.now().toString(36)), day:E.day}; for(const [k] of LABF) if(E[k]!=null) rec[k]=E[k]; if(E.inf) rec.inf=true; if(E.don) rec.don=true; const conv=E._conv;
+    S.labs=labs().filter(x=>x.id!==rec.id).concat([rec]); delete S.labEdit; const ok=save(); render(); if(ok) toast(conv?L(`Hemoglobin read as g/dL — saved as ${rec.hb} g/L`,`Hémoglobine lue en g/dL — enregistrée à ${rec.hb} g/L`):L('Saved','Enregistré')); };
+  if($('learnText')) $('learnText').oninput=e=>{ learnDraft=e.target.value; };
+  if($('learnSave')) $('learnSave').onclick=()=>{ const v=(learnDraft||'').trim(); if(!v){ toast(L('Type one thing first','Écris une chose d’abord')); return; } S.learn={day:dayKey(), text:v.slice(0,600)}; learnDraft=''; save(); render(true); };
+  if($('learnLater')) $('learnLater').onclick=()=>{ S.learnLater=keyAdd(dayKey(),7); save(); render(true); };
+  if($('learnDone')) $('learnDone').onclick=()=>{ S.learnDone=true; save(); render(true); };
+  if($('learnTell')) $('learnTell').onclick=e=>{ openTobie(e.currentTarget, L('A month in, one thing I learned: ','Un mois plus tard, une chose que j’ai apprise : ')+((S.learn&&S.learn.text)||'')); };
+}
 /* ===================== v1.2.22: ONE-SCREEN RESULT ===================== */
 function plainName(s){ return String(s||'').replace(/<[^>]+>/g,'').split(' — ')[0].trim(); }
 /* the week in three lines; the full patch further down has the why */
@@ -2749,7 +3011,7 @@ function vPatch(){
   h+=dayCheck(P,'patch');
   { const o=oneThing(P); h+=`<div class="card one"><div class="eyebrow">${L('If you do one thing this week','Si tu fais une seule chose cette semaine')}</div><p class="big">${o.t}</p><p class="small muted" style="margin:0">${o.w} ${L('The rest is below, for when you come back.','Le reste est plus bas, pour quand tu reviendras.')}</p></div>`; }
   /* v1.2.22: plain words first — what the test checks — then the names the lab uses; the box comes straight after */
-  h+=`<div class="card patch"><h3><span class="tag ink">${L('What to ask for','À demander')}</span></h3><p class="lead"><b>${P.plain.join(' · ')}</b></p><p class="small" style="margin:0 0 10px">${L('Lab names:','Noms au labo :')} ${P.number.join(' · ')}${SAFE().snore?'':L(' — one blood draw.',' — une seule prise de sang.')}</p>${(()=>{const h=handoverText(); return `<div class="hand"><div class="eyebrow">${L('Show this to your doctor or pharmacist','Montre ça à ton médecin ou à ton pharmacien')}</div><p class="small" style="margin:0 0 6px">${L('Ask if they can order this bloodwork for you. In Alberta many pharmacists can. In Quebec without a family doctor: 811, option 3. Anywhere, a doctor, nurse practitioner or walk-in clinic can.','Demande-lui s’il peut te prescrire ces analyses. En Alberta, bien des pharmaciens le peuvent. Au Québec, sans médecin de famille : 811, option 3. Partout, un médecin, une infirmière praticienne (IPS) ou une clinique sans rendez-vous le peut.')}</p><div><b>${L('Requesting bloodwork for:','Analyses sanguines demandées :')}</b> ${esc(h.labs.join(', '))}</div>${h.other.length?`<div><b>${L('Also asking for:','Aussi demandé :')}</b> ${esc(h.other.join(', '))}</div>`:''}<div class="row" style="margin-top:10px"><button class="btn sm" id="showHand">${L('Show it big','Afficher en grand')}</button><button class="btn ghost sm" data-copy="ho">${L('Copy this box','Copier cet encadré')}</button></div><p class="small muted" style="margin:8px 0 0">${L('The big view and the copy add your symptoms and medications.','La vue en grand et la copie ajoutent tes symptômes et tes médicaments.')}</p><textarea class="out hidden" id="ho" readonly>${esc(handoverPlain())}</textarea></div>`;})()}</div>`;
+  h+=`<div class="card patch"><h3><span class="tag ink">${L('What to ask for','À demander')}</span></h3><p class="lead"><b>${P.plain.join(' · ')}</b></p><p class="small" style="margin:0 0 10px">${L('Lab names:','Noms au labo :')} ${P.number.join(' · ')}${SAFE().snore?'':L(' — one blood draw.',' — une seule prise de sang.')}</p><p class="small" style="margin:0 0 10px"><button type="button" class="btn ghost sm" data-labs>${L('Got the results? Add them →','Tu as les résultats? Entre-les →')}</button></p>${(()=>{const h=handoverText(); return `<div class="hand"><div class="eyebrow">${L('Show this to your doctor or pharmacist','Montre ça à ton médecin ou à ton pharmacien')}</div><p class="small" style="margin:0 0 6px">${L('Ask if they can order this bloodwork for you. In Alberta many pharmacists can. In Quebec without a family doctor: 811, option 3. Anywhere, a doctor, nurse practitioner or walk-in clinic can.','Demande-lui s’il peut te prescrire ces analyses. En Alberta, bien des pharmaciens le peuvent. Au Québec, sans médecin de famille : 811, option 3. Partout, un médecin, une infirmière praticienne (IPS) ou une clinique sans rendez-vous le peut.')}</p><div><b>${L('Requesting bloodwork for:','Analyses sanguines demandées :')}</b> ${esc(h.labs.join(', '))}</div>${h.other.length?`<div><b>${L('Also asking for:','Aussi demandé :')}</b> ${esc(h.other.join(', '))}</div>`:''}<div class="row" style="margin-top:10px"><button class="btn sm" id="showHand">${L('Show it big','Afficher en grand')}</button><button class="btn ghost sm" data-copy="ho">${L('Copy this box','Copier cet encadré')}</button></div><p class="small muted" style="margin:8px 0 0">${L('The big view and the copy add your symptoms and medications.','La vue en grand et la copie ajoutent tes symptômes et tes médicaments.')}</p><textarea class="out hidden" id="ho" readonly>${esc(handoverPlain())}</textarea></div>`;})()}</div>`;
   h+=weekCard(P);
   h+=notesCard(P);
   h+=`<details class="more"><summary>${L(`The full patch — keep, swap, eat, add (about $${P.cost}), stop the leak`,`La patch au complet — garder, remplacer, manger, ajouter (environ ${P.cost} $), colmater la fuite`)}</summary>`;
@@ -2779,6 +3041,7 @@ function renderBar(v){
   if(v==='day'){ bar.innerHTML=`<div class="in"><button class="btn ghost sm" id="back">← ${L('Back','Retour')}</button><span class="small muted">${L('Your day','Ta journée')}</span><button class="btn sm" id="home">${L('Home','Accueil')}</button></div>`; return; }
   if(v==='patch'){ bar.innerHTML=`<div class="in"><button class="btn ghost sm" id="back">← ${L('Questions','Questions')}</button><span class="small muted">${L('The Patch','La Patch')}</span><button class="btn sm" id="home">${L('Home','Accueil')}</button></div>`; return; }
   if(v==='crashres'){ bar.innerHTML=`<div class="in"><button class="btn ghost sm" id="back">← ${L('Answers','Réponses')}</button><span class="small muted">${L('Why did I crash?','Pourquoi j’ai crashé?')}</span><button class="btn sm" id="home">${L('Home','Accueil')}</button></div>`; return; }
+  if(v==='labs'){ bar.innerHTML=`<div class="in"><button class="btn ghost sm" id="back">← ${L('Back','Retour')}</button><span class="small muted">${L('Blood results','Analyses')}</span><button class="btn sm" id="home">${L('Home','Accueil')}</button></div>`; return; }
   if(v==='pat'){ bar.innerHTML=''; bar.classList.add('hidden'); return; }
   if(v==='ai'){ bar.innerHTML=`<div class="in"><button class="btn ghost sm" id="back">← ${L('Back','Retour')}</button><span class="small muted">${L('Ask an AI','Demande à une IA')}</span><button class="btn sm" id="home">${L('Home','Accueil')}</button></div>`; return; }
   if(v==='tank'){ bar.innerHTML=`<div class="in"><button class="btn ghost sm" id="back">← ${L('Back','Retour')}</button><span class="small muted">${L('Fuel tank','Réservoir')}</span><button class="btn sm" id="home">${L('Home','Accueil')}</button></div>`; return; }
@@ -2823,7 +3086,7 @@ function bind(){
   if($('reset')) $('reset').onclick=function(){ if(!this.dataset.sure){ this.dataset.sure='1'; this.textContent=L('Tap again to erase everything','Appuie encore pour tout effacer'); return; } eraseAll(); };
   if($('aboutBtn')) $('aboutBtn').onclick=openAbout;
   if($('iosOk')) $('iosOk').onclick=()=>{ S.iosOk=true; save(); render(true); };
-  NAV={patch:goPatch,redo:goRedo,crash:goCrash,ai:goAI,tank:goTank,pat:goPat,meal:()=>{ newMeal(dayKey(),'home'); save(); render(); }, sym:()=>{ S.sym={day:dayKey(),at:nowHM(),ks:[]}; S.symFrom='home'; S.mode='sym'; save(); render(); }};
+  NAV={patch:goPatch,redo:goRedo,crash:goCrash,ai:goAI,tank:goTank,pat:goPat,meal:()=>{ newMeal(dayKey(),'home'); save(); render(); }, sym:()=>{ S.sym={day:dayKey(),at:nowHM(),ks:[]}; S.symFrom='home'; S.mode='sym'; save(); render(); }, labs:()=>{ S.labsFrom='home'; delete S.labEdit; S.mode='labs'; save(); render(); }, tobie:()=>openTobie(null)};
   document.querySelectorAll('[data-rk]').forEach(b=>{ b.onclick=()=>{ const k=b.dataset.rk, q=b.dataset.rq; let v=b.dataset.rv; if(q==='e'||q==='s') v=+v; const R=rates(); const r=R[k]||(R[k]={}); if(String(r[q])===String(v)) delete r[q]; else r[q]=v; if(r.fin){ r.fin=false; } if(!Object.keys(r).length) delete R[k]; refocus=`[data-rk="${k}"][data-rq="${q}"][data-rv="${b.dataset.rv}"]`; save(); render(true); }; });
   document.querySelectorAll('[data-cday]').forEach(b=>{ b.onclick=()=>{ crashSetDay(b.dataset.cday); delete S.c._logged; refocus=`[data-cday="${b.dataset.cday}"]`; save(); render(true); }; });
   document.querySelectorAll('[data-crashday]').forEach(b=>{ b.onclick=()=>NAV.crash(b.dataset.crashday); });
@@ -2842,6 +3105,7 @@ function bind(){
     else if(v==='tq'){ if(S.tstep<=1) S.mode='home'; else S.tstep--; }
     else if(v==='tank'){ S.mode='home'; }
     else if(v==='sym'){ const d=S.sym; const back=S.symFrom==='day'?'day':'home'; if(back==='day'&&d) S.daySel=d.day; S.mode=back; delete S.sym; }
+    else if(v==='labs'){ S.mode=S.labsFrom==='pat'?'pat':S.labsFrom==='patch'?'patch':'home'; delete S.labEdit; }
     else if(v==='nday'){ S.mode='home'; foodQ=''; }
     else if(v==='meal'){ const m=curMeal(); dropEmptyMeal(); const back=S.mealFrom==='day'?'day':'home'; if(back==='day'&&m) S.daySel=m.day; S.mode=back; delete S.meal; foodQ=''; }
     else { S.mode='home'; }
@@ -2859,7 +3123,7 @@ function bind(){
   if($('newCrash')) $('newCrash').onclick=()=>{ S.c={_st:Date.now()}; S.cstep=1; save(); render(); };
   if($('clearLog')) $('clearLog').onclick=function(){ if(!this.dataset.sure){ this.dataset.sure='1'; this.textContent=L('Tap again to clear the crash log','Appuie encore pour vider le journal'); return; } S.crashes=[]; delete S.c._logged; save(); render(true); toast(L('Log cleared','Journal vidé')); };
   document.querySelectorAll('[data-delcrash]').forEach(b=>{ b.onclick=()=>{ const i=+b.dataset.delcrash; const x=S.crashes[i]; const isCurrent = S.c._logged===true ? i===S.crashes.length-1 : (x&&x.id===S.c._logged); S.crashes.splice(i,1); if(isCurrent||!S.crashes.length) delete S.c._logged; save(); render(true); toast(L('Deleted','Supprimé')); }; });
-  bindFoods(); bindRest(); bind127(); bind128(); bind129();
+  bindFoods(); bindRest(); bind127(); bind128(); bind129(); bind130();
   if($('foodQ')) $('foodQ').onblur=()=>{ qBlurAt=Date.now(); };
   if($('foodQ')) $('foodQ').oninput=(e)=>{ foodQ=e.target.value; const fl=$('foodList'); if(fl){ fl.innerHTML=foodsHTML(editMap(),S.tank.grp); bindFoods(); } document.querySelectorAll('.fgrp').forEach(g=>{ g.hidden=!!foodQ.trim(); }); };
 }
@@ -2987,8 +3251,10 @@ function openMenu(opener){
     ['sym',L('Symptom report','Noter un symptôme')],
     ['pat',L('History','Historique')],
     ['tank',L('Fuel tank','Réservoir')],
+    ['labs',L('Blood results','Résultats de prise de sang')],
     ['ai',L('Ask an AI','Demander à une IA')],
     ['gloss',L('Glossary','Lexique')],
+    ['tobie',L('Tell Tobie','Dis-le à Tobie')],
     ['about',L('About & privacy','À propos et confidentialité')]
   ];
   const any=Object.keys(S.a).length||S.crashes.length||S.cstep||S.tstep;
