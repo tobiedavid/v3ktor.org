@@ -30,25 +30,25 @@ h2{font-size:1.5rem;font-weight:800}
 h3{font-size:1.05rem;font-weight:700;margin-top:0}
 p{margin:.35em 0 .8em}
 .muted{color:var(--muted)} .small{font-size:.9rem}
-.eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:.72rem;font-weight:700;color:var(--muted);margin-bottom:6px}
+.eyebrow{text-transform:uppercase;letter-spacing:.08em;font-size:0.875rem;font-weight:700;color:var(--muted);margin-bottom:6px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 18px;margin:12px 0;box-shadow:var(--shadow)}
 .card.flag{border-color:var(--warn);background:var(--warn-soft)}
 .card.soft{background:var(--teal-soft);border-color:transparent}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:14px;padding:14px 20px;font:inherit;font-weight:700;cursor:pointer;background:var(--ink);color:var(--bg);text-decoration:none}
 .btn.primary{background:var(--accent);color:#fff}
 .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
-.btn.sm{padding:9px 14px;font-size:.92rem;border-radius:11px}
+.btn.sm{padding:9px 14px;font-size:.92rem;border-radius:11px;min-height:44px}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .topbar{position:sticky;top:0;z-index:30;background:var(--bg);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
 .topbar .in{max-width:600px;margin:0 auto;display:flex;align-items:center;gap:6px;padding:8px 12px}
 .topbar .sp{flex:1}
-.tb{border:0;background:transparent;color:var(--ink);font:inherit;cursor:pointer;padding:8px 10px;border-radius:10px;font-weight:700}
+.tb{border:0;background:transparent;color:var(--ink);font:inherit;cursor:pointer;padding:8px 10px;border-radius:10px;font-weight:700;min-height:44px;min-width:44px}
 .tb:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
 #menuBtn{font-size:1.25rem;line-height:1}
 .tb.ttl{font-family:ui-serif,Georgia,'Times New Roman',serif;font-weight:800;font-size:1.1rem;padding:6px 4px;white-space:nowrap}
-@media (max-width:360px){.tb.gls{padding:6px 8px;font-size:.8rem}}
+@media (max-width:360px){.tb.gls{padding:6px 8px;font-size:0.875rem}}
 .tb.ttl .b{color:var(--accent)}
-.tb.gls{font-size:.85rem;border:1px solid var(--line)}
+.tb.gls{font-size:0.875rem;border:1px solid var(--line)}
 .menu{display:grid;gap:6px;margin-top:6px}
 .menu button,.menu a{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:12px 14px;font:inherit;font-weight:600;cursor:pointer;text-decoration:none}
 .menu .danger{color:var(--warn)}
@@ -56,7 +56,7 @@ p{margin:.35em 0 .8em}
 .gl .grade{margin:0;flex:none}
 html.locked,html.locked body{overflow:hidden}
 .lang{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
-.lang button{border:0;background:transparent;color:var(--muted);font:inherit;font-size:.8rem;font-weight:700;padding:6px 12px;cursor:pointer}
+.lang button{border:0;background:transparent;color:var(--muted);font:inherit;font-size:0.875rem;font-weight:700;padding:6px 14px;cursor:pointer;min-height:44px;min-width:44px}
 .lang button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 .chips{display:grid;gap:10px;margin:14px 0}
 .chip{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:14px;padding:14px 16px;font:inherit;font-size:1.02rem;line-height:1.3;cursor:pointer;text-align:left;box-shadow:var(--shadow)}
@@ -67,8 +67,8 @@ html.locked,html.locked body{overflow:hidden}
 .prog{display:flex;gap:4px;flex:1;margin:0 12px}
 .prog i{flex:1;height:5px;border-radius:3px;background:var(--line)}
 .prog i.on{background:var(--accent)}
-.qn{font-size:.8rem;color:var(--muted);font-weight:600;margin-bottom:4px}
-.t{color:var(--teal);text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;text-decoration-thickness:1.5px;cursor:pointer;font-weight:600}
+.qn{font-size:0.875rem;color:var(--muted);font-weight:600;margin-bottom:4px}
+.t{color:var(--teal);text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;text-decoration-thickness:1.5px;cursor:pointer;font-weight:600;padding:.35em 0}
 ul{padding-left:1.1em;margin:.3em 0 .6em} li{margin:.3em 0}
 .sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .18s;z-index:40}
 .sheet-bg.on{opacity:1;pointer-events:auto}
@@ -76,20 +76,20 @@ ul{padding-left:1.1em;margin:.3em 0 .6em} li{margin:.3em 0}
 .sheet.on{transform:translateY(0);visibility:visible;transition:transform .22s,visibility 0s}
 .sheet .handle{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 14px}
 .sheet h3{font-size:1.25rem}
-.grade{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;margin-bottom:10px}
+.grade{display:inline-block;font-size:0.875rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;margin-bottom:10px}
 .grade.solid{background:#2e6b3a;color:#fff}.grade.likely{background:var(--teal);color:#fff}.grade.try{background:var(--chip);color:var(--muted)}details.more{margin:10px 0 0}details.more>summary{cursor:pointer;list-style:none;padding:12px 14px;border-radius:14px;background:var(--chip);font-weight:600;font-size:.95rem}details.more>summary::-webkit-details-marker{display:none}details.more>summary::after{content:' ▾';color:var(--muted)}details.more[open]>summary::after{content:' ▴'}details.more[open]>summary{margin-bottom:10px}
 .tm details{border-top:1px solid var(--chip);padding:8px 0}.tm details:last-child{border-bottom:1px solid var(--chip)}.tm summary{cursor:pointer;line-height:1.35}.tm summary .muted{font-size:.88rem}.tm p{margin:6px 0 0;font-size:.95rem}
 .grade.reason{background:transparent;color:var(--muted);box-shadow:inset 0 0 0 1.5px var(--muted)}
-.ev{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:.86rem;color:var(--muted);line-height:1.45}
+.ev{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:0.875rem;color:var(--muted);line-height:1.45}
 .ev b{color:var(--ink)}
 .ev .src{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px}
-.ev .src a{display:inline-block;padding:4px 10px;border-radius:999px;background:var(--chip);color:var(--ink);text-decoration:none;font-size:.78rem;font-weight:600;border:1px solid var(--line)}
+.ev .src a{display:inline-block;padding:4px 10px;border-radius:999px;background:var(--chip);color:var(--ink);text-decoration:none;font-size:0.875rem;font-weight:600;border:1px solid var(--line)}
 .ev .src a:after{content:" ↗";opacity:.6}
-.ev .rev{margin-top:10px;font-size:.78rem;font-style:italic;opacity:.85}
+.ev .rev{margin-top:10px;font-size:0.875rem;font-style:italic;opacity:.85}
 .patch h3{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.tag{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--accent);padding:3px 8px;border-radius:999px}
+.tag{font-size:0.875rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--accent);padding:3px 8px;border-radius:999px}
 .tag.teal{background:var(--teal)} .tag.ink{background:var(--ink);color:var(--bg)}
-.cost{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.85rem;white-space:nowrap}
+.cost{font-variant-numeric:tabular-nums;color:var(--muted);font-size:0.875rem;white-space:nowrap}
 textarea.out{width:100%;min-height:140px;border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit;font-size:.9rem;background:var(--bg);color:var(--ink)}
 .toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s;z-index:60}
 .toast.show{opacity:1}
@@ -101,7 +101,7 @@ textarea.out{width:100%;min-height:140px;border:1px solid var(--line);border-rad
 .add-warn{display:block;margin-top:4px;color:var(--warn);font-size:.88rem;font-weight:600}
 .hand{border:2px solid var(--ink);border-radius:12px;padding:12px 14px;font-size:.95rem;line-height:1.45}
 .hand div{margin:2px 0}
-.chip.ack{width:100%;font-size:.85rem;line-height:1.35;margin-top:12px;padding:10px 14px;opacity:.85}
+.chip.ack{width:100%;font-size:0.875rem;line-height:1.35;margin-top:12px;padding:10px 14px;opacity:.85}
 .card.gate{border:2px solid var(--accent)}
 .btn[aria-disabled="true"]{opacity:.45}
 .doors{display:grid;gap:12px;margin-top:14px}
@@ -111,36 +111,36 @@ textarea.out{width:100%;min-height:140px;border:1px solid var(--line);border-rad
 .doors.small{grid-template-columns:1fr;gap:8px;margin-top:8px}
 .doors.small .door{padding:12px 14px}
 .doors.small .door .dt{font-size:1.05rem;margin:0}
-.doors.small .door .ds{font-size:.85rem}
-.or{margin:16px 0 0;font-size:.8rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.doors.small .door .ds{font-size:0.875rem}
+.or{margin:16px 0 0;font-size:0.875rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .one{border:2px solid var(--ink)}
 .one .big{font-size:1.15rem;line-height:1.4;font-weight:600;margin:4px 0 6px}
 .door.teal{border-left-color:var(--teal)} .door.ink{border-left-color:var(--ink)} .door.green{border-left-color:#2e6b3a}
 .door .eyebrow{display:block;margin-bottom:2px}
 .door .dt{display:block;font-family:ui-serif,Georgia,'Times New Roman',serif;font-weight:800;line-height:1.15;margin:2px 0 4px;font-size:1.2rem}
 .door .ds{display:block;color:var(--muted);font-size:.95rem;line-height:1.4}
-.door .status{display:inline-block;margin-top:8px;font-size:.8rem;font-weight:700;color:var(--teal)}
+.door .status{display:inline-block;margin-top:8px;font-size:0.875rem;font-weight:700;color:var(--teal)}
 .door[aria-disabled="true"]{opacity:.5}
 .door:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .verdict h3{font-size:1.35rem;margin:6px 0 8px}
 .grade.unclear{background:var(--chip);color:var(--muted)}
 .also li{margin:.25em 0}
 .intent{display:grid;gap:8px;margin:10px 0}
-textarea.out.live{min-height:240px;font-size:.84rem;line-height:1.4}
+textarea.out.live{min-height:240px;font-size:0.875rem;line-height:1.4}
 .pat{font-variant-numeric:tabular-nums}
 .tk{display:grid;gap:8px}
 .tk .r{display:grid;grid-template-columns:7.2em 1fr auto;gap:8px;align-items:center;font-size:.92rem}
 .tk .r .nm{font-weight:600;line-height:1.2}
-.tk .r .nm small{display:block;font-weight:400;color:var(--muted);font-size:.74rem}
+.tk .r .nm small{display:block;font-weight:400;color:var(--muted);font-size:0.875rem}
 .tk .meter{height:12px;border-radius:6px;background:var(--chip);overflow:hidden;position:relative;border:1px solid var(--line)}
 .tk .meter i{display:block;height:100%;border-radius:6px;background:#c99a1a;min-width:3px}
 .tk .meter.empty i,.tk .meter.low i,.tk .meter.over i{background:#d23b2a} .tk .meter.ok i{background:#c99a1a} .tk .meter.full i{background:#1fa64a}
-.tk .amt{font-size:.78rem;color:var(--muted);white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums}
+.tk .amt{font-size:0.875rem;color:var(--muted);white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums}
 .tk .amt b{color:var(--ink)}
 .foods{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
 .food{position:relative;border:1px solid var(--line);background:var(--card);border-radius:12px;min-height:52px;display:flex}
 .food .add{flex:1;border:0;background:transparent;color:var(--ink);padding:10px 44px 10px 12px;font:inherit;font-size:.9rem;line-height:1.25;cursor:pointer;text-align:left;border-radius:12px}
-.food small{display:block;color:var(--muted);font-size:.74rem;margin-top:2px}
+.food small{display:block;color:var(--muted);font-size:0.875rem;margin-top:2px}
 .food[data-n]:not([data-n="0"]){border-color:var(--teal);background:var(--teal-soft)}
 .food .cnt{font-weight:800;color:var(--teal)}
 .food .plusmark{position:absolute;top:50%;right:8px;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;border:2px solid var(--teal);color:var(--teal);font-weight:800;font-size:1.1rem;line-height:24px;text-align:center;pointer-events:none}
@@ -150,43 +150,43 @@ textarea.out.live{min-height:240px;font-size:.84rem;line-height:1.4}
 .st{display:grid;grid-template-columns:1fr 44px auto 44px;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:6px 8px 6px 12px;background:var(--card)}
 .st.on{border-color:var(--teal);background:var(--teal-soft)}
 .st .nm{font-size:.9rem;font-weight:600;line-height:1.2}
-.st .val{min-width:76px;text-align:center;font-size:.85rem;font-variant-numeric:tabular-nums}
+.st .val{min-width:76px;text-align:center;font-size:0.875rem;font-variant-numeric:tabular-nums}
 .stp{width:44px;height:44px;border-radius:50%;border:2px solid var(--ink);background:var(--card);color:var(--ink);font:inherit;font-size:1.4rem;font-weight:800;line-height:1;cursor:pointer;padding:0}
 .stp.plus{background:var(--ink);color:var(--bg)}
 .stp[disabled]{opacity:.3;cursor:default}
 .stp:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .food .add:focus-visible,.food .minus:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
 .gtabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
-.gtabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;font-size:.84rem;font-weight:600;cursor:pointer}
+.gtabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;font-size:0.875rem;font-weight:600;cursor:pointer}
 .gtabs button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .fill li{margin:.35em 0}
 .gtabs.seg{margin:6px 0 10px}
-.stor{font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 6px;vertical-align:middle}
+.stor{font-size:0.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 6px;vertical-align:middle}
 .calhd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.cw{text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:2px 0}
-.cd{position:relative;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;min-height:46px;font:inherit;font-size:.82rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:4px 0}
+.cw{text-align:center;font-size:0.75rem;font-weight:700;color:var(--muted);padding:2px 0}
+.cd{position:relative;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;min-height:46px;font:inherit;font-size:0.875rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:4px 0}
 .cd[disabled]{opacity:.35;cursor:default}
 .cd.today{border:2px solid var(--ink)}
-.cd .zap{position:absolute;top:1px;right:3px;font-size:.7rem}
+.cd .zap{position:absolute;top:1px;right:3px;font-size:0.75rem}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle}
 .dot.none{background:transparent}
 .dot.g{background:#1fa64a} .dot.y{background:#c99a1a} .dot.r{background:#d23b2a}
 .dot.part{background:linear-gradient(90deg,var(--muted) 50%,transparent 50%);border:1px solid var(--muted);width:8px;height:8px}
 .dot.hollow{border:2px solid var(--muted);width:6px;height:6px;background:transparent}
 .rq{margin:12px 0 0}
-.rq .lb{font-size:.84rem;font-weight:700;margin:0 0 6px}
+.rq .lb{font-size:0.875rem;font-weight:700;margin:0 0 6px}
 .rq .lb small{font-weight:400;color:var(--muted)}
 .rr{display:flex;gap:6px;flex-wrap:wrap}
-.rc{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 13px;font:inherit;font-size:.88rem;font-weight:600;cursor:pointer;min-height:42px}
+.rc{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 13px;font:inherit;font-size:.88rem;font-weight:600;cursor:pointer;min-height:44px}
 .rc[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .rc.e1[aria-pressed="true"],.rc.e2[aria-pressed="true"]{background:#d23b2a;border-color:#d23b2a;color:#fff}
 .rc.e3[aria-pressed="true"]{background:#c99a1a;border-color:#c99a1a;color:#fff}
 .rc.e4[aria-pressed="true"],.rc.e5[aria-pressed="true"]{background:#1fa64a;border-color:#1fa64a;color:#fff}
 .rsum{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.cd .en{position:absolute;top:1px;left:4px;font-size:.66rem;font-weight:800;color:var(--muted)}
-.strip{display:grid;grid-template-columns:auto repeat(14,minmax(0,1fr));gap:3px 2px;align-items:center;font-size:.68rem}
-.strip .sl{color:var(--muted);font-weight:700;padding-right:4px;white-space:nowrap;font-size:.8rem}
+.cd .en{position:absolute;top:1px;left:4px;font-size:0.75rem;font-weight:800;color:var(--muted)}
+.strip{display:grid;grid-template-columns:auto repeat(14,minmax(0,1fr));gap:3px 2px;align-items:center;font-size:0.75rem}
+.strip .sl{color:var(--muted);font-weight:700;padding-right:4px;white-space:nowrap;font-size:0.875rem}
 .strip .sc{text-align:center;min-width:0;line-height:1.1}
 .strip .bx{height:64px;display:flex;align-items:flex-end;background:var(--chip);border-radius:4px;overflow:hidden}
 .strip .bx i{display:block;width:100%}
@@ -211,6 +211,19 @@ textarea.out.live{min-height:240px;font-size:.84rem;line-height:1.4}
   .chip.danger[aria-pressed="true"]{color:#1c0d0b}
   .tag,.btn.primary{color:#1a0c06}
 }
+/* v1.2.22 */
+.lead{font-size:1.15rem;line-height:1.35;margin:0 0 4px}
+ul.wk{margin:0 0 8px;padding-left:1.1em}
+ul.wk li{margin:0 0 6px}
+details.note{border-top:1px solid var(--line)}
+details.note:first-of-type{border-top:0}
+details.note>summary{cursor:pointer;list-style:none;min-height:44px;display:flex;align-items:center;gap:8px;padding:6px 0}
+details.note>summary::-webkit-details-marker{display:none}
+details.note>summary::after{content:'+';margin-left:auto;color:var(--muted);font-weight:700;font-size:1.2rem;padding-left:10px}
+details.note[open]>summary::after{content:'–'}
+.handbig h3{font-size:1.6rem;margin:4px 0 16px}
+.handbig p{font-size:1.3rem;line-height:1.45;margin:0 0 18px}
+.sheet.full{top:0;max-height:none;border-radius:0;padding-top:calc(18px + env(safe-area-inset-top))}
 </style>
 </head>
 <body>
@@ -226,9 +239,12 @@ textarea.out.live{min-height:240px;font-size:.84rem;line-height:1.4}
 let S = {a:{}, step:0, started:null, checkins:[], lang:null, mode:null, c:{}, cstep:0, crashes:[], intent:null, tank:null, tstep:0};
 const KEY='thepatch.v1';
 try{ const s=localStorage.getItem(KEY)||localStorage.getItem('patch'); if(s) S=Object.assign(S, JSON.parse(s)); if(!localStorage.getItem(KEY)&&s) localStorage.setItem(KEY,s); if(localStorage.getItem('patch')) localStorage.removeItem('patch'); }catch(e){}
-const VER='1.2.21'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
+const VER='1.2.22'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
 /* v1.2.21 (5 Nov 2026): prenatal / folic-acid and pregnancy-iron lines aligned with Health Canada; Quebec route for bloodwork; hard-stool branch;
    pattern messages match the 5-a-side rule; iPhone storage note + persist(); protein note by life stage; French fixes; "about $8" in English. */
+/* v1.2.22 (6 Nov 2026): one-screen result (plain-words test card, three-line week, one notes card with the crisis line kept open); glossary words underlined once per screen;
+   day-4 check and week-4 redo on the home screen; big-type view of the box; why-we-ask on stools and bleeding; single-answer questions move on by themselves;
+   44 px targets and a 14 px text floor (chart labels 12 px); "Made by Tobie" on the first screen. */
 if(!S.lang){ S.lang = (navigator.language||'en').toLowerCase().startsWith('fr') ? 'fr' : 'en'; }
 /* v0.7: three doors. Older saves have no mode — someone mid-questions lands back on their question, everyone else on the chooser. */
 if(!S.mode){ S.mode = S.step>0 ? 'patch' : 'home'; }
@@ -767,7 +783,7 @@ const Q = [
     {l:['Most days, 3 or more','La plupart des jours, 3 ou plus'],v:'d3'},{l:['Most days, 1 or 2','La plupart des jours, 1 ou 2'],v:'d12'},{l:['A few days a week','Quelques jours par semaine'],v:'wk'},{l:['Weekends or less','Les fins de semaine ou moins'],v:'we'}]},
   {id:'sleep', t:['Sleep, most nights?','Le sommeil, la plupart des nuits?'], multi:false, opts:[
     {l:['5 hours or less','5 heures ou moins'],v:'5'},{l:['About 6','Environ 6 heures'],v:'6'},{l:['Broken — up in the night (baby, shifts, pain)','Coupé — des réveils la nuit (bébé, quarts, douleur)'],v:'broken'},{l:['7 or more, but I wake up tired','7 heures ou plus, mais je me réveille sans énergie'],v:'7tired'},{l:['7 or more and it’s fine','7 heures ou plus et ça va'],v:'7ok'}]},
-  {id:'stool', t:['Stools, most days?','Les selles, la plupart du temps?'], multi:false, opts:[
+  {id:'stool', t:['Stools, most days?','Les selles, la plupart du temps?'], h:['Your gut decides how much of what you eat actually gets in — and which add-on fits.','Ton intestin décide combien de ce que tu manges passe vraiment — et quel ajout te convient.'], multi:false, opts:[
     {l:['Loose, soft or watery','Molles ou liquides'],v:'loose'},{l:['Normal','Normales'],v:'normal'},{l:['Hard, not often','Dures, pas souvent'],v:'hard'},{l:['All over the place','Imprévisibles — ça change tout le temps'],v:'mixed'}]},
   {id:'crash', t:['When do you crash?','Quand est-ce que tu frappes un mur?'], h:['Pick all that fit.','Coche tout ce qui s’applique.'], multi:true, opts:[
     {l:['Mid-morning','Milieu d’avant-midi'],v:'am'},{l:['Mid-afternoon, around 2–4 — or mid-shift','Milieu d’après-midi, vers 14–16 h — ou au milieu du quart'],v:'pm'},{l:['Right after eating','Tout de suite après avoir mangé'],v:'meal'},{l:['All day — I’m never not tired','Toute la journée — je suis toujours à plat'],v:'all'},{l:['It’s random — no pattern I can see','C’est aléatoire — je ne vois pas de logique'],v:'random'},{l:['I don’t really crash','Je ne frappe pas vraiment de mur'],v:'none',none:true}]},
@@ -775,7 +791,7 @@ const Q = [
     {l:['Nothing','Rien'],v:'nothing'},{l:['Coffee only','Juste du café'],v:'coffee'},{l:['Something with protein — eggs, meat, yogurt','Des protéines — œufs, viande, yogourt'],v:'protein'},{l:['Toast, cereal, a pastry, a sweet drink','Toast, céréales, pâtisserie, boisson sucrée'],v:'carbs'}]},
   {id:'meds', t:['Medications?','Des médicaments?'], h:['These change the patch. Nothing here is judged, and nothing here tells you to stop anything.','Ça change la patch. Rien ici n’est jugé, et rien ici ne te dit d’arrêter quoi que ce soit.'], multi:true, opts:[
     {l:['ADHD stimulant (Vyvanse, Adderall, Ritalin…)','Stimulant pour le TDAH (Vyvanse, Adderall, Ritalin…)'],v:'stim'},{l:['Antidepressant','Antidépresseur'],v:'antidep'},{l:['Acid blocker (omeprazole, pantoprazole…)','Bloqueur d’acide (oméprazole, pantoprazole…)'],v:'ppi'},{l:['Metformin','Metformine'],v:'metformin'},{l:['Birth control (the pill)','Contraceptif oral (la pilule)'],v:'bc'},{l:['Blood thinner','Anticoagulant'],v:'thinner'},{l:['Lithium','Lithium'],v:'lithium'},{l:['Sleeping or anxiety pill (Imovane, Ativan, Xanax, clonazepam…)','Somnifère ou pilule pour l’anxiété (Imovane, Ativan, Xanax, clonazépam…)'],v:'sedative'},{l:['None','Aucun'],v:'none',none:true}]},
-  {id:'bleed', t:['Losing blood anywhere?','Tu perds du sang quelque part?'], multi:true, opts:[
+  {id:'bleed', t:['Losing blood anywhere?','Tu perds du sang quelque part?'], h:['Steady blood loss is one of the most common reasons iron runs low — and it’s easy to miss.','Perdre du sang régulièrement, c’est une des raisons les plus courantes d’un manque de fer — et ça passe facilement inaperçu.'], multi:true, opts:[
     {l:['Heavy periods','Règles abondantes'],v:'periods'},{l:['Blood in the toilet or on the paper','Du sang dans la toilette ou sur le papier'],v:'rectal'},{l:['No','Non'],v:'none',none:true}]},
   {id:'budget', t:['This week — money and time','Cette semaine — argent et temps'], h:['Honest answers get a patch you’ll actually use.','Des réponses honnêtes donnent une patch que tu vas vraiment utiliser.'], two:true, opts:[
     {l:['$0 this week','0 $ cette semaine'],v:'0',grp:'b'},{l:['About $15','Environ 15 $'],v:'15',grp:'b'},{l:['$40 or more','40 $ ou plus'],v:'40',grp:'b'},
@@ -803,7 +819,7 @@ function buildPatch(){
   const keep=(a.keep||[]).filter(k=>k!=='any');
   const SF=SAFE(); const preg=SF.preg, bp=SF.bp, kidney=SF.kidney, minor=SF.minor, snore=SF.snore;
   const noSalt = SF.noSalt;
-  const P={keep:[],swap:[],add:[],eat:[],timing:[],leak:[],number:[],stops:[],notes:[],cost:0,addNote:'',deferred:0};
+  const P={keep:[],keepShort:[],swap:[],swapShort:[],add:[],eat:[],timing:[],leak:[],number:[],plain:[],always:[],stops:[],notes:[],cost:0,addNote:'',deferred:0};
 
   /* safety answers: not emergencies, but they rewrite the card */
   if(minor) P.notes.push(L(`<b>Under 18: this wasn’t built for you.</b> The doses and the alcohol advice are for adults, so the Add card is empty on purpose. What still holds: protein before noon, caffeine done by noon, and if you’re tired all the time, ask a parent, school nurse or doctor for a ferritin test — low iron is very common at your age and it looks exactly like “lazy”.`,
@@ -855,6 +871,7 @@ function buildPatch(){
   else if(alcoholDropped) P.keep=[L('Nothing else to protect this week.','Rien d’autre à protéger cette semaine.')];
   else if((a.fuel||[]).filter(f=>f!=='none').length) P.keep=[L('Whatever you want to keep this week. We’re not starting with removal.','Ce que tu veux garder cette semaine. On ne commence pas par t’en enlever.')];
   else P.keep=[L('Nothing to keep — you’re not running on any of the usual fuels. The patch is about what’s missing, not what to cut.','Rien à garder — tu ne roules à aucun des carburants habituels. La patch porte sur ce qui manque, pas sur quoi couper.')];
+  P.keepShort = keepShown.length ? P.keep.slice() : [];
 
   const sweat = !!(S.tank&&S.tank.p&&S.tank.p.work==='heavy'); const saltOn = !noSalt && sweat;
   const saltyA = !saltOn ? L('a big glass of water','un grand verre d’eau') : L(T('salt','a glass of salted water'), T('salt','un verre d’eau salée','un verre d’eau salée'));
@@ -873,6 +890,18 @@ function buildPatch(){
   if(alcoholSwaps && has('fuel','spirits')) P.swap.push(L(`Clear spirit, diluted — ${T('vodkasoda')}. No cola, no energy drink, no coolers or sugar-free cans with artificial sweetener. Two max, with food.`, `Spiritueux clair, dilué — ${T('vodkasoda')}. Pas de cola, pas de boisson énergisante, pas de coolers ni de canettes sans sucre à l’édulcorant artificiel. Deux max, en mangeant.`));
   if(has('fuel','sugar')) P.swap.push(L(`The night sugar is the meal you skipped. Keep the sweet thing, but after a real meal, not instead of one. ${any('morning','nothing','coffee')?'The fix is at the first meal, not the last.':''}`, `Le sucre du soir, c’est le repas que tu as sauté. Garde ta gâterie, mais après un vrai repas, pas à la place. ${any('morning','nothing','coffee')?'La solution est au premier repas, pas au dernier.':''}`));
   if(has('fuel','smoke')) P.swap.push(L(`Nicotine: not this week, we’re not touching it. ${T('nicotine','If it’s pouches or chew')}: not on an empty stomach, and spit, don’t swallow — swallowed nicotine is nausea, heartburn and a sour gut, and it’s on the gum label.`, `Nicotine : pas cette semaine, on n’y touche pas. ${T('nicotine','Si c’est des sachets ou de la chique','Si c’est des sachets ou de la chique')} : pas à jeun, et crache, n’avale pas — la nicotine avalée donne des nausées, des brûlures et l’estomac à l’envers — c’est écrit sur l’étiquette de la gomme.`));
+  /* v1.2.22: a few words per swap, for the three-line week at the top (same conditions as the swaps above) */
+  const capNote = (preg||SF.bf);
+  if(has('fuel','energy')) P.swapShort.push(minor ? L('energy drink — one small can, before 2 p.m.','boisson énergisante — une petite canette, avant 14 h')
+    : has('keep','energy') ? L(`energy drink — ${saltOn?'salted water':'water'} and protein first, and the last caffeine of the day`,`boisson énergisante — ${saltOn?'de l’eau salée':'de l’eau'} et des protéines avant, et la dernière caféine de la journée`)
+    : L(`energy drink → ${saltOn?'salted water':'water'} and a protein snack`,`boisson énergisante → ${saltOn?'de l’eau salée':'de l’eau'} et une collation protéinée`));
+  if(has('fuel','coffee')) P.swapShort.push(capNote ? L('coffee — nothing after noon, 300 mg a day at most','café — rien après midi, 300 mg par jour au maximum') : L('coffee — nothing after noon','café — rien après midi'));
+  if(drinks && !alcoholSwaps) P.swapShort.push(preg ? L('alcohol — no swap; ask your pharmacist or prenatal clinic','alcool — pas de remplacement; demande au pharmacien ou à la clinique prénatale') : L('alcohol — no swap written for under-18s','alcool — pas de remplacement pour les moins de 18 ans'));
+  if(alcoholSwaps && has('fuel','beer')) P.swapShort.push(L('beer — one, slowly, with food','bière — une, lentement, en mangeant'));
+  if(alcoholSwaps && has('fuel','wine')) P.swapShort.push(L('wine — one glass of dry white, with food','vin — un verre de blanc sec, en mangeant'));
+  if(alcoholSwaps && has('fuel','spirits')) P.swapShort.push(L('spirits — clear, diluted, two max','alcool fort — clair, allongé, deux maximum'));
+  if(has('fuel','sugar')) P.swapShort.push(L('sugar — after a real meal, not instead of one','sucre — après un vrai repas, pas à la place'));
+  if(has('fuel','smoke')) P.swapShort.push(L('nicotine — left alone this week','nicotine — on n’y touche pas cette semaine'));
 
   if(any('morning','nothing','coffee','carbs')) P.eat.push(has('meds','stim')
     ? L(`${T('protein','Eat before the pill.')} ${protShort()[0].replace(/^./,c=>c.toUpperCase())} at the same time you take the stimulant — after it kicks in, appetite is often gone for the day, and a 4 p.m. crash is likely.`, `${T('protein','Mange avant la pilule.','Mange avant la pilule.')} ${protShort()[1].replace(/^./,c=>c.toUpperCase())} au moment où tu prends le stimulant — une fois qu’il fait effet, l’appétit est souvent parti pour la journée, et un crash vers 16 h est probable.`)
@@ -945,14 +974,15 @@ function buildPatch(){
   if(snore) P.leak.push(L(`<b>Snoring hard, or stopping breathing in your sleep, is a leak no supplement plugs.</b> That picture is ${T('apnea','sleep apnea')} until a test says otherwise. It raises blood pressure, wrecks whatever deep sleep you do get, and the fix works fast. Ask for a home sleep test — one night, a small device.`, `<b>Ronfler fort, ou arrêter de respirer en dormant, c’est une fuite qu’aucun supplément ne colmate.</b> Ce portrait, c’est de l’${T('apnea','apnée du sommeil','apnée du sommeil')} jusqu’à preuve du contraire. Ça fait monter la pression, ça détruit le peu de sommeil profond que tu as, et la solution agit vite. Demande un test de sommeil à la maison — une nuit, un petit appareil.`));
   if(has('crash','random')) P.leak.push(L(`<b>${T('random','Random crashes')} usually mean two or three causes that change day to day.</b> Usual suspects: uneven sleep, drinking nights, late caffeine, skipped meals, aged cheese or leftovers, sugar-free drinks (artificial sweetener), the pill’s timing, the cycle. Stop the day from changing: same breakfast and lunch every day for a week, then one change at a time, three days each. Note bed and wake times, or wear any tracker — trust its hours, not its “deep sleep”. Log each crash in “Why did I crash?”; after three, it reads the pattern.`, `<b>Des ${T('random','crashs aléatoires','crashs aléatoires')}, c’est généralement deux ou trois causes qui changent d’un jour à l’autre.</b> Suspects habituels : sommeil inégal, soirées à boire, caféine tardive, repas sautés, fromage vieilli ou restants, boissons sans sucre (édulcorant artificiel), l’heure de la pilule, le cycle. Empêche la journée de changer : même déjeuner et même dîner tous les jours pendant une semaine, puis un changement à la fois, trois jours chacun. Note tes heures de coucher et de lever, ou porte n’importe quel traqueur — fie-toi à ses heures, pas à son « sommeil profond ». Mets chaque crash au journal dans « Pourquoi j’ai crashé? »; après trois, l’app dégage la tendance.`));
   if(any('morning','nothing','coffee')&&any('crash','pm','meal','all')) P.leak.push(L(`<b>A morning with nothing in it often ends in the 3 p.m. reach for sugar or caffeine.</b> The crash can be the bill. Breakfast with protein is the first thing to try.`, `<b>Une matinée sans rien manger finit souvent par la rage de sucre ou de caféine de 15 h.</b> Le crash peut être la facture. Un déjeuner protéiné, c’est la première chose à essayer.`));
-  if(SF.pp) P.notes.push(L(`<b>“It’s postpartum” says when, not why.</b> Broken sleep with a baby is real — and three causes hide behind it, each one blood test: ${T('iron')} drained by pregnancy and delivery, a ${T('pp','thyroid that swings after the birth')} (about 1 in 14 women, most often 4 to 8 months after), and ${T('b12','B12')} if you don’t eat meat or fish. Ferritin, TSH and B12 are on your blood-test list. And mood: in Canada nearly 1 in 4 new mothers has feelings that fit postpartum depression or anxiety, and it often looks like plain exhaustion. Ask your doctor or public-health nurse for the EPDS — 10 questions, 5 minutes. Any thought of harming yourself or the baby: 9-8-8 or 911, now.`, `<b>« C’est post-partum », ça dit quand, pas pourquoi.</b> Le sommeil coupé avec un bébé, c’est une vraie fatigue — et trois causes se cachent derrière, chacune une prise de sang : le ${T('iron','fer','fer')} vidé par la grossesse et l’accouchement, une ${T('pp','thyroïde qui se dérègle après la naissance','thyroïde qui se dérègle après la naissance')} (environ 1 femme sur 14, le plus souvent de 4 à 8 mois après), et la ${T('b12','B12','B12')} si tu ne manges ni viande ni poisson. Ferritine, TSH et B12 sont sur ta liste d’analyses. Et le moral : au Canada, près d’une nouvelle mère sur 4 a des sentiments correspondant à une dépression ou à de l’anxiété post-partum, et ça ressemble souvent à de la simple fatigue. Demande l’EPDS à ton médecin ou à l’infirmière de santé publique — 10 questions, 5 minutes. Une pensée de te faire du mal ou d’en faire au bébé : 9-8-8 ou 911, tout de suite.`));
+  if(SF.pp) P.notes.push(L(`<b>“It’s postpartum” says when, not why.</b> Broken sleep with a baby is real — and three causes hide behind it, each one blood test: ${T('iron')} drained by pregnancy and delivery, a ${T('pp','thyroid that swings after the birth')} (about 1 in 14 women, most often 4 to 8 months after), and ${T('b12','B12')} if you don’t eat meat or fish. Ferritin, TSH and B12 are on your blood-test list. And mood: in Canada nearly 1 in 4 new mothers has feelings that fit postpartum depression or anxiety, and it often looks like plain exhaustion. Ask your doctor or public-health nurse for the EPDS — 10 questions, 5 minutes.`, `<b>« C’est post-partum », ça dit quand, pas pourquoi.</b> Le sommeil coupé avec un bébé, c’est une vraie fatigue — et trois causes se cachent derrière, chacune une prise de sang : le ${T('iron','fer','fer')} vidé par la grossesse et l’accouchement, une ${T('pp','thyroïde qui se dérègle après la naissance','thyroïde qui se dérègle après la naissance')} (environ 1 femme sur 14, le plus souvent de 4 à 8 mois après), et la ${T('b12','B12','B12')} si tu ne manges ni viande ni poisson. Ferritine, TSH et B12 sont sur ta liste d’analyses. Et le moral : au Canada, près d’une nouvelle mère sur 4 a des sentiments correspondant à une dépression ou à de l’anxiété post-partum, et ça ressemble souvent à de la simple fatigue. Demande l’EPDS à ton médecin ou à l’infirmière de santé publique — 10 questions, 5 minutes.`));
+  if(SF.pp) P.always.push(L('<b>Any thought of harming yourself or the baby: 9-8-8 or 911, now.</b>','<b>Une pensée de te faire du mal ou d’en faire au bébé : 9-8-8 ou 911, tout de suite.</b>'));
   if(SF.veg) P.notes.push(L(`<b>No meat or fish: ${T('veg','B12 and iron need a plan')}.</b> B12 comes only from animal and fortified foods; plant iron absorbs less, so your iron target is nearly double. Neither shows up for months — then it’s fatigue with no obvious reason.`, `<b>Sans viande ni poisson : ${T('veg','la B12 et le fer demandent un plan','la B12 et le fer demandent un plan')}.</b> La B12 vient seulement des aliments animaux et enrichis; le fer des plantes s’absorbe moins bien, donc ta cible de fer est presque doublée. Ni l’un ni l’autre ne paraît pendant des mois — puis c’est de la fatigue sans raison évidente.`));
   if(!P.leak.length) P.leak.push(L(`No obvious leak from your answers. ${T('loop','The loop','La boucle')} may be most of it — swap the fuel, keep the rest, and see.`, `Pas de fuite évidente dans tes réponses. La ${T('loop','boucle','boucle')} explique peut-être l’essentiel — change le carburant, garde le reste, et regarde.`));
 
-  P.number.push(L(`${T('ferritin','Ferritin')} with ${T('crp','CRP')}`, `${T('ferritin','Ferritine','Ferritine')} avec ${T('crp','CRP','CRP')}`));
-  if(any('meds','ppi','metformin')||any('crash','all')||has('sleep','7tired')||SF.veg||SF.pp) P.number.push(T('b12','B12','B12'));
-  if(has('sleep','7tired')||any('crash','all')||SF.pp) P.number.push(T('tsh','TSH','TSH'));
-  if(snore) P.number.push(T('apnea','A home sleep test','Un test de sommeil à la maison'));
+  P.number.push(L(`${T('ferritin','Ferritin')} with ${T('crp','CRP')}`, `${T('ferritin','Ferritine','Ferritine')} avec ${T('crp','CRP','CRP')}`)); P.plain.push(L('Iron stores','Réserves de fer'));
+  if(any('meds','ppi','metformin')||any('crash','all')||has('sleep','7tired')||SF.veg||SF.pp) { P.number.push(T('b12','B12','B12')); P.plain.push(L('Vitamin B12','Vitamine B12')); }
+  if(has('sleep','7tired')||any('crash','all')||SF.pp) { P.number.push(T('tsh','TSH','TSH')); P.plain.push(L('Thyroid','Thyroïde')); }
+  if(snore){ P.number.push(T('apnea','A home sleep test','Un test de sommeil à la maison')); P.plain.push(L('A home sleep test','Un test de sommeil à la maison')); }
   const m=new Date().getMonth(); if((m>=9||m<=2) && !minor) P.eat.push(L(`${T('vitd','Vitamin D')}, October to March: ${SF.veg?'enriched milk (cow or plant) or eggs':'fatty fish, fortified milk or eggs'} most days — or a small daily pill if not. No blood test needed for it${preg?'; in pregnancy, ask what dose':''}.`,`${T('vitd','Vitamine D','Vitamine D')}, d’octobre à mars : ${SF.veg?'du lait enrichi (de vache ou végétal) ou des œufs':'poisson gras, lait enrichi ou œufs'} la plupart des jours — sinon un petit comprimé par jour. Pas besoin de prise de sang pour ça${preg?'; enceinte, demande quelle dose':''}.`));
 
   /* what was deliberately left off, and why — so a short list reads as a decision */
@@ -991,7 +1021,7 @@ function oneThing(P){
   if(has('bleed','rectal')) return {t:L(`Firm the stools: ${T('psyllium','plain psyllium')} in a full glass of water every morning${(budget==='0'||!bought('psyllium'))?' (about $8 — the first money you have)':''}. ${T('rectal','Over 50, or with belly pain, weight loss or a change in how you go')}: book the appointment this week too.`,`Raffermis les selles : du ${T('psyllium','psyllium nature','psyllium nature')} dans un grand verre d’eau chaque matin${(budget==='0'||!bought('psyllium'))?' (environ 8 $ — le premier argent que tu as)':''}. ${T('rectal','50 ans ou plus, ou avec des douleurs au ventre, une perte de poids ou un changement dans ta façon d’aller à la selle','50 ans ou plus, ou avec des douleurs au ventre, une perte de poids ou un changement dans ta façon d’aller à la selle')} : prends le rendez-vous cette semaine aussi.`)+pharmPsy, w:L('Firm stools usually stop a tear bleeding within days — but only a look rules out the other thing, and that part doesn’t wait for the psyllium to work.','Des selles fermes arrêtent généralement une fissure de saigner en quelques jours — mais seul un examen écarte l’autre affaire, et ça, ça n’attend pas que le psyllium fasse effet.')};
   if((DI.heavy||DI.shaky) && !minor) return {t:L(`${T('thiamine','Thiamine (B1)')}, ${budget==='0'?'the first $5 you have':'today'} — the label dose.`,`De la ${T('thiamine','thiamine (B1)','thiamine (B1)')}, ${budget==='0'?'avec les premiers 5 $ que tu as':'aujourd’hui'} — la dose de l’étiquette.`)+((preg||SF.bf)?L(' Pharmacist’s yes first.',' Le feu vert du pharmacien d’abord.'):''), w:DI.shaky?L('You get shaky when you skip a drink. Thiamine protects the nerves and brain — and don’t stop suddenly on your own; a doctor or pharmacist can make that safe.','Tu trembles quand tu sautes un verre. La thiamine protège les nerfs et le cerveau — et n’arrête pas d’un coup par toi-même; un médecin ou un pharmacien peut rendre ça sécuritaire.'):L('You drink most days. Thiamine protects against the nerve and brain damage regular drinking can cause — of everything here, it’s the cheapest protection.','Tu bois la plupart des jours. La thiamine protège contre les dommages aux nerfs et au cerveau que l’alcool régulier peut causer — de tout ce qui est ici, c’est la protection la moins chère.')};
   if(has('safety','snore') && any('sleep','7tired','5','6','broken')) return {t:L(`Ask for a ${T('apnea','home sleep test')}.`,`Demande un ${T('apnea','test de sommeil à la maison','test de sommeil à la maison')}.`), w:L('Snoring plus tired is a breathing problem until a test says otherwise, and no food or supplement touches it.','Ronfler et être fatigué, c’est un problème de respiration jusqu’à preuve du contraire, et aucune bouffe ni aucun supplément n’y touche.')};
-  if(has('bleed','periods')||has('sleep','7tired')||has('crash','all')||SF.pp) return {t:L(`Get the blood test: ${T('ferritin','ferritin')} with ${T('crp','CRP')}. The box just below has the words for your doctor or pharmacist.`,`Fais la prise de sang : ${T('ferritin','ferritine','ferritine')} avec ${T('crp','CRP','CRP')}. L’encadré juste en dessous a les mots pour ton médecin ou ton pharmacien.`), w:L('It’s the only way to know whether low iron is half of this — and it looks exactly like “just tired”.','C’est la seule façon de savoir si un manque de fer explique la moitié de ça — et ça ressemble exactement à « juste de la fatigue ».')};
+  if(has('bleed','periods')||has('sleep','7tired')||has('crash','all')||SF.pp) return {t:L(`Get one blood test that checks your iron stores. The box just below has the words for your doctor or pharmacist.`,`Fais une prise de sang qui vérifie tes réserves de fer. L’encadré juste en dessous a les mots pour ton médecin ou ton pharmacien.`), w:L('It’s the only way to know whether low iron is half of this — and it looks exactly like “just tired”.','C’est la seule façon de savoir si un manque de fer explique la moitié de ça — et ça ressemble exactement à « juste de la fatigue ».')};
   if(has('meds','stim')) return {t:L(`${T('protein','Eat before the pill')} — ${protShort()[0]} the moment you take it.`,`${T('protein','Mange avant la pilule','Mange avant la pilule')} — ${protShort()[1]} au moment où tu la prends.`), w:L('Once it kicks in, the appetite is gone and the afternoon wall is already booked.','Une fois qu’elle fait effet, l’appétit est parti et le mur de l’après-midi est déjà réservé.')};
   if(has('crash','random')) return {t:L(`Same breakfast and same lunch every day this week — and log each crash in “Why did I crash?”.`,`Même déjeuner et même dîner tous les jours cette semaine — et mets chaque crash au journal dans « Pourquoi j’ai crashé? ».`), w:L(`${T('random','Random crashes')} hide when every day is different. Lock the day, then change one thing at a time, three days each.`,`Les ${T('random','crashs aléatoires','crashs aléatoires')} se cachent quand chaque journée est différente. Fige la journée, puis change une chose à la fois, trois jours chacune.`)};
   if(any('stool','loose','mixed') && budget!=='0' && !minor) return {t:L(`${T('psyllium','Plain psyllium')}, 1–2 tsp in a full glass of water every morning.`,`Du ${T('psyllium','psyllium nature','psyllium nature')}, 1–2 c. à thé dans un grand verre d’eau chaque matin.`)+pharmPsy, w:L('Loose stools take magnesium and potassium with them. This firms things up in days, for about $8.','Les selles molles emportent le magnésium et le potassium. Ça raffermit en quelques jours, pour environ 8 $.')};
@@ -1027,7 +1057,8 @@ function patchText(){
   let t=L('MY PATCH — one week','MA PATCH — une semaine')+'\n\n';
   if(P.stops.length) t+=L('FIRST','D’ABORD')+':\n'+P.stops.map(s=>' ! '+strip(s)).join('\n')+'\n\n';
   t+=L('ONE THING THIS WEEK','UNE SEULE CHOSE CETTE SEMAINE')+': '+strip(oneThing(P).t)+'\n\n';
-  if(P.notes.length) t+=L('FOR ME','POUR MOI')+':\n'+P.notes.map(s=>' - '+strip(s)).join('\n')+'\n\n';
+  if(P.notes.length||P.always.length) t+=L('FOR ME','POUR MOI')+':\n'+[...P.notes,...P.always].map(s=>' - '+strip(s)).join('\n')+'\n\n';
+  { const ck=(S.checkins||[]).filter(c=>c.k); if(ck.length){ const nm=k=>k==='all'?L('energy overall','énergie en général'):plainName((P.add.find(x=>x.k===k)||{}).label||k); const vv={better:L('better','mieux'),same:L('same','pareil'),worse:L('worse','pire')}; t+=L('DAY-4 CHECK','VÉRIFICATION DU JOUR 4')+': '+ck.map(c=>nm(c.k)+' — '+(vv[c.v]||c.v)).join('; ')+'\n\n'; } }
   t+=L('KEEP','GARDER')+': '+P.keep.map(strip).join('; ')+'\n';
   if(P.swap.length) t+='\n'+L('SWAP','REMPLACER')+':\n'+P.swap.map(s=>' - '+strip(s)).join('\n')+'\n';
   t+='\n'+L('EAT','MANGER')+':\n'+P.eat.map(s=>' - '+strip(s)).join('\n')+'\n';
@@ -1878,11 +1909,11 @@ function iosNote(){ let installed=false; try{ installed=!!(navigator.standalone|
   if(!IOS||installed||window.claude||S.iosOk) return '';
   return `<div class="card soft small" id="iosCard"><p style="margin:0 0 8px">${L('On iPhone, Safari can erase your answers if a week of using Safari goes by without you opening this. Add it to your Home Screen to keep them: in Safari, Share ⬆︎ → Add to Home Screen.','Sur iPhone, Safari peut effacer tes réponses si une semaine d’utilisation passe sans que tu ouvres l’app. Ajoute-la à ton écran d’accueil pour les garder : dans Safari, Partager ⬆︎ → Sur l’écran d’accueil.')}</p><button type="button" class="btn ghost sm" id="iosOk">${L('Got it','Compris')}</button></div>`; }
 function vHomeBack(o){ const dis='';
-  return `${vCheck(S.rsel==='y'?keyAdd(dayKey(),-1):dayKey(),'back')}${iosNote()}
+  return `${S.started?dayCheck(buildPatch(),'home'):''}${vCheck(S.rsel==='y'?keyAdd(dayKey(),-1):dayKey(),'back')}${iosNote()}
   <div class="card soft"><div class="eyebrow">${L('What your days say','Ce que disent tes journées')}</div><p style="margin:0">${daysLine()}</p><div class="row" style="margin-top:8px"><button type="button" class="btn ghost sm" data-go="pat">${L('My patterns →','Mes tendances →')}</button></div></div>
   <div class="eyebrow" style="margin-top:18px">${L('More','Plus')}</div>
   <div class="doors small">
-    <button class="door main" data-door="patch" aria-disabled="false"><span class="dt">${L('My week — the patch','Ma semaine — la patch')}</span>${o.pStatus?`<span class="status">${o.pStatus}</span>`:`<span class="ds">${L('About 11 taps.','Environ 11 questions.')}</span>`}</button>
+    <button class="door main" data-door="patch" aria-disabled="false"><span class="dt">${L('My week — the patch','Ma semaine — la patch')}</span>${o.pStatus?`<span class="status">${o.pStatus}</span>`:`<span class="ds">${L('11 questions · about 2 minutes.','11 questions · environ 2 minutes.')}</span>`}</button>
     <button class="door teal" data-door="crash" aria-disabled="false"><span class="dt">${L('I crashed — why?','J’ai crashé — pourquoi?')}</span>${o.cStatus?`<span class="status">${o.cStatus}</span>`:''}</button>
     <button class="door green" data-door="tank" aria-disabled="false"><span class="dt">${L('What’s in the tank?','Qu’est-ce qu’il y a dans le réservoir?')}</span>${o.tStatus?`<span class="status">${o.tStatus}</span>`:''}</button>
     <button class="door ink" data-door="ai" aria-disabled="false"><span class="dt">${L('Ask an AI','Demander à une IA')}</span>${o.aStatus?`<span class="status">${o.aStatus}</span>`:''}</button>
@@ -1907,17 +1938,18 @@ function vStart(){
   const homeOld = !!(done||nC||tReady||ratedKeys().length); const homeCheck = S.ack ? vCheck(S.rsel==='y'?keyAdd(dayKey(),-1):dayKey(),'home') : '';
   const aStatus = (done||nC||tankOn) ? L(`Attached: ${[done?'your week':null,nC?nC+' crash'+(nC>1?'es':''):null,tankOn?'your tank':null].filter(Boolean).join(' · ')} →`,`Attaché : ${[done?'ta semaine':null,nC?nC+' crash'+(nC>1?'s':''):null,tankOn?'ton réservoir':null].filter(Boolean).join(' · ')} →`) : '';
   if(S.ack && homeOld) return vHomeBack({pStatus,cStatus,tStatus,aStatus,homeCheck});
-  return `<p style="font-size:1.08rem;margin-top:6px">${L('You’re not broken and you’re not lazy. One minute of taps: it looks at how you sleep, eat and get through the day — coffee and all — and patches what’s running low, without taking anything away.','Il n’y a rien de brisé en toi, et ce n’est pas de la paresse. Une minute de questions : ça regarde comment tu dors, manges et passes à travers ta journée — café compris — et ça patche ce qui manque, sans rien t’enlever.')}</p>
+  return `<p style="font-size:1.08rem;margin-top:6px">${L('You’re not broken and you’re not lazy. Two minutes of questions: it looks at how you sleep, eat and get through the day — coffee and all — and patches what’s running low, without taking anything away.','Il n’y a rien de brisé en toi, et ce n’est pas de la paresse. Deux minutes de questions : ça regarde comment tu dors, manges et passes à travers ta journée — café compris — et ça patche ce qui manque, sans rien t’enlever.')}</p>
+  <p class="small muted" style="margin:-6px 0 12px">${L('Made by Tobie, for family first.','Fait par Tobie, pour la famille d’abord.')}</p>
   <div class="card flag small" style="padding:10px 14px"><b>${L('Not a doctor.','Pas un médecin.')}</b> ${L('Chest pain, fainting or black stool: 911. Thinking about ending your life: call or text 9-8-8 (988 in the US).','Douleur à la poitrine, évanouissement ou selles noires : 911. Tu penses à mettre fin à tes jours : appelle ou texte le 9-8-8 (988 aux É.-U.).')}</div>
   ${S.ack ? `<button class="chip ack" id="ack" aria-pressed="true" aria-disabled="true">${L('I understand this is education, not medical, pharmacist or dietitian advice — and I decide what to do with it.','Je comprends que c’est de l’éducation, pas un avis médical, pharmaceutique ou diététique — et que c’est moi qui décide quoi en faire.')}</button>`
   : `<div class="card gate"><p style="margin:0 0 12px">${L('Before anything else:','Avant toute chose :')}</p><p style="margin:0 0 14px;font-weight:600">${L('This is education, not medical, pharmacist or dietitian advice — and I decide what to do with it.','C’est de l’éducation, pas un avis médical, pharmaceutique ou diététique — et c’est moi qui décide quoi en faire.')}</p><button class="btn primary" id="ack" style="width:100%">${L('I understand — continue','Je comprends — continuer')}</button></div>`}
   ${S.ack&&homeOld?homeCheck:''}
   ${S.ack?`  <div class="doors">
-    <button class="door main" data-door="patch" ${dis}><span class="eyebrow">${L('Start here · about 11 taps','Commence ici · environ 11 questions')}</span><span class="dt">${L('I need to keep going this week','Je dois tenir cette semaine')}</span><span class="ds">${L('What to keep, what to swap, what to add on your budget — $0 works — and the one blood test.','Quoi garder, quoi remplacer, quoi ajouter avec ton budget — 0 $ marche aussi — et la seule prise de sang.')}</span>${pStatus?`<span class="status">${pStatus}</span>`:''}</button>
+    <button class="door main" data-door="patch" ${dis}><span class="eyebrow">${L('Start here · 11 questions, about 2 minutes','Commence ici · 11 questions, environ 2 minutes')}</span><span class="dt">${L('I need to keep going this week','Je dois tenir cette semaine')}</span><span class="ds">${L('What to keep, what to swap, what to add on your budget — $0 works — and the one blood test.','Quoi garder, quoi remplacer, quoi ajouter avec ton budget — 0 $ marche aussi — et la seule prise de sang.')}</span>${pStatus?`<span class="status">${pStatus}</span>`:''}</button>
   </div>
   <details class="more"${homeOld?' open':''}><summary>${L('Something else? A crash, your food, or an AI','Autre chose? Un crash, ta bouffe, ou une IA')}</summary>
   <div class="doors small">
-    <button class="door teal" data-door="crash" ${dis}><span class="dt">${L('I crashed — why?','J’ai crashé — pourquoi?')}</span><span class="ds">${L('8 taps. One move for tomorrow.','8 questions. Un geste pour demain.')}</span>${cStatus?`<span class="status">${cStatus}</span>`:''}</button>
+    <button class="door teal" data-door="crash" ${dis}><span class="dt">${L('I crashed — why?','J’ai crashé — pourquoi?')}</span><span class="ds">${L('8 questions. One move for tomorrow.','8 questions. Un geste pour demain.')}</span>${cStatus?`<span class="status">${cStatus}</span>`:''}</button>
     <button class="door green" data-door="tank" ${dis}><span class="dt">${L('What’s in the tank?','Qu’est-ce qu’il y a dans le réservoir?')}</span><span class="ds">${L('Tap a normal day. See what’s missing.','Coche une journée normale. Vois ce qui manque.')}</span>${tStatus?`<span class="status">${tStatus}</span>`:''}</button>
     <button class="door ink" data-door="ai" ${dis}><span class="dt">${L('Ask an AI — everything attached','Demande à une IA — tout est attaché')}</span><span class="ds">${L('Your answers, ready to paste. Nothing to explain.','Tes réponses, prêtes à coller. Rien à expliquer.')}</span>${aStatus?`<span class="status">${aStatus}</span>`:''}</button>
   </div>
@@ -1959,14 +1991,14 @@ function vCrashRes(){
   const pat=crashPattern();
   if(pat){
     const weeks=S.madeAt?Math.floor((Date.now()-new Date(S.madeAt).getTime())/(7*86400000)):null;
-    const stale = !R.profile ? L('<b>Three crashes and no Patch.</b> Eleven taps gives these reads something to be read against — your meds, your fuel, your week.','<b>Trois crashs et pas de Patch.</b> Onze questions donnent un point de repère à ces lectures — tes médicaments, ton carburant, ta semaine.') : (weeks!=null&&weeks>=4 ? L(`<b>These crashes are being read against a Patch from ${weeks} weeks ago.</b> Re-run it — what you keep and what leaks has probably moved, and that changes the read more than another log would.`,`<b>Ces crashs sont lus selon une Patch d’il y a ${weeks} semaines.</b> Refais-la — ce que tu gardes et ce qui fuit a probablement bougé, et ça change la lecture plus qu’un autre journal.`) : '');
-    h+=`<div class="card soft"><div class="eyebrow">${L('The pattern','La tendance')} · ${S.crashes.length} ${L('crashes','crashs')}</div>${pat.map(p=>`<p class="small" style="margin:.3em 0">${p}</p>`).join('')}${stale?`<p class="small" style="margin:.5em 0 0">${stale}</p><div class="row" style="margin-top:8px"><button class="btn sm" data-go="${R.profile?'redo':'patch'}">${R.profile?L('Re-run the Patch','Refaire la Patch'):L('Do the Patch · 11 taps','Faire la Patch · 11 questions')}</button></div>`:''}</div>`;
+    const stale = !R.profile ? L('<b>Three crashes and no Patch.</b> Eleven questions give these reads something to be read against — your meds, your fuel, your week.','<b>Trois crashs et pas de Patch.</b> Onze questions donnent un point de repère à ces lectures — tes médicaments, ton carburant, ta semaine.') : (weeks!=null&&weeks>=4 ? L(`<b>These crashes are being read against a Patch from ${weeks} weeks ago.</b> Re-run it — what you keep and what leaks has probably moved, and that changes the read more than another log would.`,`<b>Ces crashs sont lus selon une Patch d’il y a ${weeks} semaines.</b> Refais-la — ce que tu gardes et ce qui fuit a probablement bougé, et ça change la lecture plus qu’un autre journal.`) : '');
+    h+=`<div class="card soft"><div class="eyebrow">${L('The pattern','La tendance')} · ${S.crashes.length} ${L('crashes','crashs')}</div>${pat.map(p=>`<p class="small" style="margin:.3em 0">${p}</p>`).join('')}${stale?`<p class="small" style="margin:.5em 0 0">${stale}</p><div class="row" style="margin-top:8px"><button class="btn sm" data-go="${R.profile?'redo':'patch'}">${R.profile?L('Re-run the Patch','Refaire la Patch'):L('Do the Patch · 11 questions','Faire la Patch · 11 questions')}</button></div>`:''}</div>`;
   }
   if(!R.top){
-    h+=`<div class="card verdict"><span class="grade unclear">${P2(CONF.unclear)}</span><h3>${confLabel(R)}</h3><p>${L('Nothing you answered points one way. That happens — some crashes are three small things and no big one. Log it; after three logs the pattern usually shows up on its own.','Rien dans tes réponses ne pointe dans une direction. Ça arrive — certains crashs, c’est trois petites affaires et aucune grosse. Mets-le au journal; après trois, la tendance se montre généralement d’elle-même.')}</p>${R.profile?'':`<p class="small muted" style="margin:0">${L('Do the Patch (11 taps) and this read gets sharper — it will know your meds and what you run on.','Fais la Patch (11 questions) et cette lecture devient plus fine — elle va connaître tes médicaments et ce qui te fait tenir.')}</p>`}</div>`;
+    h+=`<div class="card verdict"><span class="grade unclear">${P2(CONF.unclear)}</span><h3>${confLabel(R)}</h3><p>${L('Nothing you answered points one way. That happens — some crashes are three small things and no big one. Log it; after three logs the pattern usually shows up on its own.','Rien dans tes réponses ne pointe dans une direction. Ça arrive — certains crashs, c’est trois petites affaires et aucune grosse. Mets-le au journal; après trois, la tendance se montre généralement d’elle-même.')}</p>${R.profile?'':`<p class="small muted" style="margin:0">${L('Do the Patch (11 questions) and this read gets sharper — it will know your meds and what you run on.','Fais la Patch (11 questions) et cette lecture devient plus fine — elle va connaître tes médicaments et ce qui te fait tenir.')}</p>`}</div>`;
   } else {
     const top=M[R.top]; const sec=R.second?M[R.second]:null;
-    h+=`<div class="card verdict"><span class="grade ${R.conf==='likely'?'likely':R.conf==='possible'?'try':'unclear'}">${P2(CONF[R.conf])}</span><div class="eyebrow">${confLabel(R)}</div><h3>${P2(top.t)}${R.tie&&sec?` <span class="muted">+</span> ${P2(sec.t)}`:''}</h3><p>${top.why()}</p>${R.tie&&sec?`<p>${sec.why()}</p><p class="small"><b>${L('One day can’t separate them.','Une journée ne peut pas les départager.')}</b> ${L('Change one — whichever is easier for you — and keep the other exactly as it was. Then read the next crash.','Change-en un — celui qui est le plus facile pour toi — et garde l’autre exactement pareil. Puis lis le prochain crash.')}</p>`:''}${R.combo?`<p class="small"><b>${L('Those two are one cause.','Ces deux-là sont une seule cause.')}</b> ${L('The pill ate the appetite, and the crash landed when the pill left and there was nothing underneath. Fix the floor and you fix both.','La pilule a mangé l’appétit, et le crash est tombé quand la pilule a lâché et qu’il n’y avait rien en dessous. Règle le plancher et tu règles les deux.')}</p>`:''}${R.profile?'':`<p class="small muted" style="margin:0">${L('Do the Patch (11 taps) and this read gets sharper — it will know your meds and what you run on.','Fais la Patch (11 questions) et cette lecture devient plus fine — elle va connaître tes médicaments et ce qui te fait tenir.')}</p>`}</div>`;
+    h+=`<div class="card verdict"><span class="grade ${R.conf==='likely'?'likely':R.conf==='possible'?'try':'unclear'}">${P2(CONF[R.conf])}</span><div class="eyebrow">${confLabel(R)}</div><h3>${P2(top.t)}${R.tie&&sec?` <span class="muted">+</span> ${P2(sec.t)}`:''}</h3><p>${top.why()}</p>${R.tie&&sec?`<p>${sec.why()}</p><p class="small"><b>${L('One day can’t separate them.','Une journée ne peut pas les départager.')}</b> ${L('Change one — whichever is easier for you — and keep the other exactly as it was. Then read the next crash.','Change-en un — celui qui est le plus facile pour toi — et garde l’autre exactement pareil. Puis lis le prochain crash.')}</p>`:''}${R.combo?`<p class="small"><b>${L('Those two are one cause.','Ces deux-là sont une seule cause.')}</b> ${L('The pill ate the appetite, and the crash landed when the pill left and there was nothing underneath. Fix the floor and you fix both.','La pilule a mangé l’appétit, et le crash est tombé quand la pilule a lâché et qu’il n’y avait rien en dessous. Règle le plancher et tu règles les deux.')}</p>`:''}${R.profile?'':`<p class="small muted" style="margin:0">${L('Do the Patch (11 questions) and this read gets sharper — it will know your meds and what you run on.','Fais la Patch (11 questions) et cette lecture devient plus fine — elle va connaître tes médicaments et ce qui te fait tenir.')}</p>`}</div>`;
     const FL=crashFloor(); h+=`<div class="card soft"><div class="eyebrow">${L('What it landed on','Sur quoi c’est tombé')}</div><p class="small" style="margin:0">${floorLine(FL)}</p>${FL&&FL.low.length?`<div class="row" style="margin-top:8px"><button class="btn ghost sm" data-go="tank">${L('See the tank','Voir le réservoir')}</button></div>`:''}</div>`;
     if(R.also.length) h+=`<div class="card also"><div class="eyebrow">${L('Also in the picture','Aussi dans le portrait')}</div><ul style="margin:0">${R.also.map(k=>`<li><b>${P2(M[k].t)}</b> — ${P2(M[k].fp)}</li>`).join('')}</ul></div>`;
     h+=`<div class="card soft"><h3><span class="tag teal">${L('Tomorrow','Demain')}</span> <span class="small muted">${L('one move','un seul geste')}</span></h3><p style="margin:0">${P2(top.move)}</p></div>`;
@@ -1985,7 +2017,7 @@ function vAI(){
   const att=[done?L('your week','ta semaine'):null, hasCrash?L('today’s crash and the read','le crash d’aujourd’hui et la lecture'):null, nC?L(`${nC} logged crash${nC>1?'es':''}`,`${nC} crash${nC>1?'s':''} au journal`):null, tankOn?L('your tank (a normal day)','ton réservoir (une journée normale)'):null].filter(Boolean);
   const canShare = typeof navigator!=='undefined' && !!navigator.share;
   let h=`<div class="eyebrow">${L('Ask an AI · everything attached','Demande à une IA · tout est attaché')}</div><h2>${L('No explaining. Paste and go.','Pas d’explications. Colle et vas-y.')}</h2>`;
-  h+=`<div class="card ${att.length?'soft':''}"><p style="margin:0">${att.length?`<b>${L('Attached:','Attaché :')}</b> ${att.join(' · ')}.`:`<b>${L('Nothing attached yet.','Rien d’attaché encore.')}</b> ${L('The packet still works — it carries the rules — but it gets good after the Patch or a crash read.','Le paquet marche quand même — il porte les règles — mais il devient bon après la Patch ou une lecture de crash.')}`}</p>${(!done||!hasCrash||!tankOn)?`<div class="row" style="margin-top:10px">${!done?`<button class="btn ghost sm" data-go="patch">${L('Do the Patch · 11 taps','Faire la Patch · 11 questions')}</button>`:''}${!hasCrash?`<button class="btn ghost sm" data-go="crash">${L('Read a crash · 8 taps','Lire un crash · 8 questions')}</button>`:''}${!tankOn?`<button class="btn ghost sm" data-go="tank">${L('Fill the tank','Remplir le réservoir')}</button>`:''}</div>`:''}</div>`;
+  h+=`<div class="card ${att.length?'soft':''}"><p style="margin:0">${att.length?`<b>${L('Attached:','Attaché :')}</b> ${att.join(' · ')}.`:`<b>${L('Nothing attached yet.','Rien d’attaché encore.')}</b> ${L('The packet still works — it carries the rules — but it gets good after the Patch or a crash read.','Le paquet marche quand même — il porte les règles — mais il devient bon après la Patch ou une lecture de crash.')}`}</p>${(!done||!hasCrash||!tankOn)?`<div class="row" style="margin-top:10px">${!done?`<button class="btn ghost sm" data-go="patch">${L('Do the Patch · 11 questions','Faire la Patch · 11 questions')}</button>`:''}${!hasCrash?`<button class="btn ghost sm" data-go="crash">${L('Read a crash · 8 questions','Lire un crash · 8 questions')}</button>`:''}${!tankOn?`<button class="btn ghost sm" data-go="tank">${L('Fill the tank','Remplir le réservoir')}</button>`:''}</div>`:''}</div>`;
   h+=`<div class="card"><div class="eyebrow">${L('What do you want from it?','Qu’est-ce que tu veux en tirer?')}</div><div class="intent">${INTENTS.map(it=>`<button class="chip" data-intent="${it.k}" aria-pressed="${S.intent===it.k}">${P2(it.l)}</button>`).join('')}</div></div>`;
   h+=`<div class="card"><div class="row">${canShare?`<button class="btn primary" id="share">${L('Share to an AI app','Partager vers une app d’IA')}</button>`:''}<button class="btn ${canShare?'':'primary'}" data-copy="pk">${L('Copy the packet','Copier le paquet')}</button><a class="btn ghost sm" id="openClaude" href="https://claude.ai/new" target="_blank" rel="noopener">${L('Copy & open Claude','Copier et ouvrir Claude')}</a><a class="btn ghost sm" id="openGPT" href="https://chatgpt.com/" target="_blank" rel="noopener">${L('Copy & open ChatGPT','Copier et ouvrir ChatGPT')}</a></div><p class="small muted" style="margin:10px 0 0">${L('The open buttons copy the packet, then open the app — you paste it there. Nothing is put in the link: links get logged, a paste doesn’t.','Les boutons copient le paquet, puis ouvrent l’app — tu le colles là. Rien n’est mis dans le lien : les liens sont enregistrés, un collage non.')}</p></div>`;
   h+=`<div class="card"><div class="eyebrow">${L('The packet — edit anything you don’t want in there','Le paquet — modifie ce que tu ne veux pas envoyer')}</div><textarea class="out live" id="pk" aria-label="${L('Packet text','Texte du paquet')}">${esc(packetText())}</textarea><p class="small muted" style="margin:8px 0 0"><b>${L('Privacy:','Vie privée :')}</b> ${L('nothing leaves this phone until you share or paste it. After that it’s in the AI company’s hands, under their rules — so take out whatever you don’t want there first. Pick what you want above before editing; the chips rebuild the text.','rien ne quitte ce téléphone tant que tu ne partages ou ne colles pas. Après, c’est entre les mains de la compagnie d’IA, selon ses règles — alors enlève d’abord ce que tu ne veux pas là. Choisis ce que tu veux plus haut avant de modifier; les choix reconstruisent le texte.')}</p></div>`;
@@ -2003,6 +2035,41 @@ function vQ(i){
   h+=`<div class="chips">`+opts.map(o=>`<button class="chip${q.danger&&!o.none?' danger':''}" data-q="${q.id}" data-v="${o.v}" data-none="${o.none?1:0}" aria-pressed="${has(q.id,o.v)}">${P2((o.lp&&any('safety','pp','bf'))?o.lp:o.l)}</button>`).join('')+`</div>`;
   return h;
 }
+/* ===================== v1.2.22: ONE-SCREEN RESULT ===================== */
+function plainName(s){ return String(s||'').replace(/<[^>]+>/g,'').split(' — ')[0].trim(); }
+/* the week in three lines; the full patch further down has the why */
+function weekCard(P){ const SF=SAFE(); const bought=P.add.filter(x=>x.cost>0).map(x=>plainName(x.label)); const first=P.add.find(x=>!x.cost);
+  const rows=[];
+  if(P.keepShort.length) rows.push(`<li><b>${L('Keep:','Garder :')}</b> ${P.keepShort.map(esc).join(', ')}</li>`);
+  if(P.swapShort.length) rows.push(`<li><b>${L('Swap:','Remplacer :')}</b> ${P.swapShort.join(' · ')}</li>`);
+  const add = bought.length ? `${esc(bought.join(', '))} — ${L('about $'+P.cost,'environ '+P.cost+' $')}`
+    : first ? L(`nothing to buy yet — first in line: ${esc(plainName(first.label))}`,`rien à acheter pour l’instant — en premier : ${esc(plainName(first.label))}`)
+    : (SF.minor&&SF.vegan) ? L('nothing to buy — except B12 on a vegan diet (see the full patch)','rien à acheter — sauf la B12 quand on est végane (voir la patch au complet)')
+    : L('nothing to buy','rien à acheter');
+  rows.push(`<li><b>${L('Add:','Ajouter :')}</b> ${add}</li>`);
+  return `<div class="card patch"><h3><span class="tag teal">${L('This week','Cette semaine')}</span></h3><ul class="wk">${rows.join('')}</ul><p class="small muted" style="margin:0">${L('The why, the foods and the rest are in the full patch, further down.','Le pourquoi, les aliments et le reste sont dans la patch au complet, plus bas.')}</p></div>`; }
+/* one card for the notes: each opens from its bold first line; lines that must never be folded stay in the open */
+function notesCard(P){ if(!P.notes.length && !P.always.length) return '';
+  const split=s=>{ const i=s.indexOf('</b>'); return (s.startsWith('<b>')&&i>0)?[s.slice(0,i+4), s.slice(i+4).trim()]:[s,'']; };
+  const items=P.notes.map(s=>{ const [hd,rest]=split(s); return rest?`<details class="note"><summary>${hd}</summary><p style="margin:2px 0 10px">${rest}</p></details>`:`<p style="margin:8px 0">${hd}</p>`; }).join('');
+  return `<div class="card soft"><div class="eyebrow">${L('Because of what you told us','Selon ce que tu nous as dit')}</div>${items}${P.always.map(s=>`<p style="margin:10px 0 0">${s}</p>`).join('')}</div>`; }
+/* day 4: the check the Add card promises; week 4: the redo. Only shown when the person opens the app — nothing reminds them. */
+function dayCheck(P,where){ if(!S.started) return ''; const day=Math.floor((Date.now()-new Date(S.started).getTime())/86400000)+1;
+  if(day>=28) return where!=='home' ? '' : `<div class="card soft"><div class="eyebrow">${L(`Day ${day} of your patch`,`Jour ${day} de ta patch`)}</div><p style="margin:0 0 10px"><b>${L('Four weeks.','Quatre semaines.')}</b> ${L('Time to redo the questions — your last answers are filled in, so it’s mostly checking what changed.','C’est le temps de refaire les questions — tes dernières réponses sont déjà là, alors c’est surtout vérifier ce qui a changé.')}</p><button class="btn sm" data-go="redo">${L('Redo the patch','Refaire la patch')}</button></div>`;
+  if(day<4) return '';
+  const items=P.add.filter(x=>x.cost>0).map(x=>({k:x.k,l:plainName(x.label)})); items.push({k:'all',l:L('Your energy overall','Ton énergie en général')});
+  const got=k=>(S.checkins||[]).find(c=>c.k===k);
+  const opts=[['better',L('Better','Mieux')],['same',L('Same','Pareil')],['worse',L('Worse','Pire')]];
+  const rows=items.map(it=>{ const g=got(it.k); return `<div class="rq" role="group" aria-label="${esc(it.l)}"><p class="lb">${esc(it.l)}</p><div class="rr">${opts.map(([v,lab])=>`<button type="button" class="rc" data-ci="${v}" data-ck="${it.k}" aria-pressed="${!!(g&&g.v===v)}">${lab}</button>`).join('')}</div></div>`; }).join('');
+  const eb=`<div class="eyebrow">${L(`Day ${day} of your patch`,`Jour ${day} de ta patch`)}</div>`;
+  if(!items.every(it=>got(it.k))) return `<div class="card soft">${eb}<p style="margin:0">${L('Quick check — how is each one doing?','Petite vérification — comment ça va pour chacun?')}</p>${rows}</div>`;
+  const vv={better:L('better','mieux'),same:L('same','pareil'),worse:L('worse','pire')};
+  return `<div class="card soft">${eb}<p style="margin:0 0 4px">${items.map(it=>`${esc(it.l)} — <b>${vv[got(it.k).v]}</b>`).join(' · ')}</p><p class="small muted" style="margin:0">${L('Keep what helped. What didn’t, stop buying. At four weeks, redo the questions.','Garde ce qui a aidé. Ce qui n’a pas aidé, arrête de l’acheter. À quatre semaines, refais les questions.')}</p><details class="note"><summary>${L('Change an answer','Changer une réponse')}</summary>${rows}</details></div>`; }
+/* the box, full screen and in big type, to hold up at a counter — with a switch for the language of the person behind it */
+function openHand(lang){ lang=lang||S.lang; const keep=S.lang; S.lang=lang; const h=handoverText(); const other=lang==='fr'?'en':'fr';
+  const html=`<div class="handbig"><h3 id="sheetTitle">${L('Bloodwork request','Demande d’analyses sanguines')}</h3><p><b>${L('Requesting:','Analyses demandées :')}</b><br>${esc(h.labs.join(', '))}</p>${h.other.length?`<p><b>${L('Also asking for:','Aussi demandé :')}</b><br>${esc(h.other.join(', '))}</p>`:''}<p><b>${L('Symptoms:','Symptômes :')}</b><br>${esc(h.sym.join('; '))}</p><p><b>${L('Medications:','Médicaments :')}</b><br>${esc(h.meds.join(', '))}</p>${h.ctx.length?`<p><b>${L('Also:','Aussi :')}</b><br>${esc(h.ctx.join('; '))}</p>`:''}</div><div class="row" style="margin-top:12px"><button class="btn sm" id="closeSheet">${L('Done','Terminé')}</button><button class="btn ghost sm" id="handLang" lang="${other}">${other==='fr'?'Français':'English'}</button></div>`;
+  S.lang=keep; showSheet(html, document.getElementById('showHand')); sheet.classList.add('full');
+  const b=document.getElementById('handLang'); if(b) b.onclick=()=>openHand(other); }
 function vPatch(){
   const P=buildPatch();
   const started=S.started?new Date(S.started):null; const day=started?Math.floor((Date.now()-started.getTime())/86400000)+1:null;
@@ -2013,10 +2080,12 @@ function vPatch(){
     h+=`<div class="card"><p class="small muted" style="margin:0">${L('To be clear: it can’t fix the job, the money or the five-minute doctor. Not yet reviewed by a pharmacist; every underlined word shows its sources.','Pour être clair : ça ne règle pas la job, l’argent ni le médecin de cinq minutes. Pas encore révisé par un pharmacien; chaque mot souligné montre ses sources.')}</p></div>`;
     return h;
   }
+  h+=dayCheck(P,'patch');
   { const o=oneThing(P); h+=`<div class="card one"><div class="eyebrow">${L('If you do one thing this week','Si tu fais une seule chose cette semaine')}</div><p class="big">${o.t}</p><p class="small muted" style="margin:0">${o.w} ${L('The rest is below, for when you come back.','Le reste est plus bas, pour quand tu reviendras.')}</p></div>`; }
-  /* v1.2.21: the number and its box come straight after the one-thing card, which points to them; the notes follow */
-  h+=`<div class="card patch"><h3><span class="tag ink">${L('The number','Le chiffre')}</span></h3><p>${P.number.join(' · ')}</p><p class="small muted" style="margin:0 0 10px">${L('One blood draw. It turns the next five-minute appointment into a different conversation, and it’s the only way to know whether iron is half your exhaustion. “Feeling like this” and “low iron” look identical from the outside.','Une seule prise de sang. Elle change complètement la discussion au prochain rendez-vous de cinq minutes, et c’est la seule façon de savoir si un manque de fer explique la moitié de ta fatigue. « Se sentir comme ça » et « manquer de fer », de l’extérieur, c’est identique.')}</p>${(()=>{const h=handoverText(); return `<div class="hand"><div class="eyebrow">${L('Show this to your doctor or pharmacist','Montre ça à ton médecin ou à ton pharmacien')}</div><p class="small" style="margin:0 0 6px">${L('Ask if they can order this bloodwork for you. In Alberta many pharmacists can. In Quebec without a family doctor: 811, option 3. Anywhere, a doctor, nurse practitioner or walk-in clinic can.','Demande-lui s’il peut te prescrire ces analyses. En Alberta, bien des pharmaciens le peuvent. Au Québec, sans médecin de famille : 811, option 3. Partout, un médecin, une infirmière praticienne (IPS) ou une clinique sans rendez-vous le peut.')}</p><div><b>${L('Symptoms:','Symptômes :')}</b> ${esc(h.sym.join('; '))}</div><div><b>${L('Medications:','Médicaments :')}</b> ${esc(h.meds.join(', '))}</div>${h.ctx.length?`<div><b>${L('Also:','Aussi :')}</b> ${esc(h.ctx.join('; '))}</div>`:''}<div><b>${L('Requesting bloodwork for:','Analyses sanguines demandées :')}</b> ${esc(h.labs.join(', '))}</div>${h.other.length?`<div><b>${L('Also asking for:','Aussi demandé :')}</b> ${esc(h.other.join(', '))}</div>`:''}<div class="row" style="margin-top:10px"><button class="btn sm" data-copy="ho">${L('Copy this box','Copier cet encadré')}</button></div><textarea class="out hidden" id="ho" readonly>${esc(handoverPlain())}</textarea></div>`;})()}</div>`;
-  for(const s of P.notes) h+=`<div class="card soft"><div class="eyebrow">${L('Because of what you told us','Selon ce que tu nous as dit')}</div><p style="margin:0">${s}</p></div>`;
+  /* v1.2.22: plain words first — what the test checks — then the names the lab uses; the box comes straight after */
+  h+=`<div class="card patch"><h3><span class="tag ink">${L('What to ask for','À demander')}</span></h3><p class="lead"><b>${P.plain.join(' · ')}</b></p><p class="small" style="margin:0 0 10px">${L('Lab names:','Noms au labo :')} ${P.number.join(' · ')}${SAFE().snore?'':L(' — one blood draw.',' — une seule prise de sang.')}</p>${(()=>{const h=handoverText(); return `<div class="hand"><div class="eyebrow">${L('Show this to your doctor or pharmacist','Montre ça à ton médecin ou à ton pharmacien')}</div><p class="small" style="margin:0 0 6px">${L('Ask if they can order this bloodwork for you. In Alberta many pharmacists can. In Quebec without a family doctor: 811, option 3. Anywhere, a doctor, nurse practitioner or walk-in clinic can.','Demande-lui s’il peut te prescrire ces analyses. En Alberta, bien des pharmaciens le peuvent. Au Québec, sans médecin de famille : 811, option 3. Partout, un médecin, une infirmière praticienne (IPS) ou une clinique sans rendez-vous le peut.')}</p><div><b>${L('Requesting bloodwork for:','Analyses sanguines demandées :')}</b> ${esc(h.labs.join(', '))}</div>${h.other.length?`<div><b>${L('Also asking for:','Aussi demandé :')}</b> ${esc(h.other.join(', '))}</div>`:''}<div class="row" style="margin-top:10px"><button class="btn sm" id="showHand">${L('Show it big','Afficher en grand')}</button><button class="btn ghost sm" data-copy="ho">${L('Copy this box','Copier cet encadré')}</button></div><p class="small muted" style="margin:8px 0 0">${L('The big view and the copy add your symptoms and medications.','La vue en grand et la copie ajoutent tes symptômes et tes médicaments.')}</p><textarea class="out hidden" id="ho" readonly>${esc(handoverPlain())}</textarea></div>`;})()}</div>`;
+  h+=weekCard(P);
+  h+=notesCard(P);
   h+=`<details class="more"><summary>${L(`The full patch — keep, swap, eat, add (about $${P.cost}), stop the leak`,`La patch au complet — garder, remplacer, manger, ajouter (environ ${P.cost} $), colmater la fuite`)}</summary>`;
   h+=`<div class="card patch"><h3><span class="tag ink">${L('Keep','Garder')}</span></h3><p style="margin:0">${P.keep.map(esc).join(' · ')}</p><p class="small muted" style="margin:.5em 0 0">${P.keepNote}</p></div>`;
   if(P.swap.length) h+=`<div class="card patch"><h3><span class="tag">${L('Swap','Remplacer')}</span> <span class="small muted">${L('same job, less damage','même job, moins de dégâts')}</span></h3><ul>${P.swap.map(s=>`<li>${s}</li>`).join('')}</ul></div>`;
@@ -2145,10 +2214,14 @@ function bindRest(){ const $=id=>document.getElementById(id);
     if(!isC&&!isT){ if(id==='fuel'){ S.a.keep=(S.a.keep||[]).filter(k=>(S.a.fuel||[]).includes(k)); if(!any('fuel','beer','wine','spirits')) delete S.a.drinkfreq; } if(id==='flags'){ S.urgentAck=false; } }
     else if(isC){ if(S.c._preC) S.c._preC=S.c._preC.filter(x=>x!==id); if(id==='cfood') delete S.c._pre; if(id==='ccaf'&&v==='0') delete S.c.ccafl; if(id==='calc'&&v==='0') delete S.c.calcl; if(id==='cwhen'&&v==='night') delete S.c.csleep; delete S.c._logged; }
     save(); render(true);
+    /* v1.2.22: a single-answer Patch question moves on by itself after a short pause, so the pick stays visible; Back still works */
+    if(!isC&&!isT&&q&&!q.multi&&store[id]===v&&view()==='q'){ const at=S.step; setTimeout(()=>{ const cur=QL()[S.step-1]; if(S.step===at&&view()==='q'&&cur&&cur.id===id&&S.a[id]===v){ S.step++; save(); render(); } },350); }
   };});
-  document.querySelectorAll('[data-ci]').forEach(b=>{ b.onclick=()=>{ const d=Math.floor((Date.now()-new Date(S.started).getTime())/86400000)+1; S.checkins=S.checkins.filter(c=>c.d!==d); S.checkins.push({d,v:b.dataset.ci}); save(); render(true); toast(L('Noted','Noté')); };});
+  /* v1.2.22: the day-4 check — one verdict per item, the latest wins */
+  document.querySelectorAll('[data-ci]').forEach(b=>{ b.onclick=()=>{ const d=Math.floor((Date.now()-new Date(S.started).getTime())/86400000)+1; const k=b.dataset.ck||'all'; S.checkins=(S.checkins||[]).filter(c=>c.k!==k); S.checkins.push({d,k,v:b.dataset.ci}); refocus=`[data-ci="${b.dataset.ci}"][data-ck="${k}"]`; save(); render(true); toast(L('Noted','Noté')); };});
+  if($('showHand')) $('showHand').onclick=()=>openHand();
   document.querySelectorAll('[data-copy]').forEach(b=>{ b.onclick=async()=>{ const ta=$(b.dataset.copy); try{ await navigator.clipboard.writeText(ta.value); toast(L('Copied','Copié')); }catch(e){ ta.classList.remove('hidden'); ta.focus(); ta.select(); toast(L('Select and copy','Sélectionne et copie')); } };});
-  wireTerms(app);
+  onceTerms(app); wireTerms(app);
   if(refocus){ const el=document.querySelector(refocus); if(el){ try{ el.focus({preventScroll:true}); }catch(e){ el.focus(); } } refocus=null; }
 }
 let refocus=null; let NAV={};
@@ -2182,6 +2255,8 @@ function parseBackup(text){
 }
 function eraseAll(){ const l=S.lang, ack=S.ack; try{ localStorage.removeItem(KEY); localStorage.removeItem('patch'); }catch(e){} S={a:{},step:0,started:null,checkins:[],lang:l,done:false,ack,mode:'home',c:{},cstep:0,crashes:[],intent:null,madeAt:null,tank:{p:{},day:{},log:{},rate:{},closed:{},closedMig:true,roll:4,view:'normal'},tstep:0}; save(); render(); toast(L('Erased','Effacé')); }
 /* tappable terms: real buttons for keyboard and screen readers, not bare spans */
+/* v1.2.22: underline each glossary word once per screen — its first appearance; later mentions are plain text */
+function onceTerms(root){ const seen=new Set(); root.querySelectorAll('.t[data-t]').forEach(el=>{ const k=el.dataset.t; if(seen.has(k)) el.replaceWith(document.createTextNode(el.textContent)); else seen.add(k); }); }
 function wireTerms(root){
   root.querySelectorAll('.t[data-t]').forEach(el=>{
     el.setAttribute('role','button'); el.tabIndex=0; el.setAttribute('aria-haspopup','dialog');
@@ -2214,7 +2289,7 @@ function openMenu(opener){
   const done=!!S.done||S.step>QL().length;
   const items=[
     ['home',L('Home','Accueil')],
-    ['patch',done?L('My patch','Ma patch'):L('The Patch · about 11 taps','La Patch · environ 11 questions')],
+    ['patch',done?L('My patch','Ma patch'):L('The Patch · 11 questions','La Patch · 11 questions')],
     ['crash',L('Why did I crash?','Pourquoi j’ai crashé?')],
     ['tank',L('What’s in the tank?','Qu’est-ce qu’il y a dans le réservoir?')],
     ['pat',L('My patterns · daily check-in','Mes tendances · bilan du jour')],
@@ -2251,7 +2326,7 @@ function openSheet(k, opener, viaGloss){ const g=G[k]; if(!g) return;
 }
 function closeSheet(noFocus){
   if(!sheet.classList.contains('on')) return;
-  sheet.classList.remove('on'); sheetBg.classList.remove('on'); sheet.setAttribute('aria-hidden','true');
+  sheet.classList.remove('on','full'); sheetBg.classList.remove('on'); sheet.setAttribute('aria-hidden','true');
   document.documentElement.classList.remove('locked'); fromGloss=false;
   const o=sheetOpener; sheetOpener=null;
   if(noFocus!==true && o && document.body.contains(o)){ try{ o.focus({preventScroll:true}); }catch(e){} }
