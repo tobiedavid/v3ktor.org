@@ -72,7 +72,7 @@ html.locked,html.locked body{overflow:hidden}
 ul{padding-left:1.1em;margin:.3em 0 .6em} li{margin:.3em 0}
 .sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .18s;z-index:40}
 .sheet-bg.on{opacity:1;pointer-events:auto}
-.sheet{overscroll-behavior:contain;position:fixed;left:0;right:0;bottom:0;background:var(--card);border-radius:22px 22px 0 0;padding:18px 20px calc(24px + env(safe-area-inset-bottom));max-height:78vh;overflow:auto;transform:translateY(105%);visibility:hidden;transition:transform .22s,visibility 0s linear .22s;z-index:50;box-shadow:0 -10px 40px rgba(0,0,0,.25)}
+.sheet{overscroll-behavior:contain;position:fixed;left:0;right:0;bottom:0;max-width:640px;margin:0 auto;background:var(--card);border-radius:22px 22px 0 0;padding:18px 20px calc(24px + env(safe-area-inset-bottom));max-height:78vh;overflow:auto;transform:translateY(105%);visibility:hidden;transition:transform .22s,visibility 0s linear .22s;z-index:50;box-shadow:0 -10px 40px rgba(0,0,0,.25)}
 .sheet.on{transform:translateY(0);visibility:visible;transition:transform .22s,visibility 0s}
 .sheet .handle{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 14px}
 .sheet h3{font-size:1.25rem}
@@ -83,7 +83,7 @@ ul{padding-left:1.1em;margin:.3em 0 .6em} li{margin:.3em 0}
 .ev{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:0.875rem;color:var(--muted);line-height:1.45}
 .ev b{color:var(--ink)}
 .ev .src{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px}
-.ev .src a{display:inline-block;padding:4px 10px;border-radius:999px;background:var(--chip);color:var(--ink);text-decoration:none;font-size:0.875rem;font-weight:600;border:1px solid var(--line)}
+.ev .src a{display:inline-flex;align-items:center;min-height:44px;box-sizing:border-box;padding:4px 12px;border-radius:999px;background:var(--chip);color:var(--ink);text-decoration:none;font-size:0.875rem;font-weight:600;border:1px solid var(--line)}
 .ev .src a:after{content:" ↗";opacity:.6}
 .ev .rev{margin-top:10px;font-size:0.875rem;font-style:italic;opacity:.85}
 .patch h3{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -97,6 +97,15 @@ textarea.out{width:100%;min-height:140px;border:1px solid var(--line);border-rad
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .checkin{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .chip[aria-pressed="true"]::before{content:"✓ ";font-weight:700}
+/* v1.2.25: checkbox for pick-several, circle for pick-one */
+.pickall{margin:12px 0 -4px;font-weight:700;font-size:.95rem}
+.chips.pickn .chip,.chips.pick1 .chip{display:flex;align-items:flex-start;gap:12px}
+.chips.pickn .chip::before,.chips.pick1 .chip::before{content:"";flex:0 0 22px;width:22px;height:22px;margin-top:-1px;box-sizing:border-box;border:2px solid var(--muted);background:var(--card)}
+.chips.pickn .chip::before{border-radius:6px}
+.chips.pick1 .chip::before{border-radius:50%}
+.chips.pickn .chip[aria-pressed="true"]::before{content:"✓";border-color:var(--bg);background:var(--bg);color:var(--chip-on);font-size:15px;font-weight:800;line-height:18px;text-align:center}
+.chips.pick1 .chip[aria-pressed="true"]::before{content:"";border-color:var(--bg);background:radial-gradient(circle,var(--bg) 0 5px,transparent 6px)}
+.chips.pickn .chip.danger[aria-pressed="true"]::before{color:var(--warn)}
 .t:focus-visible,.chip:focus-visible,.btn:focus-visible,.ev .src a:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
 .add-warn{display:block;margin-top:4px;color:var(--warn);font-size:.88rem;font-weight:600}
 .hand{border:2px solid var(--ink);border-radius:12px;padding:12px 14px;font-size:.95rem;line-height:1.45}
@@ -137,15 +146,16 @@ textarea.out.live{min-height:240px;font-size:0.875rem;line-height:1.4}
 .tk .meter.empty i,.tk .meter.low i,.tk .meter.over i{background:#d23b2a} .tk .meter.ok i{background:#c99a1a} .tk .meter.full i{background:#1fa64a}
 .tk .amt{font-size:0.875rem;color:var(--muted);white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums}
 .tk .amt b{color:var(--ink)}
-.foods{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
-.food{position:relative;border:1px solid var(--line);background:var(--card);border-radius:12px;min-height:52px;display:flex}
-.food .add{flex:1;border:0;background:transparent;color:var(--ink);padding:10px 44px 10px 12px;font:inherit;font-size:.9rem;line-height:1.25;cursor:pointer;text-align:left;border-radius:12px}
+.foods{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin:10px 0} /* v1.2.25: one column on phones; two side by side overflowed 360 px */
+.food{position:relative;border:1px solid var(--line);background:var(--card);border-radius:12px;min-height:52px;display:flex;min-width:0}
+.food .add{flex:1;border:0;background:transparent;color:var(--ink);padding:10px 44px 10px 12px;font:inherit;font-size:.9rem;line-height:1.25;cursor:pointer;text-align:left;border-radius:12px;min-width:0;overflow-wrap:anywhere}
 .food small{display:block;color:var(--muted);font-size:0.875rem;margin-top:2px}
 .food[data-n]:not([data-n="0"]){border-color:var(--teal);background:var(--teal-soft)}
 .food .cnt{font-weight:800;color:var(--teal)}
 .food .plusmark{position:absolute;top:50%;right:8px;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;border:2px solid var(--teal);color:var(--teal);font-weight:800;font-size:1.1rem;line-height:24px;text-align:center;pointer-events:none}
 .food[data-n]:not([data-n="0"]) .add{padding-right:84px}
 .food .minus{position:absolute;top:50%;right:44px;transform:translateY(-50%);width:28px;height:28px;border:2px solid var(--muted);background:var(--card);color:var(--ink);font:inherit;font-weight:800;font-size:1.1rem;line-height:1;cursor:pointer;border-radius:50%;padding:0}
+.food .minus::after{content:"";position:absolute;inset:-10px} /* v1.2.25: the circle stays 28 px; the tap area is 48 px */
 .steps{display:grid;gap:8px}
 .st{display:grid;grid-template-columns:1fr 44px auto 44px;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:6px 8px 6px 12px;background:var(--card)}
 .st.on{border-color:var(--teal);background:var(--teal-soft)}
@@ -157,12 +167,13 @@ textarea.out.live{min-height:240px;font-size:0.875rem;line-height:1.4}
 .stp:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .food .add:focus-visible,.food .minus:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
 .gtabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
-.gtabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;font-size:0.875rem;font-weight:600;cursor:pointer}
+.gtabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;font-size:0.875rem;font-weight:600;cursor:pointer;min-height:44px}
 .gtabs button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .fill li{margin:.35em 0}
 .gtabs.seg{margin:6px 0 10px}
 .stor{font-size:0.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 6px;vertical-align:middle}
 .calhd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.calhd .btn{min-width:44px}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
 .cw{text-align:center;font-size:0.75rem;font-weight:700;color:var(--muted);padding:2px 0}
 .cd{position:relative;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;min-height:46px;font:inherit;font-size:0.875rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:4px 0}
@@ -223,6 +234,10 @@ details.note>summary{cursor:pointer;list-style:none;min-height:44px;display:flex
 details.note>summary::-webkit-details-marker{display:none}
 details.note>summary::after{content:'+';margin-left:auto;color:var(--muted);font-weight:700;font-size:1.2rem;padding-left:10px}
 details.note[open]>summary::after{content:'–'}
+details.note.crashmore{margin:14px 0;border:1px solid var(--line);border-radius:14px;padding:2px 14px;background:var(--card)}
+details.note.crashmore[open]{padding-bottom:12px}
+details.note.crashmore>summary{font-weight:700}
+details.note.crashmore .card{box-shadow:none;margin:10px 0 0}
 .handbig h3{font-size:1.6rem;margin:4px 0 16px}
 .handbig p{font-size:1.3rem;line-height:1.45;margin:0 0 18px}
 .sheet.full{top:0;max-height:none;border-radius:0;padding-top:calc(18px + env(safe-area-inset-top))}
@@ -241,7 +256,7 @@ details.note[open]>summary::after{content:'–'}
 let S = {a:{}, step:0, started:null, checkins:[], lang:null, mode:null, c:{}, cstep:0, crashes:[], intent:null, tank:null, tstep:0};
 const KEY='thepatch.v1';
 try{ const s=localStorage.getItem(KEY)||localStorage.getItem('patch'); if(s) S=Object.assign(S, JSON.parse(s)); if(!localStorage.getItem(KEY)&&s) localStorage.setItem(KEY,s); if(localStorage.getItem('patch')) localStorage.removeItem('patch'); }catch(e){}
-const VER='1.2.24'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
+const VER='1.2.25'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
 /* v1.2.21 (5 Nov 2026): prenatal / folic-acid and pregnancy-iron lines aligned with Health Canada; Quebec route for bloodwork; hard-stool branch;
    pattern messages match the 5-a-side rule; iPhone storage note + persist(); protein note by life stage; French fixes; "about $8" in English. */
 /* v1.2.22 (6 Nov 2026): one-screen result (plain-words test card, three-line week, one notes card with the crisis line kept open); glossary words underlined once per screen;
@@ -253,6 +268,10 @@ const VER='1.2.24'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
    plain Bristol words on the loose/hard chips; days the patterns can't use yet are drawn pale on the strip. */
 /* v1.2.24 (6 Nov 2026): optional "When?" on loose stools — after a meal or drink / on waking. A loose stool on waking counts with the
    day before's food in the lactose, sweetener and histamine checks; unmarked ones stay with their own day, as before. */
+/* v1.2.25 (6 Nov 2026): pick-several questions say "Pick all that apply" and show checkboxes (pick-one show circles); the food grid is one
+   column on phones and no longer scrolls sideways at 360 px, with a 44 px hit area on "−"; the crash result leads with the read and
+   tomorrow's move and folds the rest; the returning home shows the week's one thing; logging a crash ticks ⚡ on that day's check-in;
+   bottom sheets are capped at 640 px on wide screens; glossary words get their one underline where they're visible first. */
 if(!S.lang){ S.lang = (navigator.language||'en').toLowerCase().startsWith('fr') ? 'fr' : 'en'; }
 /* v0.7: three doors. Older saves have no mode — someone mid-questions lands back on their question, everyone else on the chooser. */
 if(!S.mode){ S.mode = S.step>0 ? 'patch' : 'home'; }
@@ -793,7 +812,7 @@ const Q = [
     {l:['5 hours or less','5 heures ou moins'],v:'5'},{l:['About 6','Environ 6 heures'],v:'6'},{l:['Broken — up in the night (baby, shifts, pain)','Coupé — des réveils la nuit (bébé, quarts, douleur)'],v:'broken'},{l:['7 or more, but I wake up tired','7 heures ou plus, mais je me réveille sans énergie'],v:'7tired'},{l:['7 or more and it’s fine','7 heures ou plus et ça va'],v:'7ok'}]},
   {id:'stool', t:['Stools, most days?','Les selles, la plupart du temps?'], h:['Your gut decides how much of what you eat actually gets in — and which add-on fits.','Ton intestin décide combien de ce que tu manges passe vraiment — et quel ajout te convient.'], multi:false, opts:[
     {l:['Loose, soft or watery','Molles ou liquides'],v:'loose'},{l:['Normal','Normales'],v:'normal'},{l:['Hard, not often','Dures, pas souvent'],v:'hard'},{l:['All over the place','Imprévisibles — ça change tout le temps'],v:'mixed'}]},
-  {id:'crash', t:['When do you crash?','Quand est-ce que tu frappes un mur?'], h:['Pick all that fit.','Coche tout ce qui s’applique.'], multi:true, opts:[
+  {id:'crash', t:['When do you crash?','Quand est-ce que tu frappes un mur?'], multi:true, opts:[
     {l:['Mid-morning','Milieu d’avant-midi'],v:'am'},{l:['Mid-afternoon, around 2–4 — or mid-shift','Milieu d’après-midi, vers 14–16 h — ou au milieu du quart'],v:'pm'},{l:['Right after eating','Tout de suite après avoir mangé'],v:'meal'},{l:['All day — I’m never not tired','Toute la journée — je suis toujours à plat'],v:'all'},{l:['It’s random — no pattern I can see','C’est aléatoire — je ne vois pas de logique'],v:'random'},{l:['I don’t really crash','Je ne frappe pas vraiment de mur'],v:'none',none:true}]},
   {id:'morning', t:['What’s in you before noon — or in your first hours awake?','Qu’est-ce que tu as mangé avant midi — ou dans tes premières heures debout?'], multi:false, opts:[
     {l:['Nothing','Rien'],v:'nothing'},{l:['Coffee only','Juste du café'],v:'coffee'},{l:['Something with protein — eggs, meat, yogurt','Des protéines — œufs, viande, yogourt'],v:'protein'},{l:['Toast, cereal, a pastry, a sweet drink','Toast, céréales, pâtisserie, boisson sucrée'],v:'carbs'}]},
@@ -1016,26 +1035,26 @@ function buildPatch(){
   return P;
 }
 /* the one move: the first true line wins */
-function oneThing(P){
+function oneThing(P,where){
   const SF=SAFE(); const minor=SF.minor, preg=SF.preg; const DI=drinkInfo();
   const drinksDaily=DI.daily||DI.shaky;
   const budget=S.a.budget_b||'15';
   const bought=k=>P.add.some(x=>x.k===k&&x.cost>0);
   const liveStops = P.stops.length - ((P.urgent&&S.urgentAck)?1:0);
-  if(liveStops>0) return {t:L('The red card above. Nothing below matters more this week.','La carte rouge plus haut. Rien plus bas ne compte plus cette semaine.'), w:L('Everything else on this card can wait a week. That can’t.','Tout le reste de cette carte peut attendre une semaine. Ça, non.')};
+  if(liveStops>0) return {t:where==='home'?L('Your patch has a red card. Open it first — nothing else matters more this week.','Ta patch a une carte rouge. Ouvre-la en premier — rien d’autre ne compte plus cette semaine.'):L('The red card above. Nothing below matters more this week.','La carte rouge plus haut. Rien plus bas ne compte plus cette semaine.'), w:L('Everything else on this card can wait a week. That can’t.','Tout le reste de cette carte peut attendre une semaine. Ça, non.')};
   /* priority, clinical before lifestyle: red card → rectal bleeding → thiamine (daily or withdrawal) → snoring → the blood test → stimulant timing → random crashes → stools → breakfast → caffeine */
   const pharmPsy = (has('meds','thinner')||has('safety','kidney')) ? L(' Pharmacist’s yes first — you’re on a blood thinner or have kidney disease.',' Le feu vert du pharmacien d’abord — anticoagulant ou maladie des reins.') : '';
   if(has('bleed','rectal') && minor) return {t:L('Blood in the toilet or on the paper: tell a parent or a doctor this week.','Du sang dans la toilette ou sur le papier : dis-le à un parent ou à un médecin cette semaine.'), w:L('It’s usually something small, like a tear. A doctor checks it in five minutes — that’s the whole point.','C’est souvent quelque chose de petit, comme une fissure. Un médecin le vérifie en cinq minutes — c’est tout le but.')};
   if(has('bleed','rectal')) return {t:L(`Firm the stools: ${T('psyllium','plain psyllium')} in a full glass of water every morning${(budget==='0'||!bought('psyllium'))?' (about $8 — the first money you have)':''}. ${T('rectal','Over 50, or with belly pain, weight loss or a change in how you go')}: book the appointment this week too.`,`Raffermis les selles : du ${T('psyllium','psyllium nature','psyllium nature')} dans un grand verre d’eau chaque matin${(budget==='0'||!bought('psyllium'))?' (environ 8 $ — le premier argent que tu as)':''}. ${T('rectal','50 ans ou plus, ou avec des douleurs au ventre, une perte de poids ou un changement dans ta façon d’aller à la selle','50 ans ou plus, ou avec des douleurs au ventre, une perte de poids ou un changement dans ta façon d’aller à la selle')} : prends le rendez-vous cette semaine aussi.`)+pharmPsy, w:L('Firm stools usually stop a tear bleeding within days — but only a look rules out the other thing, and that part doesn’t wait for the psyllium to work.','Des selles fermes arrêtent généralement une fissure de saigner en quelques jours — mais seul un examen écarte l’autre affaire, et ça, ça n’attend pas que le psyllium fasse effet.')};
   if((DI.heavy||DI.shaky) && !minor) return {t:L(`${T('thiamine','Thiamine (B1)')}, ${budget==='0'?'the first $5 you have':'today'} — the label dose.`,`De la ${T('thiamine','thiamine (B1)','thiamine (B1)')}, ${budget==='0'?'avec les premiers 5 $ que tu as':'aujourd’hui'} — la dose de l’étiquette.`)+((preg||SF.bf)?L(' Pharmacist’s yes first.',' Le feu vert du pharmacien d’abord.'):''), w:DI.shaky?L('You get shaky when you skip a drink. Thiamine protects the nerves and brain — and don’t stop suddenly on your own; a doctor or pharmacist can make that safe.','Tu trembles quand tu sautes un verre. La thiamine protège les nerfs et le cerveau — et n’arrête pas d’un coup par toi-même; un médecin ou un pharmacien peut rendre ça sécuritaire.'):L('You drink most days. Thiamine protects against the nerve and brain damage regular drinking can cause — of everything here, it’s the cheapest protection.','Tu bois la plupart des jours. La thiamine protège contre les dommages aux nerfs et au cerveau que l’alcool régulier peut causer — de tout ce qui est ici, c’est la protection la moins chère.')};
   if(has('safety','snore') && any('sleep','7tired','5','6','broken')) return {t:L(`Ask for a ${T('apnea','home sleep test')}.`,`Demande un ${T('apnea','test de sommeil à la maison','test de sommeil à la maison')}.`), w:L('Snoring plus tired is a breathing problem until a test says otherwise, and no food or supplement touches it.','Ronfler et être fatigué, c’est un problème de respiration jusqu’à preuve du contraire, et aucune bouffe ni aucun supplément n’y touche.')};
-  if(has('bleed','periods')||has('sleep','7tired')||has('crash','all')||SF.pp) return {t:L(`Get one blood test that checks your iron stores. The box just below has the words for your doctor or pharmacist.`,`Fais une prise de sang qui vérifie tes réserves de fer. L’encadré juste en dessous a les mots pour ton médecin ou ton pharmacien.`), w:L('It’s the only way to know whether low iron is half of this — and it looks exactly like “just tired”.','C’est la seule façon de savoir si un manque de fer explique la moitié de ça — et ça ressemble exactement à « juste de la fatigue ».')};
+  if(has('bleed','periods')||has('sleep','7tired')||has('crash','all')||SF.pp) return {t:where==='home'?L('Get one blood test that checks your iron stores — the words for your doctor are in your patch.','Fais une prise de sang qui vérifie tes réserves de fer — les mots pour ton médecin sont dans ta patch.'):L(`Get one blood test that checks your iron stores. The box just below has the words for your doctor or pharmacist.`,`Fais une prise de sang qui vérifie tes réserves de fer. L’encadré juste en dessous a les mots pour ton médecin ou ton pharmacien.`), w:L('It’s the only way to know whether low iron is half of this — and it looks exactly like “just tired”.','C’est la seule façon de savoir si un manque de fer explique la moitié de ça — et ça ressemble exactement à « juste de la fatigue ».')};
   if(has('meds','stim')) return {t:L(`${T('protein','Eat before the pill')} — ${protShort()[0]} the moment you take it.`,`${T('protein','Mange avant la pilule','Mange avant la pilule')} — ${protShort()[1]} au moment où tu la prends.`), w:L('Once it kicks in, the appetite is gone and the afternoon wall is already booked.','Une fois qu’elle fait effet, l’appétit est parti et le mur de l’après-midi est déjà réservé.')};
   if(has('crash','random')) return {t:L(`Same breakfast and same lunch every day this week — and log each crash in “Why did I crash?”.`,`Même déjeuner et même dîner tous les jours cette semaine — et mets chaque crash au journal dans « Pourquoi j’ai crashé? ».`), w:L(`${T('random','Random crashes')} hide when every day is different. Lock the day, then change one thing at a time, three days each.`,`Les ${T('random','crashs aléatoires','crashs aléatoires')} se cachent quand chaque journée est différente. Fige la journée, puis change une chose à la fois, trois jours chacune.`)};
   if(any('stool','loose','mixed') && budget!=='0' && !minor) return {t:L(`${T('psyllium','Plain psyllium')}, 1–2 tsp in a full glass of water every morning.`,`Du ${T('psyllium','psyllium nature','psyllium nature')}, 1–2 c. à thé dans un grand verre d’eau chaque matin.`)+pharmPsy, w:L('Loose stools take magnesium and potassium with them. This firms things up in days, for about $8.','Les selles molles emportent le magnésium et le potassium. Ça raffermit en quelques jours, pour environ 8 $.')};
   if(any('morning','nothing','coffee','carbs')) return {t:L(`${T('protein','Protein in your first hours awake')} — ${protEx()[0].replace(/^./,c=>c.toLowerCase())}.`,`${T('protein','Des protéines dans tes premières heures debout','Des protéines dans tes premières heures debout')} — ${protEx()[1].replace(/^./,c=>c.toLowerCase())}.`), w:L('That alone moves the afternoon crash, and it costs less than the energy drink it replaces.','Juste ça, ça repousse le crash de l’après-midi, et ça coûte moins cher que la boisson énergisante que ça remplace.')};
   if(any('fuel','coffee','energy') && any('sleep','5','6','broken')) return {t:L(`${T('caffeine','Caffeine')} done by noon — on shifts, 8 hours before you sleep.`,`La ${T('caffeine','caféine','caféine')} finie à midi — sur les quarts, 8 heures avant de dormir.`), w:L('Free, and the biggest thing you can do for the hours of sleep you do get.','Gratuit, et la plus grosse chose que tu peux faire pour les heures de sommeil que tu as.')};
-  return {t:L('Pick one line below and do only that for four days.','Choisis une ligne plus bas et fais seulement ça pendant quatre jours.'), w:L('Your answers don’t point at one big leak. One change at a time is how you find out what works.','Tes réponses ne pointent pas vers une grosse fuite. Un changement à la fois, c’est comme ça que tu sais ce qui marche.')};
+  return {t:where==='home'?L('Pick one line from your patch and do only that for four days.','Choisis une ligne de ta patch et fais seulement ça pendant quatre jours.'):L('Pick one line below and do only that for four days.','Choisis une ligne plus bas et fais seulement ça pendant quatre jours.'), w:L('Your answers don’t point at one big leak. One change at a time is how you find out what works.','Tes réponses ne pointent pas vers une grosse fuite. Un changement à la fois, c’est comme ça que tu sais ce qui marche.')};
 }
 function handoverText(){
   const a=S.a; const sym=[], meds=[], ctx=[];
@@ -1088,7 +1107,7 @@ const CQ = [
     {l:['Late — 8 hours or more after getting up','Tard — 8 heures ou plus après le lever'],v:'late'},
     {l:['The whole day, start to finish','Toute la journée, du début à la fin'],v:'all'},
     {l:['There was no day — I was up all night','Il n’y a pas eu de journée — j’ai passé la nuit debout'],v:'night'}]},
-  {id:'cfeel', t:['What did it feel like?','C’était comment?'], h:['Pick all that fit. This is the fingerprint.','Coche tout ce qui s’applique. C’est l’empreinte.'], multi:true, opts:[
+  {id:'cfeel', t:['What did it feel like?','C’était comment?'], h:['This is the fingerprint.','C’est l’empreinte.'], multi:true, opts:[
     {l:['Shaky, sweaty, starving — better after eating','Tremblements, sueurs, faim — mieux après avoir mangé'],v:'sugar'},
     {l:['Heavy eyelids — could have slept standing up','Paupières lourdes — j’aurais dormi debout'],v:'sleepy'},
     {l:['Flat and foggy, like the plug got pulled','À plat et dans la brume, comme si on avait tiré la plogue'],v:'flat'},
@@ -1109,7 +1128,7 @@ const CQ = [
     {l:['Early — with a meal, hours before bed','Tôt — avec un repas, des heures avant le coucher'],v:'early'},{l:['Within 3 hours of bed','Dans les 3 heures avant le coucher'],v:'late'},{l:['I didn’t really stop','Je n’ai pas vraiment arrêté'],v:'cont'}]},
   {id:'cstim', t:['Stimulant medication that day? (Vyvanse, Adderall, Dexedrine, Ritalin…)','Un stimulant ce jour-là? (Vyvanse, Adderall, Dexedrine, Ritalin…)'], skip:()=>!!S.a.meds && !has('meds','stim'), opts:[
     {l:['Took it as usual, early','Pris comme d’habitude, tôt'],v:'am'},{l:['Took it late','Pris tard'],v:'late'},{l:['Skipped it, or ran out','Sauté, ou plus de pilules'],v:'skip'},{l:['Took more than usual','Pris plus que d’habitude'],v:'more'},{l:['I don’t take one','Je n’en prends pas'],v:'none',none:true}]},
-  {id:'cfood', t:['What went in during the 4 hours before it hit?','Qu’est-ce qui est rentré dans les 4 heures avant que ça frappe?'], h:['Pick all that fit.','Coche tout ce qui s’applique.'], multi:true, opts:[
+  {id:'cfood', t:['What went in during the 4 hours before it hit?','Qu’est-ce qui est rentré dans les 4 heures avant que ça frappe?'], multi:true, opts:[
     {l:['Nothing','Rien'],v:'nothing',none:true},
     {l:['Chips, bread, crackers, rice cakes, pastry','Chips, pain, craquelins, galettes de riz, pâtisserie'],v:'refined'},
     {l:['Something sweet, or a sweet drink','Quelque chose de sucré, ou une boisson sucrée'],v:'sweet'},
@@ -1596,9 +1615,9 @@ function foodsHTML(map,grp){ const q=normTxt(foodQ.trim()); const list=q? sorted
 
 function vTQ(i){
   const list=tqList(); const q=list[i]; if(!q) return '';
-  let h=`<div class="qn">${L('The tank · setup','Le réservoir · réglages')} · ${i+1} ${L('of','de')} ${list.length}</div><h2>${P2(q.t)}</h2>${q.h?`<p class="muted small">${P2(q.h)}</p>`:''}`;
+  let h=`<div class="qn">${L('The tank · setup','Le réservoir · réglages')} · ${i+1} ${L('of','de')} ${list.length}</div><h2>${P2(q.t)}</h2>${q.h?`<p class="muted small">${P2(q.h)}</p>`:''}${q.multi?pickAll():''}`;
   const sel=v=>{ const a=S.tank.p[q.id]; return Array.isArray(a)?a.includes(v):a===v; };
-  h+=`<div class="chips">`+q.opts.map(o=>`<button class="chip" data-store="t" data-q="${q.id}" data-v="${o.v}" data-none="${o.none?1:0}" aria-pressed="${sel(o.v)}">${P2(o.l)}</button>`).join('')+`</div>`;
+  h+=`<div class="chips ${q.multi?'pickn':'pick1'}">`+q.opts.map(o=>`<button class="chip" data-store="t" data-q="${q.id}" data-v="${o.v}" data-none="${o.none?1:0}" aria-pressed="${sel(o.v)}"><span>${P2(o.l)}</span></button>`).join('')+`</div>`;
   if(q.id==='sex') h+=`<p class="small muted">${L('Nothing here is stored anywhere but this phone.','Rien ici n’est stocké ailleurs que sur ce téléphone.')}</p>`;
   return h;
 }
@@ -1938,8 +1957,11 @@ const IOS=(()=>{ try{ return /iP(hone|ad|od)/.test(navigator.userAgent)||(naviga
 function iosNote(){ let installed=false; try{ installed=!!(navigator.standalone||(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)); }catch(_){}
   if(!IOS||installed||window.claude||S.iosOk) return '';
   return `<div class="card soft small" id="iosCard"><p style="margin:0 0 8px">${L('On iPhone, Safari can erase your answers if a week of using Safari goes by without you opening this. Add it to your Home Screen to keep them: in Safari, Share ⬆︎ → Add to Home Screen.','Sur iPhone, Safari peut effacer tes réponses si une semaine d’utilisation passe sans que tu ouvres l’app. Ajoute-la à ton écran d’accueil pour les garder : dans Safari, Partager ⬆︎ → Sur l’écran d’accueil.')}</p><button type="button" class="btn ghost sm" id="iosOk">${L('Got it','Compris')}</button></div>`; }
+/* v1.2.25: the week's one thing on the returning home — days 1–3 showed nothing from the patch — until the week-4 redo takes over */
+function homeOne(){ if(!S.done) return ''; const day=S.started?Math.floor((Date.now()-new Date(S.started).getTime())/86400000)+1:null; if(day!=null&&day>=28) return '';
+  const o=oneThing(buildPatch(),'home'); return `<div class="card one"><div class="eyebrow">${(day==null||day<=7)?L('If you do one thing this week','Si tu fais une seule chose cette semaine'):L('If you do one thing','Si tu fais une seule chose')}</div><p style="margin:0;font-weight:700">${o.t}</p><div class="row" style="margin-top:8px"><button type="button" class="btn ghost sm" data-door="patch">${L('My week →','Ma semaine →')}</button></div></div>`; }
 function vHomeBack(o){ const dis='';
-  return `${S.started?dayCheck(buildPatch(),'home'):''}${vCheck(S.rsel==='y'?keyAdd(dayKey(),-1):dayKey(),'back')}${iosNote()}
+  return `${homeOne()}${S.started?dayCheck(buildPatch(),'home'):''}${vCheck(S.rsel==='y'?keyAdd(dayKey(),-1):dayKey(),'back')}${iosNote()}
   <div class="card soft"><div class="eyebrow">${L('What your days say','Ce que disent tes journées')}</div><p style="margin:0">${daysLine()}</p><div class="row" style="margin-top:8px"><button type="button" class="btn ghost sm" data-go="pat">${L('My patterns →','Mes tendances →')}</button></div></div>
   <div class="eyebrow" style="margin-top:18px">${L('More','Plus')}</div>
   <div class="doors small">
@@ -2001,14 +2023,16 @@ function crashSetDay(k){ S.c._day=k; crashFromCheckin(k); if(!S.c.cfood||S.c._pr
 function crashDayPick(){ const t=dayKey(), y=keyAdd(t,-1), k=S.c._day||t; return `<div class="row" style="margin:-4px 0 10px;align-items:center;gap:6px"><span class="small muted">${L('This crash was','Ce crash, c’était')}</span><div class="gtabs seg" role="tablist" style="margin:0"><button type="button" role="tab" data-cday="${t}" aria-pressed="${k===t}">${L('today','aujourd’hui')}</button><button type="button" role="tab" data-cday="${y}" aria-pressed="${k===y}">${L('yesterday','hier')}</button>${k!==t&&k!==y?`<button type="button" role="tab" aria-pressed="true">${dayLabel(k)}</button>`:''}</div></div>`; }
 function vCQ(i){
   const list=cqList(); const q=list[i]; if(!q){ return ''; }
-  let h=`<div class="qn">${L('Why did I crash?','Pourquoi j’ai crashé?')} · ${i+1} ${L('of','de')} ${list.length}</div>${i===0?crashDayPick():''}<h2>${P2(q.t)}</h2>${q.h?`<p class="muted small">${P2(q.h)}</p>`:''}`;
+  let h=`<div class="qn">${L('Why did I crash?','Pourquoi j’ai crashé?')} · ${i+1} ${L('of','de')} ${list.length}</div>${i===0?crashDayPick():''}<h2>${P2(q.t)}</h2>${q.h?`<p class="muted small">${P2(q.h)}</p>`:''}${q.multi?pickAll():''}`;
   if((S.c._preC||[]).includes(q.id)) h+=`<p class="small" style="margin:0 0 6px"><b>${L('Filled in from that day’s check-in.','Rempli d’après le bilan de cette journée.')}</b> ${L('Change it if it’s off.','Change-le si ce n’est pas ça.')}</p>`;
   if(q.id==='cfood' && S.c._pre) h+=`<p class="small" style="margin:0 0 6px"><b>${(S.c._day&&S.c._day!==dayKey())?L('Pre-ticked from that day’s food log.','Pré-coché d’après le journal de cette journée.'):L('Pre-ticked from today’s food log.','Pré-coché d’après ta journée notée.')}</b> ${L('Untick anything that wasn’t in the 4 hours before.','Décoche ce qui n’était pas dans les 4 heures avant.')}</p>`;
-  h+=`<div class="chips">`+q.opts.map(o=>`<button class="chip${o.danger?' danger':''}" data-store="c" data-q="${q.id}" data-v="${o.v}" data-none="${o.none?1:0}" aria-pressed="${hc(q.id,o.v)}">${P2(o.l)}</button>`).join('')+`</div>`;
+  h+=`<div class="chips ${q.multi?'pickn':'pick1'}">`+q.opts.map(o=>`<button class="chip${o.danger?' danger':''}" data-store="c" data-q="${q.id}" data-v="${o.v}" data-none="${o.none?1:0}" aria-pressed="${hc(q.id,o.v)}"><span>${P2(o.l)}</span></button>`).join('')+`</div>`;
   return h;
 }
 function vCrashRes(){
   const R=buildCrash(); const M=R.mech; const logged=!!S.c._logged;
+  /* v1.2.25: the read, tomorrow's move and the log stay open; the background folds under one line that names what's inside */
+  const fold=[], foldNames=[]; const F=(name,html)=>{ foldNames.push(name); fold.push(html); };
   let h=`<div class="eyebrow">${L('Why did I crash? · one day','Pourquoi j’ai crashé? · une journée')}${S.c._day&&S.c._day!==dayKey()?' · '+dayLabel(S.c._day):''}</div><h2>${L('Here’s the read.','Voici la lecture.')}</h2>`;
   if(R.danger){
     h+=`<div class="card flag"><p style="margin:0"><b>${L('Chest pain, or fainting: call 911 or get to an emergency department now.','Douleur à la poitrine, ou évanouissement : appelle le 911 ou va à l’urgence maintenant.')}</b> ${L('That isn’t a crash and this app doesn’t read it. Nothing below matters until a person has seen you.','Ce n’est pas un crash et cette app ne lit pas ça. Rien plus bas ne compte tant qu’une personne ne t’a pas vu.')}</p></div>`;
@@ -2017,7 +2041,7 @@ function vCrashRes(){
   }
   if(R.hard) h+=`<div class="card flag"><p style="margin:0">${R.hard}</p></div>`;
   const cdk=S.c._day||dayKey(); const tm=tlog()[cdk];
-  if(tm && mapCount(tm)){ const items=Object.entries(tm).map(([id,n])=>{ if(id.startsWith('x_')){ const x=SUPN.find(z=>'x_'+z.k===id); return x?`${P2(x.l)} ${n} ${UU(x.u)}`:null; } const f=TF.find(x=>x.id==id); return f?`${n>1?n+'× ':''}${P2(f.l)}`:null; }).filter(Boolean); h+=`<div class="card"><div class="eyebrow">${(cdk===dayKey()?L('On today’s food log','Dans ta journée notée'):L(`On the food log for ${dayLabel(cdk)}`,`Dans la journée notée du ${dayLabel(cdk)}`))}</div><p class="small" style="margin:0">${esc(items.join(' · '))}</p><p class="small muted" style="margin:6px 0 0">${L('Crash days show as ⚡ on the tank calendar, next to what was eaten. After a few, line them up.','Les jours de crash apparaissent avec ⚡ sur le calendrier du réservoir, à côté de ce qui a été mangé. Après quelques-uns, compare-les.')}</p></div>`; }
+  if(tm && mapCount(tm)){ const items=Object.entries(tm).map(([id,n])=>{ if(id.startsWith('x_')){ const x=SUPN.find(z=>'x_'+z.k===id); return x?`${P2(x.l)} ${n} ${UU(x.u)}`:null; } const f=TF.find(x=>x.id==id); return f?`${n>1?n+'× ':''}${P2(f.l)}`:null; }).filter(Boolean); F(L('the food log','la journée notée'),`<div class="card"><div class="eyebrow">${(cdk===dayKey()?L('On today’s food log','Dans ta journée notée'):L(`On the food log for ${dayLabel(cdk)}`,`Dans la journée notée du ${dayLabel(cdk)}`))}</div><p class="small" style="margin:0">${esc(items.join(' · '))}</p><p class="small muted" style="margin:6px 0 0">${L('Crash days show as ⚡ on the tank calendar, next to what was eaten. After a few, line them up.','Les jours de crash apparaissent avec ⚡ sur le calendrier du réservoir, à côté de ce qui a été mangé. Après quelques-uns, compare-les.')}</p></div>`); }
   const pat=crashPattern();
   if(pat){
     const weeks=S.madeAt?Math.floor((Date.now()-new Date(S.madeAt).getTime())/(7*86400000)):null;
@@ -2029,15 +2053,17 @@ function vCrashRes(){
   } else {
     const top=M[R.top]; const sec=R.second?M[R.second]:null;
     h+=`<div class="card verdict"><span class="grade ${R.conf==='likely'?'likely':R.conf==='possible'?'try':'unclear'}">${P2(CONF[R.conf])}</span><div class="eyebrow">${confLabel(R)}</div><h3>${P2(top.t)}${R.tie&&sec?` <span class="muted">+</span> ${P2(sec.t)}`:''}</h3><p>${top.why()}</p>${R.tie&&sec?`<p>${sec.why()}</p><p class="small"><b>${L('One day can’t separate them.','Une journée ne peut pas les départager.')}</b> ${L('Change one — whichever is easier for you — and keep the other exactly as it was. Then read the next crash.','Change-en un — celui qui est le plus facile pour toi — et garde l’autre exactement pareil. Puis lis le prochain crash.')}</p>`:''}${R.combo?`<p class="small"><b>${L('Those two are one cause.','Ces deux-là sont une seule cause.')}</b> ${L('The pill ate the appetite, and the crash landed when the pill left and there was nothing underneath. Fix the floor and you fix both.','La pilule a mangé l’appétit, et le crash est tombé quand la pilule a lâché et qu’il n’y avait rien en dessous. Règle le plancher et tu règles les deux.')}</p>`:''}${R.profile?'':`<p class="small muted" style="margin:0">${L('Do the Patch (11 questions) and this read gets sharper — it will know your meds and what you run on.','Fais la Patch (11 questions) et cette lecture devient plus fine — elle va connaître tes médicaments et ce qui te fait tenir.')}</p>`}</div>`;
-    const FL=crashFloor(); h+=`<div class="card soft"><div class="eyebrow">${L('What it landed on','Sur quoi c’est tombé')}</div><p class="small" style="margin:0">${floorLine(FL)}</p>${FL&&FL.low.length?`<div class="row" style="margin-top:8px"><button class="btn ghost sm" data-go="tank">${L('See the tank','Voir le réservoir')}</button></div>`:''}</div>`;
-    if(R.also.length) h+=`<div class="card also"><div class="eyebrow">${L('Also in the picture','Aussi dans le portrait')}</div><ul style="margin:0">${R.also.map(k=>`<li><b>${P2(M[k].t)}</b> — ${P2(M[k].fp)}</li>`).join('')}</ul></div>`;
+    const FL=crashFloor(); F(L('what it landed on','sur quoi c’est tombé'),`<div class="card soft"><div class="eyebrow">${L('What it landed on','Sur quoi c’est tombé')}</div><p class="small" style="margin:0">${floorLine(FL)}</p>${FL&&FL.low.length?`<div class="row" style="margin-top:8px"><button class="btn ghost sm" data-go="tank">${L('See the tank','Voir le réservoir')}</button></div>`:''}</div>`);
+    if(R.also.length) F(L('also in the picture','aussi dans le portrait'),`<div class="card also"><div class="eyebrow">${L('Also in the picture','Aussi dans le portrait')}</div><ul style="margin:0">${R.also.map(k=>`<li><b>${P2(M[k].t)}</b> — ${P2(M[k].fp)}</li>`).join('')}</ul></div>`);
     h+=`<div class="card soft"><h3><span class="tag teal">${L('Tomorrow','Demain')}</span> <span class="small muted">${L('one move','un seul geste')}</span></h3><p style="margin:0">${P2(top.move)}</p></div>`;
-    h+=`<div class="card patch"><h3><span class="tag ink">${L('The test','Le test')}</span> <span class="small muted">${L('one variable','une seule variable')}</span></h3><p style="margin:0">${P2(top.test)}</p></div>`;
-    h+=`<div class="card patch"><h3><span class="tag">${L('Fingerprint','Empreinte')}</span> <span class="small muted">${L('for next time','pour la prochaine fois')}</span></h3><p style="margin:0">${P2(top.fp)}</p></div>`;
+    F(L('the test','le test'),`<div class="card patch"><h3><span class="tag ink">${L('The test','Le test')}</span> <span class="small muted">${L('one variable','une seule variable')}</span></h3><p style="margin:0">${P2(top.test)}</p></div>`);
+    F(L('the fingerprint','l’empreinte'),`<div class="card patch"><h3><span class="tag">${L('Fingerprint','Empreinte')}</span> <span class="small muted">${L('for next time','pour la prochaine fois')}</span></h3><p style="margin:0">${P2(top.fp)}</p></div>`);
   }
-  const entries=S.crashes.length?`<ul class="small" style="margin:6px 0 10px">${S.crashes.map((x,i)=>`<li><span class="pat">${crashDay(x)}</span> · ${x.top&&M[x.top]?P2(M[x.top].t):L('no clear cause','pas de cause claire')} <button class="btn ghost sm" data-delcrash="${i}" aria-label="${L('Delete this entry','Supprimer cette entrée')}" style="padding:2px 8px;margin-left:4px">×</button></li>`).join('')}</ul>`:'';
-  { const n=usableKeys().length; h+=`<div class="card soft"><p class="small" style="margin:0 0 8px">${n>=MINR?L('Your daily ratings can show what came before this — the night before, the caffeine, the drinks.','Tes notes du jour peuvent montrer ce qui est venu avant — la nuit d’avant, la caféine, l’alcool.'):L('A crash is often set up the day before: late caffeine, a short night, drinks. Four taps a day — energy, sleep, caffeine, alcohol — and after two or three weeks the app can show you what comes before yours.','Un crash se prépare souvent la veille : caféine tardive, nuit courte, alcool. Quatre réponses par jour — énergie, sommeil, caféine, alcool — et après deux ou trois semaines, l’app peut te montrer ce qui vient avant les tiens.')}</p><button class="btn ghost sm" data-go="pat">${n>=MINR?L('My patterns →','Mes tendances →'):L('Daily check-in →','Bilan du jour →')}</button></div>`; }
+  const entries=S.crashes.length?`<ul class="small" style="margin:6px 0 10px">${S.crashes.map((x,i)=>`<li><span class="pat">${crashDay(x)}</span> · ${x.top&&M[x.top]?P2(M[x.top].t):L('no clear cause','pas de cause claire')} <button class="btn ghost sm" data-delcrash="${i}" aria-label="${L('Delete this entry','Supprimer cette entrée')}" style="padding:2px 8px;margin-left:4px;min-width:44px">×</button></li>`).join('')}</ul>`:'';
+  let nudge=''; { const n=usableKeys().length; nudge=`<div class="card soft"><p class="small" style="margin:0 0 8px">${n>=MINR?L('Your daily ratings can show what came before this — the night before, the caffeine, the drinks.','Tes notes du jour peuvent montrer ce qui est venu avant — la nuit d’avant, la caféine, l’alcool.'):L('A crash is often set up the day before: late caffeine, a short night, drinks. Four taps a day — energy, sleep, caffeine, alcohol — and after two or three weeks the app can show you what comes before yours.','Un crash se prépare souvent la veille : caféine tardive, nuit courte, alcool. Quatre réponses par jour — énergie, sommeil, caféine, alcool — et après deux ou trois semaines, l’app peut te montrer ce qui vient avant les tiens.')}</p><button class="btn ghost sm" data-go="pat">${n>=MINR?L('My patterns →','Mes tendances →'):L('Daily check-in →','Bilan du jour →')}</button></div>`; }
   h+=`<div class="card"><h3>${L('The log','Le journal')}</h3>${pat?'':`<p class="small">${L(`${S.crashes.length} logged so far. The pattern shows after three — that’s when a read becomes something that keeps happening to you.`,`${S.crashes.length} au journal jusqu’ici. La tendance se montre après trois — c’est là qu’une lecture devient quelque chose qui t’arrive pour vrai.`)}</p>`}${entries}<div class="row">${logged?`<span class="small muted">✓ ${L('Logged','Au journal')}</span>`:`<button class="btn sm" id="logCrash">${L('Log this crash','Mettre ce crash au journal')}</button>`}<button class="btn ghost sm" id="newCrash">${L('New crash','Nouveau crash')}</button>${S.crashes.length?`<button class="btn ghost sm" id="clearLog">${L('Clear log','Vider le journal')}</button>`:''}</div></div>`;
+  if(fold.length) h+=`<details class="note crashmore"><summary>${L('More','Plus')} · ${foldNames.join(' · ')}</summary>${fold.join('')}</details>`;
+  h+=nudge;
   h+=`<div class="card"><p class="small muted" style="margin:0 0 8px">${L('A read, not a diagnosis — pattern-matching against your answers, with hand-set thresholds nobody has validated. Not yet reviewed by a pharmacist; every underlined word shows its sources.','Une lecture, pas un diagnostic — un rapprochement avec tes réponses, et des seuils fixés à la main que personne n’a validés. Pas encore révisé par un pharmacien; chaque mot souligné montre ses sources.')} v${VER} · ${L('sources checked','sources vérifiées le')} ${P2(CHECKED)}.</p><div class="row"><button class="btn sm" data-go="ai">${L('Ask an AI about this','Demander à une IA')}</button><button class="btn ghost sm" data-copy="ct">${L('Copy the read','Copier la lecture')}</button>${R.profile?'':`<button class="btn ghost sm" data-go="patch">${L('Do the Patch','Faire la Patch')}</button>`}</div><textarea class="out hidden" id="ct" readonly>${esc(crashText())}</textarea></div>`;
   return h;
 }
@@ -2053,16 +2079,19 @@ function vAI(){
   h+=`<div class="card"><div class="eyebrow">${L('The packet — edit anything you don’t want in there','Le paquet — modifie ce que tu ne veux pas envoyer')}</div><textarea class="out live" id="pk" aria-label="${L('Packet text','Texte du paquet')}">${esc(packetText())}</textarea><p class="small muted" style="margin:8px 0 0"><b>${L('Privacy:','Vie privée :')}</b> ${L('nothing leaves this phone until you share or paste it. After that it’s in the AI company’s hands, under their rules — so take out whatever you don’t want there first. Pick what you want above before editing; the chips rebuild the text.','rien ne quitte ce téléphone tant que tu ne partages ou ne colles pas. Après, c’est entre les mains de la compagnie d’IA, selon ses règles — alors enlève d’abord ce que tu ne veux pas là. Choisis ce que tu veux plus haut avant de modifier; les choix reconstruisent le texte.')}</p></div>`;
   return h;
 }
+/* v1.2.25: since pick-one questions move on by themselves (v1.2.22), one tap can read as "done" — on the safety question that drops
+   answers (breastfeeding AND vegetarian). Every pick-several question says so in words, and its options carry checkboxes. */
+function pickAll(){ return `<p class="pickall">${L('Pick all that apply','Coche tout ce qui s’applique')}</p>`; }
 function vQ(i){
   const q=QL()[i]; let opts=q.opts;
   if(q.dyn){ const f=(S.a.fuel||[]).filter(x=>x!=='none'); opts=f.map(v=>({l:FUEL[v],v})); opts.push({l:['I could drop any of them','Je pourrais lâcher n’importe lequel'],v:'any',none:true}); if(!f.length) opts=[{l:['Nothing to keep — next','Rien à garder — suivant'],v:'any',none:true}]; }
-  let h=`<div class="qn">${i+1} ${L('of','de')} ${QL().length}</div><h2>${P2(q.t)}</h2>${q.h?`<p class="muted small">${P2(q.h)}</p>`:''}`;
+  let h=`<div class="qn">${i+1} ${L('of','de')} ${QL().length}</div><h2>${P2(q.t)}</h2>${q.h?`<p class="muted small">${P2(q.h)}</p>`:''}${q.multi?pickAll():''}`;
   if(q.two){
-    h+=`<div class="eyebrow" style="margin-top:12px">${L('Money','Argent')}</div><div class="chips">`+opts.filter(o=>o.grp==='b').map(o=>`<button class="chip" data-q="budget_b" data-v="${o.v}" aria-pressed="${S.a.budget_b===o.v}">${P2(o.l)}</button>`).join('')+`</div>`;
-    h+=`<div class="eyebrow" style="margin-top:12px">${L('Cooking','Cuisine')}</div><div class="chips">`+opts.filter(o=>o.grp==='c').map(o=>`<button class="chip" data-q="budget_c" data-v="${o.v}" aria-pressed="${S.a.budget_c===o.v}">${P2(o.l)}</button>`).join('')+`</div>`;
+    h+=`<div class="eyebrow" style="margin-top:12px">${L('Money','Argent')}</div><div class="chips pick1">`+opts.filter(o=>o.grp==='b').map(o=>`<button class="chip" data-q="budget_b" data-v="${o.v}" aria-pressed="${S.a.budget_b===o.v}"><span>${P2(o.l)}</span></button>`).join('')+`</div>`;
+    h+=`<div class="eyebrow" style="margin-top:12px">${L('Cooking','Cuisine')}</div><div class="chips pick1">`+opts.filter(o=>o.grp==='c').map(o=>`<button class="chip" data-q="budget_c" data-v="${o.v}" aria-pressed="${S.a.budget_c===o.v}"><span>${P2(o.l)}</span></button>`).join('')+`</div>`;
     return h;
   }
-  h+=`<div class="chips">`+opts.map(o=>`<button class="chip${q.danger&&!o.none?' danger':''}" data-q="${q.id}" data-v="${o.v}" data-none="${o.none?1:0}" aria-pressed="${has(q.id,o.v)}">${P2((o.lp&&any('safety','pp','bf'))?o.lp:o.l)}</button>`).join('')+`</div>`;
+  h+=`<div class="chips ${q.multi?'pickn':'pick1'}">`+opts.map(o=>`<button class="chip${q.danger&&!o.none?' danger':''}" data-q="${q.id}" data-v="${o.v}" data-none="${o.none?1:0}" aria-pressed="${has(q.id,o.v)}"><span>${P2((o.lp&&any('safety','pp','bf'))?o.lp:o.l)}</span></button>`).join('')+`</div>`;
   return h;
 }
 /* ===================== v1.2.22: ONE-SCREEN RESULT ===================== */
@@ -2204,7 +2233,8 @@ function bind(){
     save(); render(); };
   if($('urgentAck')) $('urgentAck').onclick=()=>{ S.urgentAck=true; save(); render(true); };
   if($('startWeek')) $('startWeek').onclick=()=>{ S.started=new Date().toISOString(); S.checkins=[]; save(); render(true); toast(L('Week started','Semaine commencée')); };
-  if($('logCrash')) $('logCrash').onclick=()=>{ const R=buildCrash(); const id=Date.now(); const ans={}; for(const [k2,v2] of Object.entries(S.c)) if(k2[0]!=='_') ans[k2]=Array.isArray(v2)?[...v2]:v2; S.crashes.push({id, d:new Date().toISOString(), day:S.c._day||dayKey(), answers:ans, ver:VER, when:S.c.cwhen||null, feel:Array.isArray(S.c.cfeel)?[...S.c.cfeel]:[], top:R.top, second:R.second, conf:R.conf}); if(S.crashes.length>30) S.crashes=S.crashes.slice(-30); S.c._logged=id; save(); render(true); toast(L('Logged','Au journal')); };
+  if($('logCrash')) $('logCrash').onclick=()=>{ const R=buildCrash(); const id=Date.now(); const ans={}; for(const [k2,v2] of Object.entries(S.c)) if(k2[0]!=='_') ans[k2]=Array.isArray(v2)?[...v2]:v2; S.crashes.push({id, d:new Date().toISOString(), day:S.c._day||dayKey(), answers:ans, ver:VER, when:S.c.cwhen||null, feel:Array.isArray(S.c.cfeel)?[...S.c.cfeel]:[], top:R.top, second:R.second, conf:R.conf}); { const dk=S.c._day||dayKey(); const rr=rates()[dk]||(rates()[dk]={}); rr.fl=rr.fl||{}; rr.fl.cr=true; } /* v1.2.25: the check-in agrees with the log; "Which is right?" only if ⚡ is unticked later */
+    if(S.crashes.length>30) S.crashes=S.crashes.slice(-30); S.c._logged=id; save(); render(true); toast(L('Logged','Au journal')); };
   if($('newCrash')) $('newCrash').onclick=()=>{ S.c={}; S.cstep=1; save(); render(); };
   if($('clearLog')) $('clearLog').onclick=function(){ if(!this.dataset.sure){ this.dataset.sure='1'; this.textContent=L('Tap again to clear the crash log','Appuie encore pour vider le journal'); return; } S.crashes=[]; delete S.c._logged; save(); render(true); toast(L('Log cleared','Journal vidé')); };
   document.querySelectorAll('[data-delcrash]').forEach(b=>{ b.onclick=()=>{ const i=+b.dataset.delcrash; const x=S.crashes[i]; const isCurrent = S.c._logged===true ? i===S.crashes.length-1 : (x&&x.id===S.c._logged); S.crashes.splice(i,1); if(isCurrent||!S.crashes.length) delete S.c._logged; save(); render(true); toast(L('Deleted','Supprimé')); }; });
@@ -2287,7 +2317,10 @@ function parseBackup(text){
 function eraseAll(){ const l=S.lang, ack=S.ack; try{ localStorage.removeItem(KEY); localStorage.removeItem('patch'); }catch(e){} S={a:{},step:0,started:null,checkins:[],lang:l,done:false,ack,mode:'home',c:{},cstep:0,crashes:[],intent:null,madeAt:null,tank:{p:{},day:{},log:{},rate:{},closed:{},closedMig:true,roll:4,view:'normal'},tstep:0}; save(); render(); toast(L('Erased','Effacé')); }
 /* tappable terms: real buttons for keyboard and screen readers, not bare spans */
 /* v1.2.22: underline each glossary word once per screen — its first appearance; later mentions are plain text */
-function onceTerms(root){ const seen=new Set(); root.querySelectorAll('.t[data-t]').forEach(el=>{ const k=el.dataset.t; if(seen.has(k)) el.replaceWith(document.createTextNode(el.textContent)); else seen.add(k); }); }
+function onceTerms(root){ const seen=new Set(); const all=[...root.querySelectorAll('.t[data-t]')];
+  /* v1.2.25: visible words first, so a folded section can't take the only underline */
+  const folded=el=>{ const d=el.closest('details:not([open])'); return !!d && !(el.closest('summary') && el.closest('summary').parentElement===d); };
+  [...all.filter(e=>!folded(e)),...all.filter(folded)].forEach(el=>{ const k=el.dataset.t; if(seen.has(k)) el.replaceWith(document.createTextNode(el.textContent)); else seen.add(k); }); }
 function wireTerms(root){
   root.querySelectorAll('.t[data-t]').forEach(el=>{
     el.setAttribute('role','button'); el.tabIndex=0; el.setAttribute('aria-haspopup','dialog');
