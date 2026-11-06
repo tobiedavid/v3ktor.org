@@ -304,7 +304,7 @@ ul.pay{padding-left:18px} ul.pay li{margin:.2em 0}
 let S = {a:{}, step:0, started:null, checkins:[], lang:null, mode:null, c:{}, cstep:0, crashes:[], intent:null, tank:null, tstep:0};
 const KEY='thepatch.v1';
 try{ const s=localStorage.getItem(KEY)||localStorage.getItem('patch'); if(s) S=Object.assign(S, JSON.parse(s)); if(!localStorage.getItem(KEY)&&s) localStorage.setItem(KEY,s); if(localStorage.getItem('patch')) localStorage.removeItem('patch'); }catch(e){}
-const VER='1.2.28'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
+const VER='1.2.29'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
 /* v1.2.21 (5 Nov 2026): prenatal / folic-acid and pregnancy-iron lines aligned with Health Canada; Quebec route for bloodwork; hard-stool branch;
    pattern messages match the 5-a-side rule; iPhone storage note + persist(); protein note by life stage; French fixes; "about $8" in English. */
 /* v1.2.22 (6 Nov 2026): one-screen result (plain-words test card, three-line week, one notes card with the crisis line kept open); glossary words underlined once per screen;
@@ -336,6 +336,10 @@ const VER='1.2.28'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
    and protein rings, Crash · Meal · Symptom, today in order with the time since the last meal. First open: their own day said
    back to them, a one-minute normal day that fills the gauge, and what they'll see and when. Crash tip from hours since the
    last meal, once three recent crashes agree. */
+/* v1.2.29 (6 Nov 2026): opening the app starts on home (a refresh, or the browser bringing a sleeping page back, within 15
+   minutes keeps the screen; 15 minutes away from an open page also comes back on home). Picking a food clears the search, and the
+   list stays under the thumb: the tank's editor, "Same as" and "More foods" no longer move it. Typing hides the food groups,
+   not "Your usual". A crash report left half done on an earlier day no longer comes back as today's. */
 if(!S.lang){ S.lang = (navigator.language||'en').toLowerCase().startsWith('fr') ? 'fr' : 'en'; }
 /* v0.7: three doors. Older saves have no mode — someone mid-questions lands back on their question, everyone else on the chooser. */
 if(!S.mode){ S.mode = S.step>0 ? 'patch' : 'home'; }
@@ -1737,7 +1741,7 @@ function tankEditor(map,R){
   const dk = v==='today'?dayKey():v==='day'?S.tank.sel:null;
   const closeBtn = dk ? (isClosed(dk) ? `<span class="small" style="align-self:center">✓ ${L('Logged as complete','Noté comme complet')}</span><button type="button" class="btn ghost sm" data-fopen="${dk}">${L('Not done yet','Pas fini')}</button>` : (mapCount(map)?`<button type="button" class="btn primary sm" data-fclose="${dk}">${L('That’s everything I ate','C’est tout ce que j’ai mangé')}</button>`:'')) : '';
   const saveNormal = (v!=='normal' && mapCount(map)) ? `<button class="btn ghost sm" id="setNormal">${L('Make this my normal day','En faire ma journée normale')}</button>` : '';
-  return `<div class="card"><h3>${title} <span class="small muted">· ${R.nF} ${L('servings','portions')}</span></h3><p class="small muted" style="margin:0 0 6px">${v==='normal'?L('What a usual day looks like. Tap to add a serving, tap again for another; − takes one away.','À quoi ressemble une journée habituelle. Appuie pour ajouter une portion, encore pour une autre; − en enlève une.'):L('Tap to add a serving, tap again for another; − takes one away.','Appuie pour ajouter une portion, encore pour une autre; − en enlève une.')}</p>${supBtn}${copyBtn?`<div class="row" style="margin:6px 0 8px">${copyBtn}</div>`:''}<div class="fsearch"><input type="search" id="foodQ" class="sel" placeholder="${L('Search — egg, beer, Monster…','Chercher — œuf, bière, Monster…')}" aria-label="${L('Search all foods','Chercher tous les aliments')}" value="${esc(foodQ)}" autocomplete="off"></div><div class="gtabs" ${foodQ.trim()?'hidden':''}>${TGRP.map(([g,l])=>`<button type="button" data-grp="${g}" aria-pressed="${grp===g}">${P2(l)}</button>`).join('')}</div>${grp==='sup'&&!foodQ.trim()?supSteppers(map):''}<div class="foods" id="foodList">${foodsHTML(map,grp)}</div>${dk&&mapCount(map)&&!isClosed(dk)?`<p class="small muted" style="margin:8px 0 4px">${L('Until you mark it complete, this day counts as partly logged: it won’t be read as a full day in the 7-day view, the crash read or patterns.','Tant que tu ne la marques pas complète, cette journée compte comme notée en partie : elle ne sera pas lue comme une journée complète dans les 7 jours, la lecture du crash ou les tendances.')}</p>`:''}<div class="row">${closeBtn}${R.nF?`<button class="btn ghost sm" id="clearDay">${L('Clear','Effacer')}</button>`:''}${saveNormal}<button class="btn ghost sm" data-go="tsetup">${L('Change setup','Changer les réglages')}</button></div></div>`;
+  return `<div class="card"><h3>${title} <span class="small muted">· ${fmt(R.nF,1)} ${R.nF===1?L('serving','portion'):L('servings',R.nF<2?'portion':'portions')}</span></h3><p class="small muted" style="margin:0 0 6px">${v==='normal'?L('What a usual day looks like. Tap to add a serving, tap again for another; − takes one away.','À quoi ressemble une journée habituelle. Appuie pour ajouter une portion, encore pour une autre; − en enlève une.'):L('Tap to add a serving, tap again for another; − takes one away.','Appuie pour ajouter une portion, encore pour une autre; − en enlève une.')}</p>${supBtn}${copyBtn?`<div class="row" style="margin:6px 0 8px">${copyBtn}</div>`:''}<div class="fsearch"><input type="search" id="foodQ" class="sel" placeholder="${L('Search — egg, beer, Monster…','Chercher — œuf, bière, Monster…')}" aria-label="${L('Search all foods','Chercher tous les aliments')}" value="${esc(foodQ)}" autocomplete="off"></div><div class="gtabs fgrp" ${foodQ.trim()?'hidden':''}>${TGRP.map(([g,l])=>`<button type="button" data-grp="${g}" aria-pressed="${grp===g}">${P2(l)}</button>`).join('')}</div>${grp==='sup'&&!foodQ.trim()?supSteppers(map):''}<div class="foods" id="foodList">${foodsHTML(map,grp)}</div>${dk&&mapCount(map)&&!isClosed(dk)?`<p class="small muted" style="margin:8px 0 4px">${L('Until you mark it complete, this day counts as partly logged: it won’t be read as a full day in the 7-day view, the crash read or patterns.','Tant que tu ne la marques pas complète, cette journée compte comme notée en partie : elle ne sera pas lue comme une journée complète dans les 7 jours, la lecture du crash ou les tendances.')}</p>`:''}<div class="row">${closeBtn}${R.nF?`<button class="btn ghost sm" id="clearDay">${L('Clear','Effacer')}</button>`:''}${saveNormal}<button class="btn ghost sm" data-go="tsetup">${L('Change setup','Changer les réglages')}</button></div></div>`;
 }
 function vCal(){
   const today=dayKey(); const ym=S.tank.calMonth||today.slice(0,7); const [y,m]=ym.split('-').map(Number);
@@ -2030,10 +2034,12 @@ function renderTop(){
 }
 function render(keep){
   const y=window.scrollY; if(!keep) window.scrollTo(0,0);
+  const aSel=keep?anchorSel:null; anchorSel=null; const aTop=aSel?anchorTop(aSel):null;
   document.documentElement.lang=S.lang;
   if(S.meal&&S.mode!=='meal'){ dropEmptyMeal(); delete S.meal; }
   if(S.sym&&S.mode!=='sym') delete S.sym;
   const v=view();
+  if(v!==lastView){ if(lastView!==null){ foodQ=''; ndMore=false; } lastView=v; }
   if(v==='patch'){ try{ tankPrefill(); }catch(e){} if(!S.done){ S.done=true; S.madeAt=new Date().toISOString(); save(); }
     else if(S.redo){ S.redo=false; S.madeAt=new Date().toISOString(); const d=S.started?Math.floor((Date.now()-new Date(S.started).getTime())/86400000)+1:0; if(d>=28){ S.started=null; S.checkins=[]; } save(); } }
   const body = v==='start'?vStart() : v==='q'?vQ(S.step-1) : v==='patch'?vPatch() : v==='cq'?vCQ(S.cstep-1) : v==='crashres'?vCrashRes() : v==='tq'?vTQ(S.tstep-1) : v==='tank'?vTank() : v==='pat'?vPat() : v==='meal'?vMeal() : v==='day'?vDay() : v==='sym'?vSym() : v==='nday'?vNday() : vAI();
@@ -2041,6 +2047,7 @@ function render(keep){
   app.innerHTML = body;
   renderBar(v); bind();
   if(keep) window.scrollTo(0,y);
+  if(aTop!=null){ const t=anchorTop(aSel); if(t!=null&&Math.abs(t-aTop)>1) window.scrollBy(0,t-aTop); }
 }
 /* returning users: today's check-in, one line about their days, the doors one step down; disclaimers move to About */
 function daysLine(){ const n=usableKeys().length; if(n<MINR) return L(`${n} of ${MINR} finished days. Comparisons start at ${MINR}; most patterns take two to three weeks. Finish today and yesterday to get there faster.`,`${n} sur ${MINR} journées terminées. Les comparaisons commencent à ${MINR}; la plupart des tendances prennent deux à trois semaines. Termine aujourd’hui et hier pour y arriver plus vite.`);
@@ -2437,7 +2444,7 @@ function vDay(){ const k=S.daySel||dayKey(); const isT=k===dayKey(); const head=
   return h; }
 /* ---------- meal report ---------- */
 function foodPicker(map){ if(!TGRP.some(t=>t[0]===S.tank.grp)) S.tank.grp='fruit'; const grp=S.tank.grp;
-  return `<div class="fsearch"><input type="search" id="foodQ" class="sel" placeholder="${L('Search — egg, beer, Monster…','Chercher — œuf, bière, Monster…')}" aria-label="${L('Search all foods','Chercher tous les aliments')}" value="${esc(foodQ)}" autocomplete="off"></div><div class="gtabs" ${foodQ.trim()?'hidden':''}>${TGRP.map(([g,l])=>`<button type="button" data-grp="${g}" aria-pressed="${grp===g}">${P2(l)}</button>`).join('')}</div>${grp==='sup'&&!foodQ.trim()?supSteppers(map):''}<div class="foods" id="foodList">${foodsHTML(map,grp)}</div>`; }
+  return `<div class="fsearch"><input type="search" id="foodQ" class="sel" placeholder="${L('Search — egg, beer, Monster…','Chercher — œuf, bière, Monster…')}" aria-label="${L('Search all foods','Chercher tous les aliments')}" value="${esc(foodQ)}" autocomplete="off"></div><div class="gtabs fgrp" ${foodQ.trim()?'hidden':''}>${TGRP.map(([g,l])=>`<button type="button" data-grp="${g}" aria-pressed="${grp===g}">${P2(l)}</button>`).join('')}</div>${grp==='sup'&&!foodQ.trim()?supSteppers(map):''}<div class="foods" id="foodList">${foodsHTML(map,grp)}</div>`; }
 /* the fast path for the same breakfast every day: the last few different meals, and the foods logged most this month */
 function recentMeals(exclude){ const seen=new Set(), out=[]; const ms=meals().filter(m=>m.id!==exclude&&mapCount(m.items)).sort((a,b)=>(b.day+(b.at||'')).localeCompare(a.day+(a.at||'')));
   for(const m of ms){ const key=JSON.stringify(Object.entries(m.items).sort()); if(seen.has(key)) continue; seen.add(key); out.push(m); if(out.length>=3) break; } return out; }
@@ -2598,7 +2605,7 @@ function quickFoods(){ const life=tankLife(); const fuel=(S.a&&S.a.fuel)||[]; co
 function vNday(){ const map=S.tank.day; const t=tankTotals(map).tot; const ready=tankReady(); const TG=ready?tankTargets():null;
   let h=`<div class="eyebrow">${L('Your normal day','Ta journée normale')}</div><h2>${L('What does a usual day look like?','À quoi ressemble une journée habituelle?')}</h2><p class="small" style="margin:-4px 0 10px">${L('Rough is fine. Tap what you have on most days — drinks and pills too; tap again for a second one. Until you log real meals, the gauge uses this.','Approximatif, c’est correct. Appuie sur ce que tu prends la plupart des jours — boissons et pilules aussi; appuie encore pour une deuxième. Tant que tu ne notes pas de vrais repas, la jauge utilise ça.')}</p>`;
   h+=`<div class="card"><div class="gtabs" style="margin:0">${quickFoods().map(f=>{ const c=map[f.id]||0; return `<button type="button" data-food="${f.id}" aria-pressed="${c>0}">${esc(P2(f.l))}${c?' ×'+fmt(c,1):''}</button>`; }).join('')}</div>${TG&&mapCount(map)?`<p class="small" style="margin:10px 0 0"><b>${L(`Fuel ${Math.round((t.kcal||0)/TG.kcal*100)}% · protein ${fmt(t.prot||0,0)} of ${TG.prot} g`,`Carburant ${Math.round((t.kcal||0)/TG.kcal*100)} % · protéines ${fmt(t.prot||0,0)} sur ${TG.prot} g`)}</b></p>`:''}</div>`;
-  h+=`<details class="more"><summary>${L('More foods','Plus d’aliments')}</summary><div class="card">${foodPicker(map)}</div></details>`;
+  h+=`<details class="more" id="ndMore"${ndMore?' open':''}><summary>${L('More foods','Plus d’aliments')}</summary><div class="card">${foodPicker(map)}</div></details>`;
   return h; }
 /* ---------- the mirror: their own day back to them, before any advice ---------- */
 const FUELM={coffee:['coffee','le café'],energy:['energy drinks','les boissons énergisantes'],sugar:['sugar','le sucre'],beer:['beer','la bière'],wine:['wine','le vin'],spirits:['spirits','le fort'],smoke:['nicotine','la nicotine']};
@@ -2666,6 +2673,33 @@ function bind128(){ const $=id=>document.getElementById(id);
   if($('ndayDone')) $('ndayDone').onclick=()=>{ S.mode='home'; foodQ=''; const ok=save(); render(); if(ok&&mapCount(S.tank.day)) toast(L('Saved as your normal day','Enregistré comme ta journée normale')); };
   document.querySelectorAll('[data-payoffok]').forEach(b=>{ b.onclick=()=>{ S.payoffOk=true; save(); render(true); }; });
 }
+/* ===================== v1.2.29: open on home; a food search that clears and stays put ===================== */
+/* Opening the app starts on home: the last screen from hours ago is noise. Two cases keep the screen — a reload the browser
+   did by itself (Chrome brings back a page it put to sleep) and a refresh — when the app was last seen under 15 minutes ago.
+   A page that stayed open counts the same way: 15 minutes or more away, it comes back on home. Nothing is lost: meals and
+   symptoms are saved as they're tapped, and a half-done crash report or questionnaire picks up again from home. */
+const SEEN='thepatch.seen', AWAY=15*60000;
+function seen(){ try{ localStorage.setItem(SEEN,String(Date.now())); }catch(e){} }
+function seenAgo(){ try{ const t=+localStorage.getItem(SEEN); return t>0?Date.now()-t:Infinity; }catch(e){ return Infinity; } }
+function homeReset(){ try{ closeSheet(true); }catch(e){} if(S.meal){ dropEmptyMeal(); delete S.meal; } delete S.sym; S.mode='home'; foodQ=''; ndMore=false; rEdit=null; }
+function bootView(){ let nav=''; try{ const e=performance.getEntriesByType('navigation')[0]; nav=e?e.type:''; }catch(e){}
+  const soft=(nav==='reload'||nav==='back_forward'||document.wasDiscarded===true)&&seenAgo()<AWAY;
+  try{ history.scrollRestoration=soft?'auto':'manual'; }catch(e){}
+  if(!soft&&S.mode&&S.mode!=='home'){ homeReset(); save(); }
+  seen(); return soft; }
+let hidAt=0;
+function backFrom(away){ if(away>=AWAY){ homeReset(); save(); render(); } else if(view()==='start') render(true); seen(); }
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden'){ hidAt=Date.now(); seen(); return; } const t=hidAt; hidAt=0; backFrom(t?Date.now()-t:0); });
+window.addEventListener('pagehide',()=>seen());
+window.addEventListener('pageshow',e=>{ if(e.persisted&&!hidAt) backFrom(seenAgo()); });
+/* a crash report left half done is picked up again the same day; one from an earlier day doesn't hijack today's */
+function crashStale(){ const c=S.c||{}; if(!S.cstep||c._logged) return false; if(c._st) return dayKey(new Date(c._st))!==dayKey(); return !!(c._day&&c._day<keyAdd(dayKey(),-1)); }
+/* the food search: a pick clears it, and the screen keeps what was tapped where it was — so the next food is one search away.
+   A re-render can change what's above (the first food moves the tank's editor below the bars; "Same as" goes away once a meal
+   has something in it), so the tapped thing is measured before and after and the page scrolls by the difference. */
+let ndMore=false, anchorSel=null, lastView=null, qBlurAt=0;
+function anchorTop(sel){ const el=sel&&document.querySelector(sel); if(!el||!el.getClientRects().length) return null; return el.getBoundingClientRect().top; }
+function bind129(){ const d=document.getElementById('ndMore'); if(d) d.ontoggle=()=>{ ndMore=d.open; }; }
 /* ===================== v1.2.22: ONE-SCREEN RESULT ===================== */
 function plainName(s){ return String(s||'').replace(/<[^>]+>/g,'').split(' — ')[0].trim(); }
 /* the week in three lines; the full patch further down has the why */
@@ -2773,7 +2807,7 @@ function bind(){
   const needAck=()=>{ if(S.ack) return false; toast(L('Tap the box above first','Coche la case au-dessus d’abord')); const b=$('ack'); if(b) b.focus(); return true; };
   const goPatch=()=>{ S.mode='patch'; S.step=(S.step>=1&&S.step<=QL().length)?S.step:((S.done||S.step>QL().length)?QL().length+1:firstUnanswered()); save(); render(); };
   const goRedo=()=>{ S.mode='patch'; S.step=1; S.redo=true; save(); render(); };
-  const goCrash=(day)=>{ S.mode='crash'; const n=cqList().length; const fresh=!S.cstep || (S.cstep>n && S.c._logged) || (day && S.c._day!==day); if(fresh){ S.c={}; S.cstep=1; if(!day||day===dayKey()) S.c._at=nowHM(); crashSetDay(day||dayKey()); } else if(S.cstep<=n){ S.cstep=firstUnansweredC(); } save(); render(); };
+  const goCrash=(day)=>{ S.mode='crash'; const n=cqList().length; const fresh=!S.cstep || (S.cstep>n && S.c._logged) || (day && S.c._day!==day) || crashStale(); if(fresh){ S.c={_st:Date.now()}; S.cstep=1; if(!day||day===dayKey()) S.c._at=nowHM(); crashSetDay(day||dayKey()); } else if(S.cstep<=n){ S.cstep=firstUnansweredC(); } save(); render(); };
   const goAI=()=>{ S.mode='ai'; save(); render(); };
   const goPat=()=>{ S.mode='pat'; save(); render(); };
   const goTank=()=>{ S.mode='tank'; tankPrefill(); const l=tqList(); if(tankReady()) S.tstep=l.length+1; else { const i=l.findIndex(q=>q.multi?!(Array.isArray(S.tank.p[q.id])&&S.tank.p[q.id].length):S.tank.p[q.id]==null); S.tstep=i<0?l.length+1:i+1; } save(); render(); };
@@ -2822,29 +2856,33 @@ function bind(){
   if($('startWeek')) $('startWeek').onclick=()=>{ S.started=new Date().toISOString(); S.checkins=[]; save(); render(true); toast(L('Week started','Semaine commencée')); };
   if($('logCrash')) $('logCrash').onclick=()=>{ const R=buildCrash(); const id=Date.now(); const ans={}; for(const [k2,v2] of Object.entries(S.c)) if(k2[0]!=='_') ans[k2]=Array.isArray(v2)?[...v2]:v2; S.crashes.push({id, d:new Date().toISOString(), day:S.c._day||dayKey(), at:S.c._at||null, answers:ans, ver:VER, when:S.c.cwhen||null, feel:Array.isArray(S.c.cfeel)?[...S.c.cfeel]:[], top:R.top, second:R.second, conf:R.conf}); { const dk=S.c._day||dayKey(); const rr=rates()[dk]||(rates()[dk]={}); rr.fl=rr.fl||{}; rr.fl.cr=true; } /* v1.2.25: the check-in agrees with the log; "Which is right?" only if ⚡ is unticked later */
     if(S.crashes.length>30) S.crashes=S.crashes.slice(-30); S.c._logged=id; save(); render(true); toast(L('Logged','Au journal')); };
-  if($('newCrash')) $('newCrash').onclick=()=>{ S.c={}; S.cstep=1; save(); render(); };
+  if($('newCrash')) $('newCrash').onclick=()=>{ S.c={_st:Date.now()}; S.cstep=1; save(); render(); };
   if($('clearLog')) $('clearLog').onclick=function(){ if(!this.dataset.sure){ this.dataset.sure='1'; this.textContent=L('Tap again to clear the crash log','Appuie encore pour vider le journal'); return; } S.crashes=[]; delete S.c._logged; save(); render(true); toast(L('Log cleared','Journal vidé')); };
   document.querySelectorAll('[data-delcrash]').forEach(b=>{ b.onclick=()=>{ const i=+b.dataset.delcrash; const x=S.crashes[i]; const isCurrent = S.c._logged===true ? i===S.crashes.length-1 : (x&&x.id===S.c._logged); S.crashes.splice(i,1); if(isCurrent||!S.crashes.length) delete S.c._logged; save(); render(true); toast(L('Deleted','Supprimé')); }; });
-  bindFoods(); bindRest(); bind127(); bind128();
-  if($('foodQ')) $('foodQ').oninput=(e)=>{ foodQ=e.target.value; const fl=$('foodList'); if(fl){ fl.innerHTML=foodsHTML(editMap(),S.tank.grp); bindFoods(); } const gt=document.querySelector('.gtabs:not(.seg)'); if(gt) gt.hidden=!!foodQ.trim(); };
+  bindFoods(); bindRest(); bind127(); bind128(); bind129();
+  if($('foodQ')) $('foodQ').onblur=()=>{ qBlurAt=Date.now(); };
+  if($('foodQ')) $('foodQ').oninput=(e)=>{ foodQ=e.target.value; const fl=$('foodList'); if(fl){ fl.innerHTML=foodsHTML(editMap(),S.tank.grp); bindFoods(); } document.querySelectorAll('.fgrp').forEach(g=>{ g.hidden=!!foodQ.trim(); }); };
 }
 function bindFoods(){
-  document.querySelectorAll('[data-food]').forEach(b=>{ b.onclick=()=>{ const id=b.dataset.food; const M=editMap(); M[id]=(M[id]||0)+1; refocus=`[data-food="${id}"]`; save(); render(true); }; });
-  document.querySelectorAll('[data-foodminus]').forEach(b=>{ b.onclick=()=>{ const id=b.dataset.foodminus; const M=editMap(); if(M[id]>1) M[id]--; else delete M[id]; refocus=`[data-food="${id}"]`; save(); render(true); }; });
+  document.querySelectorAll('[data-food]').forEach(b=>{ b.onclick=()=>{ const id=b.dataset.food; const M=editMap(); M[id]=(M[id]||0)+1; const inList=!!b.closest('#foodList');
+    const q=document.getElementById('foodQ'); const typing=!!q&&(document.activeElement===q||Date.now()-qBlurAt<900);
+    if(foodQ.trim()){ foodQ=''; refocus=inList?(typing?'#foodQ':null):`[data-food="${id}"]`; } else refocus=inList?`#foodList [data-food="${id}"]`:`[data-food="${id}"]`;
+    anchorSel=inList?'#foodQ':`[data-food="${id}"]`; save(); render(true); }; });
+  document.querySelectorAll('[data-foodminus]').forEach(b=>{ b.onclick=()=>{ const id=b.dataset.foodminus; const M=editMap(); if(M[id]>1) M[id]--; else delete M[id]; refocus=`#foodList [data-food="${id}"]`; anchorSel='#foodQ'; save(); render(true); }; });
 }
 function bindRest(){ const $=id=>document.getElementById(id);
   document.querySelectorAll('[data-fclose]').forEach(b=>{ b.onclick=()=>{ const k=b.dataset.fclose; S.tank.closed[k]=true; refocus='[data-fopen]'; const ok=save(); render(true); const r=rates()[k];
     if(S.mode==='day'&&!(r&&r.fin)){ const c=document.getElementById('checkin'); if(c){ try{ c.scrollIntoView({block:'start',behavior:'smooth'}); }catch(e){} } if(ok) toast(L('Meals done — the check-in below finishes the day','Repas notés — le bilan en dessous termine la journée')); }
     else if(ok) toast(L('Day logged as complete','Journée notée comme complète')); }; });
   document.querySelectorAll('[data-fopen]').forEach(b=>{ b.onclick=()=>{ delete S.tank.closed[b.dataset.fopen]; refocus='[data-fclose]'; save(); render(true); }; });
-  document.querySelectorAll('[data-grp]').forEach(b=>{ b.onclick=()=>{ S.tank.grp=b.dataset.grp; refocus=`[data-grp="${b.dataset.grp}"]`; save(); render(true); }; });
-  if($('clearDay')) $('clearDay').onclick=function(){ if(!this.dataset.sure){ this.dataset.sure='1'; this.textContent=L('Tap again to clear this day','Appuie encore pour vider cette journée'); return; } const M=editMap(); for(const k of Object.keys(M)) delete M[k]; save(); render(true); toast(L('Cleared','Effacé')); };
-  document.querySelectorAll('[data-dose]').forEach(b=>{ b.onclick=()=>{ const x=SUPN.find(z=>z.k===b.dataset.dose); const M=editMap(); const key='x_'+x.k; let v=(M[key]||0)+x.step*(+b.dataset.dir); v=Math.max(0,Math.round(v*100)/100); if(v) M[key]=v; else delete M[key]; refocus=`[data-dose="${x.k}"][data-dir="${b.dataset.dir}"]`; save(); render(true); }; });
+  document.querySelectorAll('[data-grp]').forEach(b=>{ b.onclick=()=>{ S.tank.grp=b.dataset.grp; refocus=`[data-grp="${b.dataset.grp}"]`; anchorSel=refocus; save(); render(true); }; });
+  if($('clearDay')) $('clearDay').onclick=function(){ if(!this.dataset.sure){ this.dataset.sure='1'; this.textContent=L('Tap again to clear this day','Appuie encore pour vider cette journée'); return; } const M=editMap(); for(const k of Object.keys(M)) delete M[k]; anchorSel='#foodQ'; save(); render(true); toast(L('Cleared','Effacé')); };
+  document.querySelectorAll('[data-dose]').forEach(b=>{ b.onclick=()=>{ const x=SUPN.find(z=>z.k===b.dataset.dose); const M=editMap(); const key='x_'+x.k; let v=(M[key]||0)+x.step*(+b.dataset.dir); v=Math.max(0,Math.round(v*100)/100); if(v) M[key]=v; else delete M[key]; refocus=`[data-dose="${x.k}"][data-dir="${b.dataset.dir}"]`; anchorSel=refocus; save(); render(true); }; });
   document.querySelectorAll('[data-tv]').forEach(b=>{ b.onclick=()=>{ S.tank.view=b.dataset.tv; save(); render(); }; });
   document.querySelectorAll('[data-cal]').forEach(b=>{ b.onclick=()=>{ S.daySel=b.dataset.cal; S.mode='day'; rEdit=null; save(); render(); }; });
   document.querySelectorAll('[data-calm]').forEach(b=>{ b.onclick=()=>{ S.tank.calMonth=b.dataset.calm; save(); render(true); }; });
   if($('rollSel')) $('rollSel').onchange=(e)=>{ S.tank.roll=+e.target.value; const ok=save(); render(true); if(ok) toast(L('Saved','Enregistré')); };
-  if($('addUsualSup')) $('addUsualSup').onclick=()=>{ const M=editMap(); for(const [id,n] of Object.entries(S.tank.day)){ if(String(id).startsWith('x_')||(TF.find(f=>f.id==id)||{}).grp==='sup') M[id]=n; } refocus='#foodQ'; const ok=save(); render(true); if(ok) toast(L('Usual supplements added','Suppléments habituels ajoutés')); };
+  if($('addUsualSup')) $('addUsualSup').onclick=()=>{ const M=editMap(); for(const [id,n] of Object.entries(S.tank.day)){ if(String(id).startsWith('x_')||(TF.find(f=>f.id==id)||{}).grp==='sup') M[id]=n; } refocus='#foodQ'; anchorSel='#foodQ'; const ok=save(); render(true); if(ok) toast(L('Usual supplements added','Suppléments habituels ajoutés')); };
   if($('copyNormal')) $('copyNormal').onclick=()=>{ const M=editMap(); Object.assign(M, JSON.parse(JSON.stringify(S.tank.day))); save(); render(true); toast(L('Copied — change what was different','Copié — change ce qui était différent')); };
   if($('setNormal')) $('setNormal').onclick=()=>{ S.tank.day=JSON.parse(JSON.stringify(editMap())); save(); render(true); toast(L('Saved as your normal day','Enregistré comme ta journée normale')); };
   document.querySelectorAll('[data-intent]').forEach(b=>{ b.onclick=()=>{ S.intent=(S.intent===b.dataset.intent)?null:b.dataset.intent; refocus=`[data-intent="${b.dataset.intent}"]`; save(); render(true); }; });
@@ -2904,7 +2942,7 @@ function parseBackup(text){
     document.getElementById('doRestore').onclick=()=>{ const lang=S.lang; S=Object.assign({a:{},step:0,started:null,checkins:[],lang,mode:'home',c:{},cstep:0,crashes:[],intent:null,tank:{p:{},day:{},log:{},rate:{},roll:4,view:'normal'},tstep:0}, o.state); if(!S.tank||typeof S.tank!=='object') S.tank={p:{},day:{}}; if(!S.tank.log) S.tank.log={}; if(!S.tank.rate) S.tank.rate={}; if(!S.tank.closed){ S.tank.closed={}; for(const k of Object.keys(S.tank.log)) if(Object.keys(S.tank.log[k]||{}).length) S.tank.closed[k]=true; } S.mode='home'; try{ for(const r of Object.values(S.tank.rate||{})){ if(r&&r.fin&&r.at&&!r.firstAt) r.firstAt=r.at; } }catch(e){} migrateSup(); try{ migrateMeals(); syncMeals(); }catch(e){} save(); closeSheet(true); render(); toast(L('Restored','Restauré')); };
   }
 }
-function eraseAll(){ const l=S.lang, ack=S.ack; try{ localStorage.removeItem(KEY); localStorage.removeItem('patch'); }catch(e){} S={a:{},step:0,started:null,checkins:[],lang:l,done:false,ack,mode:'home',c:{},cstep:0,crashes:[],intent:null,madeAt:null,tank:{p:{},day:{},log:{},rate:{},closed:{},closedMig:true,roll:4,view:'normal'},tstep:0}; save(); render(); toast(L('Erased','Effacé')); }
+function eraseAll(){ const l=S.lang, ack=S.ack; try{ localStorage.removeItem(KEY); localStorage.removeItem('patch'); localStorage.removeItem(SEEN); }catch(e){} S={a:{},step:0,started:null,checkins:[],lang:l,done:false,ack,mode:'home',c:{},cstep:0,crashes:[],intent:null,madeAt:null,tank:{p:{},day:{},log:{},rate:{},closed:{},closedMig:true,roll:4,view:'normal'},tstep:0}; save(); render(); toast(L('Erased','Effacé')); }
 /* tappable terms: real buttons for keyboard and screen readers, not bare spans */
 /* v1.2.22: underline each glossary word once per screen — its first appearance; later mentions are plain text */
 function onceTerms(root){ const seen=new Set(); const all=[...root.querySelectorAll('.t[data-t]')];
@@ -3002,6 +3040,7 @@ document.addEventListener('keydown',e=>{
     else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
   }
 });
+bootView();
 render();
 </script>
 <script>
