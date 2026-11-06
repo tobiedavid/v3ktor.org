@@ -267,6 +267,28 @@ ul.meals{list-style:none;margin:0 0 10px;padding:0} ul.meals li{border-bottom:1p
 .ml small{color:var(--muted)}
 input.sel.tm{width:auto;min-width:112px;min-height:44px;padding:6px 10px}
 .chips.quick{gap:6px;margin:0} .chips.quick .chip{padding:10px 14px;font-size:.95rem;min-height:44px}
+/* v1.2.28 */
+.toptabs{margin:0 0 12px} .toptabs button{flex:1}
+.card.wk{padding:12px 16px} .card.wk .eyebrow{margin-bottom:4px}
+.fuelhd{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px} .fuelhd .eyebrow{margin:0} .fuelhd .btn{white-space:nowrap;flex:none}
+.rings{display:flex;gap:18px;justify-content:center;margin:4px 0 0}
+.ring{position:relative;width:88px;text-align:center}
+.ring svg{width:88px;height:88px;display:block}
+.ring circle{fill:none;stroke-width:8}
+.ring .rb{stroke:var(--chip)} .ring .rf{stroke:var(--teal);stroke-linecap:round}
+.ring .rv{position:absolute;left:0;top:0;width:88px;height:88px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
+.ring .rv b{font-size:1.15rem} .ring .rv small{font-size:.75rem;color:var(--muted)}
+.ring .rl{font-size:.85rem;font-weight:700;margin-top:2px}
+.mb.sym{border-top:4px solid #7a5aa6}
+ul.tl{list-style:none;margin:4px 0 6px;padding:0} ul.tl li{border-bottom:1px solid var(--line)} ul.tl li:last-child{border-bottom:0}
+.tlr{display:grid;grid-template-columns:3.4em 1.6em 1fr;gap:6px;align-items:start;width:100%;min-height:48px;padding:10px 0;border:0;background:transparent;color:var(--ink);font:inherit;font-size:.95rem;text-align:left;cursor:pointer;line-height:1.3}
+div.tlr{cursor:default}
+.tlr .tt{font-variant-numeric:tabular-nums;color:var(--muted);padding-top:1px} .tlr .tx small{display:block;color:var(--muted);font-size:.85rem}
+.card.today .days{border-top:1px solid var(--line);margin-top:4px}
+.mirror{background:var(--teal-soft);border-radius:14px;padding:12px 14px;margin:0 0 12px}
+ul.pay{padding-left:18px} ul.pay li{margin:.2em 0}
+#bar .in .btn{white-space:nowrap;flex:none}
+#bar .in > span.small{flex:1;min-width:0;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -282,7 +304,7 @@ input.sel.tm{width:auto;min-width:112px;min-height:44px;padding:6px 10px}
 let S = {a:{}, step:0, started:null, checkins:[], lang:null, mode:null, c:{}, cstep:0, crashes:[], intent:null, tank:null, tstep:0};
 const KEY='thepatch.v1';
 try{ const s=localStorage.getItem(KEY)||localStorage.getItem('patch'); if(s) S=Object.assign(S, JSON.parse(s)); if(!localStorage.getItem(KEY)&&s) localStorage.setItem(KEY,s); if(localStorage.getItem('patch')) localStorage.removeItem('patch'); }catch(e){}
-const VER='1.2.27'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
+const VER='1.2.28'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
 /* v1.2.21 (5 Nov 2026): prenatal / folic-acid and pregnancy-iron lines aligned with Health Canada; Quebec route for bloodwork; hard-stool branch;
    pattern messages match the 5-a-side rule; iPhone storage note + persist(); protein note by life stage; French fixes; "about $8" in English. */
 /* v1.2.22 (6 Nov 2026): one-screen result (plain-words test card, three-line week, one notes card with the crisis line kept open); glossary words underlined once per screen;
@@ -308,6 +330,12 @@ const VER='1.2.27'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
    report, Meal report, History. Meals carry a time; the day log is rebuilt from them. Closing the day leads into the check-in.
    The crash report fills in the 4 hours before from timed meals, and sleep and caffeine from the check-in, and skips those
    questions. History opens on what was found: test, suspects, patterns, then the days, the crash log and the rest. */
+/* v1.2.28 (6 Nov 2026): for the person with five minutes — see what's wrong, what to swap in, keep going. Symptoms carry a time
+   (bloating, loose or hard stools, headache, itch or flushing, low mood) and fill the check-in's day flags; a loose stool before
+   the day's first meal counts with the day before, worked out instead of asked. Home: Today | History, the week's one line, fuel
+   and protein rings, Crash · Meal · Symptom, today in order with the time since the last meal. First open: their own day said
+   back to them, a one-minute normal day that fills the gauge, and what they'll see and when. Crash tip from hours since the
+   last meal, once three recent crashes agree. */
 if(!S.lang){ S.lang = (navigator.language||'en').toLowerCase().startsWith('fr') ? 'fr' : 'en'; }
 /* v0.7: three doors. Older saves have no mode — someone mid-questions lands back on their question, everyone else on the chooser. */
 if(!S.mode){ S.mode = S.step>0 ? 'patch' : 'home'; }
@@ -1102,7 +1130,7 @@ function oneThing(P,where){
   if(has('meds','stim')) return {t:L(`${T('protein','Eat before the pill')} — ${protShort()[0]} the moment you take it.`,`${T('protein','Mange avant la pilule','Mange avant la pilule')} — ${protShort()[1]} au moment où tu la prends.`), w:L('Once it kicks in, the appetite is gone and the afternoon wall is already booked.','Une fois qu’elle fait effet, l’appétit est parti et le mur de l’après-midi est déjà réservé.')};
   if(has('crash','random')) return {t:L(`Same breakfast and same lunch every day this week — and log each crash with “Crash report”.`,`Même déjeuner et même dîner tous les jours cette semaine — et mets chaque crash au journal avec « Noter un crash ».`), w:L(`${T('random','Random crashes')} hide when every day is different. Lock the day, then change one thing at a time, three days each.`,`Les ${T('random','crashs aléatoires','crashs aléatoires')} se cachent quand chaque journée est différente. Fige la journée, puis change une chose à la fois, trois jours chacune.`)};
   if(any('stool','loose','mixed') && budget!=='0' && !minor) return {t:L(`${T('psyllium','Plain psyllium')}, 1–2 tsp in a full glass of water every morning.`,`Du ${T('psyllium','psyllium nature','psyllium nature')}, 1–2 c. à thé dans un grand verre d’eau chaque matin.`)+pharmPsy, w:L('Loose stools take magnesium and potassium with them. This firms things up in days, for about $8.','Les selles molles emportent le magnésium et le potassium. Ça raffermit en quelques jours, pour environ 8 $.')};
-  if(any('morning','nothing','coffee','carbs')) return {t:L(`${T('protein','Protein in your first hours awake')} — ${protEx()[0].replace(/^./,c=>c.toLowerCase())}.`,`${T('protein','Des protéines dans tes premières heures debout','Des protéines dans tes premières heures debout')} — ${protEx()[1].replace(/^./,c=>c.toLowerCase())}.`), w:L('That alone moves the afternoon crash, and it costs less than the energy drink it replaces.','Juste ça, ça repousse le crash de l’après-midi, et ça coûte moins cher que la boisson énergisante que ça remplace.')};
+  if(any('morning','nothing','coffee','carbs')) return {t:L(`${T('protein','Protein in your first hours awake')} — ${protEx()[0].replace(/^./,c=>c.toLowerCase())}.`,`${T('protein','Des protéines dans tes premières heures debout','Des protéines dans tes premières heures debout')} — ${protEx()[1].replace(/^./,c=>c.toLowerCase())}.`), w:has('fuel','energy')?L('That alone moves the afternoon crash, and it costs less than the energy drink it replaces.','Juste ça, ça repousse le crash de l’après-midi, et ça coûte moins cher que la boisson énergisante que ça remplace.'):L('That alone moves the afternoon crash.','Juste ça, ça repousse le crash de l’après-midi.')};
   if(any('fuel','coffee','energy') && any('sleep','5','6','broken')) return {t:L(`${T('caffeine','Caffeine')} done by noon — on shifts, 8 hours before you sleep.`,`La ${T('caffeine','caféine','caféine')} finie à midi — sur les quarts, 8 heures avant de dormir.`), w:L('Free, and the biggest thing you can do for the hours of sleep you do get.','Gratuit, et la plus grosse chose que tu peux faire pour les heures de sommeil que tu as.')};
   return {t:where==='home'?L('Pick one line from your patch and do only that for four days.','Choisis une ligne de ta patch et fais seulement ça pendant quatre jours.'):L('Pick one line below and do only that for four days.','Choisis une ligne plus bas et fais seulement ça pendant quatre jours.'), w:L('Your answers don’t point at one big leak. One change at a time is how you find out what works.','Tes réponses ne pointent pas vers une grosse fuite. Un changement à la fois, c’est comme ça que tu sais ce qui marche.')};
 }
@@ -1444,6 +1472,7 @@ function packetText(compact){
   if(hasCrash){ o.push(L('== TODAY’S CRASH (my own answers) ==','== LE CRASH D’AUJOURD’HUI (mes propres réponses) ==')); o.push(...crashAnswersPlain()); o.push(''); o.push(L('== THE APP’S READ OF IT ==','== LA LECTURE DE L’APP ==')); o.push(crashText().trim()); o.push(''); }
   if(S.crashes.length){ o.push(L('== PAST CRASHES LOGGED ==','== CRASHS PASSÉS AU JOURNAL ==')); const M=MECH(); for(const x of S.crashes.slice(-8)){ o.push(`${crashDay(x)}${x.at?' '+x.at:''} — ${x.when?P2((CQ[0].opts.find(op=>op.v===x.when)||{l:[x.when,x.when]}).l):'?'} — ${x.top&&M[x.top]?P2(M[x.top].t):L('no clear cause','pas de cause claire')} (${x.conf?P2(CONF[x.conf]).toLowerCase():''})`); } const pat=crashPattern(); if(pat) o.push(...pat.map(strip)); o.push(''); }
   { const ml=mealsText(); if(ml){ o.push(ml); o.push(''); } }
+  { const st=symText(); if(st){ o.push(st); o.push(''); } }
   if(tankReady() && (mapCount(S.tank.day)||realDays().length)){ o.push(L('== MY TANK (from the Canadian Nutrient File) ==','== MON RÉSERVOIR (selon le Fichier canadien sur les éléments nutritifs) ==')); o.push(tankText().split('\n').slice(1).join('\n').trim()); o.push(''); }
   { const pt=patternsText(); if(pt){ o.push(pt); o.push(''); } }
   if(profile && !compact){ o.push(L('== THE PATCH THE APP GAVE ME THIS WEEK ==','== LA PATCH QUE L’APP M’A DONNÉE CETTE SEMAINE ==')); o.push(patchText().trim()); o.push(''); }
@@ -1754,7 +1783,8 @@ const LW=[['meal',['after a meal or drink','après un repas ou une boisson']],['
 function looseOn(k){ if(!usable(k)) return null; const r=rates()[k]; return (r.fl&&r.fl.off&&r.offw&&r.offw.loose)?1:0; }
 /* v1.2.24: loose stools that followed a day's food — the gut checks' outcome. Marked "on waking" = the day before's; marked "after a meal
    or drink", or not marked = that day's. An unknown next morning counts as no "on waking" stool, which is how every day was read before. */
-function gutAfter(k){ const n=keyAdd(k,1); if(looseOn(n)===1&&rates()[n].lw==='wake') return 1; const o=looseOn(k); if(o==null) return null; return (o===1&&rates()[k].lw!=='wake')?1:0; }
+/* v1.2.28: the timing comes from the logged times when there are any (r.lwA, including "both"), from the person's tap otherwise */
+function gutAfter(k){ const n=keyAdd(k,1); const ln=lwOf(n); if(looseOn(n)===1&&(ln==='wake'||ln==='both')) return 1; const o=looseOn(k); if(o==null) return null; return (o===1&&lwOf(k)!=='wake')?1:0; }
 /* crash on a day: a logged crash or a finished day with ⚡ = yes; a finished day without it = no; otherwise unknown */
 function crashOn(k){ if(crashKeys().has(k)) return true; const r=rates()[k]; if(r&&r.fin) return !!(r.fl&&r.fl.cr); return null; }
 /* the patterns' version (v1.2.23): a crash in the crash log is a fact on any day; "no crash" needs a day the patterns can use */
@@ -1775,14 +1805,14 @@ function vCheck(k, where){
   const tabs = (where==='home'||where==='pat'||where==='back') ? `<div class="gtabs seg" role="tablist"><button type="button" role="tab" data-rday="t" aria-pressed="${isToday}">${L('Today','Aujourd’hui')}</button><button type="button" role="tab" data-rday="y" aria-pressed="${!isToday}">${L('Yesterday','Hier')}${R[keyAdd(dayKey(),-1)]&&R[keyAdd(dayKey(),-1)].fin?' ✓':''}</button></div>` : '';
   let body;
   if(r.fin && rEdit!==k){
-    const fl=FLAGS.filter(f=>r.fl&&r.fl[f.k]).map(f=>f.k==='off'&&r.offw&&Object.keys(r.offw).length?P2(f.s)+' ('+OFFW.filter(([v])=>r.offw[v]).map(([v,l])=>{ const w=v==='loose'&&LW.find(x=>x[0]===r.lw); return P2(l)+(w?' '+P2(w[1]):''); }).join(', ')+')':P2(f.s)); const part=[r.e!=null?`${L('energy','énergie')} ${r.e}/5`:null, r.s!=null?`${L('slept','dormi')} ${rOpt('s',r.s)}`:null, r.cf?`${L('last caffeine','dernière caféine')}: ${rOpt('cf',r.cf)}`:null, r.al?`${L('alcohol','alcool')}: ${rOpt('al',r.al)}`:null].filter(Boolean).join(' · ');
+    const fl=FLAGS.filter(f=>r.fl&&r.fl[f.k]).map(f=>f.k==='off'&&r.offw&&Object.keys(r.offw).length?P2(f.s)+' ('+OFFW.filter(([v])=>r.offw[v]).map(([v,l])=>{ const w=v==='loose'&&lwOf(k); return P2(l)+(w?' '+lwLabel(w):''); }).join(', ')+')':P2(f.s)); const part=[r.e!=null?`${L('energy','énergie')} ${r.e}/5`:null, r.s!=null?`${L('slept','dormi')} ${rOpt('s',r.s)}`:null, r.cf?`${L('last caffeine','dernière caféine')}: ${rOpt('cf',r.cf)}`:null, r.al?`${L('alcohol','alcool')}: ${rOpt('al',r.al)}`:null].filter(Boolean).join(' · ');
     const conflict = crashKeys().has(k) && !(r.fl&&r.fl.cr);
     body=`${conflict?`<div class="card flag" style="padding:10px 12px;margin:0 0 8px"><p class="small" style="margin:0 0 6px">${L('A crash is in your crash log for this day, but this check-in says no crash. Which is right?','Il y a un crash dans ton journal des crashs pour cette journée, mais ce bilan dit « pas de crash ». Lequel est juste?')}</p><div class="row"><button type="button" class="btn sm" data-rconf="${k}">${L('I did crash','J’ai bien crashé')}</button><button type="button" class="btn ghost sm" data-crashday="${k}">${L('Check the crash log','Vérifier le journal')}</button></div></div>`:''}<div class="rsum"><p class="small" style="margin:0"><b>${head} ✓</b> ${part}${part?' · ':''}${fl.length?fl.join(', '):L('nothing else','rien d’autre')}</p><button type="button" class="btn ghost sm" data-redit="${k}">${L('Change','Changer')}</button></div>${RATEQ.some(q=>r[q.id]==null)?`<p class="small muted" style="margin:6px 0 0">${L('An answer is missing, so this day won’t count in patterns — tap Change to add it.','Il manque une réponse, alors cette journée ne comptera pas dans les tendances — appuie sur Changer pour l’ajouter.')}</p>`:isToday?`<p class="small muted" style="margin:6px 0 0">${L('Counts in your patterns from tomorrow, once the day is over. If the rest of today changes an answer, tap Change.','Cette journée comptera dans tes tendances à partir de demain, une fois finie. Si le reste de la journée change une réponse, appuie sur Changer.')}</p>`:''}`;
   } else {
     body=RATEQ.map(q=>{ const lab = q.id==='cf' ? `${L('Last coffee or energy drink','Dernier café ou boisson énergisante')} <small>· ${T('cafclock',L('why the time matters','pourquoi l’heure compte'),L('pourquoi l’heure compte','pourquoi l’heure compte'))}</small>` : `${P2(q.t)}${q.h?` <small>· ${P2(q.h)}</small>`:''}`;
       return `<div class="rq" role="group" aria-label="${esc(P2(q.t))}"><p class="lb">${lab}</p><div class="rr">${q.opts.map(([v,l])=>`<button type="button" class="rc${q.id==='e'?' e'+v:''}" data-rk="${k}" data-rq="${q.id}" data-rv="${v}" aria-pressed="${String(r[q.id])===String(v)}">${P2(l)}</button>`).join('')}</div></div>`; }).join('');
     const fl=r.fl||{}; const anyF=FLAGS.some(f=>fl[f.k]); const ow=r.offw||{};
-    body+=`<div class="rq" role="group" aria-label="${L('Anything else today?','Autre chose aujourd’hui?')}"><p class="lb">${L('Anything else today?','Autre chose aujourd’hui?')} <small>· ${L('pick any that apply, then finish','choisis ce qui s’applique, puis termine')}</small></p><div class="rr">${FLAGS.map(f=>`<button type="button" class="rc" data-rflag="${f.k}" data-rk2="${k}" aria-pressed="${!!fl[f.k]}">${P2(f.l)}</button>`).join('')}</div>${fl.off?`<div class="rq" style="margin-top:10px"><p class="lb">${L('What felt off?','Qu’est-ce qui clochait?')} <small>· ${L('pick any','choisis ce qui s’applique')}</small></p><div class="rr">${OFFW.map(([v,l,d])=>`<button type="button" class="rc" data-roff="${v}" data-rk3="${k}" aria-pressed="${!!ow[v]}">${P2(l)}${d?` <small>· ${P2(d)}</small>`:''}</button>`).join('')}</div>${ow.loose?`<div class="rq" role="group" aria-label="${L('When did the loose stools come?','Quand sont venues les selles molles?')}" style="margin-top:10px"><p class="lb">${L('When?','Quand?')} <small>· ${L('optional — “on waking” counts with what you ate the day before','facultatif — « au réveil » compte avec ce que tu as mangé la veille')}</small></p><div class="rr">${LW.map(([v,l])=>`<button type="button" class="rc" data-rlw="${v}" data-rk4="${k}" aria-pressed="${r.lw===v}">${P2(l)}</button>`).join('')}</div></div>`:''}</div>`:''}${fl.cr?`<p class="small" style="margin:8px 0 0"><button type="button" class="btn ghost sm" data-crashday="${k}">${L('Report this crash →','Noter ce crash →')}</button></p>`:''}<div class="row" style="margin-top:10px"><button type="button" class="btn primary sm" data-rfin="${k}">${r.firstAt?L('Finish again','Terminer à nouveau'):anyF?L('Done for today','Fini pour aujourd’hui'):L('Nothing else — finish today','Rien d’autre — terminer la journée')}</button></div>${r.firstAt?`<p class="small" style="margin:6px 0 0"><b>${L('Changed.','Modifié.')}</b> ${L('Finish again to keep it — until then this day counts as unknown.','Termine à nouveau pour le garder — d’ici là, cette journée compte comme inconnue.')}</p>`:''}${RATEQ.some(q=>r[q.id]==null)?`<p class="small muted" style="margin:6px 0 0">${L('Energy, sleep, caffeine or alcohol not answered — you can still finish, but this day won’t count in patterns.','Énergie, sommeil, caféine ou alcool sans réponse — tu peux quand même terminer, mais cette journée ne comptera pas dans les tendances.')}</p>`:''}<p class="small muted" style="margin:6px 0 0">${L('A day you don’t finish stays “unknown” — never counted as “no crash”.','Une journée non terminée reste « inconnue » — jamais comptée comme « pas de crash ».')}</p></div>`;
+    body+=`<div class="rq" role="group" aria-label="${L('Anything else today?','Autre chose aujourd’hui?')}"><p class="lb">${L('Anything else today?','Autre chose aujourd’hui?')} <small>· ${L('pick any that apply, then finish','choisis ce qui s’applique, puis termine')}</small></p><div class="rr">${FLAGS.map(f=>`<button type="button" class="rc" data-rflag="${f.k}" data-rk2="${k}" aria-pressed="${!!fl[f.k]}">${P2(f.l)}</button>`).join('')}</div>${fl.off?`<div class="rq" style="margin-top:10px"><p class="lb">${L('What felt off?','Qu’est-ce qui clochait?')} <small>· ${L('pick any','choisis ce qui s’applique')}</small></p><div class="rr">${OFFW.map(([v,l,d])=>`<button type="button" class="rc" data-roff="${v}" data-rk3="${k}" aria-pressed="${!!ow[v]}">${P2(l)}${d?` <small>· ${P2(d)}</small>`:''}</button>`).join('')}</div>${ow.loose&&r.lwA?`<p class="small muted" style="margin:8px 0 0">${L('When: worked out from the times you logged —','Quand : calculé d’après les heures notées —')} ${lwLabel(r.lwA)}.</p>`:''}${ow.loose&&!r.lwA?`<div class="rq" role="group" aria-label="${L('When did the loose stools come?','Quand sont venues les selles molles?')}" style="margin-top:10px"><p class="lb">${L('When?','Quand?')} <small>· ${L('optional — “on waking” counts with what you ate the day before','facultatif — « au réveil » compte avec ce que tu as mangé la veille')}</small></p><div class="rr">${LW.map(([v,l])=>`<button type="button" class="rc" data-rlw="${v}" data-rk4="${k}" aria-pressed="${r.lw===v}">${P2(l)}</button>`).join('')}</div></div>`:''}</div>`:''}${fl.cr?`<p class="small" style="margin:8px 0 0"><button type="button" class="btn ghost sm" data-crashday="${k}">${L('Report this crash →','Noter ce crash →')}</button></p>`:''}<div class="row" style="margin-top:10px"><button type="button" class="btn primary sm" data-rfin="${k}">${r.firstAt?L('Finish again','Terminer à nouveau'):anyF?L('Done for today','Fini pour aujourd’hui'):L('Nothing else — finish today','Rien d’autre — terminer la journée')}</button></div>${r.firstAt?`<p class="small" style="margin:6px 0 0"><b>${L('Changed.','Modifié.')}</b> ${L('Finish again to keep it — until then this day counts as unknown.','Termine à nouveau pour le garder — d’ici là, cette journée compte comme inconnue.')}</p>`:''}${RATEQ.some(q=>r[q.id]==null)?`<p class="small muted" style="margin:6px 0 0">${L('Energy, sleep, caffeine or alcohol not answered — you can still finish, but this day won’t count in patterns.','Énergie, sommeil, caféine ou alcool sans réponse — tu peux quand même terminer, mais cette journée ne comptera pas dans les tendances.')}</p>`:''}<p class="small muted" style="margin:6px 0 0">${L('A day you don’t finish stays “unknown” — never counted as “no crash”.','Une journée non terminée reste « inconnue » — jamais comptée comme « pas de crash ».')}</p></div>`;
   }
   const n=usableKeys().length;
   const link = `<div class="row" style="margin-top:12px"><button type="button" class="btn ghost sm" data-go="pat">${n>=MINR?L('History →','Historique →'):L(`History · ${n} of ${MINR} days →`,`Historique · ${n} sur ${MINR} jours →`)}</button></div>`;
@@ -1889,7 +1919,7 @@ function stripHTML(){
 }
 function vPat(){
   const P=findPatterns(); const k=S.rsel==='y'?keyAdd(dayKey(),-1):dayKey();
-  let h=`<div class="eyebrow">${L('History','Historique')}</div><h2>${L('What comes before your bad days','Ce qui vient avant tes mauvaises journées')}</h2>`;
+  let h=tabsHTML('pat')+`<div class="eyebrow">${L('History','Historique')}</div><h2>${L('What comes before your bad days','Ce qui vient avant tes mauvaises journées')}</h2>`;
   h+=`<p class="small muted" style="margin-top:-4px">${L('Your own days compared with each other — nobody else’s data, no averages from a study.','Tes journées comparées entre elles — pas les données de quelqu’un d’autre, pas des moyennes d’étude.')}</p>`;
   h+=testCard('pat');
   h+=suspectsCard();
@@ -1982,6 +2012,8 @@ function view(){
   if(S.mode==='pat') return 'pat';
   if(S.mode==='meal' && curMeal()) return 'meal';
   if(S.mode==='day') return 'day';
+  if(S.mode==='sym' && S.sym) return 'sym';
+  if(S.mode==='nday') return 'nday';
   if(S.mode==='tank' && S.tstep>0) return S.tstep>tqList().length ? 'tank' : 'tq';
   if(S.mode==='patch' && S.step>0) return S.step>QL().length ? 'patch' : 'q';
   return 'start';
@@ -2000,10 +2032,11 @@ function render(keep){
   const y=window.scrollY; if(!keep) window.scrollTo(0,0);
   document.documentElement.lang=S.lang;
   if(S.meal&&S.mode!=='meal'){ dropEmptyMeal(); delete S.meal; }
+  if(S.sym&&S.mode!=='sym') delete S.sym;
   const v=view();
   if(v==='patch'){ try{ tankPrefill(); }catch(e){} if(!S.done){ S.done=true; S.madeAt=new Date().toISOString(); save(); }
     else if(S.redo){ S.redo=false; S.madeAt=new Date().toISOString(); const d=S.started?Math.floor((Date.now()-new Date(S.started).getTime())/86400000)+1:0; if(d>=28){ S.started=null; S.checkins=[]; } save(); } }
-  const body = v==='start'?vStart() : v==='q'?vQ(S.step-1) : v==='patch'?vPatch() : v==='cq'?vCQ(S.cstep-1) : v==='crashres'?vCrashRes() : v==='tq'?vTQ(S.tstep-1) : v==='tank'?vTank() : v==='pat'?vPat() : v==='meal'?vMeal() : v==='day'?vDay() : vAI();
+  const body = v==='start'?vStart() : v==='q'?vQ(S.step-1) : v==='patch'?vPatch() : v==='cq'?vCQ(S.cstep-1) : v==='crashres'?vCrashRes() : v==='tq'?vTQ(S.tstep-1) : v==='tank'?vTank() : v==='pat'?vPat() : v==='meal'?vMeal() : v==='day'?vDay() : v==='sym'?vSym() : v==='nday'?vNday() : vAI();
   renderTop();
   app.innerHTML = body;
   renderBar(v); bind();
@@ -2027,7 +2060,7 @@ function homeOne(){ if(!S.done) return ''; const day=S.started?Math.floor((Date.
   const o=oneThing(buildPatch(),'home'); return `<div class="card one"><div class="eyebrow">${(day==null||day<=7)?L('If you do one thing this week','Si tu fais une seule chose cette semaine'):L('If you do one thing','Si tu fais une seule chose')}</div><p style="margin:0;font-weight:700">${o.t}</p><div class="row" style="margin-top:8px"><button type="button" class="btn ghost sm" data-door="patch">${L('My week →','Ma semaine →')}</button></div></div>`; }
 /* v1.2.27: the week's one line, the test if one is running, the fuel gauge, three buttons; the day's state and one hint below */
 function vHomeBack(o){
-  return `${S.done?homeOne():startCard()}${testCard('home')}${fuelCard()}${mainBtns()}${S.started?dayCheck(buildPatch(),'home'):''}${finishLine()}${hintCard()}${iosNote()}
+  return `${tabsHTML('home')}${S.done?weekLine():startCard()}${testCard('home')}${fuelCard()}${mainBtns()}${todayCard()}${payoffCard()}${S.started?dayCheck(buildPatch(),'home'):''}${hintCard()}${iosNote()}
   <p class="small muted" style="margin-top:16px"><b>${L('Not a doctor.','Pas un médecin.')}</b> ${L('Chest pain, fainting or black stool: 911. Thinking about ending your life: call or text 9-8-8 (988 in the US).','Douleur à la poitrine, évanouissement ou selles noires : 911. Tu penses à mettre fin à tes jours : appelle ou texte le 9-8-8 (988 aux É.-U.).')} <button type="button" class="btn ghost sm" id="aboutBtn" style="margin-top:6px">${L('About & privacy','À propos et confidentialité')}</button></p>`; }
 function openAbout(){ showSheet(`<div class="handle"></div><h3 id="sheetTitle">${L('About & privacy','À propos et confidentialité')}</h3>
   <p class="small">${L('Education, not medical, pharmacist or dietitian advice. It starts from how you live now, and you decide what to do with it.','De l’éducation, pas un avis médical, pharmaceutique ou diététique. Ça part de ta vie telle qu’elle est, et c’est toi qui décides quoi en faire.')}</p>
@@ -2101,6 +2134,7 @@ function vCrashRes(){
     const stale = !R.profile ? L('<b>Three crashes and no Patch.</b> Three minutes of questions give these reads something to be read against — your meds, your fuel, your week.','<b>Trois crashs et pas de Patch.</b> Trois minutes de questions donnent un point de repère à ces lectures — tes médicaments, ton carburant, ta semaine.') : (weeks!=null&&weeks>=4 ? L(`<b>These crashes are being read against a Patch from ${weeks} weeks ago.</b> Re-run it — what you keep and what leaks has probably moved, and that changes the read more than another log would.`,`<b>Ces crashs sont lus selon une Patch d’il y a ${weeks} semaines.</b> Refais-la — ce que tu gardes et ce qui fuit a probablement bougé, et ça change la lecture plus qu’un autre journal.`) : '');
     h+=`<div class="card soft"><div class="eyebrow">${L('The pattern','La tendance')} · ${S.crashes.length} ${L('crashes','crashs')}</div>${pat.map(p=>`<p class="small" style="margin:.3em 0">${p}</p>`).join('')}${stale?`<p class="small" style="margin:.5em 0 0">${stale}</p><div class="row" style="margin-top:8px"><button class="btn sm" data-go="${R.profile?'redo':'patch'}">${R.profile?L('Re-run the Patch','Refaire la Patch'):L('Do the Patch · about 3 minutes','Faire la Patch · environ 3 minutes')}</button></div>`:''}</div>`;
   }
+  h+=gapTipCard();
   if(!R.top){
     h+=`<div class="card verdict"><span class="grade unclear">${P2(CONF.unclear)}</span><h3>${confLabel(R)}</h3><p>${L('Nothing you answered points one way. That happens — some crashes are three small things and no big one. Log it; after three logs the pattern usually shows up on its own.','Rien dans tes réponses ne pointe dans une direction. Ça arrive — certains crashs, c’est trois petites affaires et aucune grosse. Mets-le au journal; après trois, la tendance se montre généralement d’elle-même.')}</p>${R.profile?'':`<p class="small muted" style="margin:0">${L('Do the Patch (about 3 minutes) and this read gets sharper — it will know your meds and what you run on.','Fais la Patch (environ 3 minutes) et cette lecture devient plus fine — elle va connaître tes médicaments et ce qui te fait tenir.')}</p>`}</div>`;
   } else {
@@ -2335,7 +2369,7 @@ function agedSignal(){ const today=dayKey(); const cu=famById('cured'); let n=0;
   n+=(S.crashes||[]).filter(x=>{ const c=x.answers&&x.answers.cfood; return Array.isArray(c)&&c.includes('hist')&&!loggedDay(crashDay(x)); }).length; return n>=2; }
 function coffeeIronSignal(){ if(!S.done) return false; const P=buildPatch(); const iron=(P.number||[]).some(x=>/ferritin/i.test(String(x)));
   return iron&&(any('fuel','coffee')||Object.values(rates()).some(r=>r&&r.cf&&r.cf!=='none')); }
-function hintCard(){ if(!hintsOn()) return ''; const today=dayKey(); const H=S.hints||{}; if(H.lastOk===today) return ''; const ok=H.ok||{}; const t=activeTest(); const C=[];
+function hintCard(){ if(!hintsOn()) return ''; const today=dayKey(); const H=S.hints||{}; if(H.lastOk===today) return ''; const ok=H.ok||{}; const t=activeTest(); const C=[]; { const gt=gapTip(); if(gt) C.push({id:'gap-'+gt.kind, gl:'protein', html:gapTipText(gt)}); }
   if(!t){ const s=suspects().find(x=>x.kind==='lead'&&!(x.f.id==='alcohol3'&&drinkerDaily())); if(s) C.push({id:'lead-'+s.f.id+'-'+s.o, html:suspectLine(s), gl:'selftest', test:[s.f.id,s.o]}); }
   if(t&&testDay(t)<=14) C.push({id:'plain', gl:'selftest', html:L('<b>Plain foods give clear answers.</b> A shake with 20 ingredients is 20 suspects; plain yogurt is one.','<b>Les aliments simples donnent des réponses claires.</b> Un shake à 20 ingrédients, c’est 20 suspects; un yogourt nature, c’est un seul.')});
   if(shakeSignal()) C.push({id:'shake', gl:'sweeteners', test:t?null:['shakes','gut'], html:L('<b>Shake and loose stools? It’s often not the protein.</b> Check the label for a sweetener ending in -ol (maltitol, sorbitol), inulin or chicory root. Whey concentrate carries lactose; isolate, much less.','<b>Shake et selles molles? Souvent, ce n’est pas la protéine.</b> Cherche sur l’étiquette un édulcorant en -ol (maltitol, sorbitol), de l’inuline ou de la racine de chicorée. Le concentré de lactosérum contient du lactose; l’isolat, beaucoup moins.')});
@@ -2355,7 +2389,7 @@ function meals(){ if(!S.tank.mealsMig||!Array.isArray(S.tank.meals)) migrateMeal
 /* the day totals every other part of the app reads; days without a meal drop out */
 function syncMeals(){ try{ if(!S.tank||!S.tank.mealsMig||!Array.isArray(S.tank.meals)) return; const by={};
   for(const m of S.tank.meals){ if(!m||!m.day||!m.items) continue; const t=by[m.day]||(by[m.day]={}); for(const [id,n] of Object.entries(m.items)){ if(!(n>0)) continue; t[id]=Math.round(((t[id]||0)+n)*100)/100; } }
-  const lg=tlog(); for(const k of Object.keys(lg)) if(!by[k]||!mapCount(by[k])) delete lg[k]; for(const [k,t] of Object.entries(by)) if(mapCount(t)) lg[k]=t; }catch(e){} }
+  const lg=tlog(); for(const k of Object.keys(lg)) if(!by[k]||!mapCount(by[k])) delete lg[k]; for(const [k,t] of Object.entries(by)) if(mapCount(t)) lg[k]=t; }catch(e){} syncEv(); }
 function pruneMeals(){ const cut=keyAdd(dayKey(),-90); S.tank.meals=meals().filter(m=>m&&m.day&&m.day>=cut&&m.items&&mapCount(m.items)>0); }
 function curMeal(){ return (S.meal&&S.tank&&Array.isArray(S.tank.meals))?(S.tank.meals.find(m=>m&&m.id===S.meal)||null):null; }
 migrateMeals(); pruneMeals(); syncMeals();
@@ -2383,26 +2417,6 @@ function lowWeekNames(){ const ws=weekSrc(); if(!ws.days||(ws.nReal<3&&!mapCount
 /* ---------- home ---------- */
 function startCard(){ const mid=S.step>=1&&S.step<=QL().length;
   return `<div class="doors"><button class="door main" data-door="patch"><span class="eyebrow">${L(`Start here · ${QL().length} questions, about 3 minutes`,`Commence ici · ${QL().length} questions, environ 3 minutes`)}</span><span class="dt">${L('I need to keep going this week','Je dois tenir cette semaine')}</span><span class="ds">${L('What to keep, what to swap, what to add on your budget — $0 works — and the one blood test. It sets your fuel gauge too.','Quoi garder, quoi remplacer, quoi ajouter avec ton budget — 0 $ marche aussi — et la seule prise de sang. Ça règle aussi ta jauge de carburant.')}</span>${mid?`<span class="status">${L(`Resume at question ${S.step} →`,`Reprendre à la question ${S.step} →`)}</span>`:''}</button></div>`; }
-/* fuel shows as a share of the day, the way the tank always has; the calorie number is there for anyone who wants it; no "over" colour — this is fuel, not a diet */
-function fuelCard(){
-  if(!tankReady()){ try{ tankPrefill(); }catch(e){} }
-  if(!tankReady()){ const p=S.tank.p; const miss=tqList().filter(q=>q.multi?!(Array.isArray(p[q.id])&&p[q.id].length):p[q.id]==null).length;
-    return `<div class="card fuel"><div class="eyebrow">${L('Fuel tank','Réservoir')}</div><p class="small" style="margin:0 0 8px">${L(`${miss} question${miss>1?'s':''} set the gauge to your body.`,`${miss} question${miss>1?'s':''} pour régler la jauge à ton corps.`)}</p><button type="button" class="btn sm" data-tsetuph>${L('Set the gauge →','Régler la jauge →')}</button></div>`; }
-  const k=dayKey(); const t=tankTotals(tlog()[k]||{}).tot; const TG=tankTargets();
-  const kc=t.kcal||0, pr=t.prot||0, kp=TG.kcal?kc/TG.kcal:0, pp=TG.prot?pr/TG.prot:0;
-  const bar=(lab,pct,amt)=>`<div class="r"><div class="nm">${lab}</div><div class="meter fuel" role="img" aria-label="${esc(lab)} ${Math.round(pct*100)}%"><i style="width:${Math.min(100,Math.round(pct*100))}%"></i></div><div class="amt">${amt}</div></div>`;
-  const la=lastAteMin(); const low=lowWeekNames();
-  const ate = la!=null ? L(`Last ate ${agoText(la)}.`,`Dernier repas ${agoText(la)}.`) : (mapCount(tlog()[k]||{})?'':L('Nothing logged today yet.','Rien de noté aujourd’hui.'));
-  const lw = low ? (low.length?L(`<b>Low this week:</b> ${low.join(', ')}.`,`<b>Bas cette semaine :</b> ${low.join(', ')}.`):L('Nothing low this week.','Rien de bas cette semaine.')) : L('Log 3 full days to see what’s low.','Note 3 journées complètes pour voir ce qui est bas.');
-  return `<div class="card fuel"><div class="eyebrow">${L('Fuel tank · today','Réservoir · aujourd’hui')}</div><div class="tk">${bar(L('Fuel','Carburant'),kp,`<b>${L(Math.round(kp*100)+'%',Math.round(kp*100)+' %')}</b> · ${fmt(kc,0)} kcal`)}${bar(L('Protein','Protéines'),pp,`<b>${fmt(pr,0)}</b> / ${TG.prot} g`)}</div><p class="small" style="margin:10px 0 0">${ate}${ate?' ':''}${lw}</p><div class="row" style="margin-top:8px"><button type="button" class="btn ghost sm" data-fueldetail>${L('Details →','Détails →')}</button></div></div>`; }
-function mainBtns(){ return `<div class="mainbtns"><button type="button" class="mb crash" data-go="crash"><span class="mi" aria-hidden="true">⚡</span>${L('Crash report','Noter un crash')}</button><button type="button" class="mb meal" data-addmeal="${dayKey()}"><span class="mi" aria-hidden="true">🍽️</span>${L('Meal report','Noter un repas')}</button><button type="button" class="mb hist" data-go="pat"><span class="mi" aria-hidden="true">📅</span>${L('History','Historique')}</button></div>`; }
-/* where the day stands: yesterday only when it has something to finish; today always, as a fact, not a nag */
-function finishLine(){ const t=dayKey(), y=keyAdd(t,-1); const R=rates(); const rows=[];
-  const yUnf=!(R[y]&&R[y].fin)&&(dayMeals(y).length||(R[y]&&Object.keys(R[y]).length));
-  if(yUnf) rows.push(`<button type="button" class="dl" data-dayopen="${y}"><b>${L('Yesterday','Hier')}</b> · ${L('not finished — 4 questions','pas terminée — 4 questions')} <span aria-hidden="true">→</span></button>`);
-  const nm=dayMeals(t).length; const tf=R[t]&&R[t].fin;
-  rows.push(`<button type="button" class="dl" data-dayopen="${t}"><b>${L('Today','Aujourd’hui')}</b> · ${nm?L(`${nm} meal${nm>1?'s':''}`,`${nm} repas`):L('no meals yet','aucun repas')} · ${tf?L('finished ✓','terminée ✓'):L('check-in not done','bilan pas fait')} <span aria-hidden="true">→</span></button>`);
-  return `<div class="card days">${rows.join('')}</div>`; }
 /* ---------- History, below what was found: the days, the crash log, the rest ---------- */
 function histMore(){ let h=`<h3 style="margin:18px 0 6px">${L('Your days','Tes journées')}</h3>`+vCal();
   const C=(S.crashes||[]).filter(x=>crashDay(x)).slice().reverse(); let M={}; try{ M=MECH(); }catch(e){}
@@ -2412,9 +2426,9 @@ function histMore(){ let h=`<h3 style="margin:18px 0 6px">${L('Your days','Tes j
 /* ---------- your day: the meals with their times, then the check-in ---------- */
 function vDay(){ const k=S.daySel||dayKey(); const isT=k===dayKey(); const head=isT?L('Today','Aujourd’hui'):k===keyAdd(dayKey(),-1)?L('Yesterday','Hier'):cap1(dayLabel(k));
   const ms=dayMeals(k); const t=tankTotals(tlog()[k]||{}).tot; const ready=tankReady(); const TG=ready?tankTargets():null;
-  let h=`<div class="eyebrow">${L('Your day','Ta journée')}</div><h2>${head}</h2><div class="card"><h3>${L('Meals','Repas')}</h3>`;
-  h+=ms.length?`<ul class="meals">${ms.map(m=>{ const tt=tankTotals(m.items).tot; return `<li><button type="button" class="ml" data-meal="${m.id}"><b>${m.at||L('no time','sans heure')}</b> ${esc(mealNames(m.items,4))} <small>· ${fmt(tt.kcal||0,0)} kcal</small></button></li>`; }).join('')}</ul>`:`<p class="small muted" style="margin:0 0 8px">${L('Nothing logged for this day.','Rien de noté pour cette journée.')}</p>`;
-  h+=`<div class="row"><button type="button" class="btn sm" data-addmeal="${k}">+ ${L('Add a meal','Ajouter un repas')}</button>${!ms.length&&mapCount(S.tank.day)?`<button type="button" class="btn ghost sm" data-usualday="${k}">${L('Same as my normal day','Comme ma journée normale')}</button>`:''}</div>`;
+  let h=`<div class="eyebrow">${L('Your day','Ta journée')}</div><h2>${head}</h2><div class="card"><h3>${L('In order','Dans l’ordre')}</h3>`;
+  h+=timelineHTML(k);
+  h+=`<div class="row"><button type="button" class="btn sm" data-addmeal="${k}">+ ${L('Meal','Repas')}</button><button type="button" class="btn ghost sm" data-addsym="${k}">+ ${L('Symptom','Symptôme')}</button>${!ms.length&&mapCount(S.tank.day)?`<button type="button" class="btn ghost sm" data-usualday="${k}">${L('Same as my normal day','Comme ma journée normale')}</button>`:''}</div>`;
   if(ms.length){
     if(TG) h+=`<p class="small" style="margin:10px 0 0">${L(`Fuel ${Math.round((t.kcal||0)/TG.kcal*100)}% · protein ${fmt(t.prot||0,0)} of ${TG.prot} g.`,`Carburant ${Math.round((t.kcal||0)/TG.kcal*100)} % · protéines ${fmt(t.prot||0,0)} sur ${TG.prot} g.`)}</p>`;
     h+=`<div class="row" style="margin-top:8px">${isClosed(k)?`<span class="small" style="align-self:center">✓ ${L('Logged as complete','Noté comme complet')}</span><button type="button" class="btn ghost sm" data-fopen="${k}">${L('Not done yet','Pas fini')}</button>`:`<button type="button" class="btn primary sm" data-fclose="${k}">${L('That’s everything I ate','C’est tout ce que j’ai mangé')}</button>`}${ready?`<button type="button" class="btn ghost sm" data-tankday="${k}">${L('The detail','Le détail')}</button>`:''}</div>`;
@@ -2458,7 +2472,7 @@ function crashMealPrefill(){ const k=S.c._day||dayKey(); delete S.c._preSure; if
 function crashSkipped(){ if(!S.c||S.c._noskip) return []; const s=(S.c._preC||[]).filter(id=>S.c[id]!=null); if(S.c._pre==='meal'&&S.c._preSure&&S.c.cfood) s.push('cfood'); return s; }
 const CQSHORT={csleep:['Sleep the night before','Sommeil la nuit d’avant'],ccaf:['Caffeine that day','Caféine ce jour-là'],ccafl:['Last caffeine','Dernière caféine'],cfood:['The 4 hours before','Les 4 heures avant']};
 function crashPrefillNote(){ const sk=crashSkipped(); if(!sk.length) return '';
-  const parts=sk.map(id=>{ const q=CQ.find(x=>x.id===id); if(!q) return ''; const v=S.c[id]; const lab=w=>{ const o=q.opts.find(o=>o.v===w); return o?P2(o.l):''; }; return `${P2(CQSHORT[id])}: ${Array.isArray(v)?v.map(lab).join(', '):lab(v)}`; }).filter(Boolean);
+  const parts=sk.map(id=>{ const q=CQ.find(x=>x.id===id); if(!q) return ''; const v=S.c[id]; const lab=w=>{ const o=q.opts.find(o=>o.v===w); return o?P2(o.l):''; }; return `${P2(CQSHORT[id])}${L(': ',' : ')}${Array.isArray(v)?v.map(lab).join(', '):lab(v)}`; }).filter(Boolean);
   return `<div class="card soft"><p class="small" style="margin:0 0 8px"><b>${L('Filled in from your logs, so not asked:','Rempli d’après tes notes, donc pas demandé :')}</b> ${esc(parts.join(' · '))}</p><button type="button" class="btn ghost sm" id="cUnskip">${L('Change these','Changer ça')}</button></div>`; }
 /* the gauge's setup asks only what's missing, and single answers move on by themselves */
 function tqAnswered(q){ const p=S.tank.p; return q.multi?(Array.isArray(p[q.id])&&p[q.id].length>0):p[q.id]!=null; }
@@ -2481,6 +2495,176 @@ function bind127(){ const $=id=>document.getElementById(id);
   document.querySelectorAll('[data-tsetuph]').forEach(b=>{ b.onclick=()=>{ S.mode='tank'; tankPrefill(); const l=tqList(); const i=l.findIndex(q=>q.multi?!(Array.isArray(S.tank.p[q.id])&&S.tank.p[q.id].length):S.tank.p[q.id]==null); S.tstep=i<0?1:i+1; S.tqHome=true; save(); render(); }; });
   if($('cAt')) $('cAt').onchange=e=>{ S.c._at=e.target.value||null; crashSetDay(S.c._day||dayKey()); delete S.c._logged; refocus='#cAt'; save(); render(true); };
   if($('cUnskip')) $('cUnskip').onclick=()=>{ const was=crashSkipped(); S.c._noskip=true; const l=cqList(); const i=l.findIndex(q=>was.includes(q.id)); S.cstep=i<0?1:i+1; save(); render(); };
+}
+/* ===================== v1.2.28: THE DAY IN ORDER, TIMED SYMPTOMS, FIRST VALUE =====================
+   For the person with five minutes: see what's wrong, see what to swap in, keep going. Symptoms carry a time like meals
+   (S.tank.ev); the check-in's day flags are rebuilt from them, so patterns, suspects and tests read what they always read.
+   Home: Today | History, the week's one line, fuel and protein rings, Crash · Meal · Symptom, today in order. */
+const SYMK=['bloat','loose','hard','head','skin','mood','other'];
+function migrateEv(){ if(!S.tank) return; if(!Array.isArray(S.tank.ev)) S.tank.ev=[];
+  if(!S.tank.evMig){ for(const [k,r] of Object.entries(rates())){ if(!r||!r.offw) continue; for(const v of Object.keys(r.offw)) if(r.offw[v]&&SYMK.includes(v)) S.tank.ev.push({id:'u'+k.replace(/-/g,'')+v, day:k, at:null, k:v}); } S.tank.evMig=true; } }
+function evs(){ if(!S.tank.evMig||!Array.isArray(S.tank.ev)) migrateEv(); return S.tank.ev; }
+function dayEvents(k){ return evs().filter(e=>e.day===k); }
+/* the day flags the patterns read: "something felt off" and which kinds, from the events; a loose stool before the day's first
+   timed meal counts with the day before ("on waking"), after it with that day, both if both — r.lwA, worked out, never asked */
+function syncEv(){ try{ if(!S.tank||!S.tank.evMig||!Array.isArray(S.tank.ev)) return; const R=rates(); const by={};
+  for(const e of S.tank.ev){ if(!e||!e.day||!SYMK.includes(e.k)) continue; (by[e.day]||(by[e.day]=[])).push(e); }
+  for(const [k,r] of Object.entries(R)){ if(!r) continue; if(!by[k]){ delete r.offw; delete r.lwA; if(r.offA){ if(r.fl) delete r.fl.off; delete r.offA; } } }
+  for(const [k,list] of Object.entries(by)){ const r=R[k]||(R[k]={}); r.offw={}; for(const e of list) r.offw[e.k]=true; r.fl=r.fl||{}; if(!r.fl.off) r.offA=true; r.fl.off=true;
+    const L0=list.filter(e=>e.k==='loose'&&e.at); const ms=(S.tank.meals||[]).filter(m=>m&&m.day===k&&m.at&&m.items&&mapCount(m.items));
+    if(L0.length&&ms.length){ const first=Math.min(...ms.map(m=>atMs(m.day,m.at))); const pre=L0.some(e=>atMs(e.day,e.at)<first), post=L0.some(e=>atMs(e.day,e.at)>=first); r.lwA=pre&&post?'both':pre?'wake':'meal'; }
+    else delete r.lwA; } }catch(e){} }
+function lwOf(k){ const r=rates()[k]; return r?(r.lwA||r.lw):undefined; }
+function lwLabel(v){ return v==='both'?L('on waking and after a meal','au réveil et après un repas'):((LW.find(x=>x[0]===v)||[null,null])[1]?P2(LW.find(x=>x[0]===v)[1]):''); }
+function pruneEv(){ const cut=keyAdd(dayKey(),-90); S.tank.ev=evs().filter(e=>e&&e.day&&e.day>=cut&&SYMK.includes(e.k)); }
+migrateEv(); pruneEv(); syncMeals();
+if(S.mode==='sym'&&!S.sym) S.mode='home';
+/* ---------- time since the last meal ---------- */
+function sinceMeal(k,t){ const ms=meals().filter(m=>m.at&&mapCount(m.items)&&(m.day===k||m.day===keyAdd(k,-1))&&atMs(m.day,m.at)<=t&&t-atMs(m.day,m.at)<=14*3600000);
+  if(!ms.length) return null; const m=ms.reduce((a,b)=>atMs(a.day,a.at)>=atMs(b.day,b.at)?a:b); return {m, min:Math.round((t-atMs(m.day,m.at))/60000)}; }
+function durText(min){ if(min<60) return `${min} min`; const h=Math.floor(min/60), mm=min%60; return mm>=5?L(`${h} h ${mm} min`,`${h} h ${String(mm).padStart(2,'0')}`):`${h} h`; }
+function shortNames(items){ const n=[]; for(const [id,c] of Object.entries(items||{})){ if(!(c>0)||String(id).startsWith('x_')) continue; const f=TF.find(z=>z.id==id); if(f) n.push(P2(f.l).split(',')[0].toLowerCase()); }
+  return n.length>2?n.slice(0,2).join(', ')+'…':n.join(L(' and ',' et ')); }
+function afterText(k,t,what){ const s=sinceMeal(k,t); if(!s) return ''; const w=what?` (${shortNames(s.m.items)})`:''; return L(`${durText(s.min)} after your ${s.m.at} meal${w}`,`${durText(s.min)} après ton repas de ${s.m.at}${w}`); }
+function symLabel(v){ const o=OFFW.find(x=>x[0]===v); return o?cap1(P2(o[1])):v; }
+/* ---------- today in order ---------- */
+function dayItems(k){ const out=[];
+  for(const m of dayMeals(k)) if(mapCount(m.items)) out.push({t:m.at?atMs(m.day,m.at):null, at:m.at, kind:'meal', m});
+  for(const e of dayEvents(k)) out.push({t:e.at?atMs(e.day,e.at):null, at:e.at, kind:'sym', e});
+  for(const x of (S.crashes||[])) if(crashDay(x)===k) out.push({t:x.at?atMs(k,x.at):null, at:x.at, kind:'crash', x});
+  return out.sort((a,b)=>(a.t==null?-1:a.t)-(b.t==null?-1:b.t)); }
+function timelineHTML(k){ const items=dayItems(k); if(!items.length) return `<p class="small muted" style="margin:0 0 6px">${L('Nothing logged yet.','Rien de noté encore.')}</p>`;
+  let M={}; try{ M=MECH(); }catch(e){}
+  return `<ul class="tl">${items.map(it=>{ const tm=`<span class="tt">${it.at||'—'}</span>`;
+    if(it.kind==='meal') return `<li><button type="button" class="tlr" data-meal="${it.m.id}">${tm}<span class="ti" aria-hidden="true">🍽️</span><span class="tx">${esc(mealNames(it.m.items,3))}</span></button></li>`;
+    const after=it.t!=null?afterText(k,it.t):'';
+    if(it.kind==='sym') return `<li><button type="button" class="tlr" data-symedit="${it.e.id}">${tm}<span class="ti" aria-hidden="true">😣</span><span class="tx"><b>${esc(symLabel(it.e.k))}</b>${after?`<small>${esc(after)}</small>`:''}</span></button></li>`;
+    return `<li><div class="tlr">${tm}<span class="ti" aria-hidden="true">⚡</span><span class="tx"><b>${L('Crash','Crash')}</b>${it.x.top&&M[it.x.top]?' · '+esc(P2(M[it.x.top].t)):''}${after?`<small>${esc(after)}</small>`:''}</span></div></li>`; }).join('')}</ul>`; }
+function tabsHTML(on){ return `<div class="gtabs seg toptabs" role="tablist"><button type="button" role="tab" data-tab="home" aria-pressed="${on==='home'}">${L('Today','Aujourd’hui')}</button><button type="button" role="tab" data-tab="pat" aria-pressed="${on==='pat'}">${L('History','Historique')}</button></div>`; }
+function weekLine(){ if(!S.done) return ''; const day=S.started?Math.floor((Date.now()-new Date(S.started).getTime())/86400000)+1:null; if(day!=null&&day>=28) return '';
+  const o=oneThing(buildPatch(),'home'); return `<div class="card wk"><div class="fuelhd"><div class="eyebrow">${L('This week','Cette semaine')}</div><button type="button" class="btn ghost sm" data-door="patch">${L('My week →','Ma semaine →')}</button></div><p style="margin:0;font-weight:700">${o.t}</p></div>`; }
+function todayCard(){ const t=dayKey(), y=keyAdd(t,-1); const R=rates(); const rows=[];
+  const yUnf=!(R[y]&&R[y].fin)&&(dayItems(y).length||(R[y]&&RATEQ.some(q=>R[y][q.id]!=null)));
+  if(yUnf) rows.push(`<button type="button" class="dl" data-dayci="${y}"><span><b>${L('Finish yesterday’s check-in','Termine le bilan d’hier')}</b> · ${L('4 questions','4 questions')}</span><span aria-hidden="true">→</span></button>`);
+  rows.push(R[t]&&R[t].fin?`<button type="button" class="dl" data-dayci="${t}"><span><b>${L('Today’s check-in','Bilan d’aujourd’hui')} ✓</b> · ${L('change','changer')}</span><span aria-hidden="true">→</span></button>`
+    :`<button type="button" class="dl" data-dayci="${t}"><span><b>${L('Finish today’s check-in','Termine le bilan d’aujourd’hui')}</b> · ${L('energy, sleep, caffeine, alcohol','énergie, sommeil, caféine, alcool')}</span><span aria-hidden="true">→</span></button>`);
+  return `<div class="card today"><div class="eyebrow">${L('Today so far','Aujourd’hui jusqu’ici')}</div>${timelineHTML(t)}<div class="days">${rows.join('')}</div></div>`; }
+/* ---------- the fuel tank as two rings: real numbers only ---------- */
+function ring(pct,label,big,small){ const r=33, c=2*Math.PI*r, p=Math.max(0,Math.min(1,pct||0));
+  return `<div class="ring" role="img" aria-label="${esc(label)} ${Math.round((pct||0)*100)}%"><svg viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="${r}" class="rb"/>${p>0?`<circle cx="40" cy="40" r="${r}" class="rf" stroke-dasharray="${(c*p).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 40 40)"/>`:''}</svg><div class="rv"><b>${big}</b><small>${small}</small></div><div class="rl">${label}</div></div>`; }
+function gapFix(){ const ws=weekSrc(); if(!ws.days||(ws.nReal<3&&!mapCount(S.tank.day))) return ''; const R=buildTank(ws); const PRI=['fe','b12','mg','b1','fol','d','zn','k','c','fib']; const F=(R.fills||[]).filter(x=>x.c&&x.c[0]&&x.c[0].share>=0.3); if(!F.length) return ''; const f=F.slice().sort((a,b)=>((PRI.indexOf(a.r.k)+99)%99)-((PRI.indexOf(b.r.k)+99)%99))[0];
+  const lc=s=>s.toLowerCase().replace(/vitamin(e)? ([a-z])/g,(m,e,x)=>'vitamin'+(e||'')+' '+x.toUpperCase()).replace(/\bb(\d{1,2})\b/g,'B$1'); const c=f.c[0]; const pct=Math.min(100,Math.round(c.share*100));
+  const nm=lc(P2(f.r.l)); const art=/^[aeiouyhéè]/i.test(nm)?'l’':/^(vitamine|thiamine|riboflavine|niacine|b\d)/i.test(nm)?'la ':/s$/.test(nm)?'les ':'le ';
+  const sv=P2(c.f.s).replace(/(\d) /g,'$1 '); return L(` For ${nm}: ${P2(c.f.l).toLowerCase()} (${sv}) covers ${pct}% of the gap.`,` Pour ${art}${nm} : ${P2(c.f.l).toLowerCase()} (${sv}), ça couvre ${pct} % du manque.`); }
+function fuelCard(){
+  if(!tankReady()){ try{ tankPrefill(); }catch(e){} }
+  if(!tankReady()){ const p=S.tank.p; const miss=tqList().filter(q=>q.multi?!(Array.isArray(p[q.id])&&p[q.id].length):p[q.id]==null).length;
+    return `<div class="card fuel"><div class="eyebrow">${L('Fuel tank','Réservoir')}</div><p class="small" style="margin:0 0 8px">${L(`${miss} question${miss>1?'s':''} set the gauge to your body.`,`${miss} question${miss>1?'s':''} pour régler la jauge à ton corps.`)}</p><button type="button" class="btn sm" data-tsetuph>${L('Set the gauge →','Régler la jauge →')}</button></div>`; }
+  const k=dayKey(); const today=tlog()[k]||{}; const hasT=mapCount(today)>0, hasN=mapCount(S.tank.day)>0; const useN=!hasT&&hasN;
+  const t=tankTotals(useN?S.tank.day:today).tot; const TG=tankTargets(); const kc=t.kcal||0, pr=t.prot||0, kp=TG.kcal?kc/TG.kcal:0, pp=TG.prot?pr/TG.prot:0;
+  const rings=`<div class="rings">${ring(kp,L('Fuel','Carburant'),L(Math.round(kp*100)+'%',Math.round(kp*100)+' %'),`${fmt(kc,0)} kcal`)}${ring(pp,L('Protein','Protéines'),fmt(pr,0),`/ ${TG.prot} g`)}</div>`;
+  const la=lastAteMin(); const low=lowWeekNames();
+  let line = useN ? L('Your normal day — log a meal to see today.','Ta journée normale — note un repas pour voir aujourd’hui.') : (la!=null?L(`Last ate ${agoText(la)}.`,`Dernier repas ${agoText(la)}.`):(hasT?'':L('Nothing logged today yet.','Rien de noté aujourd’hui.')));
+  const lw = low ? (low.length?L(`<b>Low this week:</b> ${low.join(', ')}.`,`<b>Bas cette semaine :</b> ${low.join(', ')}.`)+(low.length?gapFix():''):L('Nothing low this week.','Rien de bas cette semaine.')) : '';
+  const prompt = (!hasT&&!hasN) ? `<div class="row" style="margin-top:8px"><button type="button" class="btn sm" data-nday>${L('Fill the gauge: tap a normal day →','Remplis la jauge : coche une journée normale →')}</button></div><p class="small muted" style="margin:6px 0 0">${L('About a minute. Rough is fine.','Environ une minute. Approximatif, c’est correct.')}</p>` : '';
+  return `<div class="card fuel"><div class="fuelhd"><div class="eyebrow">${useN?L('Fuel tank · your normal day','Réservoir · ta journée normale'):L('Fuel tank · today','Réservoir · aujourd’hui')}</div><button type="button" class="btn ghost sm" data-fueldetail>${L('Details →','Détails →')}</button></div>${rings}<p class="small" style="margin:8px 0 0">${line}${line&&lw?' ':''}${lw}</p>${prompt}</div>`; }
+function mainBtns(){ return `<div class="mainbtns"><button type="button" class="mb crash" data-go="crash"><span class="mi" aria-hidden="true">⚡</span>${L('Crash report','Noter un crash')}</button><button type="button" class="mb meal" data-addmeal="${dayKey()}"><span class="mi" aria-hidden="true">🍽️</span>${L('Meal report','Noter un repas')}</button><button type="button" class="mb sym" data-addsym="${dayKey()}"><span class="mi" aria-hidden="true">😣</span>${L('Symptom report','Noter un symptôme')}</button></div>`; }
+/* what the app gives back, and when — so day 3 isn't the day people give up; gone after "Got it" */
+function payoffCard(){ if(!S.done||S.payoffOk) return '';
+  return `<div class="card soft"><div class="eyebrow">${L('What you’ll see, and when','Ce que tu vas voir, et quand')}</div><ul class="small pay" style="margin:0 0 8px">
+  <li><b>${L('Today:','Aujourd’hui :')}</b> ${L('your patch, and what’s low on a normal day.','ta patch, et ce qui est bas une journée normale.')}</li>
+  <li><b>${L('After 7 finished days:','Après 7 journées terminées :')}</b> ${L('your first comparison.','ta première comparaison.')}</li>
+  <li><b>${L('Weeks 2 to 3:','Semaines 2 à 3 :')}</b> ${L('a first suspect, if there is one.','un premier suspect, s’il y en a un.')}</li>
+  <li><b>${L('When you’re ready:','Quand ça te convient :')}</b> ${L('a test — two weeks without one suspect, three days back — and an answer.','un test — deux semaines sans un suspect, trois jours comme avant — et une réponse.')}</li></ul><button type="button" class="btn ghost sm" data-payoffok>${L('Got it','Compris')}</button></div>`; }
+/* ---------- symptom report ---------- */
+function vSym(){ const d=S.sym; if(!d) return ''; const t=dayKey(), y=keyAdd(t,-1); const tm=d.at?atMs(d.day,d.at):null; const after=tm!=null?afterText(d.day,tm,true):'';
+  let h=`<div class="eyebrow">${L('Symptom report','Noter un symptôme')}</div><div class="card mealhd"><div class="row" style="gap:8px"><div class="gtabs seg" role="tablist" style="margin:0"><button type="button" role="tab" data-sday="${t}" aria-pressed="${d.day===t}">${L('Today','Aujourd’hui')}</button><button type="button" role="tab" data-sday="${y}" aria-pressed="${d.day===y}">${L('Yesterday','Hier')}</button>${d.day!==t&&d.day!==y?`<button type="button" role="tab" aria-pressed="true">${dayLabel(d.day)}</button>`:''}</div><label class="small" for="symAt">${L('at','à')}</label><input type="time" id="symAt" class="sel tm" value="${d.at||''}"><button type="button" class="btn ghost sm" id="symNow">${L('Now','Maintenant')}</button></div>${after?`<p class="small" style="margin:8px 0 0"><b>${esc(cap1(after))}</b> — ${L('the time between is what the patterns read.','c’est l’écart que les tendances lisent.')}</p>`:''}</div>`;
+  h+=`<h2 style="margin-top:14px">${L('What is it?','C’est quoi?')}</h2>${pickAll()}<div class="chips pickn">${OFFW.map(([v,l,ds])=>`<button type="button" class="chip" data-symk="${v}" aria-pressed="${d.ks.includes(v)}"><span>${esc(cap1(P2(l)))}${ds?` <small class="muted">· ${esc(P2(ds))}</small>`:''}</span></button>`).join('')}</div>`;
+  h+=`<p class="small" style="margin:4px 0 0"><button type="button" class="btn ghost sm" data-go="crash">${L('A crash? Crash report →','Un crash? Noter un crash →')}</button></p>`;
+  if(d.edit) h+=`<div class="row" style="margin-top:10px"><button type="button" class="btn ghost sm" id="symDel">${L('Delete this','Supprimer ça')}</button></div>`;
+  return h; }
+/* ---------- normal day, quick: the foods most days are made of, filtered by diet and what they run on ---------- */
+const QUICK=[2873,2909,910004,910001,5288,1620,130,4066,4067,3671,1414,3399,502188,502158,61,501527,1704,1696,842,2696,3081,4464,4523,2506,3393,3404,119,4650,4635,4962,4903,4407,4186,501819,3915,509001,2943,2850,900005];
+const MEATY=[4650,4635,4962,1055,6248,501976];
+function quickFoods(){ const life=tankLife(); const fuel=(S.a&&S.a.fuel)||[]; const drinks=any('fuel','beer','wine','spirits');
+  return QUICK.map(id=>TF.find(f=>f.id===id)).filter(f=>{ if(!f) return false;
+    if(life.veg&&(['meat','sea'].includes(f.grp)||MEATY.includes(f.id))) return false;
+    if(life.vegan&&((f.grp==='dairy'&&![501527,502442].includes(f.id))||f.id===3915)) return false;
+    if(!life.vegan&&f.id===501527) return false;
+    if(f.grp==='energy'&&!fuel.includes('energy')) return false;
+    if(f.grp==='alc'&&!drinks) return false;
+    if(f.id===2873&&fuel.length&&!fuel.includes('coffee')) return false;
+    return true; }); }
+function vNday(){ const map=S.tank.day; const t=tankTotals(map).tot; const ready=tankReady(); const TG=ready?tankTargets():null;
+  let h=`<div class="eyebrow">${L('Your normal day','Ta journée normale')}</div><h2>${L('What does a usual day look like?','À quoi ressemble une journée habituelle?')}</h2><p class="small" style="margin:-4px 0 10px">${L('Rough is fine. Tap what you have on most days — drinks and pills too; tap again for a second one. Until you log real meals, the gauge uses this.','Approximatif, c’est correct. Appuie sur ce que tu prends la plupart des jours — boissons et pilules aussi; appuie encore pour une deuxième. Tant que tu ne notes pas de vrais repas, la jauge utilise ça.')}</p>`;
+  h+=`<div class="card"><div class="gtabs" style="margin:0">${quickFoods().map(f=>{ const c=map[f.id]||0; return `<button type="button" data-food="${f.id}" aria-pressed="${c>0}">${esc(P2(f.l))}${c?' ×'+fmt(c,1):''}</button>`; }).join('')}</div>${TG&&mapCount(map)?`<p class="small" style="margin:10px 0 0"><b>${L(`Fuel ${Math.round((t.kcal||0)/TG.kcal*100)}% · protein ${fmt(t.prot||0,0)} of ${TG.prot} g`,`Carburant ${Math.round((t.kcal||0)/TG.kcal*100)} % · protéines ${fmt(t.prot||0,0)} sur ${TG.prot} g`)}</b></p>`:''}</div>`;
+  h+=`<details class="more"><summary>${L('More foods','Plus d’aliments')}</summary><div class="card">${foodPicker(map)}</div></details>`;
+  return h; }
+/* ---------- the mirror: their own day back to them, before any advice ---------- */
+const FUELM={coffee:['coffee','le café'],energy:['energy drinks','les boissons énergisantes'],sugar:['sugar','le sucre'],beer:['beer','la bière'],wine:['wine','le vin'],spirits:['spirits','le fort'],smoke:['nicotine','la nicotine']};
+function listJoin(a){ return a.length<2?(a[0]||''):a.slice(0,-1).join(', ')+L(' and ',' et ')+a[a.length-1]; }
+function mirrorHTML(){ const a=S.a||{}; if(!Object.keys(a).length) return ''; const parts=[];
+  const fuel=(a.fuel||[]).filter(v=>FUELM[v]); if(fuel.length) parts.push(L(`you run on ${listJoin(fuel.map(v=>FUELM[v][0]))}`,`tu tiens avec ${listJoin(fuel.map(v=>FUELM[v][1]))}`));
+  const SL={'5':['sleep 5 hours or less','tu dors 5 heures ou moins'],'6':['sleep about 6 hours','tu dors environ 6 heures'],'broken':['sleep in pieces','tu dors en morceaux'],'7tired':['wake up tired even after 7 hours','tu te réveilles sans énergie même après 7 heures']};
+  if(SL[a.sleep]) parts.push(L(SL[a.sleep][0],SL[a.sleep][1]));
+  const CR={am:['crash mid-morning','tu frappes un mur en milieu d’avant-midi'],pm:['crash mid-afternoon','tu frappes un mur en milieu d’après-midi'],meal:['crash right after eating','tu frappes un mur après avoir mangé'],all:['are tired all day','tu es à plat toute la journée'],random:['crash at random','tu frappes un mur n’importe quand']};
+  const cr=(a.crash||[]).find(v=>CR[v]); if(cr) parts.push(L(CR[cr][0],CR[cr][1]));
+  const MO={nothing:['have nothing before noon','tu ne prends rien avant midi'],coffee:['have no food before noon','tu ne manges rien avant midi'],carbs:['start on toast or something sweet','tu commences avec du pain ou du sucré']};
+  if(MO[a.morning]) parts.push(L(MO[a.morning][0],MO[a.morning][1]));
+  if(!parts.length) return '';
+  const caf=any('fuel','coffee','energy'), short=['5','6','broken','7tired'].includes(a.sleep), crash=(a.crash||[]).filter(v=>v!=='none');
+  /* the loop, named once and underlined to its glossary entry; the rest in plain words */
+  let rest=null;
+  const NW={'5':['the short night','la nuit trop courte'],'6':['the short night','la nuit trop courte'],'broken':['the broken nights','les nuits entrecoupées'],'7tired':['the tiredness','la fatigue']}[a.sleep]||['the short night','la nuit trop courte'];
+  if(caf&&short) rest=[`: caffeine covers ${NW[0]}, and when it wears off, the tiredness catches up — so you reach for more.`,` : la caféine couvre ${NW[1]}, et quand l’effet tombe, la fatigue te rattrape — alors tu en reprends.`];
+  else if(has('fuel','sugar')&&crash.some(v=>v==='pm'||v==='meal')) rest=[': sugar lifts you for an hour, then drops you lower than before.',' : le sucre te remonte pendant une heure, puis te laisse plus bas qu’avant.'];
+  else if(any('fuel','beer','wine','spirits')&&short) rest=[': a drink helps you fall asleep, wakes you at 3 a.m., and the next day runs on caffeine.',' : un verre aide à s’endormir, réveille à 3 h du matin, et le lendemain roule à la caféine.'];
+  else if(['nothing','coffee'].includes(a.morning)&&crash.length) rest=[': no fuel in the morning, and the tank runs dry later in the day.',' : rien dans le réservoir le matin, et il est à sec plus tard dans la journée.'];
+  const loop=rest?L('That’s ','C’est ')+T('loop','the usual loop','la boucle habituelle')+esc(P2(rest)):'';
+  const pieces=a.sleep!=='broken';
+  const life = has('safety','bf') ? (pieces?L('A baby makes it harder: sleep comes in pieces, breastfeeding takes extra protein and B12, and birth often leaves iron low.','Un bébé rend ça plus dur : le sommeil arrive en morceaux, l’allaitement demande plus de protéines et de B12, et l’accouchement laisse souvent le fer bas.'):L('A baby makes it harder: breastfeeding takes extra protein and B12, and birth often leaves iron low.','Un bébé rend ça plus dur : l’allaitement demande plus de protéines et de B12, et l’accouchement laisse souvent le fer bas.'))
+    : has('safety','pp') ? (pieces?L('A baby this year makes it harder: sleep comes in pieces, and birth often leaves iron low.','Un bébé cette année rend ça plus dur : le sommeil arrive en morceaux, et l’accouchement laisse souvent le fer bas.'):L('A baby this year makes it harder: birth often leaves iron low.','Un bébé cette année rend ça plus dur : l’accouchement laisse souvent le fer bas.'))
+    : has('safety','preg') ? L('Pregnancy makes it harder: the need for iron, folate and protein goes up.','La grossesse rend ça plus dur : les besoins en fer, en folate et en protéines augmentent.') : '';
+  const told=L(`you ${listJoin(parts.map(p=>p.replace(/^you /,'')))}.`,`${listJoin(parts)}.`);
+  return `<div class="mirror"><p style="margin:0 0 6px"><b>${L('What you told it:','Ce que tu lui as dit :')}</b> ${esc(told)}</p>${loop||life?`<p style="margin:0 0 6px">${loop}${loop&&life?' ':''}${esc(life)}</p>`:''}<p class="small muted" style="margin:0">${L('Nothing below takes any of it away — it works around it.','Rien en dessous ne t’enlève ça — on fait avec.')}</p></div>`; }
+/* ---------- the timed tip: hours since the last meal before each crash (rotations move the clock, not the gap) ---------- */
+function crashGaps(){ const cut=keyAdd(dayKey(),-30), out=[];
+  for(const x of (S.crashes||[])){ const k=crashDay(x); if(!k||k<cut||!x.at) continue; const t=atMs(k,x.at); const s=sinceMeal(k,t); if(s) out.push({k,at:x.at,t,gap:s.min/60}); }
+  return out.sort((a,b)=>b.t-a.t); }
+function gapTip(){ const g=crashGaps().slice(0,5); if(g.length<3) return null; const half=x=>Math.round(x*2)/2;
+  const long=g.filter(x=>x.gap>=4), short=g.filter(x=>x.gap<=2);
+  if(long.length>=3){ const lo=half(Math.min(...long.map(x=>x.gap))), hi=half(Math.max(...long.map(x=>x.gap))); return {kind:'long',n:long.length,lo,hi,at:Math.max(2.5,Math.floor(lo)-1)}; }
+  if(short.length>=3){ const hi=Math.max(1,Math.ceil(Math.max(...short.map(x=>x.gap)))); return {kind:'short',n:short.length,hi}; }
+  return null; }
+function hrs(x){ return fmt(x,1).replace(/[.,]0$/,''); }
+function gapTipText(g){ if(!g) return '';
+  if(g.kind==='long') return L(`<b>Your last ${g.n} crashes came ${g.lo===g.hi?'about '+hrs(g.lo):hrs(g.lo)+'–'+hrs(g.hi)} h after you’d last eaten.</b> Eat something with protein about ${hrs(g.at)} h after a meal, before the gap gets that long. A pattern in your crashes, not proof — try it for a week.`,
+    `<b>Tes ${g.n} derniers crashs sont arrivés ${g.lo===g.hi?'environ '+hrs(g.lo):hrs(g.lo)+' à '+hrs(g.hi)} h après ton dernier repas.</b> Mange quelque chose avec des protéines environ ${hrs(g.at)} h après un repas, avant que l’écart devienne aussi long. Une tendance dans tes crashs, pas une preuve — essaie-le une semaine.`);
+  return L(`<b>Your last ${g.n} crashes came within ${g.hi} h of eating.</b> The meal itself is the suspect: a smaller portion, with protein and less sugar or white bread, is the usual fix. A pattern, not proof — try it for a week.`,
+    `<b>Tes ${g.n} derniers crashs sont arrivés moins de ${g.hi} h après avoir mangé.</b> Le repas lui-même est le suspect : une plus petite portion, avec des protéines et moins de sucre ou de pain blanc, c’est la solution habituelle. Une tendance, pas une preuve — essaie-le une semaine.`); }
+function gapTipCard(){ const g=gapTip(); if(!g) return ''; return `<div class="card soft"><div class="eyebrow">${L('The time before your crashes','Le temps avant tes crashs')}</div><p class="small" style="margin:0">${gapTipText(g)}</p></div>`; }
+/* ---------- for "Ask an AI": symptoms with their times ---------- */
+function symText(){ const today=dayKey(), lines=[];
+  for(const k of [0,1,2].map(i=>keyAdd(today,-i))){ const es=dayEvents(k).filter(e=>e.at); if(!es.length) continue; lines.push(`${k}: `+es.sort((a,b)=>atMs(a.day,a.at)-atMs(b.day,b.at)).map(e=>{ const a=afterText(k,atMs(e.day,e.at)); return `${e.at} ${symLabel(e.k).toLowerCase()}${a?' ('+a+')':''}`; }).join(' · ')); }
+  return lines.length?L('== SYMPTOMS, LAST 3 DAYS (with the time) ==','== SYMPTÔMES, 3 DERNIERS JOURS (avec l’heure) ==')+'\n'+lines.join('\n'):''; }
+/* ---------- events ---------- */
+function bind128(){ const $=id=>document.getElementById(id);
+  const symBack=()=>{ const d=S.sym; const back=S.symFrom==='day'?'day':'home'; if(back==='day'&&d) S.daySel=d.day; S.mode=back; delete S.sym; };
+  document.querySelectorAll('[data-tab]').forEach(b=>{ b.onclick=()=>{ S.mode=b.dataset.tab==='pat'?'pat':'home'; save(); render(); }; });
+  document.querySelectorAll('[data-addsym]').forEach(b=>{ b.onclick=()=>{ if(!S.ack) return; const k=b.dataset.addsym||dayKey(); S.sym={day:k, at:k===dayKey()?nowHM():null, ks:[]}; S.symFrom=S.mode==='day'?'day':'home'; S.mode='sym'; save(); render(); }; });
+  document.querySelectorAll('[data-symedit]').forEach(b=>{ b.onclick=()=>{ const e=evs().find(x=>x.id===b.dataset.symedit); if(!e) return; S.sym={day:e.day, at:e.at, ks:[e.k], edit:e.id}; S.symFrom=S.mode==='day'?'day':'home'; S.mode='sym'; save(); render(); }; });
+  document.querySelectorAll('[data-symk]').forEach(b=>{ b.onclick=()=>{ const d=S.sym; if(!d) return; const v=b.dataset.symk; d.ks=d.ks.includes(v)?d.ks.filter(x=>x!==v):d.ks.concat([v]); refocus=`[data-symk="${v}"]`; save(); render(true); }; });
+  document.querySelectorAll('[data-sday]').forEach(b=>{ b.onclick=()=>{ const d=S.sym; if(!d) return; d.day=b.dataset.sday; refocus=`[data-sday="${d.day}"]`; save(); render(true); }; });
+  if($('symAt')) $('symAt').onchange=e=>{ if(!S.sym) return; S.sym.at=e.target.value||null; save(); render(true); };
+  if($('symNow')) $('symNow').onclick=()=>{ if(!S.sym) return; S.sym.day=dayKey(); S.sym.at=nowHM(); refocus='#symNow'; save(); render(true); };
+  if($('symDone')) $('symDone').onclick=()=>{ const d=S.sym; if(!d){ S.mode='home'; render(); return; } const E=evs(); if(d.edit) S.tank.ev=E.filter(x=>x.id!==d.edit);
+    for(const k of d.ks) S.tank.ev.push({id:'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,5)+k, day:d.day, at:d.at||null, k});
+    const n=d.ks.length, at=d.at; symBack(); const ok=save(); render(); if(ok&&n) toast(L(`Saved${at?' · '+at:''}`,`Noté${at?' · '+at:''}`)); };
+  if($('symDel')) $('symDel').onclick=function(){ if(!this.dataset.sure){ this.dataset.sure='1'; this.textContent=L('Tap again to delete','Appuie encore pour supprimer'); return; } const d=S.sym; if(d&&d.edit) S.tank.ev=evs().filter(x=>x.id!==d.edit); symBack(); save(); render(); toast(L('Deleted','Supprimé')); };
+  document.querySelectorAll('[data-dayci]').forEach(b=>{ b.onclick=()=>{ S.daySel=b.dataset.dayci; S.mode='day'; rEdit=null; save(); render(); const c=document.getElementById('checkin'); if(c){ try{ c.scrollIntoView({block:'start'}); }catch(e){} } }; });
+  document.querySelectorAll('[data-nday]').forEach(b=>{ b.onclick=()=>{ S.mode='nday'; foodQ=''; save(); render(); }; });
+  if($('ndayDone')) $('ndayDone').onclick=()=>{ S.mode='home'; foodQ=''; const ok=save(); render(); if(ok&&mapCount(S.tank.day)) toast(L('Saved as your normal day','Enregistré comme ta journée normale')); };
+  document.querySelectorAll('[data-payoffok]').forEach(b=>{ b.onclick=()=>{ S.payoffOk=true; save(); render(true); }; });
 }
 /* ===================== v1.2.22: ONE-SCREEN RESULT ===================== */
 function plainName(s){ return String(s||'').replace(/<[^>]+>/g,'').split(' — ')[0].trim(); }
@@ -2527,6 +2711,7 @@ function vPatch(){
     h+=`<div class="card"><p class="small muted" style="margin:0">${L('To be clear: it can’t fix the job, the money or the five-minute doctor. Not yet reviewed by a pharmacist; every underlined word shows its sources.','Pour être clair : ça ne règle pas la job, l’argent ni le médecin de cinq minutes. Pas encore révisé par un pharmacien; chaque mot souligné montre ses sources.')}</p></div>`;
     return h;
   }
+  h+=mirrorHTML();
   h+=dayCheck(P,'patch');
   { const o=oneThing(P); h+=`<div class="card one"><div class="eyebrow">${L('If you do one thing this week','Si tu fais une seule chose cette semaine')}</div><p class="big">${o.t}</p><p class="small muted" style="margin:0">${o.w} ${L('The rest is below, for when you come back.','Le reste est plus bas, pour quand tu reviendras.')}</p></div>`; }
   /* v1.2.22: plain words first — what the test checks — then the names the lab uses; the box comes straight after */
@@ -2555,10 +2740,12 @@ function renderBar(v){
   if(v==='start'){ bar.innerHTML=''; bar.classList.add('hidden'); return; }
   bar.classList.remove('hidden');
   if(v==='meal'){ bar.innerHTML=`<div class="in"><button class="btn ghost sm" id="back">← ${L('Back','Retour')}</button><span class="small muted">${L('Meal report','Noter un repas')}</span><button class="btn primary sm" id="mealDone">${L('Done','Terminé')}</button></div>`; return; }
+  if(v==='sym'){ bar.innerHTML=`<div class="in"><button class="btn ghost sm" id="back">← ${L('Back','Retour')}</button><span class="small muted">${L('Symptom','Symptôme')}</span><button class="btn primary sm" id="symDone">${L('Done','Terminé')}</button></div>`; return; }
+  if(v==='nday'){ bar.innerHTML=`<div class="in"><button class="btn ghost sm" id="back">← ${L('Back','Retour')}</button><span class="small muted">${L('Normal day','Journée normale')}</span><button class="btn primary sm" id="ndayDone">${L('Done','Terminé')}</button></div>`; return; }
   if(v==='day'){ bar.innerHTML=`<div class="in"><button class="btn ghost sm" id="back">← ${L('Back','Retour')}</button><span class="small muted">${L('Your day','Ta journée')}</span><button class="btn sm" id="home">${L('Home','Accueil')}</button></div>`; return; }
   if(v==='patch'){ bar.innerHTML=`<div class="in"><button class="btn ghost sm" id="back">← ${L('Questions','Questions')}</button><span class="small muted">${L('The Patch','La Patch')}</span><button class="btn sm" id="home">${L('Home','Accueil')}</button></div>`; return; }
   if(v==='crashres'){ bar.innerHTML=`<div class="in"><button class="btn ghost sm" id="back">← ${L('Answers','Réponses')}</button><span class="small muted">${L('Why did I crash?','Pourquoi j’ai crashé?')}</span><button class="btn sm" id="home">${L('Home','Accueil')}</button></div>`; return; }
-  if(v==='pat'){ bar.innerHTML=`<div class="in"><button class="btn ghost sm" id="back">← ${L('Back','Retour')}</button><span class="small muted">${L('History','Historique')}</span><button class="btn sm" id="home">${L('Home','Accueil')}</button></div>`; return; }
+  if(v==='pat'){ bar.innerHTML=''; bar.classList.add('hidden'); return; }
   if(v==='ai'){ bar.innerHTML=`<div class="in"><button class="btn ghost sm" id="back">← ${L('Back','Retour')}</button><span class="small muted">${L('Ask an AI','Demande à une IA')}</span><button class="btn sm" id="home">${L('Home','Accueil')}</button></div>`; return; }
   if(v==='tank'){ bar.innerHTML=`<div class="in"><button class="btn ghost sm" id="back">← ${L('Back','Retour')}</button><span class="small muted">${L('Fuel tank','Réservoir')}</span><button class="btn sm" id="home">${L('Home','Accueil')}</button></div>`; return; }
   if(v==='tq'){
@@ -2602,14 +2789,14 @@ function bind(){
   if($('reset')) $('reset').onclick=function(){ if(!this.dataset.sure){ this.dataset.sure='1'; this.textContent=L('Tap again to erase everything','Appuie encore pour tout effacer'); return; } eraseAll(); };
   if($('aboutBtn')) $('aboutBtn').onclick=openAbout;
   if($('iosOk')) $('iosOk').onclick=()=>{ S.iosOk=true; save(); render(true); };
-  NAV={patch:goPatch,redo:goRedo,crash:goCrash,ai:goAI,tank:goTank,pat:goPat,meal:()=>{ newMeal(dayKey(),'home'); save(); render(); }};
+  NAV={patch:goPatch,redo:goRedo,crash:goCrash,ai:goAI,tank:goTank,pat:goPat,meal:()=>{ newMeal(dayKey(),'home'); save(); render(); }, sym:()=>{ S.sym={day:dayKey(),at:nowHM(),ks:[]}; S.symFrom='home'; S.mode='sym'; save(); render(); }};
   document.querySelectorAll('[data-rk]').forEach(b=>{ b.onclick=()=>{ const k=b.dataset.rk, q=b.dataset.rq; let v=b.dataset.rv; if(q==='e'||q==='s') v=+v; const R=rates(); const r=R[k]||(R[k]={}); if(String(r[q])===String(v)) delete r[q]; else r[q]=v; if(r.fin){ r.fin=false; } if(!Object.keys(r).length) delete R[k]; refocus=`[data-rk="${k}"][data-rq="${q}"][data-rv="${b.dataset.rv}"]`; save(); render(true); }; });
   document.querySelectorAll('[data-cday]').forEach(b=>{ b.onclick=()=>{ crashSetDay(b.dataset.cday); delete S.c._logged; refocus=`[data-cday="${b.dataset.cday}"]`; save(); render(true); }; });
   document.querySelectorAll('[data-crashday]').forEach(b=>{ b.onclick=()=>NAV.crash(b.dataset.crashday); });
   document.querySelectorAll('[data-rconf]').forEach(b=>{ b.onclick=()=>{ const r=rates()[b.dataset.rconf]; if(r){ r.fl=r.fl||{}; r.fl.cr=true; r.at=new Date().toISOString(); } refocus='#checkin'; save(); render(true); }; });
-  document.querySelectorAll('[data-roff]').forEach(b=>{ b.onclick=()=>{ const k=b.dataset.rk3, v=b.dataset.roff; const r=rates()[k]||(rates()[k]={}); r.offw=r.offw||{}; if(r.offw[v]) delete r.offw[v]; else r.offw[v]=true; if(v==='loose'&&!r.offw.loose) delete r.lw; if(r.fin) r.fin=false; refocus=`[data-roff="${v}"][data-rk3="${k}"]`; save(); render(true); }; });
+  document.querySelectorAll('[data-roff]').forEach(b=>{ b.onclick=()=>{ const k=b.dataset.rk3, v=b.dataset.roff; const r=rates()[k]||(rates()[k]={}); const had=evs().some(e=>e.day===k&&e.k===v); if(had) S.tank.ev=evs().filter(e=>!(e.day===k&&e.k===v)); else evs().push({id:'c'+Date.now().toString(36)+v, day:k, at:null, k:v}); if(v==='loose'&&had) delete r.lw; if(r.fin) r.fin=false; refocus=`[data-roff="${v}"][data-rk3="${k}"]`; save(); render(true); }; });
   document.querySelectorAll('[data-rlw]').forEach(b=>{ b.onclick=()=>{ const k=b.dataset.rk4, v=b.dataset.rlw; const r=rates()[k]||(rates()[k]={}); if(r.lw===v) delete r.lw; else r.lw=v; if(r.fin) r.fin=false; refocus=`[data-rlw="${v}"][data-rk4="${k}"]`; save(); render(true); }; });
-  document.querySelectorAll('[data-rflag]').forEach(b=>{ b.onclick=()=>{ const k=b.dataset.rk2, f=b.dataset.rflag; const R=rates(); const r=R[k]||(R[k]={}); r.fl=r.fl||{}; if(r.fl[f]) delete r.fl[f]; else r.fl[f]=true; if(r.fin) r.fin=false; refocus=`[data-rflag="${f}"][data-rk2="${k}"]`; save(); render(true); }; });
+  document.querySelectorAll('[data-rflag]').forEach(b=>{ b.onclick=()=>{ const k=b.dataset.rk2, f=b.dataset.rflag; const R=rates(); const r=R[k]||(R[k]={}); r.fl=r.fl||{}; if(r.fl[f]) delete r.fl[f]; else r.fl[f]=true; if(f==='off'){ delete r.offA; if(!r.fl.off){ S.tank.ev=evs().filter(e=>e.day!==k); delete r.lw; } } if(r.fin) r.fin=false; refocus=`[data-rflag="${f}"][data-rk2="${k}"]`; save(); render(true); }; });
   document.querySelectorAll('[data-rfin]').forEach(b=>{ b.onclick=()=>{ const k=b.dataset.rfin; const R=rates(); const r=R[k]||(R[k]={}); r.fl=r.fl||{}; r.fin=true; const now=new Date().toISOString(); if(!r.firstAt) r.firstAt=now; r.at=now; rEdit=null; refocus='#checkin'; const ok=save(); render(true); if(ok) toast(k===dayKey()?L('Day finished','Journée terminée'):L('Saved for '+dayLabel(k),'Noté pour '+dayLabel(k))); }; });
   document.querySelectorAll('[data-redit]').forEach(b=>{ b.onclick=()=>{ rEdit=b.dataset.redit||null; refocus='#checkin'; render(true); }; });
   document.querySelectorAll('[data-rday]').forEach(b=>{ b.onclick=()=>{ S.rsel=b.dataset.rday; rEdit=null; refocus=`[data-rday="${b.dataset.rday}"]`; save(); render(true); }; });
@@ -2620,6 +2807,8 @@ function bind(){
     else if(v==='crashres'){ S.cstep=cqList().length; }
     else if(v==='tq'){ if(S.tstep<=1) S.mode='home'; else S.tstep--; }
     else if(v==='tank'){ S.mode='home'; }
+    else if(v==='sym'){ const d=S.sym; const back=S.symFrom==='day'?'day':'home'; if(back==='day'&&d) S.daySel=d.day; S.mode=back; delete S.sym; }
+    else if(v==='nday'){ S.mode='home'; foodQ=''; }
     else if(v==='meal'){ const m=curMeal(); dropEmptyMeal(); const back=S.mealFrom==='day'?'day':'home'; if(back==='day'&&m) S.daySel=m.day; S.mode=back; delete S.meal; foodQ=''; }
     else { S.mode='home'; }
     save(); render(); };
@@ -2636,7 +2825,7 @@ function bind(){
   if($('newCrash')) $('newCrash').onclick=()=>{ S.c={}; S.cstep=1; save(); render(); };
   if($('clearLog')) $('clearLog').onclick=function(){ if(!this.dataset.sure){ this.dataset.sure='1'; this.textContent=L('Tap again to clear the crash log','Appuie encore pour vider le journal'); return; } S.crashes=[]; delete S.c._logged; save(); render(true); toast(L('Log cleared','Journal vidé')); };
   document.querySelectorAll('[data-delcrash]').forEach(b=>{ b.onclick=()=>{ const i=+b.dataset.delcrash; const x=S.crashes[i]; const isCurrent = S.c._logged===true ? i===S.crashes.length-1 : (x&&x.id===S.c._logged); S.crashes.splice(i,1); if(isCurrent||!S.crashes.length) delete S.c._logged; save(); render(true); toast(L('Deleted','Supprimé')); }; });
-  bindFoods(); bindRest(); bind127();
+  bindFoods(); bindRest(); bind127(); bind128();
   if($('foodQ')) $('foodQ').oninput=(e)=>{ foodQ=e.target.value; const fl=$('foodList'); if(fl){ fl.innerHTML=foodsHTML(editMap(),S.tank.grp); bindFoods(); } const gt=document.querySelector('.gtabs:not(.seg)'); if(gt) gt.hidden=!!foodQ.trim(); };
 }
 function bindFoods(){
@@ -2757,6 +2946,7 @@ function openMenu(opener){
     ['patch',done?L('My patch','Ma patch'):L(`The Patch · ${QL().length} questions`,`La Patch · ${QL().length} questions`)],
     ['crash',L('Crash report','Noter un crash')],
     ['meal',L('Meal report','Noter un repas')],
+    ['sym',L('Symptom report','Noter un symptôme')],
     ['pat',L('History','Historique')],
     ['tank',L('Fuel tank','Réservoir')],
     ['ai',L('Ask an AI','Demander à une IA')],
