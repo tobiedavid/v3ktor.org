@@ -315,7 +315,7 @@ ul.pay{padding-left:18px} ul.pay li{margin:.2em 0}
 let S = {a:{}, step:0, started:null, checkins:[], lang:null, mode:null, c:{}, cstep:0, crashes:[], intent:null, tank:null, tstep:0};
 const KEY='thepatch.v1';
 try{ const s=localStorage.getItem(KEY)||localStorage.getItem('patch'); if(s) S=Object.assign(S, JSON.parse(s)); if(!localStorage.getItem(KEY)&&s) localStorage.setItem(KEY,s); if(localStorage.getItem('patch')) localStorage.removeItem('patch'); }catch(e){}
-const VER='1.2.32'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
+const VER='1.2.33'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
 /* v1.2.21 (5 Nov 2026): prenatal / folic-acid and pregnancy-iron lines aligned with Health Canada; Quebec route for bloodwork; hard-stool branch;
    pattern messages match the 5-a-side rule; iPhone storage note + persist(); protein note by life stage; French fixes; "about $8" in English. */
 /* v1.2.22 (6 Nov 2026): one-screen result (plain-words test card, three-line week, one notes card with the crisis line kept open); glossary words underlined once per screen;
@@ -361,6 +361,8 @@ const VER='1.2.32'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
 /* v1.2.32 (6 Nov 2026): where the Canadian Nutrient File has a blank, the USDA number for the same food, or the closest one
    (68 numbers in 31 foods); the bagel's impossible vitamin E fixed. A ? left on the gauge is a button: it names the foods
    with no number and says why. */
+/* v1.2.33 (6 Nov 2026): the hours before. For each crash, headache or itch with a time, the meals logged in the 4 hours
+   before (6 for loose stools or bloating), against the same hours on days without it, with the suspects' bar. */
 if(!S.lang){ S.lang = (navigator.language||'en').toLowerCase().startsWith('fr') ? 'fr' : 'en'; }
 /* v0.7: three doors. Older saves have no mode — someone mid-questions lands back on their question, everyone else on the chooser. */
 if(!S.mode){ S.mode = S.step>0 ? 'patch' : 'home'; }
@@ -566,6 +568,9 @@ const G = {
   selftest:{g:'reason', t:['Your own test','Ton propre test'],
     s:['A food becomes a lead only when bad days come with it so often that luck would do that less than 1 time in 50 — and even then, it’s just a reason to test. One change, two weeks, then back to how it was. Two weeks because bad days come and go: at three crashes a week, one quiet week happens by luck about 1 time in 5; two quiet weeks, rarely. The swap keeps the protein the same so it can’t cause its own crash, and coffee and sleep stay put so the answer is about one thing. A slipped day just drops out. If the crashes come back when the food does, that’s the clearest answer one person can get. The odds shown assume your days are otherwise alike — they never quite are, so read them as rough.',
        'Un aliment devient une piste seulement quand les mauvaises journées l’accompagnent si souvent que le hasard ferait ça moins d’une fois sur 50 — et même là, c’est juste une raison de tester. Un seul changement, deux semaines, puis retour comme avant. Deux semaines parce que les mauvaises journées vont et viennent : à trois crashs par semaine, une semaine calme arrive par hasard environ 1 fois sur 5; deux semaines calmes, rarement. Le remplacement garde autant de protéines pour ne pas causer son propre crash, et le café et le sommeil restent pareils pour que la réponse porte sur une seule chose. Une journée d’écart est simplement retirée. Si les crashs reviennent quand l’aliment revient, c’est la réponse la plus claire qu’une personne puisse avoir. Les chances affichées supposent que tes journées se ressemblent autrement — ce n’est jamais tout à fait vrai, alors prends-les comme un ordre de grandeur.']},
+  hours:{g:'likely', t:['The hours before','Les heures d’avant'],
+    s:['Some reactions come within hours, so the time matters, not just the day. For each crash, headache or itch you note with a time, the app looks at the meals you logged in the 4 hours before; for loose stools or bloating, the 6 hours before. Then it looks at the same hours on days without it — days with a finished check-in that say it didn’t happen. A lead needs the same bar as the other suspects: at least 3 times with the food, a gap of 30 points, and a split luck would give less than 1 time in 50. Only meals with a time count, and a “no” only counts on days marked complete. Why those windows: a crash after a meal usually comes within a few hours; lactose shows up 30 minutes to 2 hours later; what ferments in the large bowel takes a few hours more. A lead is a reason to test, not proof.',
+       'Certaines réactions arrivent en quelques heures, alors l’heure compte, pas juste la journée. Pour chaque crash, mal de tête ou démangeaison que tu notes avec l’heure, l’app regarde les repas notés dans les 4 heures avant; pour les selles molles ou les ballonnements, les 6 heures avant. Ensuite, elle regarde les mêmes heures les jours sans — des journées avec un bilan terminé qui dit que ça n’est pas arrivé. Une piste demande la même barre que les autres suspects : au moins 3 fois avec l’aliment, un écart de 30 points, et un partage que la chance donnerait moins d’une fois sur 50. Seuls les repas avec l’heure comptent, et un « non » compte seulement les jours marqués complets. Pourquoi ces fenêtres : un crash après un repas arrive d’habitude en quelques heures; le lactose se fait sentir de 30 minutes à 2 heures après; ce qui fermente dans le gros intestin prend quelques heures de plus. Une piste, c’est une raison de tester, pas une preuve.']},
   sugarloop:{g:'likely', t:['The sugar loop','La boucle du sucre'],
     s:['Sugar on its own is absorbed in the first stretch of the gut. The signals that say “full” fire further down, when protein, fat and fibre get there — so after sugar alone, hunger comes back sooner, and the fastest fix for hunger is more sugar. Fat with it slows the sugar, but makes the mix the body stores best and the brain wants most. The way out isn’t no sugar: it’s sugar after protein, not instead of it.',
        'Le sucre seul est absorbé dans le premier bout de l’intestin. Les signaux qui disent « plein » partent plus loin, quand les protéines, le gras et les fibres y arrivent — alors après du sucre seul, la faim revient plus vite, et le moyen le plus rapide de la calmer, c’est encore du sucre. Du gras avec ça ralentit le sucre, mais ça donne le mélange que le corps stocke le mieux et que le cerveau veut le plus. La sortie, ce n’est pas zéro sucre : c’est du sucre après les protéines, pas à leur place.']},
@@ -905,6 +910,9 @@ const EV = {
   selftest:{src:[],
     e:['Changing one thing in one person, with a before, a during and a return, is the logic of an N-of-1 trial. A real N-of-1 trial adds blinding and repeats; this one can’t, so expectation and everything else that changes in two weeks can fool it. The odds come from a simple binomial model of bad days.',
        'Changer une seule chose chez une seule personne, avec un avant, un pendant et un retour, c’est la logique d’un essai N-de-1. Un vrai essai N-de-1 se fait à l’insu et se répète; celui-ci ne peut pas, alors les attentes et tout ce qui change en deux semaines peuvent le fausser. Les chances viennent d’un simple modèle binomial des mauvaises journées.']},
+  hours:{src:['nihLact','ebert2016','maintz'],
+    e:['The windows: lactose symptoms come 30 minutes to 2 hours after (NIDDK); unabsorbed fructose causes symptoms once it reaches the large bowel and ferments (Ebert 2016); histamine reactions come within minutes to a few hours (Maintz & Novak 2007). The 4-hour crash window is the one the crash report already uses. The lead rule is the suspects’ rule; on simulated people with no food effect, 5% got a lead from the hours (3% from the day counts). With afternoon crashes coming only after sweets at lunch, and sweets at breakfast most days too, the hours found it for 29% of people by six weeks; the day counts, which can’t see the time, for 3%.',
+       'Les fenêtres : les symptômes du lactose arrivent de 30 minutes à 2 heures après (NIDDK); le fructose non absorbé cause des symptômes quand il atteint le gros intestin et fermente (Ebert 2016); les réactions à l’histamine arrivent de quelques minutes à quelques heures après (Maintz & Novak 2007). La fenêtre de 4 heures pour les crashs est celle que le rapport de crash utilise déjà. La règle est celle des suspects; sur des personnes simulées sans aucun effet des aliments, 5 % ont eu une piste par les heures (3 % par les journées). Avec des crashs d’après-midi qui suivent seulement les sucreries au dîner, et des sucreries au déjeuner presque tous les jours aussi, les heures l’ont trouvé chez 29 % des gens en six semaines; les journées, qui ne voient pas l’heure, chez 3 %.']},
   sugarloop:{src:['hall2019','difeli2018','brake2013'],
     e:['An inpatient trial (Hall 2019, 20 adults): on ultra-processed food, people ate about 500 kcal a day more and gained weight within two weeks. A brain-imaging study (DiFeliceantonio 2018): people paid more for snacks with fat and carbohydrate together than for snacks with only one, at the same calories. A review (2013): nutrients that reach the end of the small intestine slow the stomach and add fullness — the “ileal brake”. The loop itself, sugar to quick hunger to more sugar, is our reading of these, not a trial.',
        'Un essai en milieu hospitalier (Hall 2019, 20 adultes) : avec de la nourriture ultra-transformée, les gens ont mangé environ 500 kcal de plus par jour et pris du poids en deux semaines. Une étude d’imagerie du cerveau (DiFeliceantonio 2018) : les gens payaient plus pour des collations avec du gras et des glucides ensemble que pour des collations avec un seul des deux, à calories égales. Une revue (2013) : les nutriments qui atteignent la fin de l’intestin grêle ralentissent l’estomac et donnent le sentiment d’être plein — le « frein iléal ». La boucle elle-même, du sucre à la faim rapide à encore du sucre, c’est notre lecture de ces études, pas un essai.']},
@@ -1535,6 +1543,7 @@ function packetText(compact){
   if(S.crashes.length){ o.push(L('== PAST CRASHES LOGGED ==','== CRASHS PASSÉS AU JOURNAL ==')); const M=MECH(); for(const x of S.crashes.slice(-8)){ o.push(`${crashDay(x)}${x.at?' '+x.at:''} — ${x.when?P2((CQ[0].opts.find(op=>op.v===x.when)||{l:[x.when,x.when]}).l):'?'} — ${x.top&&M[x.top]?P2(M[x.top].t):L('no clear cause','pas de cause claire')} (${x.conf?P2(CONF[x.conf]).toLowerCase():''})`); } const pat=crashPattern(); if(pat) o.push(...pat.map(strip)); o.push(''); }
   { const ml=mealsText(); if(ml){ o.push(ml); o.push(''); } }
   { const st=symText(); if(st){ o.push(st); o.push(''); } }
+  { const ht=hoursText(); if(ht){ o.push(ht); o.push(''); } }
   { const lt=labsText(); if(lt){ o.push(lt); o.push(''); } }
   if(tankReady() && (mapCount(S.tank.day)||realDays().length)){ o.push(L('== MY TANK (from the Canadian Nutrient File) ==','== MON RÉSERVOIR (selon le Fichier canadien sur les éléments nutritifs) ==')); o.push(tankText().split('\n').slice(1).join('\n').trim()); o.push(''); }
   { const pt=patternsText(); if(pt){ o.push(pt); o.push(''); } }
@@ -1990,7 +1999,7 @@ function vPat(){
   let h=tabsHTML('pat')+`<div class="eyebrow">${L('History','Historique')}</div><h2>${L('What comes before your bad days','Ce qui vient avant tes mauvaises journées')}</h2>`;
   h+=`<p class="small muted" style="margin-top:-4px">${L('Your own days compared with each other — nobody else’s data, no averages from a study.','Tes journées comparées entre elles — pas les données de quelqu’un d’autre, pas des moyennes d’étude.')}</p>`;
   h+=testCard('pat');
-  h+=suspectsCard();
+  h+=suspectsCard()+hoursCard();
   h+=labsPatCard()+learnPatCard();
   h+=`<div class="card">${stripHTML()}</div>`;
   { const R=rates(); const today=dayKey(); const keys=[...Array(14)].map((_,i)=>keyAdd(today,-i)); let fin=0, same=0, later=0, core=0; for(const k of keys){ const r=R[k]; if(r&&(r.firstAt||r.fin)){ fin++; const t0=r.firstAt||r.at; if(t0 && dayKey(new Date(t0))===k) same++; else later++; if(RATEQ.every(q=>r[q.id]!=null)) core++; } }
@@ -3003,6 +3012,68 @@ function openLack(k, opener){ const n=TN.find(x=>x.k===k); if(!n) return;
     :L('no close match in the Canadian file or the USDA one','aucun aliment proche dans le fichier canadien ni dans celui des États-Unis');
   showSheet(`<div class="handle"></div><h3 id="sheetTitle">${L('What the ? means','Ce que veut dire le « ? »')}</h3><p>${head}</p><ul class="wk">${fs.map(f=>`<li><b>${esc(P2(f.l))}</b> — ${why(f)}</li>`).join('')}</ul><p class="small">${T('tank',L('Where the numbers come from','D’où viennent les chiffres'),L('Where the numbers come from','D’où viennent les chiffres'))}</p><div class="row"><button type="button" class="btn sm" id="closeSheet">${L('Got it','Compris')}</button></div>`, opener); }
 function bind132(){ document.querySelectorAll('[data-lack]').forEach(b=>{ b.onclick=e=>{ e.preventDefault(); e.stopPropagation(); openLack(b.dataset.lack, b); }; }); }
+/* ===================== v1.2.33: the hours before ===================== */
+/* Some reactions come within hours, so the time matters, not just the day. For each crash, headache or itch with a time, the
+   meals logged in the 4 hours before; for loose stools or bloating, the 6 hours before (lactose: 30 minutes to 2 hours; what
+   ferments in the large bowel comes later). Compared with the same hours on days without it: the event's usual time of day,
+   on days with a finished check-in that say it didn't happen. The bar is the suspects' bar (3 times with it, a 30-point gap,
+   a split luck gives less than 1 time in 50), checked again for this version on simulated people (see HOURS_P).
+   Exposure is known only from meals with a time: "yes" if a meal in the window had the food; "no" only if every day the
+   window touches is marked complete and has no untimed meal. A food a test already answered counts only after the test. */
+const HRS={crash:4, gut:6, hs:4};
+const HOUT={gut:['loose','bloat'], hs:['head','skin']};
+const HOURS_P=0.02;
+const HOUTB={crash:['crashes','crashs'], gut:['times you noted loose stools or bloating','fois où tu as noté des selles molles ou des ballonnements'], hs:['headaches or itch you noted','maux de tête ou démangeaisons notés']};
+const HOF={crash:['of your','de tes'], gut:['of the','des'], hs:['of the','des']};
+function dayStart(k){ const [y,m,d]=k.split('-').map(Number); return new Date(y,m-1,d,S.tank.roll||0,0).getTime(); }
+function clk(min){ min=((Math.round(min)%1440)+1440)%1440; return String(Math.floor(min/60)).padStart(2,'0')+':'+String(min%60).padStart(2,'0'); }
+function hFams(){ return FAMS.filter(f=>(f.ids&&!f.ci&&!f.logOnly)||f.id==='bigmeal'); }
+function bigKcal(){ return Math.min(1000,tankReady()?0.4*tankTargets().kcal:1000); }
+/* meals in [from,to]: null if a day the window touches isn't complete or has an untimed meal (the "no" can't be known) */
+function winMeals(from,to){ const k0=dayKey(new Date(from)), k1=dayKey(new Date(to)); const ks=[k0]; while(ks[ks.length-1]<k1&&ks.length<4) ks.push(keyAdd(ks[ks.length-1],1));
+  const ms=meals().filter(m=>m&&m.items&&mapCount(m.items)&&(ks.includes(m.day)||m.day===keyAdd(k0,-1)));
+  const inW=ms.filter(m=>m.at&&atMs(m.day,m.at)>=from&&atMs(m.day,m.at)<=to);
+  const sure=ks.every(k=>isClosed(k)&&!ms.some(m=>m.day===k&&!m.at));
+  return {inW, sure}; }
+function famIn(f,W){ if(f.id==='bigmeal'){ const b=bigKcal(); return W.inW.some(m=>(tankTotals(m.items).tot.kcal||0)>=b); } return W.inW.some(m=>f.ids.some(id=>m.items[id]>0)); }
+function hExpo(f,from,to){ const W=winMeals(from,to); if(famIn(f,W)) return true; return W.sure?false:null; }
+/* the first timed crash or symptom of each day, by outcome */
+function hEvents(o,days){ const out=[];
+  for(const k of days){ let t=null;
+    if(o==='crash'){ for(const x of (S.crashes||[])){ if(crashDay(x)===k&&x.at){ const v=atMs(k,x.at); if(t==null||v<t) t=v; } } }
+    else { for(const e of evs()){ if(e&&e.day===k&&e.at&&HOUT[o].includes(e.k)){ const v=atMs(k,e.at); if(t==null||v<t) t=v; } } }
+    if(t!=null) out.push({k,t}); }
+  return out; }
+/* a day without it: the finished check-in says so */
+function hNone(o,k){ if(o==='crash') return crashP(k)===false; if(!usable(k)) return false; const r=rates()[k]; const w=(r.fl&&r.fl.off&&r.offw)||{}; return !HOUT[o].some(x=>w[x]); }
+function hoursLeads(){ const today=dayKey(); const all=[...Array(60)].map((_,i)=>keyAdd(today,-i));
+  const since={}; for(const x of (S.tests||[])){ if(!x||!x.start) continue; const end=x.stopped?keyAdd(x.start,Math.max(0,(+x.day||1)-1)):keyAdd(x.start,16); if(!since[x.fam]||end>since[x.fam]) since[x.fam]=end; }
+  const day=new Set(suspects().filter(s=>s.kind==='lead').map(s=>s.f.id+'|'+s.o));
+  const leads=[], seen={}; let nEv=0, nCt=0;
+  for(const o of ['crash','gut','hs']){ const ev=hEvents(o,all); if(!ev.length) continue;
+    const offs=ev.map(e=>e.t-dayStart(e.k)).sort((a,b)=>a-b); const off=offs[Math.floor(offs.length/2)]; const H=HRS[o]*3600000;
+    const evDays=new Set(ev.map(e=>e.k)); const ctl=all.filter(k=>!evDays.has(k)&&hNone(o,k));
+    { const cov=ev.filter(e=>winMeals(e.t-H,e.t).sure).length, cc=ctl.filter(k=>winMeals(dayStart(k)+off-H,dayStart(k)+off).sure).length; nEv+=cov; if(cc>nCt) nCt=cc; seen[o]={ev:cov, ctl:cc}; }
+    for(const f of hFams()){ if(!(f.outs||['crash']).includes(o)) continue; if(day.has(f.id+'|'+o)) continue; const s0=since[f.id];
+      let wy=0,wn=0,oy=0,on=0;
+      for(const e of ev){ if(s0&&e.k<=s0) continue; const x=hExpo(f,e.t-H,e.t); if(x==null) continue; wn++; if(x) wy++; }
+      for(const k of ctl){ if(s0&&k<=s0) continue; const t=dayStart(k)+off; const x=hExpo(f,t-H,t); if(x==null) continue; on++; if(x) oy++; }
+      if(wy>=3&&on>=3&&wy/wn-oy/on>=0.3){ const p=fisherP(wy,wn,oy,on); if(p<HOURS_P) leads.push({f,o,wy,wn,oy,on,p,score:wy/wn-oy/on,from:clk((off-H)/60000+(S.tank.roll||0)*60),to:clk(off/60000+(S.tank.roll||0)*60),h:HRS[o]}); }
+    } }
+  return {leads:leads.sort((a,b)=>b.score-a.score), nEv, nCt, seen}; }
+function hoursLine(s){ const F=`<b>${P2(s.f.l)}</b>`;
+  return L(`${F} — in the ${s.h} hours before ${s.wy} ${HOF[s.o][0]} ${s.wn} ${P2(HOUTB[s.o])}. The same hours (${s.from}–${s.to}) on days without: ${s.oy} of ${s.on}.`,
+    `${F} — dans les ${s.h} heures avant ${s.wy} ${HOF[s.o][1]} ${s.wn} ${P2(HOUTB[s.o])}. Les mêmes heures (${s.from}–${s.to}), les jours sans : ${s.oy} sur ${s.on}.`); }
+function hoursCard(){ const H=hoursLeads(); const shown=new Set(suspects().slice(0,4).map(s=>s.f.id+'|'+s.o)); /* the suspects card above already offers that test */
+  if(H.leads.length) return `<div class="card"><div class="eyebrow">${L('The hours before · leads, not proof','Les heures d’avant · des pistes, pas des preuves')}</div><ul class="sus">${H.leads.slice(0,3).map(s=>`<li><p>${hoursLine(s)}</p>${shown.has(s.f.id+'|'+s.o)?'':testBtn(s)}</li>`).join('')}</ul><p class="small" style="margin:6px 0 0">${T('hours',L('How this works','Comment ça marche'),L('How this works','Comment ça marche'))}</p></div>`;
+  if(!H.nEv&&!hEventsAny()) return '';
+  return `<div class="card soft"><div class="eyebrow">${L('The hours before','Les heures d’avant')}</div><p class="small" style="margin:0">${L(`Nothing stands out yet. A pattern needs at least 3 of the same problem with the hours before logged — meals with a time, the day marked complete — and days without it to compare. So far: ${H.nEv} time${H.nEv===1?'':'s'} with the hours before logged, and ${H.nCt} day${H.nCt===1?'':'s'} without to compare.`,`Rien ne ressort encore. Une piste, c’est au moins 3 fois le même problème avec les heures d’avant notées — des repas avec l’heure, la journée marquée complète — et des journées sans pour comparer. Jusqu’ici : ${H.nEv} fois avec les heures d’avant notées, et ${H.nCt} journée${H.nCt>1?'s':''} sans pour comparer.`)} ${T('hours',L('How this works','Comment ça marche'),L('How this works','Comment ça marche'))}</p></div>`; }
+function hEventsAny(){ return (S.crashes||[]).some(x=>x&&x.at) || evs().some(e=>e&&e.at&&(HOUT.gut.includes(e.k)||HOUT.hs.includes(e.k))); }
+function hoursText(){ const H=hoursLeads(); if(!H.leads.length&&!H.nEv) return '';
+  const head=L('== THE HOURS BEFORE (meals with a time; leads, not proof) ==','== LES HEURES D’AVANT (repas avec l’heure; des pistes, pas des preuves) ==');
+  const lines=H.leads.length?H.leads.slice(0,3).map(s=>'- '+hPlain(hoursLine(s))):[L(`Nothing stands out yet: ${H.nEv} times with the hours before logged, ${H.nCt} days to compare.`,`Rien ne ressort encore : ${H.nEv} fois avec les heures d’avant notées, ${H.nCt} journées pour comparer.`)];
+  return head+'\n'+lines.join('\n'); }
+function hPlain(h){ return String(h).replace(/<[^>]+>/g,''); }
 /* ===================== v1.2.22: ONE-SCREEN RESULT ===================== */
 function plainName(s){ return String(s||'').replace(/<[^>]+>/g,'').split(' — ')[0].trim(); }
 /* the week in three lines; the full patch further down has the why */
