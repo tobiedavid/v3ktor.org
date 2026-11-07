@@ -319,7 +319,7 @@ ul.pay{padding-left:18px} ul.pay li{margin:.2em 0}
 let S = {a:{}, step:0, started:null, checkins:[], lang:null, mode:null, c:{}, cstep:0, crashes:[], intent:null, tank:null, tstep:0};
 const KEY='thepatch.v1';
 try{ const s=localStorage.getItem(KEY)||localStorage.getItem('patch'); if(s) S=Object.assign(S, JSON.parse(s)); if(!localStorage.getItem(KEY)&&s) localStorage.setItem(KEY,s); if(localStorage.getItem('patch')) localStorage.removeItem('patch'); }catch(e){}
-const VER='1.2.38'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
+const VER='1.2.39'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
 /* v1.2.21 (5 Nov 2026): prenatal / folic-acid and pregnancy-iron lines aligned with Health Canada; Quebec route for bloodwork; hard-stool branch;
    pattern messages match the 5-a-side rule; iPhone storage note + persist(); protein note by life stage; French fixes; "about $8" in English. */
 /* v1.2.22 (6 Nov 2026): one-screen result (plain-words test card, three-line week, one notes card with the crisis line kept open); glossary words underlined once per screen;
@@ -391,6 +391,11 @@ const VER='1.2.38'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
    zoom), and inside a Claude chat the backup falls back to copy, then to the text itself. */
 /* v1.2.38 (6 Nov 2026): ice cream, cookies, donuts and dark chocolate count as sweets (a binge of them couldn't be named before);
    lactose "at one time" is a sitting's total, not the largest single serving. */
+/* v1.2.39 (7 Nov 2026): six made-up people, 19 runs of 70 days in the real app. The bring-back says "clearest sign" only when luck
+   at the person's own rate rarely brings the bad days back; lactose becomes a suspect with a test; calm first when the outcome is on
+   most days; alcohol in four steps with a dose ladder, "not cleared" instead of vanishing, and a no-6-or-more test for daily drinkers
+   who don't get shaky; alcohol tests never ask for days back; energy drinks leave sweets; everyday foods wait their turn; thin
+   logging is said on Home. */
 if(!S.lang){ S.lang = (navigator.language||'en').toLowerCase().startsWith('fr') ? 'fr' : 'en'; }
 /* v0.7: three doors. Older saves have no mode — someone mid-questions lands back on their question, everyone else on the chooser. */
 if(!S.mode){ S.mode = S.step>0 ? 'patch' : 'home'; }
@@ -594,8 +599,8 @@ const G = {
     s:['Before adding anything, find where you’re losing more than you take in. Blood in the toilet is iron leaving. Loose stools are minerals leaving. Alcohol in the three hours before bed is sleep leaving. A morning with nothing in it gets paid for at 3 p.m. Plug the biggest leak first; everything you add afterwards actually stays.',
        'Avant d’ajouter quoi que ce soit, trouve par où tu te vides. Du sang dans la toilette, c’est du fer qui part. Des selles molles, ce sont des minéraux qui partent. L’alcool dans les trois heures avant le coucher, c’est du sommeil qui part. Une matinée sans rien manger, ça se paie à 15 h. Colmate la plus grosse fuite d’abord; tout ce que tu ajoutes ensuite va enfin rester.']},
   selftest:{g:'reason', t:['Your own test','Ton propre test'],
-    s:['A food becomes a lead only when bad days come with it so often that luck would do that less than 1 time in 50 — and even then, it’s just a reason to test. One change, two weeks, then back to how it was. Two weeks because bad days come and go: at three crashes a week, one quiet week happens by luck about 1 time in 5; two quiet weeks, rarely. It’s compared with the four weeks before, not two: a lead tends to show up right after a bad stretch, and next to that stretch anything looks better. Two weeks only catch a big difference, so “no clear change” doesn’t rule a food out — and when it looks better but can’t tell yet, you can keep going two more weeks. The swap keeps the protein the same so it can’t cause its own crash, and coffee and sleep stay put so the answer is about one thing. A slipped day just drops out. If the crashes come back when the food does, that’s the clearest answer one person can get. The odds shown assume your days are otherwise alike — they never quite are, so read them as rough.',
-       'Un aliment devient une piste seulement quand les mauvaises journées l’accompagnent si souvent que le hasard ferait ça moins d’une fois sur 50 — et même là, c’est juste une raison de tester. Un seul changement, deux semaines, puis retour comme avant. Deux semaines parce que les mauvaises journées vont et viennent : à trois crashs par semaine, une semaine calme arrive par hasard environ 1 fois sur 5; deux semaines calmes, rarement. On compare avec les quatre semaines d’avant, pas deux : une piste apparaît souvent juste après une mauvaise passe, et à côté de cette passe, n’importe quoi paraît mieux. Deux semaines ne voient qu’une grosse différence, alors « pas de changement clair » n’écarte pas un aliment — et quand ça semble mieux sans pouvoir trancher, tu peux continuer deux semaines de plus. Le remplacement garde autant de protéines pour ne pas causer son propre crash, et le café et le sommeil restent pareils pour que la réponse porte sur une seule chose. Une journée d’écart est simplement retirée. Si les crashs reviennent quand l’aliment revient, c’est la réponse la plus claire qu’une personne puisse avoir. Les chances affichées supposent que tes journées se ressemblent autrement — ce n’est jamais tout à fait vrai, alors prends-les comme un ordre de grandeur.']},
+    s:['A food becomes a lead only when bad days come with it so often that luck would do that less than 1 time in 50 — and even then, it’s just a reason to test. One change, two weeks, then back to how it was. Two weeks because bad days come and go: at three crashes a week, one quiet week happens by luck about 1 time in 5; two quiet weeks, rarely. It’s compared with the four weeks before, not two: a lead tends to show up right after a bad stretch, and next to that stretch anything looks better. Two weeks only catch a big difference, so “no clear change” doesn’t rule a food out — and when it looks better but can’t tell yet, you can keep going two more weeks. The swap keeps the protein the same so it can’t cause its own crash, and coffee and sleep stay put so the answer is about one thing. A slipped day just drops out. If the crashes come back when the food does — and they aren’t on most of your days anyway — that’s the clearest answer one person can get. Drinks are the exception: no days back, the two weeks are the answer. The odds shown assume your days are otherwise alike — they never quite are, so read them as rough.',
+       'Un aliment devient une piste seulement quand les mauvaises journées l’accompagnent si souvent que le hasard ferait ça moins d’une fois sur 50 — et même là, c’est juste une raison de tester. Un seul changement, deux semaines, puis retour comme avant. Deux semaines parce que les mauvaises journées vont et viennent : à trois crashs par semaine, une semaine calme arrive par hasard environ 1 fois sur 5; deux semaines calmes, rarement. On compare avec les quatre semaines d’avant, pas deux : une piste apparaît souvent juste après une mauvaise passe, et à côté de cette passe, n’importe quoi paraît mieux. Deux semaines ne voient qu’une grosse différence, alors « pas de changement clair » n’écarte pas un aliment — et quand ça semble mieux sans pouvoir trancher, tu peux continuer deux semaines de plus. Le remplacement garde autant de protéines pour ne pas causer son propre crash, et le café et le sommeil restent pareils pour que la réponse porte sur une seule chose. Une journée d’écart est simplement retirée. Si les crashs reviennent quand l’aliment revient — et qu’ils ne sont pas là la plupart de tes journées de toute façon — c’est la réponse la plus claire qu’une personne puisse avoir. L’alcool fait exception : pas de jours de retour, les deux semaines sont la réponse. Les chances affichées supposent que tes journées se ressemblent autrement — ce n’est jamais tout à fait vrai, alors prends-les comme un ordre de grandeur.']},
   hours:{g:'likely', t:['The hours before','Les heures d’avant'],
     s:['Some reactions come within hours, so the time matters, not just the day. For each crash, headache or itch you note with a time, the app looks at the meals you logged in the 4 hours before; for loose stools or bloating, the 6 hours before. Then, for each one, it looks at the same clock hours on days without it — days with a finished check-in that say it didn’t happen. So a 9 a.m. headache is compared with mornings and a 4 p.m. crash with afternoons, and a food you usually have at breakfast can’t look guilty just because some problems happen in the morning. A lead needs the same bar as the other suspects: at least 3 times with the food, a gap of 30 points, and a split luck would give less than 1 time in 50. Only meals with a time count, and a “no” only counts on days marked complete. Why those windows: a crash after a meal usually comes within a few hours; lactose shows up 30 minutes to 2 hours later; what ferments in the large bowel takes a few hours more. A lead is a reason to test, not proof.',
        'Certaines réactions arrivent en quelques heures, alors l’heure compte, pas juste la journée. Pour chaque crash, mal de tête ou démangeaison que tu notes avec l’heure, l’app regarde les repas notés dans les 4 heures avant; pour les selles molles ou les ballonnements, les 6 heures avant. Ensuite, pour chacun, elle regarde les mêmes heures les jours sans — des journées avec un bilan terminé qui dit que ça n’est pas arrivé. Un mal de tête à 9 h est donc comparé aux matins, un crash à 16 h aux après-midis, et un aliment que tu prends d’habitude au déjeuner ne peut pas avoir l’air coupable juste parce que certains problèmes arrivent le matin. Une piste demande le même seuil que les autres suspects : au moins 3 fois avec l’aliment, un écart de 30 points, et une répartition que le hasard donnerait moins d’une fois sur 50. Seuls les repas avec l’heure comptent, et un « non » compte seulement les jours marqués complets. Pourquoi ces fenêtres : un crash après un repas arrive d’habitude en quelques heures; le lactose se fait sentir de 30 minutes à 2 heures après; ce qui fermente dans le gros intestin prend quelques heures de plus. Une piste, c’est une raison de tester, pas une preuve.']},
@@ -1868,9 +1873,13 @@ const RATEQ=[
   {id:'e', t:['Energy today','Énergie aujourd’hui'], h:['The whole day, overall.','La journée au complet.'], opts:[[1,['1 · empty','1 · vide']],[2,['2 · low','2 · bas']],[3,['3 · OK','3 · correct']],[4,['4 · good','4 · bon']],[5,['5 · full','5 · plein']]]},
   {id:'s', t:['Sleep last night','Sommeil la nuit passée'], h:['Your last main sleep — day sleep counts on nights.','Ton dernier vrai sommeil — si tu fais des nuits, celui de jour compte.'], opts:[[4.5,['under 5 h','moins de 5 h']],[5.5,['5–6 h','5–6 h']],[6.5,['6–7 h','6–7 h']],[7.5,['7 h or more','7 h et plus']]]},
   {id:'cf', t:['Last coffee or energy drink','Dernier café ou boisson énergisante'], h:null, opts:[['none',['none today','rien aujourd’hui']],['am',['early in my day','tôt dans ma journée']],['pm',['middle of my day','milieu de ma journée']],['eve',['within 8 h of bed','moins de 8 h avant le coucher']]]},
-  {id:'al', t:['Alcohol today','Alcool aujourd’hui'], h:null, opts:[['0',['none','aucun']],['low',['1–2','1–2']],['high',['3 or more','3 ou plus']]]}
+  {id:'al', t:['Alcohol today','Alcool aujourd’hui'], h:null, opts:[['0',['none','aucun']],['low',['1–2','1–2']],['mid',['3–5','3–5']],['six',['6 or more','6 ou plus']],['high',['3 or more','3 ou plus'],'old']]}
 ];
 const MINR=7;
+/* v1.2.39: drinks in four steps. "high" is the old "3 or more" (before 1.2.39): it still counts as 3+, but can't say 3–5 or 6+,
+   so it's left out of the ladder and of the 6-or-more checks. It's kept as a hidden option so old days still read. */
+function al3(v){ return v==='mid'||v==='six'||v==='high'; }
+function alStep(v){ return (v==='0'||v==='low')?0:v==='mid'?1:v==='six'?2:null; }
 /* the closing row (v1.2.5): multi-select, then an explicit finish. Nothing is recorded as "no" until the day is finished. */
 const FLAGS=[
   {k:'cr', l:['⚡ I crashed','⚡ J’ai crashé'], s:['crashed','crash']},
@@ -1915,7 +1924,7 @@ function vCheck(k, where){
     body=`${conflict?`<div class="card flag" style="padding:10px 12px;margin:0 0 8px"><p class="small" style="margin:0 0 6px">${L('A crash is in your crash log for this day, but this check-in says no crash. Which is right?','Il y a un crash dans ton journal des crashs pour cette journée, mais ce bilan dit « pas de crash ». Lequel est juste?')}</p><div class="row"><button type="button" class="btn sm" data-rconf="${k}">${L('I did crash','J’ai bien crashé')}</button><button type="button" class="btn ghost sm" data-crashday="${k}">${L('Check the crash log','Vérifier le journal')}</button></div></div>`:''}<div class="rsum"><p class="small" style="margin:0"><b>${head} ✓</b> ${part}${part?' · ':''}${fl.length?fl.join(', '):L('nothing else','rien d’autre')}</p><button type="button" class="btn ghost sm" data-redit="${k}">${L('Change','Changer')}</button></div>${RATEQ.some(q=>r[q.id]==null)?`<p class="small muted" style="margin:6px 0 0">${L('An answer is missing, so this day won’t count in patterns — tap Change to add it.','Il manque une réponse, alors cette journée ne comptera pas dans les tendances — appuie sur Changer pour l’ajouter.')}</p>`:isToday?`<p class="small muted" style="margin:6px 0 0">${L('Counts in your patterns from tomorrow, once the day is over. If the rest of today changes an answer, tap Change.','Cette journée comptera dans tes tendances à partir de demain, une fois terminée. Si le reste de la journée change une réponse, appuie sur Changer.')}</p>`:''}`;
   } else {
     body=RATEQ.map(q=>{ const lab = q.id==='cf' ? `${L('Last coffee or energy drink','Dernier café ou boisson énergisante')} <small>· ${T('cafclock',L('why the time matters','pourquoi l’heure compte'),L('pourquoi l’heure compte','pourquoi l’heure compte'))}</small>` : `${P2(q.t)}${q.h?` <small>· ${P2(q.h)}</small>`:''}`;
-      return `<div class="rq" role="group" aria-label="${esc(P2(q.t))}"><p class="lb">${lab}</p><div class="rr">${q.opts.map(([v,l])=>`<button type="button" class="rc${q.id==='e'?' e'+v:''}" data-rk="${k}" data-rq="${q.id}" data-rv="${v}" aria-pressed="${String(r[q.id])===String(v)}">${P2(l)}</button>`).join('')}</div></div>`; }).join('');
+      return `<div class="rq" role="group" aria-label="${esc(P2(q.t))}"><p class="lb">${lab}</p><div class="rr">${q.opts.filter(o=>!o[2]).map(([v,l])=>`<button type="button" class="rc${q.id==='e'?' e'+v:''}" data-rk="${k}" data-rq="${q.id}" data-rv="${v}" aria-pressed="${String(r[q.id])===String(v)}">${P2(l)}</button>`).join('')}</div></div>`; }).join('');
     const fl=r.fl||{}; const anyF=FLAGS.some(f=>fl[f.k]); const ow=r.offw||{};
     body+=`<div class="rq" role="group" aria-label="${L('Anything else today?','Autre chose aujourd’hui?')}"><p class="lb">${L('Anything else today?','Autre chose aujourd’hui?')} <small>· ${L('pick any that apply, then finish','choisis ce qui s’applique, puis termine')}</small></p><div class="rr">${FLAGS.map(f=>`<button type="button" class="rc" data-rflag="${f.k}" data-rk2="${k}" aria-pressed="${!!fl[f.k]}">${P2(f.l)}</button>`).join('')}</div>${fl.off?`<div class="rq" style="margin-top:10px"><p class="lb">${L('What felt off?','Qu’est-ce qui clochait?')} <small>· ${L('pick any','choisis ce qui s’applique')}</small></p><div class="rr">${OFFW.map(([v,l,d])=>`<button type="button" class="rc" data-roff="${v}" data-rk3="${k}" aria-pressed="${!!ow[v]}">${P2(l)}${d?` <small>· ${P2(d)}</small>`:''}</button>`).join('')}</div>${ow.loose&&r.lwA?`<p class="small muted" style="margin:8px 0 0">${L('When: worked out from the times you logged —','Quand : calculé d’après les heures notées —')} ${lwLabel(r.lwA)}.</p>`:''}${ow.loose&&!r.lwA?`<div class="rq" role="group" aria-label="${L('When did the loose stools come?','Quand sont venues les selles molles?')}" style="margin-top:10px"><p class="lb">${L('When?','Quand?')} <small>· ${L('optional — “on waking” counts with what you ate the day before','facultatif — « au réveil » compte avec ce que tu as mangé la veille')}</small></p><div class="rr">${LW.map(([v,l])=>`<button type="button" class="rc" data-rlw="${v}" data-rk4="${k}" aria-pressed="${r.lw===v}">${P2(l)}</button>`).join('')}</div></div>`:''}</div>`:''}${fl.cr?`<p class="small" style="margin:8px 0 0"><button type="button" class="btn ghost sm" data-crashday="${k}">${L('Report this crash →','Noter ce crash →')}</button></p>`:''}<div class="row" style="margin-top:10px"><button type="button" class="btn primary sm" data-rfin="${k}">${r.firstAt?L('Finish again','Terminer à nouveau'):anyF?L('Done for today','Fini pour aujourd’hui'):L('Nothing else — finish today','Rien d’autre — terminer la journée')}</button></div>${r.firstAt?`<p class="small" style="margin:6px 0 0"><b>${L('Changed.','Modifié.')}</b> ${L('Finish again to keep it — until then this day counts as unknown.','Termine à nouveau pour l’enregistrer — d’ici là, cette journée compte comme inconnue.')}</p>`:''}${RATEQ.some(q=>r[q.id]==null)?`<p class="small muted" style="margin:6px 0 0">${L('Energy, sleep, caffeine or alcohol not answered — you can still finish, but this day won’t count in patterns.','Énergie, sommeil, caféine ou alcool sans réponse — tu peux quand même terminer, mais cette journée ne comptera pas dans les tendances.')}</p>`:''}<p class="small muted" style="margin:6px 0 0">${L('A day you don’t finish stays “unknown” — never counted as “no crash”.','Une journée non terminée reste « inconnue » — jamais comptée comme « pas de crash ».')}</p></div>`;
   }
@@ -1957,20 +1966,13 @@ function findPatterns(){
      high = one serving carrying 12 g or more (a cup of milk) or over 24 g in the day; low = under 6 g on a completed food log;
      anything between counts as neither, so it can't blur either side. Sweeteners: any serving. Both against the loose stools that followed the day's food (gutAfter). */
   const dayTot=k=>{ const m=tlog()[k]; if(!m||!mapCount(m)) return null; return tankTotals(m).tot; };
-  /* v1.2.38: "at one time" is a sitting — each logged meal's total (meals are sittings since v1.2.33); a day with no meals keeps the
-     largest single serving */
-  const lacOf=(id,c)=>{ if(String(id).startsWith('x_')||!(c>0)) return 0; const f=TF.find(x=>x.id==id); return ((f&&f.n&&f.n.lact)||0)*c; };
-  const lacE=k=>{ const m=tlog()[k]; if(!m||!mapCount(m)) return null; let one=0;
-    const sits=meals().filter(x=>x&&x.day===k&&x.items&&mapCount(x.items));
-    if(sits.length){ for(const x of sits){ let v=0; for(const [id,c] of Object.entries(x.items)) v+=lacOf(id,c); if(v>one) one=v; } }
-    else for(const [id,c] of Object.entries(m)){ const v=lacOf(id,Math.min(c,1)); if(v>one) one=v; }
-    const tot=dayTot(k).lact||0; if(one>=12||tot>24) return true; return isClosed(k)&&tot<6?false:null; };
+  const lacE=lacHigh; /* v1.2.39: the same rule as the lactose suspect (lacHigh) */
   add('lac','12',lacE,[['g',gutAfter]],false);
   { const t=out.tests[out.tests.length-1]; if(!t.ny&&!t.nn) out.tests.pop(); }
   add('sw','1',k=>{ const t=dayTot(k); if(!t) return null; return (t.t_swt||0)>=1?true:(isClosed(k)?false:null); },[['g',gutAfter]],false);
   { const t=out.tests[out.tests.length-1]; if(!t.ny&&!t.nn) out.tests.pop(); }
   // 3. three drinks or more → the next night and the next day
-  add('al','high',k=>U(k)?R[k].al==='high':null,[['s',sN],['e',eN]],true);
+  add('al','high',k=>U(k)?al3(R[k].al):null,[['s',sN],['e',eN]],true);
   // 4. short night → that same day
   add('sl','short',k=>U(k)?+R[k].s<=5.5:null,[['e',eT]],false);
   const caf=out.tests.find(t=>t.id==='caf'), sl=out.tests.find(t=>t.id==='sl'), al=out.tests.find(t=>t.id==='al');
@@ -1988,7 +1990,8 @@ function testName(t){
   if(t.id==='sw') return L('Sweeteners or sugar-free drinks (from the food log)','Édulcorants ou boissons sans sucre (journal alimentaire)');
   return L('A night under 6 hours','Une nuit de moins de 6 heures');
 }
-function testLine(t){
+function testLine(t){ const s=testLine0(t); return t.id==='al'?s+alLadderLine():s; }
+function testLine0(t){
   const s=t.res.find(x=>x.o==='s'), e=t.res.find(x=>x.o==='e');
   if(t.status==='need'){ const n=Math.min(t.ny,t.nn); return t.ny<5 ? L(`${t.ny} day${t.ny===1?'':'s'} with it so far — needs 5 to compare.`,`${t.ny} jour${t.ny>1?'s':''} avec ça jusqu’ici — il en faut 5 pour comparer.`) : t.id==='lac' ? L(`Needs 5 days under 6 g to compare (${t.nn} so far).`,`Il faut 5 jours à moins de 6 g pour comparer (${t.nn} jusqu’ici).`) : L(`Needs 5 days without it to compare (${t.nn} so far).`,`Il faut 5 jours sans ça pour comparer (${t.nn} jusqu’ici).`); }
   const parts=[];
@@ -2019,12 +2022,12 @@ function stripHTML(){
   h+=row(L('sleep','sommeil'),r=>sh(r.s),nc);
   h+=row('☕',r=>r.cf==='eve'?'●':r.cf==='pm'?'○':'',nc);
   if(anyEd) h+=row('🥫',(r,k)=>edrinks(k)||'');
-  h+=row('🍺',r=>r.al==='high'?'●':r.al==='low'?'○':'',nc);
+  h+=row('🍺',r=>r.al==='six'?'◉':al3(r.al)?'●':r.al==='low'?'○':'',nc);
   h+=row(L('gut','ventre'),r=>r.fin&&r.fl&&r.fl.off&&r.offw&&(r.offw.loose||r.offw.bloat||r.offw.hard)?(r.offw.loose?'●':'○'):'',nc);
   h+=row('⚡',(r,k)=>{ const c=crashOn(k); return c?'⚡':c===false?'·':''; },k=>nc(k)&&!ck.has(k));
   h+=row('',(r,k)=>+k.slice(8));
   h+='</div>';
-  h+=`<p class="small muted" style="margin:8px 0 0">${L('Bars: energy 1–5. Sleep in hours. ☕ ● within 8 h of bed, ○ middle of the day.','Barres : énergie 1–5. Sommeil en heures. ☕ ● moins de 8 h avant le coucher, ○ milieu de la journée.')}${anyEd?L(' 🥫 energy drinks logged.',' 🥫 boissons énergisantes notées.'):''} ${L('🍺 ● 3 or more, ○ 1–2. Gut ● loose stools, ○ bloated or hard. ⚡ a crash, · a finished day without one, blank = not known. Pale = not counted yet: unfinished, an answer missing, or today.','🍺 ● 3 ou plus, ○ 1–2. Ventre ● selles molles, ○ ballonné ou dur. ⚡ un crash, · une journée terminée sans crash, vide = inconnu. En pâle = pas encore comptée : journée pas terminée, réponse manquante, ou aujourd’hui.')}</p>`;
+  h+=`<p class="small muted" style="margin:8px 0 0">${L('Bars: energy 1–5. Sleep in hours. ☕ ● within 8 h of bed, ○ middle of the day.','Barres : énergie 1–5. Sommeil en heures. ☕ ● moins de 8 h avant le coucher, ○ milieu de la journée.')}${anyEd?L(' 🥫 energy drinks logged.',' 🥫 boissons énergisantes notées.'):''} ${L('🍺 ◉ 6 or more, ● 3–5 (or an older “3 or more”), ○ 1–2. Gut ● loose stools, ○ bloated or hard. ⚡ a crash, · a finished day without one, blank = not known. Pale = not counted yet: unfinished, an answer missing, or today.','🍺 ◉ 6 ou plus, ● 3–5 (ou un ancien « 3 ou plus »), ○ 1–2. Ventre ● selles molles, ○ ballonné ou dur. ⚡ un crash, · une journée terminée sans crash, vide = inconnu. En pâle = pas encore comptée : journée pas terminée, réponse manquante, ou aujourd’hui.')}</p>`;
   return h;
 }
 function vPat(){
@@ -2176,7 +2179,7 @@ function homeOne(){ if(!S.done) return ''; const day=S.started?Math.floor((Date.
   const o=oneThing(buildPatch(),'home'); return `<div class="card one"><div class="eyebrow">${(day==null||day<=7)?L('If you do one thing this week','Si tu fais une seule chose cette semaine'):L('If you do one thing','Si tu fais une seule chose')}</div><p style="margin:0;font-weight:700">${o.t}</p><div class="row" style="margin-top:8px"><button type="button" class="btn ghost sm" data-door="patch">${L('My week →','Ma semaine →')}</button></div></div>`; }
 /* v1.2.27: the week's one line, the test if one is running, the fuel gauge, three buttons; the day's state and one hint below */
 function vHomeBack(o){
-  return `${tabsHTML('home')}${alarmCard()}${S.done?weekLine():startCard()}${testCard('home')}${fuelCard()}${mainBtns()}${todayCard()}${monthCard()}${payoffCard()}${S.started?dayCheck(buildPatch(),'home'):''}${hintCard()}${iosNote()}
+  return `${tabsHTML('home')}${alarmCard()}${S.done?weekLine():startCard()}${testCard('home')}${thinCard()}${fuelCard()}${mainBtns()}${todayCard()}${monthCard()}${payoffCard()}${S.started?dayCheck(buildPatch(),'home'):''}${hintCard()}${iosNote()}
   <p class="small muted" style="margin-top:16px"><b>${L('Not a doctor.','Pas un médecin.')}</b> ${L('Chest pain, fainting or black stool: 911. Thinking about ending your life: call or text 9-8-8 (988 in the US).','Douleur à la poitrine, évanouissement ou selles noires : 911. Tu penses à mettre fin à tes jours : appelle ou texte le 9-8-8 (988 aux É.-U.).')} <button type="button" class="btn ghost sm" id="aboutBtn" style="margin-top:6px">${L('About & privacy','À propos et confidentialité')}</button></p>`; }
 function openAbout(){ showSheet(`<div class="handle"></div><h3 id="sheetTitle">${L('About & privacy','À propos et confidentialité')}</h3>${tagline()}
   <p class="small">${L('Education, not medical, pharmacist or dietitian advice. It starts from how you live now, and you decide what to do with it.','De l’éducation, pas un avis médical, pharmaceutique ou diététique. Ça part de ta vie telle qu’elle est, et c’est toi qui décides quoi en faire.')}</p>
@@ -2304,6 +2307,9 @@ function vQ(i){
    Hints are earned (three finished check-ins or one logged crash), one at a time, gone for good once dismissed. */
 const AGED_CHEESE=[119,109,40,502213];
 const FAMS=[
+  {id:'lactose', l:['Big dairy servings (12 g of lactose or more at a time)','Grosses portions de produits laitiers (12 g de lactose ou plus à la fois)'], title:['Under 12 g of lactose at a time','Moins de 12 g de lactose à la fois'], lac:true, outs:['gut'],
+    todo:['no sitting with 12 g of lactose or more — a cup of milk is about 13 g; lactose-free milk is fine','aucun repas avec 12 g de lactose ou plus — une tasse de lait, c’est environ 13 g; le lait sans lactose, ça va'],
+    swap:{any:['lactose-free milk; hard cheese and yogurt in small amounts usually sit fine','du lait sans lactose; le fromage ferme et le yogourt en petite quantité passent souvent bien']}},
   {id:'cheese', l:['Cheese','Fromage'], title:['Without cheese','Sans fromage'], ids:AGED_CHEESE.concat([110,25,28]), prot:true, outs:['crash','gut','hs'],
     swap:{veg:['eggs, tofu, beans or lentils','des œufs, du tofu, des fèves ou des lentilles'], any:['eggs, meat, fish or beans','des œufs, de la viande, du poisson ou des fèves']}},
   {id:'cured', l:['Cured meat, canned fish, leftovers','Charcuterie, poisson en conserve, restants'], title:['Without cured meat, canned fish or leftovers','Sans charcuterie, poisson en conserve ni restants'], ids:TF.filter(f=>(f.tags||[]).includes('hist')&&['meat','sea'].includes(f.grp)).map(f=>f.id), prot:true, outs:['crash','gut','hs'],
@@ -2312,18 +2318,21 @@ const FAMS=[
     swap:{veg:['Greek yogurt, tofu or beans','du yogourt grec, du tofu ou des fèves'], any:['Greek yogurt, meat or fish','du yogourt grec, de la viande ou du poisson']}},
   {id:'shakes', l:['Shakes, bars, diet drinks, sugar-free sweets','Shakes, barres, boissons diète, sucreries sans sucre'], title:['Without shakes, bars, diet drinks or sugar-free sweets','Sans shakes, barres, boissons diète ni sucreries sans sucre'], ids:TF.filter(f=>(f.tags||[]).includes('swt')&&f.grp!=='energy').map(f=>f.id).concat([502447]), cat:'sweetener', prot:true, outs:['gut','crash'],
     swap:{vegan:['soy milk, or an unflavoured pea protein','de la boisson de soya, ou une protéine de pois nature'], any:['plain Greek yogurt, or an unflavoured one-ingredient protein powder','du yogourt grec nature, ou une poudre de protéines nature à un seul ingrédient']}},
-  {id:'sweets', l:['Sweets and sugary drinks','Sucreries et boissons sucrées'], title:['Without sweets or sugary drinks','Sans sucreries ni boissons sucrées'], ids:CRASHCAT.sweet, cat:'sweet', outs:['crash','gut'],
+  {id:'edrinks', l:['Energy drinks','Boissons énergisantes'], title:['Without energy drinks','Sans boissons énergisantes'], ids:EDIDS, outs:['crash','gut'],
+    swap:{any:['coffee or tea before noon','du café ou du thé avant midi']}},
+  {id:'sweets', l:['Sweets and sugary drinks','Sucreries et boissons sucrées'], title:['Without sweets or sugary drinks','Sans sucreries ni boissons sucrées'], ids:CRASHCAT.sweet.filter(id=>!EDIDS.includes(id)), cat:'sweet', outs:['crash','gut'],
     swap:{any:['fruit with nuts or yogurt','un fruit avec des noix ou du yogourt']}},
   {id:'fructose', l:['Apples, pears, mango, watermelon','Pommes, poires, mangue, melon d’eau'], title:['Without apples, pears, mango or watermelon','Sans pommes, poires, mangue ni melon d’eau'], ids:[1696,1731,1603,1691], outs:['gut'],
     swap:{any:['berries, an orange, kiwi or a banana instead','des petits fruits, une orange, un kiwi ou une banane à la place']}},
-  {id:'edrinks', l:['Energy drinks','Boissons énergisantes'], title:['Without energy drinks','Sans boissons énergisantes'], ids:EDIDS, outs:['crash','gut'],
-    swap:{any:['coffee or tea before noon','du café ou du thé avant midi']}},
   {id:'latecoffee', l:['Coffee late in the day','Café tard dans la journée'], title:['Coffee done by noon','Café fini à midi'], ci:'cf', next:true, outs:['crash'],
     todo:['coffee done by noon — on shifts, 8 hours before you sleep','le café fini à midi — si tu travailles par quarts, 8 heures avant de dormir'],
     swap:{any:['decaf or herbal tea after that','du décaféiné ou une tisane après']}},
   {id:'alcohol3', l:['3 drinks or more','3 verres ou plus'], title:['No more than 2 drinks a day','Pas plus de 2 verres par jour'], ci:'al', next:true, outs:['crash','gut','hs'],
     todo:['no more than 2 drinks on any day','pas plus de 2 verres par jour'],
     swap:{any:['soda water with lime after two','de l’eau pétillante avec de la lime après deux']}},
+  {id:'alcohol6', l:['6 drinks or more','6 verres ou plus'], title:['Steady nights: no night at 6 drinks or more','Soirées tranquilles : aucune soirée à 6 verres ou plus'], ci:'al6', next:true, noSus:true, outs:['crash','gut','hs'],
+    todo:['no night at 6 drinks or more — keep your other nights as they are','aucune soirée à 6 verres ou plus — garde tes autres soirées comme elles sont'],
+    swap:{any:['water or soda water between drinks on the big nights','de l’eau ou de l’eau pétillante entre les verres, les grosses soirées']}},
   {id:'bigmeal', l:['A big meal','Un gros repas'], title:['No big meals','Pas de gros repas'], cat:'big', logOnly:true,
     todo:['no big meals — the same food in two smaller sittings','pas de gros repas — la même nourriture en deux plus petits repas']},
   {id:'hist', l:['Aged cheese, cured meat, canned fish or leftovers','Fromage vieilli, charcuterie, poisson en conserve ou restants'], title:['Without aged cheese, cured meat, canned fish or leftovers','Sans fromage vieilli, charcuterie, poisson en conserve ni restants'], cat:'hist', logOnly:true, ids:CRASHCAT.hist, prot:true,
@@ -2339,8 +2348,22 @@ function crashCats(k){ let c=null; for(const x of (S.crashes||[])){ if(crashDay(
 function loggedDay(k){ const m=tlog()[k]; return !!(m&&mapCount(m)); }
 function agedOn(k){ const m=tlog()[k]; return !!(m&&AGED_CHEESE.some(id=>m[id]>0)); }
 /* was the suspect there that day? true / false / null (not known). "No" needs a completed food log or a finished check-in. */
+/* v1.2.39: the lactose rule, shared by History and the lactose suspect. "At one time" is a sitting — each logged meal's total
+   (meals are sittings since v1.2.33); a day with no meals keeps the largest single serving. High = 12 g or more at one sitting, or
+   over 24 g in the day; low = under 6 g on a completed day; anything between is neither, so it can't blur either side (EFSA 2010). */
+function lacOf(id,c){ if(String(id).startsWith('x_')||!(c>0)) return 0; const f=TF.find(x=>x.id==id); return ((f&&f.n&&f.n.lact)||0)*c; }
+function lacHigh(k){ const m=tlog()[k]; if(!m||!mapCount(m)) return null; let one=0;
+  const sits=meals().filter(x=>x&&x.day===k&&x.items&&mapCount(x.items));
+  if(sits.length){ for(const x of sits){ let v=0; for(const [id,c] of Object.entries(x.items)) v+=lacOf(id,c); if(v>one) one=v; } }
+  else for(const [id,c] of Object.entries(m)){ const v=lacOf(id,Math.min(c,1)); if(v>one) one=v; }
+  const tot=((tankTotals(m).tot)||{}).lact||0; if(one>=12||tot>24) return true; return isClosed(k)&&tot<6?false:null; }
+/* check-in exposures: late caffeine, 3+ drinks, 6+ drinks (unknown on an old "3 or more" day) */
+function ciExpo(f,r){ return f.ci==='cf'?r.cf==='eve':f.ci==='al6'?(r.al==='high'?null:r.al==='six'):al3(r.al); }
+function isAlcF(f){ return !!(f&&(f.ci==='al'||f.ci==='al6')); }
+function isAlcId(id){ return isAlcF(famById(id)); }
 function famExpo(f,k){
-  if(f.ci){ if(!usable(k)) return null; const r=rates()[k]; return f.ci==='cf'?r.cf==='eve':r.al==='high'; }
+  if(f.lac) return lacHigh(k);
+  if(f.ci){ if(!usable(k)) return null; return ciExpo(f,rates()[k]); }
   if(f.logOnly){ if(f.ids&&loggedDay(k)) return null; const c=crashCats(k); return c?c.includes(f.cat):null; }
   const m=tlog()[k]; let yes=!!(m&&f.ids&&f.ids.some(id=>m[id]>0));
   if(!yes&&f.cat){ const c=crashCats(k); if(c&&c.includes(f.cat)) yes=true; }
@@ -2363,8 +2386,8 @@ function lchoose(n,k){ return (k<0||k>n)?-Infinity:LFACT[n]-LFACT[k]-LFACT[n-k];
 function fisherP(wy,wn,oy,on){ const N=wn+on, K=wy+oy; let p=0; for(let x=wy;x<=Math.min(K,wn);x++) p+=Math.exp(lchoose(K,x)+lchoose(N-K,wn-x)-lchoose(N,wn)); return Math.min(1,p); }
 function suspects(){
   const today=dayKey(); const all=[...Array(60)].map((_,i)=>keyAdd(today,-i)); const out=[];
-  const since={}; for(const x of (S.tests||[])){ if(!x||!x.start) continue; const end=x.stopped?keyAdd(x.start,Math.max(0,(+x.day||1)-1)):keyAdd(x.start,(x.ext?28:14)+2); if(!since[x.fam]||end>since[x.fam]) since[x.fam]=end; }
-  for(const f of FAMS){ const days=since[f.id]?all.filter(k=>k>since[f.id]):all; const first=since[f.id]||all[59];
+  const since={}; for(const x of (S.tests||[])){ if(!x||!x.start) continue; const end=x.stopped?keyAdd(x.start,Math.max(0,(+x.day||1)-1)):keyAdd(x.start,(x.ext?28:14)+2); const fm=x.fam==='alcohol6'?'alcohol3':x.fam; if(!since[fm]||end>since[fm]) since[fm]=end; }
+  for(const f of FAMS){ if(f.noSus) continue; const days=since[f.id]?all.filter(k=>k>since[f.id]):all; const first=since[f.id]||all[59];
     if(f.logOnly){
       const ents=(S.crashes||[]).filter(x=>{ const k=crashDay(x); return k&&(since[f.id]?k>first:k>=first)&&(!f.ids||!loggedDay(k)); });
       const n=ents.length, y=ents.filter(x=>{ const c=x.answers&&x.answers.cfood; return Array.isArray(c)?c.includes(f.cat):c===f.cat; }).length;
@@ -2379,13 +2402,71 @@ function suspects(){
       let c=null;
       if(wy>=3&&on>=3&&wy/wn-oy/on>=0.3){ const p=fisherP(wy,wn,oy,on); if(p<0.02) c={kind:'lead',score:wy/wn-oy/on,p}; }
       if(!c&&wy>=3&&cw+on>=10&&on<3&&wy/wn>=0.2) c={kind:'daily',score:0.1};
-      if(c&&(!best||c.score>best.score)) best=Object.assign(c,{f,o,wy,wn,oy,on,aged});
+      const lad=f.id==='alcohol3'?alLadder(f,o,days):null;
+      if(lad&&lad.lead&&(!c||c.kind==='daily'||lad.score>c.score)) c={kind:'ladder',score:lad.score,p:lad.p};
+      if(c&&(!best||c.score>best.score)) best=Object.assign(c,{f,o,wy,wn,oy,on,aged,lad});
     }
     if(best) out.push(best);
   }
-  return out.sort((a,b)=>b.score-a.score);
+  /* v1.2.39: real leads first; "on nearly every day" (everyday foods) after them */
+  return out.sort((a,b)=>((a.kind==='daily')-(b.kind==='daily'))||(b.score-a.score));
 }
-function suspectLine(s){ const F=`<b>${P2(s.f.l)}</b>`;
+/* v1.2.39: the dose ladder for drinks — the outcome after 0–2, 3–5 and 6+ drinks. A lead when it rises step by step, the top step
+   is at least 30 points over the bottom, and a trend test (Cochran–Armitage, one-sided) puts luck under 1 in 50. With drinks on
+   nearly every day there's no "without" to compare, but a ladder still can be read. Old "3 or more" days are left out. */
+function alLadder(f,o,days){ const g=[[0,0],[0,0],[0,0]]; const R=rates();
+  for(const k of days){ if(!usable(k)) continue; const st=alStep(R[k].al); if(st==null) continue; const y=famOut(f,o,k); if(y==null) continue; g[st][1]++; if(y) g[st][0]++; }
+  const pres=[0,1,2].filter(i=>g[i][1]>=3); if(pres.length<2||!(g[1][1]>=3||g[2][1]>=3)) return null;
+  const r=i=>g[i][0]/g[i][1]; const lo=pres[0], hi=pres[pres.length-1]; let mono=true;
+  for(let i=1;i<pres.length;i++) if(r(pres[i])<r(pres[i-1])-0.05) mono=false;
+  const p=trendP(g), score=r(hi)-r(lo);
+  return {g,p,score,lead:mono&&score>=0.3&&p<0.02&&(g[0][0]+g[1][0]+g[2][0])>=3}; }
+function trendP(g){ let N=0,Y=0,Sx=0,Sxx=0,T=0; g.forEach(([y,n],x)=>{ N+=n; Y+=y; Sx+=n*x; Sxx+=n*x*x; });
+  if(N<6||Y===0||Y===N) return 1; const p=Y/N; g.forEach(([y,n],x)=>{ T+=x*(y-n*p); });
+  const V=p*(1-p)*(Sxx-Sx*Sx/N); if(!(V>0)) return 1; return 1-normCdf(T/Math.sqrt(V)); }
+function normCdf(z){ const t=1/(1+0.2316419*Math.abs(z)); const d=0.3989423*Math.exp(-z*z/2); const q=d*t*(0.3193815+t*(-0.3565638+t*(1.781478+t*(-1.821256+t*1.330274)))); return z>0?1-q:q; }
+/* chance that luck alone brings the outcome back on k or more of n days, at rate q */
+function binTail(k,n,q){ let s=0; for(let x=k;x<=n;x++){ let c=1; for(let i=0;i<x;i++) c=c*(n-i)/(i+1); s+=c*Math.pow(q,x)*Math.pow(1-q,n-x); } return Math.min(1,s); }
+function ladTxt(s){ const g=s.lad&&s.lad.g; if(!g) return '';
+  const lab=[L('0–2 drinks','0–2 verres'),L('3–5 drinks','3–5 verres'),L('6 or more','6 ou plus')];
+  const parts=[0,1,2].filter(i=>g[i][1]>=1).map(i=>L(`${lab[i]}: ${g[i][0]} of ${g[i][1]}`,`${lab[i]} : ${g[i][0]} sur ${g[i][1]}`)).join(' · ');
+  const head=s.o==='gut'?L('Loose stools after','Des selles molles après'):s.o==='hs'?L('A headache or itch the next day','Un mal de tête ou des démangeaisons le lendemain'):L('A crash the next day','Un crash le lendemain');
+  return ' '+L(`${head}, by amount — ${parts}.`,`${head}, selon la quantité — ${parts}.`); }
+function suspectLine(s){ if(s.kind==='ladder') return L(`<b>${P2(s.f.l)}</b> — the more you drank, the more often it followed.`,`<b>${P2(s.f.l)}</b> — plus tu as bu, plus c’est arrivé souvent.`)+ladTxt(s);
+  const t=suspectLine0(s); return s.f.id==='alcohol3'?t+ladTxt(s):t; }
+/* "not cleared": a suspect that was listed stays listed until something tests it, instead of vanishing into "No leads yet" */
+function famShare(f){ let y=0,n=0; for(let i=1;i<=28;i++){ const e=famExpo(f,keyAdd(dayKey(),-i)); if(e==null) continue; n++; if(e) y++; } return n?y/n:0; }
+function heldLine(s){ const F=`<b>${P2(s.f.l)}</b>`;
+  return famShare(s.f)>=0.8
+    ? L(`${F} — listed before and not cleared: it’s on too many of your days to compare, and nothing has tested it yet.`,`${F} — sur la liste avant, et pas écarté : c’est dans trop de tes journées pour comparer, et rien ne l’a encore testé.`)
+    : L(`${F} — listed before and not cleared: the last weeks don’t show a clear gap, but nothing has tested it yet.`,`${F} — sur la liste avant, et pas écarté : les dernières semaines ne montrent pas d’écart clair, mais rien ne l’a encore testé.`); }
+/* steady nights: offered to a daily drinker who didn't say they get shaky, when nights of 6 or more are the exception, not the rule
+   (cutting them doesn't cut the usual amount). Guidance for dependent drinkers: steady first, then cut slowly; withdrawal signs
+   mean medical help before cutting further (NHS; Canada's guideline for high-risk drinking). */
+function steadyOk(){ let n=0,six=0; for(let i=1;i<=28;i++){ const k=keyAdd(dayKey(),-i); if(!usable(k)) continue; const st=alStep(rates()[k].al); if(st==null) continue; n++; if(st===2) six++; } return six>=2&&six/n<=0.35; }
+const STEADY=['Drinks are on nearly every day, so counts can’t compare days with and without. What can be tested without cutting your usual amount is the big nights: keep your other nights as they are, and none at 6 or more.','Il y a de l’alcool presque tous les jours, alors les chiffres ne peuvent pas comparer des journées avec et sans. Ce qui se teste sans couper ta quantité habituelle, ce sont les grosses soirées : garde tes autres soirées comme elles sont, et aucune à 6 verres ou plus.'];
+const STEADYDONE=['Steady nights didn’t make a clear difference. What’s left is the usual amount. If you want to lower it, go slowly — and since you drink every day, do it with a pharmacist or doctor.','Les soirées tranquilles n’ont pas fait de différence claire. Ce qui reste, c’est la quantité habituelle. Si tu veux la baisser, vas-y lentement — et comme tu bois tous les jours, fais-le avec un pharmacien ou un médecin.'];
+const WDRAW=['If you get shaky, sweaty, sick or on edge when you drink less, stop the test and talk to a pharmacist or doctor — that’s withdrawal, and it can be dangerous.','Si tu trembles, sues, as mal au cœur ou te sens à cran quand tu bois moins, arrête le test et parles-en à un pharmacien ou à un médecin — c’est du sevrage, et ça peut être dangereux.'];
+function backSheet(f,o){ if(isAlcF(f)) return L('No need to go back to how it was afterward — the two weeks are the answer.','Pas besoin de revenir comme avant après — les deux semaines sont la réponse.');
+  const st=winStats(keyAdd(dayKey(),-28),28,null); const [y,n]=pickOut(st,o);
+  if(n>=10&&y/n>0.5) return L(`Then 3 days back to how it was — but with ${P2(OUTB[o])} on most days lately (${y} of ${n}), those 3 days won’t tell much. The two weeks will.`,`Ensuite, 3 jours comme avant — mais avec des ${P2(OUTB[o])} la plupart des jours dernièrement (${y} sur ${n}), ces 3 jours ne diront pas grand-chose. Les deux semaines, oui.`);
+  return L(`Then 3 days back to how it was. If the ${P2(OUTB[o])} come back, that’s the clearest answer you’ll get.`,`Ensuite, 3 jours comme avant. Si les ${P2(OUTB[o])} reviennent, c’est la réponse la plus claire que tu puisses avoir.`); }
+/* History: drinks by amount, the day after */
+function alLadderLine(){ const R=rates(); const g=[0,1,2].map(()=>({n:0,e:0,gy:0,gn:0}));
+  for(let i=1;i<=60;i++){ const k=keyAdd(dayKey(),-i); if(!usable(k)) continue; const st=alStep(R[k].al); if(st==null) continue; const nx=keyAdd(k,1);
+    if(usable(nx)){ g[st].n++; g[st].e+=+R[nx].e; } const y=gutAfter(k); if(y!=null){ g[st].gn++; if(y===1) g[st].gy++; } }
+  const pres=[0,1,2].filter(i=>g[i].n>=3); if(pres.length<2||!(g[1].n>=3||g[2].n>=3)) return '';
+  const lab=[L('0–2 drinks','0–2 verres'),L('3–5','3–5'),L('6 or more','6 ou plus')]; const anyG=pres.some(i=>g[i].gn>=3&&g[i].gy>0);
+  const parts=pres.map(i=>`${lab[i]}${L(': ',' : ')}${L(`energy ${fmt1(g[i].e/g[i].n)}`,`énergie ${fmt1(g[i].e/g[i].n)}`)}${anyG&&g[i].gn?L(`, loose stools after ${g[i].gy} of ${g[i].gn}`,`, selles molles après ${g[i].gy} sur ${g[i].gn}`):''}`).join(' · ');
+  return ' '+L(`By amount, the day after — ${parts}.`,`Selon la quantité, le lendemain — ${parts}.`); }
+/* Home: say when logging is too thin to compare anything */
+function thinCard(){ if(!S.done||!S.started) return ''; const day=Math.floor((Date.now()-new Date(S.started).getTime())/86400000)+1; if(day<10) return '';
+  const ks=[...Array(14)].map((_,i)=>keyAdd(dayKey(),-1-i)); const nF=ks.filter(usable).length, nL=ks.filter(k=>loggedDay(k)).length, nC=ks.filter(k=>loggedDay(k)&&isClosed(k)).length;
+  let m='';
+  if(nF<7) m=L(`Only ${nF} of your last 14 days have a finished check-in. Suspects and patterns need finished days — about a minute each.`,`Seulement ${nF} de tes 14 derniers jours ont un bilan terminé. Les suspects et les tendances ont besoin de journées terminées — environ une minute chacune.`);
+  else if(nL>=5&&nC<=3) m=L(`Only ${nC} of your last 14 days are marked “That’s everything I ate”. Suspects can only compare those days — tap it on the days you logged everything.`,`Seulement ${nC} de tes 14 derniers jours sont marqués « C’est tout ce que j’ai mangé ». Les suspects ne peuvent comparer que ces journées-là — appuie dessus les jours où tu as tout noté.`);
+  return m?`<div class="card soft"><p class="small" style="margin:0">${m}</p></div>`:''; }
+function suspectLine0(s){ const F=`<b>${P2(s.f.l)}</b>`;
   if(s.kind==='log') return L(`${F} — before ${s.y} of your ${s.n} logged crashes. Normal days aren’t logged, so there’s nothing to compare; a test can tell.`,`${F} — avant ${s.y} de tes ${s.n} crashs au journal. Les journées normales ne sont pas notées, alors il n’y a rien à comparer; un test peut trancher.`);
   if(s.kind==='daily') return L(`${F} — on nearly every day you logged, so counts can’t tell. A test can.`,`${F} — presque tous les jours notés, alors les chiffres ne peuvent pas trancher. Un test, oui.`);
   const a=s.wy,b=s.wn,c=s.oy,d=s.on;
@@ -2399,21 +2480,42 @@ function suspectLine(s){ const F=`<b>${P2(s.f.l)}</b>`;
 /* daily or shaky drinkers are never offered a cut-down test — the app's "don't stop suddenly" line instead */
 function drinkerDaily(){ const DI=drinkInfo(); if(DI.daily||DI.shaky) return true; const R=rates(); const u=Object.keys(R).filter(usable); return u.length>=7 && u.filter(k=>R[k].al&&R[k].al!=='0').length/u.length>=0.7; }
 const NOCUT=['If you drink every day or get shaky without it, don’t cut down suddenly — talk to a pharmacist or doctor first.','Si tu bois tous les jours ou que tu trembles sans alcool, ne diminue pas d’un coup — parles-en à un pharmacien ou à un médecin d’abord.'];
-function testBtn(s){ if(activeTest()) return ''; if(s.f.id==='alcohol3'&&drinkerDaily()) return `<p class="small muted" style="margin:0">${P2(NOCUT)}</p>`;
+function testBtn(s){ if(activeTest()) return '';
+  if(s.f.id==='alcohol3'&&drinkerDaily()){ const sd=(S.tests||[]).filter(x=>x&&x.fam==='alcohol6'&&x.code!=='fewer'&&daysFrom(x.start,dayKey())<=74).length; if(sd&&!drinkInfo().shaky) return `<p class="small muted" style="margin:0">${P2(STEADYDONE)}</p>`; if(drinkInfo().shaky||!steadyOk()) return `<p class="small muted" style="margin:0">${P2(NOCUT)}</p>`;
+    return `<p class="small muted" style="margin:0 0 6px">${P2(STEADY)}</p><button type="button" class="btn sm" data-tstart="alcohol6" data-tout="${s.o}">${L('Test steady nights','Tester des soirées tranquilles')}</button>`; }
   return `<button type="button" class="btn sm" data-tstart="${s.f.id}" data-tout="${s.o}">${L('Test it','Tester ça')}</button>`; }
 function suspectsCard(){
-  const list=suspects().slice(0,4); const t=activeTest();
-  if(!list.length){ const nC=(S.crashes||[]).length, nF=Object.values(rates()).filter(r=>r&&r.fin).length; if(!nC&&nF<7) return '';
+  const all=suspects(); const t=activeTest(); const today=dayKey();
+  /* v1.2.39: remember what was listed; a suspect that drops off stays "not cleared" until something tests it (60 days) */
+  /* kept in S.hints.flag, saved with the next change — never a save from inside a render */
+  const H=S.hints=S.hints||{}; const FL=H.flag=H.flag||{};
+  for(const s of all){ const e=FL[s.f.id]; if(!e||e.last!==today) FL[s.f.id]={o:s.o,first:(e&&daysFrom(e.last,today)<=60)?e.first:today,last:today}; }
+  for(const id of Object.keys(FL)){ const e=FL[id]; if(!e||!e.last||daysFrom(e.last,today)>60||!famById(id)) delete FL[id]; }
+  const tested=id=>{ const e=FL[id]; const m=x=>x&&(x.fam===id||(id==='alcohol3'&&x.fam==='alcohol6')); return (S.tests||[]).some(x=>m(x)&&x.start>=e.first)||!!(t&&m(t)); };
+  const now=new Set(all.map(s=>s.f.id));
+  const held=Object.keys(FL).filter(id=>!now.has(id)&&!tested(id)).map(id=>({f:famById(id),o:FL[id].o,kind:'held'})).filter(x=>x.f&&!x.f.noSus).slice(0,2);
+  const leads=all.filter(s=>s.kind!=='daily').slice(0,4), daily=all.filter(s=>s.kind==='daily');
+  /* while a test runs, its suspect is "being tested", not gone */
+  const tf=t&&famById(t.fam); const testing=(tf&&!all.some(s=>s.f.id===t.fam||(t.fam==='alcohol6'&&s.f.id==='alcohol3')))?`<li><p><b>${P2(tf.l)}</b> — ${L('being tested now.','en test en ce moment.')}</p></li>`:'';
+  if(!leads.length&&!daily.length&&!held.length&&!testing){ const nC=(S.crashes||[]).length, nF=Object.values(rates()).filter(r=>r&&r.fin).length; if(!nC&&nF<7) return '';
     return `<div class="card"><div class="eyebrow">${L('Suspects','Suspects')}</div><p class="small" style="margin:0">${L('No leads yet. A lead needs at least three bad days with the same food, and normal days to compare — so log those too, and tap “That’s everything I ate”.','Pas encore de piste. Une piste, c’est au moins trois mauvaises journées avec le même aliment, et des journées normales pour comparer — alors note aussi ces journées-là, et appuie sur « C’est tout ce que j’ai mangé ».')}</p></div>`; }
+  const dShow=daily.slice(0,1), dMore=daily.length-dShow.length;
+  const li=(s,btn)=>`<li><p>${s.kind==='held'?heldLine(s):suspectLine(s)}</p>${btn?testBtn(s):''}</li>`;
+  const rows=testing+leads.map(s=>li(s,true)).join('')+dShow.map(s=>li(s,!leads.length)).join('')+held.map(s=>li(s,!leads.length&&!dShow.length)).join('');
+  const more=dMore>0?`<p class="small muted" style="margin:6px 0 0">${L(`+${dMore} other everyday food${dMore>1?'s':''} on nearly every day — one at a time, after the ones above.`,`+${dMore} autre${dMore>1?'s':''} aliment${dMore>1?'s':''} de tous les jours — un à la fois, après ceux plus haut.`)}</p>`:'';
+  /* calm first: when the outcome is on most days, everyday foods look guilty and the days back can't tell */
+  let calm=''; const top=leads[0]||dShow[0]||held[0];
+  if(top){ const st=winStats(keyAdd(today,-28),28,null); const [y,n]=pickOut(st,top.o);
+    if(n>=10&&y/n>0.5) calm=`<p class="small" style="margin:8px 0 0"><b>${L(`${cap1(P2(OUTB[top.o]))} on most days lately (${y} of ${n}).`,`${cap1(P2(OUTB[top.o]))} la plupart des jours dernièrement (${y} sur ${n}).`)}</b> ${isAlcF(top.f)?L('While that’s so, everyday foods can look guilty. Start with the strongest lead — the two weeks are the answer.','Tant que c’est comme ça, les aliments de tous les jours peuvent avoir l’air coupables. Commence par la piste la plus forte — les deux semaines sont la réponse.'):L('While that’s so, everyday foods can look guilty, and the 3 days back after a test can’t tell much. Start with the strongest lead — the two weeks are the answer.','Tant que c’est comme ça, les aliments de tous les jours peuvent avoir l’air coupables, et les 3 jours de retour après un test ne disent pas grand-chose. Commence par la piste la plus forte — les deux semaines sont la réponse.')}</p>`; }
   let note=''; if(t){ const left=testLen(t)+4-testDay(t); note=`<p class="small muted" style="margin:8px 0 0">${left>0?L(`One test at a time — this one ends in ${left} day${left>1?'s':''}.`,`Un test à la fois — celui-ci finit dans ${left} jour${left>1?'s':''}.`):L('One test at a time — your results are ready above.','Un test à la fois — tes résultats sont prêts plus haut.')}</p>`; }
-  return `<div class="card"><div class="eyebrow">${L('Suspects · leads, not proof','Suspects · des pistes, pas des preuves')}</div><ul class="sus">${list.map(s=>`<li><p>${suspectLine(s)}</p>${testBtn(s)}</li>`).join('')}</ul>${note}</div>`;
+  return `<div class="card"><div class="eyebrow">${L('Suspects · leads, not proof','Suspects · des pistes, pas des preuves')}</div><ul class="sus">${rows}</ul>${more}${calm}${note}</div>`;
 }
 /* ---------- your own test ---------- */
 function activeTest(){ return (S.test&&S.test.start&&famById(S.test.fam))?S.test:null; }
 function daysFrom(a,b){ const p=s=>{ const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); }; return Math.round((p(b)-p(a))/86400000); }
 function testDay(t){ return daysFrom(t.start,dayKey())+1; }
 function testLen(t){ return t&&t.ext?28:14; }
-function slipOn(f,k){ if(f.ci){ if(!usable(k)) return false; const r=rates()[k]; return f.ci==='cf'?r.cf==='eve':r.al==='high'; }
+function slipOn(f,k){ if(f.lac) return lacHigh(k)===true; if(f.ci){ if(!usable(k)) return false; return ciExpo(f,rates()[k])===true; }
   const m=tlog()[k]; if(m&&f.ids&&f.ids.some(id=>m[id]>0)) return true; const c=f.cat?crashCats(k):null; return !!(c&&c.includes(f.cat)); }
 /* slipped days: the ones marked, plus any day the food log or check-in shows it anyway */
 function testSlips(t){ const f=famById(t.fam); const s=new Set(t.slips||[]); for(let i=0;i<testLen(t);i++){ const k=keyAdd(t.start,i); if(k>dayKey()) break; if(slipOn(f,k)) s.add(k); } return s; }
@@ -2436,17 +2538,28 @@ function binomCDF(k,n,p){ let s=0,c=1; for(let j=0;j<=k;j++){ if(j>0) c=c*(n-j+1
    Simulated (tools/calib137v*.py, first lead tested): innocent food "fewer" 2–7% at two weeks, 9–15% with the two more weeks
    (was 20–22%); a real cause that halves crashes: 23–25% at two weeks, about 40% with them (was 45%), and "no clear change" for
    about 30% of real causes, which no longer rules anything out (was "probably not this one" for 55%). */
+/* v1.2.39: the four weeks before a test — but if an earlier test came back "fewer" (a change the person most likely kept), the
+   baseline starts when that change began, and that test's 3 days back (the food back in) are left out. Otherwise a kept change
+   makes whatever is tested next look better. */
+function beforeWin(t){ let a=keyAdd(t.start,-28), n=28; const ex=new Set();
+  for(const x of (S.tests||[])){ if(!x||!x.start||x.start>=t.start||x.code!=='fewer') continue;
+    if(x.start>a){ a=x.start; n=Math.max(0,daysFrom(a,t.start)); }
+    if(!isAlcId(x.fam)){ const N=x.ext?28:14; for(let i=0;i<3;i++) ex.add(keyAdd(x.start,N+i)); } }
+  return {a,n,ex}; }
 function testVerdict(t){ const slips=testSlips(t), N=testLen(t);
-  const before=winStats(keyAdd(t.start,-28),28,null), during=winStats(t.start,N,slips), back=winStats(keyAdd(t.start,N),3,null);
+  const bw=beforeWin(t); const before=winStats(bw.a,bw.n,bw.ex), during=winStats(t.start,N,slips), back=winStats(keyAdd(t.start,N),3,null);
   const [yb,nb]=pickOut(before,t.out), [yd,nd]=pickOut(during,t.out), [yr,nr]=pickOut(back,t.out);
   let code, p=null;
   if(nb<7||nd<7) code='thin'; else if(yb===0) code='nobase'; else { p=fisherP(yb,nb,yd,nd); code=yd*nb>=yb*nd?'same':p<0.1?'fewer':(3*yd*nb<=2*yb*nd?'unclear':'same'); }
   const bb=backBack(t); const came=bb.known>=1?(bb.hit>=2?true:(bb.hit===0&&bb.known>=2?false:null)):null;
-  return {code,p,yb,nb,yd,nd,yr,nr,came,bx:bb.ex,bk:bb.known,bh:bb.hit,before,during,back,slips:slips.size}; }
+  /* v1.2.39: the chance that luck alone brings the outcome back on that many days, at the person's own rate (before and during
+     pooled — the rate if the food changed nothing). Under 1 in 10 is "the clearest sign"; above it, the days back can't settle it. */
+  const q=(nb+nd)?(yb+yd)/(nb+nd):0, luck=bb.known>=1?binTail(bb.hit,bb.known,q):1;
+  return {code,p,yb,nb,yd,nd,yr,nr,came,q,luck,bDays:bw.n,bx:bb.ex,bk:bb.known,bh:bb.hit,before,during,back,slips:slips.size}; }
 function verdictHTML(t,v){ const OD=cap1(P2(OUTN[t.out])); const W=t.ext?L('Four weeks','Quatre semaines'):L('Two weeks','Deux semaines');
-  const nums=L(`${OD}: ${v.yd} of ${v.nd} days during the test, ${v.yb} of ${v.nb} in the four weeks before.`,`${OD} : ${v.yd} sur ${v.nd} jours pendant le test, ${v.yb} sur ${v.nb} dans les quatre semaines d’avant.`);
+  const nums=L(`${OD}: ${v.yd} of ${v.nd} days during the test, ${v.yb} of ${v.nb} ${v.bDays<28?`in the ${v.bDays} days before, since your last change`:'in the four weeks before'}.`,`${OD} : ${v.yd} sur ${v.nd} jours pendant le test, ${v.yb} sur ${v.nb} ${v.bDays<28?`dans les ${v.bDays} jours d’avant, depuis ton dernier changement`:'dans les quatre semaines d’avant'}.`);
   if(v.code==='thin') return L('<b>Too few finished days to compare.</b> The numbers are here, but they can’t settle it.','<b>Trop peu de journées terminées pour comparer.</b> Les chiffres sont là, mais ils ne peuvent pas trancher.');
-  if(v.code==='nobase') return L(`<b>Nothing to reduce.</b> ${OD}: 0 in the four weeks before.`,`<b>Rien à réduire.</b> ${OD} : 0 dans les quatre semaines d’avant.`);
+  if(v.code==='nobase') return L(`<b>Nothing to reduce.</b> ${OD}: 0 ${v.bDays<28?`in the ${v.bDays} days before`:'in the four weeks before'}.`,`<b>Rien à réduire.</b> ${OD} : 0 ${v.bDays<28?`dans les ${v.bDays} jours d’avant`:'dans les quatre semaines d’avant'}.`);
   let h;
   if(v.code==='fewer'){ const odds=v.p<0.01?L('less than 1 time in 100','moins d’une fois sur 100'):L(`about 1 time in ${Math.round(1/v.p)}`,`environ 1 fois sur ${Math.round(1/v.p)}`);
     h=L(`<b>Fewer during the test.</b> ${nums} If it made no difference, a split this lopsided would come ${odds}.`,`<b>Moins pendant le test.</b> ${nums} Si ça ne changeait rien, un écart pareil arriverait ${odds}.`); }
@@ -2458,13 +2571,15 @@ function verdictHTML(t,v){ const OD=cap1(P2(OUTN[t.out])); const W=t.ext?L('Four
 /* the bring-back days, read whatever the test said: 2 bad days for "the clearest sign"; 1 is shown next to the usual rate */
 function backLine(t,v){ const OB=P2(OUTB[t.out]);
   if(v.bk>=1){
+    if(v.bh>=2&&!(v.luck<0.1)) return ' '+L(`They came back on ${v.bh} of the ${v.bk} days you had it again — but with ${OB} on about ${Math.max(1,Math.round(v.q*10))} in 10 of your days anyway, that could be luck, so it can’t settle it.`,`C’est revenu ${v.bh} des ${v.bk} jours où tu en as repris — mais avec des ${OB} environ ${Math.max(1,Math.round(v.q*10))} jours sur 10 de toute façon, ça peut être le hasard, alors ça ne tranche pas.`);
     if(v.bh>=2) return ' '+L(`${v.code==='fewer'?'And':'But'} they came back on ${v.bh} of the ${v.bk} days you had it again — the clearest sign one person can get. Your call: keep it out, keep it small, or save it for days off.`,`${v.code==='fewer'?'Et':'Mais'} c’est revenu ${v.bh} des ${v.bk} jours où tu en as repris — le signe le plus clair qu’une personne puisse avoir. À toi de voir : le laisser de côté, en prendre moins, ou le garder pour tes congés.`);
     if(v.bh===1){ const z=v.yb>0?Math.round(v.nb/v.yb):0;
       const first=v.bk===1?L('They came back on the one day you had it again.','C’est revenu le jour où tu en as repris.'):L(`They came back on 1 of the ${v.bk} days you had it again.`,`C’est revenu 1 des ${v.bk} jours où tu en as repris.`);
       return ' '+first+' '+(z>=2?L(`You usually get ${OB} about 1 day in ${z}, so once can still be luck — another day or two would tell.`,`D’habitude, tu as des ${OB} environ 1 jour sur ${z}, alors une fois, ça peut être le hasard — un jour ou deux de plus le diraient.`):L('Once can still be luck — another day or two would tell.','Une fois, ça peut être le hasard — un jour ou deux de plus le diraient.')); }
     return ' '+(v.bk>=2?L(`You had it again on ${v.bk} days and nothing came back — could be chance, or it takes longer.`,`Tu en as repris ${v.bk} jours et rien n’est revenu — ça peut être le hasard, ou ça prend plus de temps.`):L('You had it again once and nothing came back — one day can’t tell.','Tu en as repris une fois et rien n’est revenu — une seule journée ne peut pas trancher.'));
   }
-  if(!v.bx&&t.fam!=='alcohol3'&&v.code==='fewer') return ' '+L(`To be surer: have it again on two or three days and log it. If ${OB} come back on two of them, that’s the clearest sign one person can get.`,`Pour être plus sûr : reprends-en deux ou trois jours et note-le. Si les ${OB} reviennent deux de ces jours-là, c’est le signe le plus clair qu’une personne puisse avoir.`);
+  if(!v.bx&&!isAlcId(t.fam)&&v.code==='fewer'&&v.q>0.5) return ' '+L(`Bringing it back won’t tell much while you have ${OB} on most days.`,`En reprendre ne dira pas grand-chose tant que tu as des ${OB} la plupart des jours.`);
+  if(!v.bx&&!isAlcId(t.fam)&&v.code==='fewer') return ' '+L(`To be surer: have it again on two or three days and log it. If ${OB} come back on two of them, that’s the clearest sign one person can get.`,`Pour être plus sûr : reprends-en deux ou trois jours et note-le. Si les ${OB} reviennent deux de ces jours-là, c’est le signe le plus clair qu’une personne puisse avoir.`);
   return ''; }
 function testTable(t,v){ const W=[v.before,v.during,v.back]; const frac=(y,n)=>n?`${y}/${n}`:'—'; const avg=(s,n)=>n?fmt1(s/n):'—';
   const rows=[[cap1(P2(OUTN[t.out])),...W.map(st=>frac(...pickOut(st,t.out)))]];
@@ -2481,8 +2596,8 @@ function testCard(where){ const t=activeTest(); if(!t) return ''; const f=famByI
   const more=v=>(v.code==='unclear'&&!t.ext&&d<=21)?`<button type="button" class="btn sm" data-text>${L('Keep it out two more weeks','Continuer deux semaines de plus')}</button>`:'';
   if(d<=N){ const sw=swapFor(f); const today=dayKey(), yd=keyAdd(today,-1); const ex=new Set(t.slips||[]); const n=testSlips(t).size;
     return `<div class="card test"><div class="eyebrow">${L(`Test · day ${d} of ${N}`,`Test · jour ${d} sur ${N}`)}</div><p class="lead" style="margin:0 0 4px"><b>${T}</b></p>${sw?`<p class="small" style="margin:0 0 8px">${L('Swap:','Remplace par :')} ${P2(sw)}.</p>`:''}${n?`<p class="small muted" style="margin:0 0 8px">${L(`${n} slipped day${n>1?'s':''} — dropped from the comparison.`,`${n} écart${n>1?'s':''} — retiré${n>1?'s':''} de la comparaison.`)}</p>`:''}<div class="row"><button type="button" class="btn ghost sm" data-tslip="${today}" aria-pressed="${ex.has(today)}">${ex.has(today)?'✓ ':''}${L('Slipped today','Écart aujourd’hui')}</button>${d>1?`<button type="button" class="btn ghost sm" data-tslip="${yd}" aria-pressed="${ex.has(yd)}">${ex.has(yd)?'✓ ':''}${L('Slipped yesterday','Écart hier')}</button>`:''}${stop}</div></div>`; }
-  if(d<=N+3){ const v=testVerdict(t);
-    return `<div class="card test"><div class="eyebrow">${L(`Test · after · day ${d-N} of 3`,`Test · après · jour ${d-N} sur 3`)}</div><p class="lead" style="margin:0 0 4px"><b>${L('Back to how it was, for 3 days','Retour comme avant, pendant 3 jours')}</b></p><p class="small" style="margin:0 0 8px">${L(`If the ${P2(OUTB[t.out])} come back on two of these days, that’s your answer.`,`Si les ${P2(OUTB[t.out])} reviennent deux de ces jours-là, c’est ta réponse.`)} ${L(`During the test, ${P2(OUTN[t.out])}: ${v.yd} of ${v.nd}; in the four weeks before: ${v.yb} of ${v.nb}.`,`Pendant le test, ${P2(OUTN[t.out])} : ${v.yd} sur ${v.nd}; dans les quatre semaines d’avant : ${v.yb} sur ${v.nb}.`)}${v.code==='unclear'&&!t.ext?' '+L('Lower, but too close to call — you can keep it out two more weeks instead.','Plus bas, mais trop serré pour trancher — tu peux plutôt continuer deux semaines de plus.'):''}</p><div class="row">${more(v)}${stop}</div></div>`; }
+  if(d<=N+3&&!isAlcF(f)){ const v=testVerdict(t); const hiB=v.q>0.5&&v.nb+v.nd>=10;
+    return `<div class="card test"><div class="eyebrow">${L(`Test · after · day ${d-N} of 3`,`Test · après · jour ${d-N} sur 3`)}</div><p class="lead" style="margin:0 0 4px"><b>${L('Back to how it was, for 3 days','Retour comme avant, pendant 3 jours')}</b></p><p class="small" style="margin:0 0 8px">${hiB?L(`You have ${P2(OUTB[t.out])} on most days, so these 3 days can’t tell much on their own — the two weeks are the real answer.`,`Tu as des ${P2(OUTB[t.out])} la plupart des jours, alors ces 3 jours ne disent pas grand-chose à eux seuls — les deux semaines sont la vraie réponse.`):L(`If the ${P2(OUTB[t.out])} come back on two of these days, that’s your answer.`,`Si les ${P2(OUTB[t.out])} reviennent deux de ces jours-là, c’est ta réponse.`)} ${L(`During the test, ${P2(OUTN[t.out])}: ${v.yd} of ${v.nd}; ${v.bDays<28?`in the ${v.bDays} days before`:'in the four weeks before'}: ${v.yb} of ${v.nb}.`,`Pendant le test, ${P2(OUTN[t.out])} : ${v.yd} sur ${v.nd}; ${v.bDays<28?`dans les ${v.bDays} jours d’avant`:'dans les quatre semaines d’avant'} : ${v.yb} sur ${v.nb}.`)}${v.code==='unclear'&&!t.ext?' '+L('Lower, but too close to call — you can keep it out two more weeks instead.','Plus bas, mais trop serré pour trancher — tu peux plutôt continuer deux semaines de plus.'):''}</p><div class="row">${more(v)}${stop}</div></div>`; }
   const v=testVerdict(t);
   return `<div class="card test"><div class="eyebrow">${L('Test results','Résultats du test')} · ${T}</div><p style="margin:0 0 8px">${verdictHTML(t,v)}</p>${where==='pat'?testTable(t,v):''}<div class="row">${more(v)}${where==='home'?`<button type="button" class="btn ghost sm" data-go="pat">${L('See the numbers','Voir les chiffres')}</button>`:''}<button type="button" class="btn sm" data-tkeep>${L('Done','Terminé')}</button></div></div>`; }
 function histRes(x){ if(x.stopped) return L(`stopped on day ${x.day}`,`arrêté au jour ${x.day}`);
@@ -2492,12 +2607,12 @@ function histRes(x){ if(x.stopped) return L(`stopped on day ${x.day}`,`arrêté 
   return (x.code==='same'?L('no clear change — not ruled out','pas de changement clair — pas écarté'):x.code==='nobase'?L('nothing to reduce','rien à réduire'):L('too few days to tell','trop peu de jours pour trancher'))+back; }
 function testsHistory(){ const H=(S.tests||[]).slice(-5).reverse(); if(!H.length) return '';
   return `<div class="card"><div class="eyebrow">${L('Your tests','Tes tests')}</div><ul class="small" style="margin:0">${H.map(x=>{ const f=famById(x.fam); return `<li><b>${f?P2(f.title):esc(x.fam)}</b> · ${dayLabel(x.start)}${L(': ',' : ')}${histRes(x)}</li>`; }).join('')}</ul></div>`; }
-function openTestSheet(id,o,opener){ const f=famById(id); if(!f||activeTest()) return; if(f.id==='alcohol3'&&drinkerDaily()) return; o=OUTN[o]?o:'crash';
+function openTestSheet(id,o,opener){ const f=famById(id); if(!f||activeTest()) return; if(f.id==='alcohol3'&&drinkerDaily()) return; if(f.id==='alcohol6'&&drinkInfo().shaky) return; o=OUTN[o]?o:'crash';
   const sw=swapFor(f);
   const doL=f.todo?L(`For 14 days: ${P2(f.todo)}.`,`Pendant 14 jours : ${P2(f.todo)}.`):L('For 14 days, leave it out.','Pendant 14 jours, tu t’en passes.');
   const swL=sw?' '+L(`Swap: <b>${P2(sw)}</b>${f.prot?' — same protein, so the swap doesn’t cause its own crash':''}.`,`Remplace par : <b>${P2(sw)}</b>${f.prot?' — autant de protéines, pour que le remplacement ne cause pas son propre crash':''}.`):'';
   const keepL=f.id==='latecoffee'?L('Keep the amount of coffee the same — only the time moves. Keep sleep as it is.','Garde la même quantité de café — seule l’heure change. Garde ton sommeil comme il est.'):L('Keep coffee and sleep the way they are, so the answer is about this one thing.','Garde ton café et ton sommeil comme ils sont, pour que la réponse porte sur cette seule chose.');
-  showSheet(`<div class="handle"></div><h3 id="sheetTitle">${L('Two-week test','Test de deux semaines')} · ${P2(f.title)}</h3><p>${doL}${swL}</p><p class="small">${keepL}</p><p class="small">${L('Slipped? Tap “Slipped today” on the home screen — that day just drops out. Nothing resets.','Un écart? Appuie sur « Écart aujourd’hui » à l’accueil — cette journée est simplement retirée. Rien ne repart à zéro.')}</p><p class="small">${L(`Then 3 days back to how it was. If the ${P2(OUTB[o])} come back, that’s the clearest answer you’ll get.`,`Ensuite, 3 jours comme avant. Si les ${P2(OUTB[o])} reviennent, c’est la réponse la plus claire que tu puisses avoir.`)}</p><div class="row"><button type="button" class="btn primary" id="tgo">${L('Start today','Commencer aujourd’hui')}</button><button type="button" class="btn ghost" id="closeSheet">${L('Not now','Pas maintenant')}</button></div><p class="small" style="margin:10px 0 0"><button type="button" class="btn ghost sm" id="thow">${L('How the test works','Comment marche le test')}</button></p>`, opener);
+  showSheet(`<div class="handle"></div><h3 id="sheetTitle">${L('Two-week test','Test de deux semaines')} · ${P2(f.title)}</h3><p>${doL}${swL}</p><p class="small">${keepL}</p><p class="small">${L('Slipped? Tap “Slipped today” on the home screen — that day just drops out. Nothing resets.','Un écart? Appuie sur « Écart aujourd’hui » à l’accueil — cette journée est simplement retirée. Rien ne repart à zéro.')}</p><p class="small">${backSheet(f,o)}</p>${isAlcF(f)?`<p class="small"><b>${P2(WDRAW)}</b></p>`:''}<div class="row"><button type="button" class="btn primary" id="tgo">${L('Start today','Commencer aujourd’hui')}</button><button type="button" class="btn ghost" id="closeSheet">${L('Not now','Pas maintenant')}</button></div><p class="small" style="margin:10px 0 0"><button type="button" class="btn ghost sm" id="thow">${L('How the test works','Comment marche le test')}</button></p>`, opener);
   const g=document.getElementById('tgo'); if(g) g.onclick=()=>{ startTest(id,o); closeSheet(true); render(true); toast(L('Test started','Test commencé')); };
   const hw=document.getElementById('thow'); if(hw) hw.onclick=()=>openSheet('selftest',hw);
 }
@@ -3107,7 +3222,7 @@ function hEvents(o,days){ const out=[], H=HRS[o]*3600000, set=new Set(days), ts=
 function hNone(o,k){ if(o==='crash') return crashP(k)===false; if(!usable(k)) return false; const r=rates()[k]; const w=(r.fl&&r.fl.off&&r.offw)||{}; return !HOUT[o].some(x=>w[x]); }
 function hoursLeads(){ hMBD={}; hWM=new Map(); hKC=new Map(); for(const m of meals()) if(m&&m.day) (hMBD[m.day]||(hMBD[m.day]=[])).push(m); try{ return hoursLeads0(); } finally { hMBD=null; hWM=null; hKC=null; } }
 function hoursLeads0(){ const today=dayKey(); const all=[...Array(60)].map((_,i)=>keyAdd(today,-i));
-  const since={}; for(const x of (S.tests||[])){ if(!x||!x.start) continue; const end=x.stopped?keyAdd(x.start,Math.max(0,(+x.day||1)-1)):keyAdd(x.start,(x.ext?28:14)+2); if(!since[x.fam]||end>since[x.fam]) since[x.fam]=end; }
+  const since={}; for(const x of (S.tests||[])){ if(!x||!x.start) continue; const end=x.stopped?keyAdd(x.start,Math.max(0,(+x.day||1)-1)):keyAdd(x.start,(x.ext?28:14)+2); const fm=x.fam==='alcohol6'?'alcohol3':x.fam; if(!since[fm]||end>since[fm]) since[fm]=end; }
   const day=new Set(suspects().filter(s=>s.kind==='lead').map(s=>s.f.id+'|'+s.o));
   const leads=[], seen={}; let nEv=0, nCt=0;
   for(const o of ['crash','gut','hs']){ const ev=hEvents(o,all); if(!ev.length) continue;
@@ -3293,7 +3408,7 @@ function bind(){
   document.querySelectorAll('[data-tstart]').forEach(b=>{ b.onclick=()=>openTestSheet(b.dataset.tstart,b.dataset.tout,b); });
   document.querySelectorAll('[data-tslip]').forEach(b=>{ b.onclick=()=>{ const t=activeTest(); if(!t) return; const k=b.dataset.tslip; const s=new Set(t.slips||[]); if(s.has(k)) s.delete(k); else s.add(k); t.slips=[...s]; refocus=`[data-tslip="${k}"]`; save(); render(true); }; });
   document.querySelectorAll('[data-tstop]').forEach(b=>{ b.onclick=function(){ if(!this.dataset.sure){ this.dataset.sure='1'; this.textContent=L('Tap again to stop','Appuie encore pour arrêter'); return; } const t=activeTest(); if(t) S.tests=(S.tests||[]).concat([{fam:t.fam,out:t.out,start:t.start,stopped:true,day:testDay(t)}]).slice(-10); S.test=null; save(); render(true); toast(L('Test stopped','Test arrêté')); }; });
-  document.querySelectorAll('[data-tkeep]').forEach(b=>{ b.onclick=()=>{ const t=activeTest(); if(t){ const v=testVerdict(t); S.tests=(S.tests||[]).concat([{fam:t.fam,out:t.out,start:t.start,code:v.code,came:v.came,yb:v.yb,nb:v.nb,yd:v.yd,nd:v.nd,ext:!!t.ext}]).slice(-10); } S.test=null; save(); render(true); }; });
+  document.querySelectorAll('[data-tkeep]').forEach(b=>{ b.onclick=()=>{ const t=activeTest(); if(t){ const v=testVerdict(t); S.tests=(S.tests||[]).concat([{fam:t.fam,out:t.out,start:t.start,code:v.code,came:v.came,luck:v.luck,yb:v.yb,nb:v.nb,yd:v.yd,nd:v.nd,ext:!!t.ext}]).slice(-10); } S.test=null; save(); render(true); }; });
   document.querySelectorAll('[data-text]').forEach(b=>{ b.onclick=()=>{ const t=activeTest(); if(t&&!t.ext){ t.ext=true; save(); render(true); toast(L('Two more weeks','Deux semaines de plus')); } }; });
   document.querySelectorAll('[data-hintok]').forEach(b=>{ b.onclick=()=>{ const H=S.hints=S.hints||{}; H.ok=H.ok||{}; H.ok[b.dataset.hintok]=dayKey(); H.lastOk=dayKey(); save(); render(true); }; });
   document.querySelectorAll('[data-gloss]').forEach(b=>{ b.onclick=()=>openSheet(b.dataset.gloss,b); });
