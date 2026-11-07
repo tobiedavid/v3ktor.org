@@ -1,4 +1,4 @@
-THE PATCH — website folder (app v1.2.36)
+THE PATCH — website folder (app v1.2.37)
 
 WHERE IT GOES
 Upload this whole "patch" folder to the top of your v3ktor.org site, so the addresses are:
