@@ -319,7 +319,7 @@ ul.pay{padding-left:18px} ul.pay li{margin:.2em 0}
 let S = {a:{}, step:0, started:null, checkins:[], lang:null, mode:null, c:{}, cstep:0, crashes:[], intent:null, tank:null, tstep:0};
 const KEY='thepatch.v1';
 try{ const s=localStorage.getItem(KEY)||localStorage.getItem('patch'); if(s) S=Object.assign(S, JSON.parse(s)); if(!localStorage.getItem(KEY)&&s) localStorage.setItem(KEY,s); if(localStorage.getItem('patch')) localStorage.removeItem('patch'); }catch(e){}
-const VER='1.2.37'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
+const VER='1.2.38'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
 /* v1.2.21 (5 Nov 2026): prenatal / folic-acid and pregnancy-iron lines aligned with Health Canada; Quebec route for bloodwork; hard-stool branch;
    pattern messages match the 5-a-side rule; iPhone storage note + persist(); protein note by life stage; French fixes; "about $8" in English. */
 /* v1.2.22 (6 Nov 2026): one-screen result (plain-words test card, three-line week, one notes card with the crisis line kept open); glossary words underlined once per screen;
@@ -389,6 +389,8 @@ const VER='1.2.37'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
    weeks before, a two-sample exact test, "too close to call" with two more weeks offered, no ruling out on a short test, and
    the bring-back days read whatever the test said (2 of them for "the clearest sign"). Also: fields at 16px on iPhone (no
    zoom), and inside a Claude chat the backup falls back to copy, then to the text itself. */
+/* v1.2.38 (6 Nov 2026): ice cream, cookies, donuts and dark chocolate count as sweets (a binge of them couldn't be named before);
+   lactose "at one time" is a sitting's total, not the largest single serving. */
 if(!S.lang){ S.lang = (navigator.language||'en').toLowerCase().startsWith('fr') ? 'fr' : 'en'; }
 /* v0.7: three doors. Older saves have no mode — someone mid-questions lands back on their question, everyone else on the chooser. */
 if(!S.mode){ S.mode = S.step>0 ? 'patch' : 'home'; }
@@ -1660,7 +1662,7 @@ function tankTargets(){
   return T;
 }
 /* which logged foods count for the crash door's "what went in" question */
-const CRASHCAT={hist:[],sweetener:[502395,2926,910002,910006,502444,502447,509001,509002],refined:[4407,4127,4124,4066,3671,3893,3915,1242,1256,501819,3812,4903,502357,4962,4635,4617,2185,501999],sweet:[4186,6230,5288,502393,910001,910003,910004,910005,910007,4318,70,502158,1620,1745],protein:[130,133,3203,5965,3081,501869,501872,2696,6146,842,854,1787,1816,691,3183,3187,3037,3588,3580,3572,502170,25,4086,2657,5335,3212,3116,3118,3404,502444,502447,1148,1154]};
+const CRASHCAT={hist:[],sweetener:[502395,2926,910002,910006,502444,502447,509001,509002],refined:[4407,4127,4124,4066,3671,3893,3915,1242,1256,501819,3812,4903,502357,4962,4635,4617,2185,501999],sweet:[4186,6230,5288,502393,910001,910003,910004,910005,910007,4318,70,502158,1620,1745,4163,3812,3893,4148],protein:[130,133,3203,5965,3081,501869,501872,2696,6146,842,854,1787,1816,691,3183,3187,3037,3588,3580,3572,502170,25,4086,2657,5335,3212,3116,3118,3404,502444,502447,1148,1154]};
 /* the crash option says "aged cheese, cured meat, canned fish, leftovers" — so only those pre-tick it; wine, beer and fermented foods are asked elsewhere */
 CRASHCAT.hist=TF.filter(f=>(f.tags||[]).includes('hist') && ['meat','sea','dairy'].includes(f.grp) && !/^Kefir/.test(f.l[0])).map(f=>f.id);
 function logCats(map){ const out=[]; for(const [c,ids] of Object.entries(CRASHCAT)) if(ids.some(id=>map[id])) out.push(c); return out; }
@@ -1955,8 +1957,13 @@ function findPatterns(){
      high = one serving carrying 12 g or more (a cup of milk) or over 24 g in the day; low = under 6 g on a completed food log;
      anything between counts as neither, so it can't blur either side. Sweeteners: any serving. Both against the loose stools that followed the day's food (gutAfter). */
   const dayTot=k=>{ const m=tlog()[k]; if(!m||!mapCount(m)) return null; return tankTotals(m).tot; };
+  /* v1.2.38: "at one time" is a sitting — each logged meal's total (meals are sittings since v1.2.33); a day with no meals keeps the
+     largest single serving */
+  const lacOf=(id,c)=>{ if(String(id).startsWith('x_')||!(c>0)) return 0; const f=TF.find(x=>x.id==id); return ((f&&f.n&&f.n.lact)||0)*c; };
   const lacE=k=>{ const m=tlog()[k]; if(!m||!mapCount(m)) return null; let one=0;
-    for(const [id,c] of Object.entries(m)){ if(id.startsWith('x_')||!(c>0)) continue; const f=TF.find(x=>x.id==id); const v=((f&&f.n&&f.n.lact)||0)*Math.min(c,1); if(v>one) one=v; }
+    const sits=meals().filter(x=>x&&x.day===k&&x.items&&mapCount(x.items));
+    if(sits.length){ for(const x of sits){ let v=0; for(const [id,c] of Object.entries(x.items)) v+=lacOf(id,c); if(v>one) one=v; } }
+    else for(const [id,c] of Object.entries(m)){ const v=lacOf(id,Math.min(c,1)); if(v>one) one=v; }
     const tot=dayTot(k).lact||0; if(one>=12||tot>24) return true; return isClosed(k)&&tot<6?false:null; };
   add('lac','12',lacE,[['g',gutAfter]],false);
   { const t=out.tests[out.tests.length-1]; if(!t.ny&&!t.nn) out.tests.pop(); }
