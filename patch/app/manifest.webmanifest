@@ -37,25 +37,25 @@
  ],
  "screenshots": [
   {
-   "src": "../img/home-en.webp",
+   "src": "../img/report-en.webp",
    "sizes": "780x1560",
    "type": "image/webp",
    "form_factor": "narrow",
-   "label": "Home"
+   "label": "Report"
   },
   {
    "src": "../img/patch-en.webp",
    "sizes": "780x1560",
    "type": "image/webp",
    "form_factor": "narrow",
-   "label": "Your patch"
+   "label": "The plan"
   },
   {
-   "src": "../img/day-en.webp",
+   "src": "../img/hist-en.webp",
    "sizes": "780x1560",
    "type": "image/webp",
    "form_factor": "narrow",
-   "label": "Every day"
+   "label": "History"
   }
  ]
 }
