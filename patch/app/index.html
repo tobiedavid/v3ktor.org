@@ -352,7 +352,7 @@ p.goalfor{font-size:.85rem}
 let S = {a:{}, step:0, started:null, checkins:[], lang:null, mode:null, c:{}, cstep:0, crashes:[], intent:null, tank:null, tstep:0};
 const KEY='thepatch.v1';
 try{ const s=localStorage.getItem(KEY)||localStorage.getItem('patch'); if(s) S=Object.assign(S, JSON.parse(s)); if(!localStorage.getItem(KEY)&&s) localStorage.setItem(KEY,s); if(localStorage.getItem('patch')) localStorage.removeItem('patch'); }catch(e){}
-const VER='1.2.50'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
+const VER='1.2.51'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
 /* v1.2.21 (5 Nov 2026): prenatal / folic-acid and pregnancy-iron lines aligned with Health Canada; Quebec route for bloodwork; hard-stool branch;
    pattern messages match the 5-a-side rule; iPhone storage note + persist(); protein note by life stage; French fixes; "about $8" in English. */
 /* v1.2.22 (6 Nov 2026): one-screen result (plain-words test card, three-line week, one notes card with the crisis line kept open); glossary words underlined once per screen;
@@ -451,6 +451,7 @@ const VER='1.2.50'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
    the one-week patch. Report points at the plan when the plan is waiting on you. */
 /* v1.2.49 (7 Nov 2026): fibre as a suspect for loose stools, with a two-week plain-food test; colon cancer in the family. */
 /* v1.2.50 (7 Nov 2026): open source under the GNU AGPL-3.0 or later — the notice at the top of the file, and in About. */
+/* v1.2.51 (7 Nov 2026): the install file's screenshots exist again; on Samsung's browser the install pill points to Chrome. */
 if(!S.lang){ S.lang = (navigator.language||'en').toLowerCase().startsWith('fr') ? 'fr' : 'en'; }
 /* v0.7: three doors. Older saves have no mode — someone mid-questions lands back on their question, everyone else on the chooser. */
 if(!S.mode){ S.mode = S.step>0 ? 'patch' : 'home'; }
@@ -4366,8 +4367,8 @@ render();
   window.addEventListener('beforeinstallprompt',function(e){
     e.preventDefault(); ev=e; try{ if(localStorage.getItem(KEY)) return; }catch(x){}
     var b=document.createElement('div'); b.id='installPill';
-    b.setAttribute('style','position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom));z-index:60;display:flex;gap:6px;align-items:center;background:#1c1b19;color:#fff;border-radius:999px;padding:6px 6px 6px 14px;box-shadow:0 6px 20px -8px rgba(0,0,0,.4);font:600 15px system-ui,sans-serif');
-    b.innerHTML='<span>'+(fr()?'Installer La Patch sur ce téléphone':'Install The Patch on this phone')+'</span><button type="button" id="ipYes" style="background:#c8481f;color:#fff;border:0;border-radius:999px;padding:8px 14px;font:inherit">'+(fr()?'Installer':'Install')+'</button><button type="button" id="ipNo" aria-label="'+(fr()?'Non merci':'No thanks')+'" style="background:transparent;color:#fff;border:0;font:inherit;padding:8px 10px">✕</button>';
+    var sam=/SamsungBrowser/i.test(navigator.userAgent); b.setAttribute('style','position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom));z-index:60;display:flex;gap:6px;align-items:center;background:#1c1b19;color:#fff;'+(sam?'border-radius:16px;flex-wrap:wrap;width:min(92vw,420px);box-sizing:border-box;padding:10px 10px 10px 14px;':'border-radius:999px;padding:6px 6px 6px 14px;')+'box-shadow:0 6px 20px -8px rgba(0,0,0,.4);font:600 15px system-ui,sans-serif');
+    b.innerHTML=(sam?'<span style="flex:1 1 100%;font-weight:500;line-height:1.35">'+(fr()?'Sur un Samsung, installe-la avec Chrome (⋮ → Installer l’application) — ou ici : ☰ → Ajouter la page à → Écran d’accueil.':'On a Samsung phone, install it from Chrome (⋮ → Install app) — or here: ☰ → Add page to → Home screen.')+'</span>':'<span>'+(fr()?'Installer La Patch sur ce téléphone':'Install The Patch on this phone')+'</span>')+'<button type="button" id="ipYes" style="background:#c8481f;color:#fff;border:0;border-radius:999px;padding:8px 14px;font:inherit">'+(sam?(fr()?'Essayer ici':'Try here'):(fr()?'Installer':'Install'))+'</button><button type="button" id="ipNo" aria-label="'+(fr()?'Non merci':'No thanks')+'" style="background:transparent;color:#fff;border:0;font:inherit;padding:8px 10px">✕</button>';
     document.body.appendChild(b);
     document.getElementById('ipYes').onclick=function(){ b.remove(); ev.prompt(); ev.userChoice.finally(function(){ ev=null; }); };
     document.getElementById('ipNo').onclick=function(){ b.remove(); try{ localStorage.setItem(KEY,'1'); }catch(x){} };
