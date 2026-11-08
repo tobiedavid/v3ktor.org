@@ -1,7 +1,7 @@
 /* The Patch — offline cache. A new app version changes CACHE, so phones pick it up on the next open with a connection.
    Copyright (C) 2026  Tobie David · SPDX-License-Identifier: AGPL-3.0-or-later, with two terms under its section 7 (see the notice
    at the top of index.html) · https://github.com/tobiedavid/v3ktor.org */
-const CACHE='thepatch-1.2.55-dcabd9ce';
+const CACHE='thepatch-1.2.56-285e6250';
 const SHELL=['./','index.html','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','icons/maskable-512.png','icons/apple-touch-icon.png','icons/favicon-32.png'];
 self.addEventListener('install',e=>{ e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())); });
 self.addEventListener('activate',e=>{ e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k.startsWith('thepatch-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())); });

@@ -370,7 +370,7 @@ const KEY='thepatch.v1';
 try{ const s=localStorage.getItem(KEY)||localStorage.getItem('patch'); if(s) S=Object.assign(S, JSON.parse(s)); if(!localStorage.getItem(KEY)&&s) localStorage.setItem(KEY,s); if(localStorage.getItem('patch')) localStorage.removeItem('patch'); }catch(e){}
 /* v1.2.55: the weight plan used to ask about trouble with eating itself; the answer now lives in question 16 */
 try{ if(S.wl&&S.wl.ed===true&&S.a){ const sa=Array.isArray(S.a.safety)?S.a.safety.filter(x=>x!=='none'):[]; if(!sa.includes('ed')){ sa.push('ed'); S.a.safety=sa; } } }catch(e){}
-const VER='1.2.55'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
+const VER='1.2.56'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
 /* v1.2.21 (5 Nov 2026): prenatal / folic-acid and pregnancy-iron lines aligned with Health Canada; Quebec route for bloodwork; hard-stool branch;
    pattern messages match the 5-a-side rule; iPhone storage note + persist(); protein note by life stage; French fixes; "about $8" in English. */
 /* v1.2.22 (6 Nov 2026): one-screen result (plain-words test card, three-line week, one notes card with the crisis line kept open); glossary words underlined once per screen;
@@ -480,6 +480,8 @@ const VER='1.2.55'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
    trouble with eating is asked of everyone in question 16, not only on the weight plan; re-tapping an answer keeps it; the empty
    tank shows no 0%, and offers the normal day first; a gentler night-sugar line; a grab-and-go breakfast; the plan page folds,
    each card showing its first lines until it's tapped. */
+/* v1.2.56 (8 Nov 2026): the first session is the product. The doctor box sits right under the one thing, open; then the usual-day
+   step: tick a normal day in a minute and see what it covers, what comes in low and the food that fills each gap. */
 if(!S.lang){ S.lang = (navigator.language||'en').toLowerCase().startsWith('fr') ? 'fr' : 'en'; }
 /* v0.7: three doors. Older saves have no mode — someone mid-questions lands back on their question, everyone else on the chooser. */
 if(!S.mode){ S.mode = S.step>0 ? 'patch' : 'home'; }
@@ -2164,7 +2166,8 @@ function buildTank(src){
   if((p.age==='a3'||p.age==='a4')) notes.push(L(`<b>Over 50:</b> the reference tables say to get B12 mainly from fortified food or a supplement, because up to a third of older adults absorb food B12 poorly.`,`<b>Plus de 50 ans :</b> les tables de référence disent de prendre la B12 surtout dans des aliments enrichis ou un supplément, parce que jusqu’au tiers des adultes plus âgés absorbent mal la B12 des aliments.`));
   return {TG,rows,low,fills,notes,nF,kcalPct,lack:[...lack],week:wk,src,tot,lackBy:lackBy||{}};
 }
-function tankHeadline(R){
+function tankHeadline(R){ let s=tankHeadline0(R); if(SAFE().ed&&R.nF){ const w=R.kcalPct>=0.7; s=s.replace(/Fuel (\d+)%/, w?'Fuel: enough':'Fuel: low').replace(/Carburant à (\d+)\u00a0?%/, w?'Carburant\u00a0: assez':'Carburant\u00a0: bas').replace(/ \((\d+)\u00a0?%\)/,''); } return s; }
+function tankHeadline0(R){
   if(R.week && !R.nF) return L('Nothing to average yet — log a day, or save a normal day.','Pas encore de moyenne — note une journée, ou enregistre une journée normale.');
   if(!R.nF) return S.tank.view==='normal' ? L('Tap what a normal day looks like. The bars fill as you go.','Coche à quoi ressemble une journée normale. Les barres se remplissent au fur et à mesure.') : L('Nothing logged for this day yet.','Rien de noté pour cette journée.');
   const nLow=R.low.length; const fuel=R.kcalPct>=0.85?L('full of fuel','plein de carburant'):L('short on fuel','à court de carburant');
@@ -2498,6 +2501,7 @@ function vTank(){
     h+= R.nF ? tankBars(R)+vegCard(R)+gutCard(R)+tankMid(R) : tankBars(R)+tankMid(R);
     return h+tankFoot(); }
   const map=S.tank.day; const R=buildTank({map});
+  h+=usualTop();
   h+=`<h2>${tankHeadline(R)}</h2>`;
   const ed=tankEditor(map,R);
   h+= R.nF ? tankBars(R)+vegCard(R)+gutCard(R)+tankMid(R)+ed : ed+tankBars(R)+tankMid(R);
@@ -3536,12 +3540,27 @@ function planAsks(){ if(!S.done) return []; const out=[]; let X=null; try{ X=pat
   return out; }
 /* the plan's live cards: the goal chips only while no goal is picked (the plan's "For your goals" card lists them otherwise) */
 function planLive(){ return `${myGoals().length?'':goalCard()}${wlCard()}${testCard('home')}${pathCard()}${hormCard()}${payoffCard()}`; }
+/* v1.2.56: the first session's second step. One usual day is a fair picture; half of today would be an alarm. The words are
+   what comes in low and what fills it — never "deficiency": one day of food can't show that, only blood can. */
+function lowName(r){ return P2(r.l).toLowerCase().replace(/vitamin(e)? ([a-z])/g,(m,e,x)=>'vitamin'+(e||'')+' '+x.toUpperCase()).replace(/\bb(\d{1,2})\b/g,'B$1'); }
+function usualFix(R){ const PRI=['fe','b12','mg','b1','fol','d','zn','k','c','fib']; const F=(R.fills||[]).filter(x=>x.c&&x.c[0]&&x.c[0].share>=0.3); if(!F.length) return '';
+  const f=F.slice().sort((a,b)=>((PRI.indexOf(a.r.k)+99)%99)-((PRI.indexOf(b.r.k)+99)%99))[0]; const c=f.c[0]; const pct=Math.min(100,Math.round(c.share*100)); const nm=lowName(f.r);
+  const art=/^[aeiouyhéè]/i.test(nm)?'l’':/^(vitamine|thiamine|riboflavine|niacine|b\d)/i.test(nm)?'la ':/s$/.test(nm)?'les ':'le ';
+  return L(`For ${nm}: ${P2(c.f.l).toLowerCase()} (${P2(c.f.s)}) covers ${pct}% of the gap.`,`Pour ${art}${nm} : ${P2(c.f.l).toLowerCase()} (${P2(c.f.s)}), ça couvre ${pct} % du manque.`); }
+const USUAL_WHY=()=>L('Blood work tells you what’s actually low; this tells you whether that would be a surprise.','La prise de sang dit ce qui est vraiment bas; ceci dit si ce serait une surprise.');
+function usualCard(){ if(!S.done||!tankReady()) return '';
+  if(!mapCount(S.tank.day)) return `<div class="card" data-usual data-keep><div class="eyebrow">${L('Next · about a minute','Ensuite · environ une minute')}</div><p style="margin:0 0 8px"><b>${L('What does your usual day cover?','Qu’est-ce que ta journée habituelle couvre?')}</b></p><p class="small" style="margin:0 0 10px">${L('Tick what you eat on a normal day — rough is fine. You’ll see what it covers, what comes in low, and the cheapest food that fills each gap.','Coche ce que tu manges dans une journée normale — approximatif, c’est correct. Tu verras ce que ça couvre, ce qui rentre bas, et l’aliment le moins cher qui comble chaque manque.')} ${USUAL_WHY()}</p><div class="row"><button type="button" class="btn sm" data-nday data-ndfrom="plan">${L('Tick my usual day →','Cocher ma journée habituelle →')}</button></div></div>`;
+  const R=buildTank({map:S.tank.day}); const tot=R.rows.filter(r=>!r.cap&&!r.fuel).length, nLow=R.low.length, low=R.low.slice(0,3).map(lowName).join(', ');
+  const head = nLow ? L(`Covers ${tot-nLow} of ${tot} vitamins and minerals. Comes in low: ${low}${nLow>3?'…':'.'}`,`Couvre ${tot-nLow} des ${tot} vitamines et minéraux. Rentre bas : ${low}${nLow>3?'…':'.'}`) : L(`Covers all ${tot} vitamins and minerals it tracks. That’s rare.`,`Couvre les ${tot} vitamines et minéraux suivis. C’est rare.`);
+  return `<div class="card" data-usual data-keep><div class="eyebrow">${L('Your usual day','Ta journée habituelle')}</div><p style="margin:0 0 6px"><b>${head}</b></p><p class="small" style="margin:0 0 10px">${usualFix(R)} ${USUAL_WHY()}</p><div class="row"><button type="button" class="btn sm" data-tankn>${L('See the graph →','Voir le graphique →')}</button><button type="button" class="btn ghost sm" data-nday data-ndfrom="plan">${L('Change my usual day','Changer ma journée habituelle')}</button></div></div>`; }
+function usualTop(){ if(S.tank.from!=='plan'||S.tank.view!=='normal'||!mapCount(S.tank.day)) return ''; const R=buildTank({map:S.tank.day}); const nLow=R.low.length, low=R.low.slice(0,3).map(lowName).join(', ');
+  return `<div class="card one"><div class="eyebrow">${L('On a day like this','Dans une journée comme ça')}</div><p class="big">${nLow?L(`${low}${nLow>3?' and more':''} come in low.`,`${low}${nLow>3?' et d’autres':''} rentre${nLow>1?'nt':''} bas.`):L('Nothing comes in low.','Rien ne rentre bas.')}</p><p class="small muted" style="margin:0 0 10px">${usualFix(R)} ${USUAL_WHY()}${R.kcalPct<0.6?' '+L('If that’s less than you usually eat, go back and add the rest — the bars only know what you ticked.','Si c’est moins que ce que tu manges d’habitude, reviens en arrière et ajoute le reste — les barres ne connaissent que ce que tu as coché.'):''}</p><div class="row"><button type="button" class="btn sm" data-go="patch">${L('Back to my plan →','Retour à mon plan →')}</button></div></div>`; }
 /* v1.2.55: the plan folds. A card shows its first lines until it's tapped; what's opened stays open. Nothing is pushed on anyone.
    The one-thing card, a running test, the day check and the buttons at the bottom stay open. */
-function foldKey(c){ for(const a of ['data-wl','data-path','data-horm','data-payoffcard']){ if(c.hasAttribute(a)) return a.slice(5)+':'+(c.getAttribute(a)||''); }
+function foldKey(c){ for(const a of ['data-wl','data-path','data-horm','data-payoffcard','data-ask']){ if(c.hasAttribute(a)) return a.slice(5)+':'+(c.getAttribute(a)||''); }
   const h=c.querySelector('h3,.eyebrow'); return 'p:'+(h?h.textContent:c.textContent).trim().toLowerCase().replace(/[^a-z0-9àâçéèêëîïôûùüÿœ]+/g,'-').slice(0,40); }
 function foldPlan(){ const open=S.fold||{}; const cards=document.querySelectorAll('#app > .card[data-wl], #app > .card[data-path], #app > .card[data-horm], #app > .card[data-payoffcard], #app > .card.patch');
-  cards.forEach(c=>{ const k=foldKey(c); if(open[k]){ c.insertAdjacentHTML('beforeend',`<button type="button" class="fdclose" aria-expanded="true">${L('Close ▴','Fermer ▴')}</button>`);
+  cards.forEach(c=>{ if(c.hasAttribute('data-keep')) return; const k=foldKey(c); if(open[k]){ c.insertAdjacentHTML('beforeend',`<button type="button" class="fdclose" aria-expanded="true">${L('Close ▴','Fermer ▴')}</button>`);
       c.querySelector('.fdclose').onclick=()=>{ S.fold=S.fold||{}; delete S.fold[k]; save(); render(true); }; return; }
     c.classList.add('fold'); c.setAttribute('role','button'); c.setAttribute('aria-expanded','false'); c.tabIndex=0;
     c.insertAdjacentHTML('beforeend',`<div class="fdbtn" aria-hidden="true">${L('Open ▾','Ouvrir ▾')}</div>`);
@@ -3606,7 +3625,7 @@ function quickFoods(){ const life=tankLife(); const fuel=(S.a&&S.a.fuel)||[]; co
     return true; }); }
 function vNday(){ const map=S.tank.day; const t=tankTotals(map).tot; const ready=tankReady(); const TG=ready?tankTargets():null;
   let h=`<div class="eyebrow">${L('Your normal day','Ta journée normale')}</div><h2>${L('What does a usual day look like?','À quoi ressemble une journée habituelle?')}</h2><p class="small" style="margin:-4px 0 10px">${L('Rough is fine. Tap what you have on most days — drinks and pills too; tap again for a second one. Until you log real meals, the gauge uses this.','Approximatif, c’est correct. Appuie sur ce que tu prends la plupart des jours — boissons et pilules aussi; appuie encore pour une deuxième. Tant que tu ne notes pas de vrais repas, la jauge utilise ça.')}</p>`;
-  h+=`<div class="card"><div class="gtabs" style="margin:0">${quickFoods().map(f=>{ const c=map[f.id]||0; return `<button type="button" data-food="${f.id}" aria-pressed="${c>0}">${esc(P2(f.l))}${c?' ×'+fmt(c,1):''}</button>`; }).join('')}</div>${TG&&mapCount(map)?`<p class="small" style="margin:10px 0 0"><b>${L(`Fuel ${Math.round((t.kcal||0)/TG.kcal*100)}% · protein ${fmt(t.prot||0,0)} of ${TG.prot} g`,`Carburant ${Math.round((t.kcal||0)/TG.kcal*100)} % · protéines ${fmt(t.prot||0,0)} sur ${TG.prot} g`)}</b></p>`:''}</div>`;
+  h+=`<div class="card"><div class="gtabs" style="margin:0">${quickFoods().map(f=>{ const c=map[f.id]||0; return `<button type="button" data-food="${f.id}" aria-pressed="${c>0}">${esc(P2(f.l))}${c?' ×'+fmt(c,1):''}</button>`; }).join('')}</div>${TG&&mapCount(map)?`<p class="small" style="margin:10px 0 0"><b>${(()=>{ const fp=Math.round((t.kcal||0)/TG.kcal*100); const fs=SAFE().ed?(fp>=70?L('Fuel: enough','Carburant : assez'):L('Fuel: low','Carburant : bas')):L(`Fuel ${fp}%`,`Carburant ${fp} %`); return `${fs} · ${L(`protein ${fmt(t.prot||0,0)} of ${TG.prot} g`,`protéines ${fmt(t.prot||0,0)} sur ${TG.prot} g`)}`; })()}</b></p>`:''}</div>`;
   h+=`<details class="more" id="ndMore"${ndMore?' open':''}><summary>${L('More foods','Plus d’aliments')}</summary><div class="card">${foodPicker(map)}</div></details>`;
   return h; }
 /* ---------- the mirror: their own day back to them, before any advice ---------- */
@@ -3675,8 +3694,9 @@ function bind128(){ const $=id=>document.getElementById(id);
     const n=d.ks.length, at=d.at; symBack(); const ok=save(); render(); if(ok&&n) toast(L(`Saved${at?' · '+at:''}`,`Noté${at?' · '+at:''}`)); };
   if($('symDel')) $('symDel').onclick=function(){ if(!this.dataset.sure){ this.dataset.sure='1'; this.textContent=L('Tap again to delete','Appuie encore pour supprimer'); return; } const d=S.sym; if(d&&d.edit) S.tank.ev=evs().filter(x=>x.id!==d.edit); symBack(); save(); render(); toast(L('Deleted','Supprimé')); };
   document.querySelectorAll('[data-dayci]').forEach(b=>{ b.onclick=()=>{ S.daySel=b.dataset.dayci; S.mode='day'; rEdit=null; save(); render(); const c=document.getElementById('checkin'); if(c){ try{ c.scrollIntoView({block:'start'}); }catch(e){} } }; });
-  document.querySelectorAll('[data-nday]').forEach(b=>{ b.onclick=()=>{ S.mode='nday'; foodQ=''; save(); render(); }; });
-  if($('ndayDone')) $('ndayDone').onclick=()=>{ S.mode='home'; foodQ=''; const ok=save(); render(); if(ok&&mapCount(S.tank.day)) toast(L('Saved as your normal day','Enregistré comme ta journée normale')); };
+  document.querySelectorAll('[data-nday]').forEach(b=>{ b.onclick=()=>{ S.mode='nday'; S.ndFrom=b.dataset.ndfrom||null; foodQ=''; save(); render(); }; });
+  document.querySelectorAll('[data-tankn]').forEach(b=>{ b.onclick=()=>{ S.mode='tank'; S.tank.view='normal'; S.tank.from='plan'; tankPrefill(); S.tstep=tqList().length+1; save(); render(); }; });
+  if($('ndayDone')) $('ndayDone').onclick=()=>{ if(S.ndFrom==='plan'&&mapCount(S.tank.day)){ S.mode='tank'; S.tank.view='normal'; S.tank.from='plan'; S.tstep=tqList().length+1; } else S.mode='home'; delete S.ndFrom; foodQ=''; const ok=save(); render(); if(ok&&mapCount(S.tank.day)) toast(L('Saved as your normal day','Enregistré comme ta journée normale')); };
   document.querySelectorAll('[data-payoffok]').forEach(b=>{ b.onclick=()=>{ S.payoffOk=true; save(); render(true); }; });
 }
 /* ===================== v1.2.29: open on home; a food search that clears and stays put ===================== */
@@ -4107,9 +4127,12 @@ function vPatch(){
   h+=mirrorHTML();
   h+=dayCheck(P,'patch');
   { const o=oneThing(P); h+=`<div class="card one"><div class="eyebrow">${L('If you do one thing this week','Si tu fais une seule chose cette semaine')}</div><p class="big">${o.t}</p><p class="small muted" style="margin:0">${o.w} ${L('The rest is below, for when you come back.','Le reste est plus bas, pour quand tu reviendras.')}</p></div>`; }
-  if(!started) h+=live;
+  /* v1.2.56: the doctor box is the one thing on this page that works after the app is deleted, so in the first session it comes
+     right after the one thing, open; then the usual-day step; the live cards (folded) after. Once the week has started, the live
+     cards are already at the top and the box folds like the rest. */
   /* v1.2.22: plain words first — what the test checks — then the names the lab uses; the box comes straight after */
-  h+=`<div class="card patch"><h3><span class="tag ink">${L('What to ask for','À demander')}</span></h3><p class="lead"><b>${P.plain.join(' · ')}</b></p><p class="small" style="margin:0 0 10px">${L('Lab names:','Noms au labo :')} ${P.number.join(' · ')}${SAFE().snore?'':L(' — one blood draw.',' — une seule prise de sang.')}</p>${crcCard()}<p class="small" style="margin:0 0 10px"><button type="button" class="btn ghost sm" data-labs>${L('Got the results? Add them →','Tu as les résultats? Entre-les →')}</button></p>${(()=>{const h=handoverText(); return `<div class="hand"><div class="eyebrow">${L('Show this to your doctor or pharmacist','Montre ça à ton médecin ou à ton pharmacien')}</div><p class="small" style="margin:0 0 6px">${L('Ask if they can order this bloodwork for you. In Alberta many pharmacists can. In Quebec without a family doctor: 811, option 3. Anywhere, a doctor, nurse practitioner or walk-in clinic can.','Demande-lui s’il peut te prescrire ces analyses. En Alberta, bien des pharmaciens le peuvent. Au Québec, sans médecin de famille : 811, option 3. Partout, un médecin, une infirmière praticienne (IPS) ou une clinique sans rendez-vous le peut.')}</p><div><b>${L('Requesting bloodwork for:','Analyses sanguines demandées :')}</b> ${esc(h.labs.join(', '))}</div>${h.other.length?`<div><b>${L('Also asking for:','Aussi demandé :')}</b> ${esc(h.other.join(', '))}</div>`:''}<div class="row" style="margin-top:10px"><button class="btn sm" id="showHand">${L('Show it big','Afficher en grand')}</button><button class="btn ghost sm" data-copy="ho">${L('Copy this box','Copier cet encadré')}</button></div><p class="small muted" style="margin:8px 0 0">${L('The big view and the copy add your symptoms and medications.','La vue en grand et la copie ajoutent tes symptômes et tes médicaments.')}</p><textarea class="out hidden" id="ho" readonly>${esc(handoverPlain())}</textarea></div>`;})()}</div>`;
+  const askBox=`<div class="card patch" data-ask${started?'':' data-keep'}><h3><span class="tag ink">${L('What to ask for','À demander')}</span></h3><p class="lead"><b>${P.plain.join(' · ')}</b></p><p class="small" style="margin:0 0 10px">${L('Lab names:','Noms au labo :')} ${P.number.join(' · ')}${SAFE().snore?'':L(' — one blood draw.',' — une seule prise de sang.')}</p>${crcCard()}<p class="small" style="margin:0 0 10px"><button type="button" class="btn ghost sm" data-labs>${L('Got the results? Add them →','Tu as les résultats? Entre-les →')}</button></p>${(()=>{const h=handoverText(); return `<div class="hand"><div class="eyebrow">${L('Show this to your doctor or pharmacist','Montre ça à ton médecin ou à ton pharmacien')}</div><p class="small" style="margin:0 0 6px">${L('Ask if they can order this bloodwork for you. In Alberta many pharmacists can. In Quebec without a family doctor: 811, option 3. Anywhere, a doctor, nurse practitioner or walk-in clinic can.','Demande-lui s’il peut te prescrire ces analyses. En Alberta, bien des pharmaciens le peuvent. Au Québec, sans médecin de famille : 811, option 3. Partout, un médecin, une infirmière praticienne (IPS) ou une clinique sans rendez-vous le peut.')}</p><div><b>${L('Requesting bloodwork for:','Analyses sanguines demandées :')}</b> ${esc(h.labs.join(', '))}</div>${h.other.length?`<div><b>${L('Also asking for:','Aussi demandé :')}</b> ${esc(h.other.join(', '))}</div>`:''}<div class="row" style="margin-top:10px"><button class="btn sm" id="showHand">${L('Show it big','Afficher en grand')}</button><button class="btn ghost sm" data-copy="ho">${L('Copy this box','Copier cet encadré')}</button></div><p class="small muted" style="margin:8px 0 0">${L('The big view and the copy add your symptoms and medications.','La vue en grand et la copie ajoutent tes symptômes et tes médicaments.')}</p><textarea class="out hidden" id="ho" readonly>${esc(handoverPlain())}</textarea></div>`;})()}</div>`;
+  h+=askBox; if(!started){ h+=usualCard(); h+=live; }
   h+=weekCard(P);
   h+=goalsPlanCard();
   h+=notesCard(P);
@@ -4175,7 +4198,7 @@ function bind(){
   const goPat=()=>{ S.mode='pat'; save(); render(); };
   const goTank=()=>{ S.mode='tank'; tankPrefill(); const l=tqList(); if(tankReady()) S.tstep=l.length+1; else { const i=l.findIndex(q=>q.multi?!(Array.isArray(S.tank.p[q.id])&&S.tank.p[q.id].length):S.tank.p[q.id]==null); S.tstep=i<0?l.length+1:i+1; } save(); render(); };
   document.querySelectorAll('[data-door]').forEach(b=>{ b.onclick=()=>{ if(needAck()) return; ({patch:goPatch,crash:goCrash,ai:goAI,tank:goTank})[b.dataset.door](); }; });
-  document.querySelectorAll('[data-go]').forEach(b=>{ b.onclick=()=>({patch:goPatch,redo:goRedo,crash:goCrash,ai:goAI,tank:goTank,pat:goPat,answers:()=>{ S.mode='patch'; S.step=1; S.redo=false; save(); render(); },tsetup:()=>{ S.mode='tank'; S.tstep=1; save(); render(); }})[b.dataset.go](); });
+  document.querySelectorAll('[data-go]').forEach(b=>{ b.onclick=()=>({patch:()=>{ delete S.tank.from; goPatch(); },redo:goRedo,crash:goCrash,ai:goAI,tank:goTank,pat:goPat,answers:()=>{ S.mode='patch'; S.step=1; S.redo=false; save(); render(); },tsetup:()=>{ S.mode='tank'; S.tstep=1; save(); render(); }})[b.dataset.go](); });
   /* v1.2.26: tests and hints */
   document.querySelectorAll('[data-tstart]').forEach(b=>{ b.onclick=()=>openTestSheet(b.dataset.tstart,b.dataset.tout,b); });
   document.querySelectorAll('[data-tslip]').forEach(b=>{ b.onclick=()=>{ const t=activeTest(); if(!t) return; const k=b.dataset.tslip; const s=new Set(t.slips||[]); if(s.has(k)) s.delete(k); else s.add(k); t.slips=[...s]; refocus=`[data-tslip="${k}"]`; save(); render(true); }; });
@@ -4223,10 +4246,10 @@ function bind(){
     else if(v==='cq'){ if(S.cstep<=1) S.mode='home'; else S.cstep--; }
     else if(v==='crashres'){ S.cstep=cqList().length; }
     else if(v==='tq'){ if(S.tstep<=1) S.mode='home'; else S.tstep--; }
-    else if(v==='tank'){ S.mode='home'; }
+    else if(v==='tank'){ if(S.tank.from==='plan'){ S.mode='patch'; S.step=QL().length+1; delete S.tank.from; } else S.mode='home'; }
     else if(v==='sym'){ const d=S.sym; const back=S.symFrom==='day'?'day':'home'; if(back==='day'&&d) S.daySel=d.day; S.mode=back; delete S.sym; }
     else if(v==='labs'){ S.mode=S.labsFrom==='pat'?'pat':S.labsFrom==='patch'?'patch':'home'; delete S.labEdit; }
-    else if(v==='nday'){ S.mode='home'; foodQ=''; }
+    else if(v==='nday'){ if(S.ndFrom==='plan'){ S.mode='patch'; S.step=QL().length+1; } else S.mode='home'; delete S.ndFrom; foodQ=''; }
     else if(v==='meal'){ const m=curMeal(); dropEmptyMeal(); const back=S.mealFrom==='day'?'day':'home'; if(back==='day'&&m) S.daySel=m.day; S.mode=back; delete S.meal; foodQ=''; }
     else { S.mode='home'; }
     save(); render(); };
