@@ -1,4 +1,29 @@
 <!DOCTYPE html>
+<!--
+    The Patch / La Patch — a bilingual (EN/FR) web app that reads how you sleep, eat and get
+    through your day, and patches what's running low.
+    Copyright (C) 2026  Tobie David
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+    SPDX-License-Identifier: AGPL-3.0-or-later
+    Source code: https://github.com/tobiedavid/v3ktor.org
+
+    Food values: Canadian Nutrient File, Health Canada, 2015. Contains information licensed
+    under the Open Government Licence – Canada (https://open.canada.ca/en/open-government-licence-canada).
+    Blanks filled from USDA SR28 (FoodData Central, SR Legacy), which is in the public domain.
+-->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -418,13 +443,14 @@ const VER='1.2.49'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
 /* v1.2.44 (7 Nov 2026): in French the clean start is "les trois semaines sans les suspects habituels" (Argon: "Départ…" read translated). */
 /* v1.2.45 (7 Nov 2026): "Something was different" sets the day aside — no patterns, tests, days back or path; drinks and slips still count.
    For women the label adds "period" (Bernstein 2014: 73% of 156 healthy women had gut symptoms before or during their period). */
-/* v1.2.46 (7 Nov 2026): from Angèle, Samuel and Tina's runs — the weight plan knows about stimulants and the road, the week card
+/* v1.2.46 (7 Nov 2026): from three simulated people's runs — the weight plan knows about stimulants and the road, the week card
    follows the clean start, and the path's "no suspect" card names what History already shows. */
 /* v1.2.47 (7 Nov 2026): the ADHD pill in the check-in. On a pill day a crash isn't held against a food; when crashes sit on
    pill days, the path's first step is the prescriber, not a food test. */
 /* v1.2.48 (7 Nov 2026): three tabs — Report, The plan, History. Report is the day; the plan is the path, the weight plan and
    the one-week patch. Report points at the plan when the plan is waiting on you. */
-/* v1.2.49 (7 Nov 2026): fibre as a suspect for loose stools, with a two-week plain-food test; colon cancer in the family. */
+/* v1.2.49 (7 Nov 2026): fibre as a suspect for loose stools, with a two-week plain-food test; colon cancer in the family;
+   open source under the GNU AGPL-3.0 or later (the notice at the top, and in About). */
 if(!S.lang){ S.lang = (navigator.language||'en').toLowerCase().startsWith('fr') ? 'fr' : 'en'; }
 /* v0.7: three doors. Older saves have no mode — someone mid-questions lands back on their question, everyone else on the chooser. */
 if(!S.mode){ S.mode = S.step>0 ? 'patch' : 'home'; }
@@ -2524,6 +2550,8 @@ function openAbout(){ showSheet(`<div class="handle"></div><h3 id="sheetTitle">$
   <p class="small">${L('Education, not medical, pharmacist or dietitian advice. It starts from how you live now, and you decide what to do with it.','De l’éducation, pas un avis médical, pharmaceutique ou diététique. Ça part de ta vie telle qu’elle est, et c’est toi qui décides quoi en faire.')}</p>
   <p class="small">${L('Provided as-is, without warranty of any kind. Your answers stay in this browser’s storage until you share them or erase them — that storage isn’t encrypted, so anyone who can unlock this phone can read it. Meals, symptoms and crash reports are kept for a year; a backup saves what’s there. Nothing here replaces a clinician who can examine you.','Fourni tel quel, sans garantie d’aucune sorte. Tes réponses restent dans la mémoire de ce navigateur tant que tu ne les partages pas ou ne les effaces pas — cette mémoire n’est pas chiffrée, alors quiconque peut déverrouiller ce téléphone peut les lire. Les repas, les symptômes et les rapports de crash sont gardés un an; une sauvegarde garde ce qui est là. Rien ici ne remplace un clinicien qui peut t’examiner.')}</p>
   <p class="small">${L('Any underlined word can be tapped to see what it means, how sure we are, and the sources.','N’importe quel mot souligné peut être touché pour voir ce que ça veut dire, à quel point on en est sûr, et les sources.')}</p>
+  <p class="small">${L('The Patch is free software: you can use, share and change it under the <a href="https://github.com/tobiedavid/v3ktor.org/blob/main/LICENSE" target="_blank" rel="noopener">GNU Affero General Public License</a>, version 3 or later. If you share a changed version — even just by putting it online for other people — you have to share your changes under the same license. Source code: <a href="https://github.com/tobiedavid/v3ktor.org" target="_blank" rel="noopener">github.com/tobiedavid/v3ktor.org</a>','La Patch est un logiciel libre : tu peux l’utiliser, la partager et la modifier selon la <a href="https://github.com/tobiedavid/v3ktor.org/blob/main/LICENSE" target="_blank" rel="noopener">licence publique générale GNU Affero</a>, version 3 ou plus récente. Si tu partages une version modifiée, même en la mettant seulement en ligne pour d’autres, tu dois partager tes changements sous la même licence. Code source : <a href="https://github.com/tobiedavid/v3ktor.org" target="_blank" rel="noopener">github.com/tobiedavid/v3ktor.org</a>')}</p>
+  <p class="small">${L('Food values: Canadian Nutrient File, Health Canada, 2015 — contains information licensed under the <a href="https://open.canada.ca/en/open-government-licence-canada" target="_blank" rel="noopener">Open Government Licence – Canada</a>. Blanks are filled from the USDA’s SR28, which is in the public domain.','Valeurs des aliments : Fichier canadien sur les éléments nutritifs, Santé Canada, 2015 — contient de l’information visée par la <a href="https://ouvert.canada.ca/fr/licence-du-gouvernement-ouvert-canada" target="_blank" rel="noopener">Licence du gouvernement ouvert – Canada</a>. Les trous sont comblés avec la SR28 de l’USDA, qui est du domaine public.')}</p>
   <p class="small muted">v${VER} · ${L('sources checked','sources vérifiées le')} ${P2(CHECKED)} · ${L('pharmacist review: not yet','révision par un pharmacien : pas encore')}</p><p style="margin:10px 0 0"><button type="button" class="btn ghost sm" id="aboutTobie">${L('Tell Tobie','Dis-le à Tobie')}</button></p>`, null); const at=document.getElementById('aboutTobie'); if(at) at.onclick=e=>openTobie(e.currentTarget); }
 function vStart(){
   const done=!!S.done || S.step>QL().length;
