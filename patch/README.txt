@@ -1,4 +1,4 @@
-THE PATCH — website folder (app v1.2.51)
+THE PATCH — website folder (app v1.2.52)
 
 WHERE IT GOES
 Upload this whole "patch" folder to the top of your v3ktor.org site, so the addresses are:
@@ -34,3 +34,6 @@ The Patch is free software under the GNU Affero General Public License, version 
 (the LICENSE file at the top of the repository). Copying and changing it is fine: keep the LICENSE
 file and the notice at the top of app/index.html. If you put a changed copy online for other
 people, share your changes under the same license. Source: https://github.com/tobiedavid/v3ktor.org
+Two extra terms (section 7 of the license): every copy keeps the line "Made by Tobie and Claude.
+Free version at v3ktor.org/patch." (or the French one) in its About screen, and a changed version
+can't be presented as the original. The full wording is in the notice at the top of app/index.html.

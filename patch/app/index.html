@@ -20,6 +20,17 @@
     SPDX-License-Identifier: AGPL-3.0-or-later
     Source code: https://github.com/tobiedavid/v3ktor.org
 
+    Additional terms under section 7 of the GNU AGPL, for this file and every
+    copy or changed version of it:
+      (b) Keep this attribution, word for word, in the About screen (the
+          Appropriate Legal Notices) of every copy and changed version, in
+          English, French or both:
+            "Made by Tobie and Claude. Free version at v3ktor.org/patch."
+            "Faite par Tobie et Claude. Version gratuite sur v3ktor.org/patch."
+      (c) Don't present a changed version as the original The Patch / La Patch.
+    In plain words: you can sell a copy, but the app has to say where the free
+    version is.
+
     Food values: Canadian Nutrient File, Health Canada, 2015. Contains information licensed
     under the Open Government Licence – Canada (https://open.canada.ca/en/open-government-licence-canada).
     Blanks filled from USDA SR28 (FoodData Central, SR Legacy), which is in the public domain.
@@ -352,7 +363,7 @@ p.goalfor{font-size:.85rem}
 let S = {a:{}, step:0, started:null, checkins:[], lang:null, mode:null, c:{}, cstep:0, crashes:[], intent:null, tank:null, tstep:0};
 const KEY='thepatch.v1';
 try{ const s=localStorage.getItem(KEY)||localStorage.getItem('patch'); if(s) S=Object.assign(S, JSON.parse(s)); if(!localStorage.getItem(KEY)&&s) localStorage.setItem(KEY,s); if(localStorage.getItem('patch')) localStorage.removeItem('patch'); }catch(e){}
-const VER='1.2.51'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
+const VER='1.2.52'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
 /* v1.2.21 (5 Nov 2026): prenatal / folic-acid and pregnancy-iron lines aligned with Health Canada; Quebec route for bloodwork; hard-stool branch;
    pattern messages match the 5-a-side rule; iPhone storage note + persist(); protein note by life stage; French fixes; "about $8" in English. */
 /* v1.2.22 (6 Nov 2026): one-screen result (plain-words test card, three-line week, one notes card with the crisis line kept open); glossary words underlined once per screen;
@@ -452,6 +463,8 @@ const VER='1.2.51'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
 /* v1.2.49 (7 Nov 2026): fibre as a suspect for loose stools, with a two-week plain-food test; colon cancer in the family. */
 /* v1.2.50 (7 Nov 2026): open source under the GNU AGPL-3.0 or later — the notice at the top of the file, and in About. */
 /* v1.2.51 (7 Nov 2026): the install file's screenshots exist again; on Samsung's browser the install pill points to Chrome. */
+/* v1.2.52 (7 Nov 2026): About shows the copyright and who made it, with where the free version is; the notice at the top adds two terms
+   under section 7 of the AGPL: keep that line in every copy, and don't pass a changed version off as the original. */
 if(!S.lang){ S.lang = (navigator.language||'en').toLowerCase().startsWith('fr') ? 'fr' : 'en'; }
 /* v0.7: three doors. Older saves have no mode — someone mid-questions lands back on their question, everyone else on the chooser. */
 if(!S.mode){ S.mode = S.step>0 ? 'patch' : 'home'; }
@@ -2548,6 +2561,7 @@ function vHomeBack(o){
   return `${tabsHTML('home')}${alarmCard()}${S.done?weekLine():startCard()}${testCard('home')}${thinCard()}${fuelCard()}${mainBtns()}${todayCard()}${monthCard()}${S.started?dayCheck(buildPatch(),'home'):''}${hintCard()}${iosNote()}
   <p class="small muted" style="margin-top:16px"><b>${L('Not a doctor.','Pas un médecin.')}</b> ${L('Chest pain, fainting or black, tar-like poop: 911. Thinking about ending your life: call or text 9-8-8 (988 in the US).','Douleur à la poitrine, évanouissement ou selles noires comme du goudron : 911. Tu penses à mettre fin à tes jours : appelle ou texte le 9-8-8 (988 aux É.-U.).')} <button type="button" class="btn ghost sm" id="aboutBtn" style="margin-top:6px">${L('About & privacy','À propos et confidentialité')}</button></p>`; }
 function openAbout(){ showSheet(`<div class="handle"></div><h3 id="sheetTitle">${L('About & privacy','À propos et confidentialité')}</h3>${tagline()}
+  <p class="small">${L('<b>Made by Tobie and Claude.</b> Free version at <a href="https://v3ktor.org/patch/" target="_blank" rel="noopener">v3ktor.org/patch</a>. © 2026 Tobie David.','<b>Faite par Tobie et Claude.</b> Version gratuite sur <a href="https://v3ktor.org/patch/" target="_blank" rel="noopener">v3ktor.org/patch</a>. © 2026 Tobie David.')}</p>
   <p class="small">${L('Education, not medical, pharmacist or dietitian advice. It starts from how you live now, and you decide what to do with it.','De l’éducation, pas un avis médical, pharmaceutique ou diététique. Ça part de ta vie telle qu’elle est, et c’est toi qui décides quoi en faire.')}</p>
   <p class="small">${L('Provided as-is, without warranty of any kind. Your answers stay in this browser’s storage until you share them or erase them — that storage isn’t encrypted, so anyone who can unlock this phone can read it. Meals, symptoms and crash reports are kept for a year; a backup saves what’s there. Nothing here replaces a clinician who can examine you.','Fourni tel quel, sans garantie d’aucune sorte. Tes réponses restent dans la mémoire de ce navigateur tant que tu ne les partages pas ou ne les effaces pas — cette mémoire n’est pas chiffrée, alors quiconque peut déverrouiller ce téléphone peut les lire. Les repas, les symptômes et les rapports de crash sont gardés un an; une sauvegarde garde ce qui est là. Rien ici ne remplace un clinicien qui peut t’examiner.')}</p>
   <p class="small">${L('Any underlined word can be tapped to see what it means, how sure we are, and the sources.','N’importe quel mot souligné peut être touché pour voir ce que ça veut dire, à quel point on en est sûr, et les sources.')}</p>
