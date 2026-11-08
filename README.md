@@ -35,6 +35,12 @@ The Patch is free software. You can use, study, share and change it under the [G
 
 In plain words: copies and changed versions stay under the same license, with their source code available. That includes a changed version you only run online for other people — that's what the "Affero" part adds.
 
+### Archived and timestamped
+- **Software, v1.2.50:** https://doi.org/10.5281/zenodo.24046421
+- **Method paper, v1.0:** https://doi.org/10.5281/zenodo.24046691 (also in `docs/`)
+
+Both are timestamped on Bitcoin with OpenTimestamps; see [PROVENANCE.md](PROVENANCE.md). To cite The Patch, use GitHub's "Cite this repository" button (it reads `CITATION.cff`).
+
 ### Data and sources
 - **Food values:** Canadian Nutrient File, Health Canada, 2015. Contains information licensed under the [Open Government Licence – Canada](https://open.canada.ca/en/open-government-licence-canada). That data stays under its own licence.
 - **Missing values** are filled from USDA SR28 (FoodData Central, SR Legacy), which is in the public domain.
@@ -57,5 +63,9 @@ La Patch est une app web bilingue, gratuite et privée. Trois minutes de questio
 **Licence.** C’est un logiciel libre, sous la [licence publique générale GNU Affero](LICENSE), version 3 ou plus récente.
 - Tu peux l’utiliser, l’étudier, la partager et la modifier.
 - Une version modifiée reste sous la même licence, avec son code source. C’est vrai même si tu la mets seulement en ligne pour d’autres.
+
+**Archive.** Le logiciel (v1.2.50) et l’article sur la méthode (v1.0) sont archivés sur Zenodo et horodatés sur Bitcoin avec OpenTimestamps. Voir [PROVENANCE.md](PROVENANCE.md).
+- Logiciel : https://doi.org/10.5281/zenodo.24046421
+- Article : https://doi.org/10.5281/zenodo.24046691
 
 **Données.** Les valeurs des aliments viennent du Fichier canadien sur les éléments nutritifs (Santé Canada, 2015). Cette information est visée par la [Licence du gouvernement ouvert – Canada](https://ouvert.canada.ca/fr/licence-du-gouvernement-ouvert-canada).

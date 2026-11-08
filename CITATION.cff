@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "If you use The Patch, please cite the archived release below."
+title: "The Patch / La Patch"
+version: "1.2.50"
+doi: 10.5281/zenodo.24046421
+date-released: 2026-11-08
+license: AGPL-3.0-or-later
+repository-code: "https://github.com/tobiedavid/v3ktor.org"
+url: "https://v3ktor.org/patch/"
+authors:
+  - family-names: David
+    given-names: Tobie
+    orcid: "https://orcid.org/0009-0006-3116-3517"
+keywords:
+  - n-of-1
+  - self-experiment
+  - fatigue
+  - food diary
+  - nutrition
+  - bilingual
+  - on-device
+references:
+  - type: report
+    title: "The Patch · La Patch — An on-device, bilingual, n-of-1 method for everyday fatigue, crashes and gut symptoms: method, design rationale and safety rules (v1.0)"
+    doi: 10.5281/zenodo.24046691
+    year: 2026
+    authors:
+      - family-names: David
+        given-names: Tobie
+        orcid: "https://orcid.org/0009-0006-3116-3517"
