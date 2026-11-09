@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<!--
+    Sollum — a bilingual (EN/FR) web app that asks you to pick between pairs of words,
+    and shows how your priorities move with sleep, caffeine, sugar, alcohol and the rest of the day.
+    Copyright (C) 2026  Tobie David
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+    SPDX-License-Identifier: AGPL-3.0-or-later
+    Source code: https://github.com/tobiedavid/v3ktor.org
+
+    Additional terms under section 7 of the GNU AGPL, for this file and every
+    copy or changed version of it:
+      (b) Keep this attribution, word for word, in the About screen (the
+          Appropriate Legal Notices) of every copy and changed version, in
+          English, French or both:
+            "Made by Tobie and Claude. Free version at v3ktor.org/sollum."
+            "Fait par Tobie et Claude. Version gratuite sur v3ktor.org/sollum."
+      (c) Don't present a changed version as the original Sollum.
+    In plain words: you can sell a copy, but the app has to say where the free
+    version is.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f7f4ee">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Sollum</title>
+<meta name="description" content="Sollum: pick between pairs of words and see how your priorities move with sleep, caffeine, sugar and alcohol. Free, private, bilingual.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>
+:root{--bg:#f7f4ee;--card:#fff;--ink:#1c1b19;--mute:#6b665d;--line:#e6e0d4;--acc:#c8481f;--teal:#0f6b6b;--teal-soft:#e3f0ef;--warn:#b3261e;--warn-soft:#fbe9e7;--chip:#f1ede4;--ok:#0f6b6b;--r:14px;--shadow:0 1px 2px rgba(0,0,0,.05),0 6px 20px -10px rgba(0,0,0,.15)}
+@media (prefers-color-scheme:dark){:root{--bg:#15161a;--card:#1e2026;--ink:#ececea;--mute:#a19d95;--line:#2d3038;--acc:#e3633a;--teal:#5fb3b3;--teal-soft:#1c2c2c;--warn:#ff7b6e;--warn-soft:#3a1f1c;--chip:#2a2d35;--ok:#5fb3b3;--shadow:0 1px 2px rgba(0,0,0,.4),0 6px 20px -10px rgba(0,0,0,.6)}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:17px;line-height:1.5;-webkit-text-size-adjust:100%}
+#app{max-width:600px;margin:0 auto;padding:0 18px calc(24px + env(safe-area-inset-bottom));min-height:100vh;display:flex;flex-direction:column}
+h1,h2,h3{font-family:ui-serif,Georgia,'Times New Roman',serif;line-height:1.15;margin:0 0 .4em}
+h1{font-size:2.6rem;font-weight:800;margin:26px 0 0;letter-spacing:-.01em}
+h1 .b{color:var(--acc)}
+h2{font-size:1.5rem;font-weight:800;margin:18px 0 8px}
+h3{font-size:1.1rem;font-weight:700;margin:0 0 6px}
+.gloss{color:var(--mute);font-style:italic;margin:0 0 4px}
+.tagline{font-family:ui-serif,Georgia,'Times New Roman',serif;font-size:1.25rem;line-height:1.35;margin:10px 0 18px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:var(--r);padding:15px 20px;font:inherit;font-weight:700;font-size:1.05rem;background:var(--acc);color:#fff;margin:10px 0;cursor:pointer;text-align:center;text-decoration:none;min-height:48px}
+.btn.sec{background:var(--card);color:var(--ink);border:1px solid var(--line);box-shadow:var(--shadow)}
+.btn.dark{background:var(--ink);color:var(--bg)}
+.btn.ghost{background:transparent;color:var(--mute);padding:10px;font-weight:600;min-height:44px}
+.btn.danger{background:var(--card);color:var(--warn);border:1px solid var(--line)}
+.btn.sm{padding:9px 14px;font-size:.92rem;border-radius:11px;width:auto;display:inline-flex;margin:6px 8px 0 0;min-height:44px}
+.btn:disabled{opacity:.4;cursor:default}
+.row{display:flex;gap:10px}.row .btn{flex:1}
+.top{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;gap:6px;background:var(--bg);border-bottom:1px solid var(--line);margin:0 -18px;padding:calc(6px + env(safe-area-inset-top)) 10px 6px;color:var(--mute);font-size:.9rem;min-height:56px}
+.top button{border:0;background:transparent;color:var(--ink);font:inherit;font-weight:700;cursor:pointer;padding:8px 10px;border-radius:10px;min-height:44px;min-width:44px}
+.top .ttl{font-family:ui-serif,Georgia,'Times New Roman',serif;font-weight:800;font-size:1.1rem}
+.lang{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.top .lang button{border:0;background:transparent;color:var(--mute);font:inherit;font-size:.875rem;font-weight:700;padding:6px 14px;cursor:pointer;min-height:44px;min-width:44px;border-radius:0}
+.top .lang button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.top span{display:flex;align-items:center;gap:6px}
+.eyebrow,.sect{text-transform:uppercase;letter-spacing:.08em;font-size:.8rem;font-weight:700;color:var(--mute);margin:22px 0 8px}
+.pairq{text-align:center;color:var(--mute);margin:26px 0 12px;font-weight:600}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:1;align-content:center}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;min-height:40vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:14px 10px;font-family:ui-serif,Georgia,'Times New Roman',serif;font-weight:700;line-height:1.15;cursor:pointer;user-select:none;-webkit-user-select:none;word-break:keep-all;overflow-wrap:normal;hyphens:none;box-shadow:var(--shadow);transition:transform .06s}
+.card.s1{font-size:30px}.card.s2{font-size:25px}.card.s3{font-size:21px}.card.s4{font-size:18px}
+.card:active{transform:scale(.98);border-color:var(--ink)}
+@media (orientation:landscape){.card{min-height:56vh}}
+.prog{height:5px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:12px}.prog i{display:block;height:100%;background:var(--acc);transition:width .2s}
+.box{border-radius:18px;padding:16px 18px;margin:12px 0;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow)}
+.box.warn{border-left:5px solid var(--acc)}
+.box.bad{border-color:var(--warn);background:var(--warn-soft)}
+.box.ok{border-left:5px solid var(--teal)}
+.box.soft{background:var(--teal-soft);border-color:transparent;box-shadow:none}
+.box.note{background:var(--ink);color:var(--bg);border:0}
+.box.note .small,.box.note .sub{color:var(--bg);opacity:.75}
+.box.note a{color:var(--bg)}
+.box.note .btn.sm{background:var(--acc);color:#fff}.box.note .btn.sm.sec{background:var(--bg);color:var(--ink);border:0}
+.big{font-family:ui-serif,Georgia,'Times New Roman',serif;font-size:1.25rem;line-height:1.35;margin:0}
+.sub{color:var(--mute);font-size:.92rem;margin-top:8px;line-height:1.5}
+.rank{list-style:none;padding:0;margin:6px 0}
+.rank li{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.rank li.dim{opacity:.55}
+.rank .n{color:var(--mute);font-size:.875rem;text-align:right;font-weight:700}
+.bar{position:relative;height:6px;background:var(--line);border-radius:3px;margin-top:5px;overflow:hidden}
+.bar b{position:absolute;left:0;top:0;height:100%;background:var(--teal);border-radius:3px}
+.bar s{position:absolute;top:0;height:100%;background:var(--teal);opacity:.22;text-decoration:none}
+.small{font-size:.9rem;color:var(--mute)}
+.day{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 16px;margin:8px 0;box-shadow:var(--shadow)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 4px}
+.chip{border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:9px 15px;font-size:.95rem;cursor:pointer;min-height:40px;display:inline-flex;align-items:center}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip.pre{border-style:dashed;border-color:var(--teal)}
+.chips.big{display:grid;gap:10px}
+.chips.big .chip{border-radius:14px;padding:14px 16px;font-size:1.02rem;background:var(--card);box-shadow:var(--shadow)}
+.chips.big .chip.on{background:var(--ink);color:var(--bg)}
+.q{margin:18px 0 4px}
+.q .lb{font-size:.95rem;color:var(--mute);font-weight:600}
+.foot{margin-top:auto;padding-top:22px;color:var(--mute);font-size:.82rem;text-align:center;line-height:1.5}
+textarea,input[type=text],input[type=tel],input[type=number],input[type=time],input[type=date],select{width:100%;font:inherit;font-size:16px;border:1px solid var(--line);border-radius:12px;padding:11px 12px;background:var(--card);color:var(--ink)}
+textarea{min-height:110px;line-height:1.4}
+textarea.mono{font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;min-height:120px;background:var(--bg)}
+.msg{background:var(--teal-soft);border-radius:12px;padding:10px 14px;margin:8px 0;font-size:.95rem}
+.sw{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.sw .st{font-size:.875rem;color:var(--mute);margin-top:2px}
+.tog{width:52px;height:30px;border-radius:15px;background:var(--line);border:0;position:relative;cursor:pointer;flex:none}
+.tog i{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:left .15s}
+.tog.on{background:var(--teal)}.tog.on i{left:25px}
+.tog:disabled{opacity:.4}
+.lever{display:flex;gap:6px;align-items:flex-end;margin:4px 0 10px}
+.lever .lk{flex:1;height:8px;border-radius:4px;background:var(--line)}
+.lever .lk.on{background:var(--acc)}
+.lever .lk.hot{background:var(--warn)}
+a{color:var(--teal)}
+.tel{display:inline-block;margin:6px 8px 0 0;font-weight:700}
+label.lb{display:block;font-size:.95rem;color:var(--mute);margin:12px 0 4px;font-weight:600}
+.doors{display:grid;gap:10px;margin:8px 0}
+.door{display:block;width:100%;text-align:left;border:1px solid var(--line);border-left:5px solid var(--acc);background:var(--card);color:var(--ink);border-radius:18px;padding:16px 18px;font:inherit;cursor:pointer;box-shadow:var(--shadow)}
+.door.main{padding:20px;border-left-width:7px}
+.door.teal{border-left-color:var(--teal)}.door.ink{border-left-color:var(--ink)}
+.door .dt{display:block;font-family:ui-serif,Georgia,'Times New Roman',serif;font-weight:800;font-size:1.2rem;line-height:1.15;margin:0 0 4px}
+.door.main .dt{font-size:1.45rem}
+.door .ds{display:block;font-size:.9rem;color:var(--mute)}
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .18s;z-index:40}
+.sheet-bg.on{opacity:1;pointer-events:auto}
+.sheet{overscroll-behavior:contain;position:fixed;left:0;right:0;bottom:0;max-width:640px;margin:0 auto;background:var(--card);border-radius:22px 22px 0 0;padding:18px 20px calc(24px + env(safe-area-inset-bottom));max-height:82vh;overflow:auto;transform:translateY(105%);visibility:hidden;transition:transform .22s,visibility 0s linear .22s;z-index:50;box-shadow:0 -10px 40px rgba(0,0,0,.25)}
+.sheet.on{transform:translateY(0);visibility:visible;transition:transform .22s,visibility 0s}
+.sheet .handle{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 14px}
+.sheet h3{font-size:1.25rem}
+.sheet p{margin:.4em 0 .8em}
+.sheet ul{padding-left:1.1em;margin:.3em 0 .8em}.sheet li{margin:.35em 0}
+html.locked,html.locked body{overflow:hidden}
+.menu{display:grid;gap:6px;margin-top:6px}
+.menu button{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:12px 14px;font:inherit;font-weight:600;cursor:pointer}
+.top .menuBtn{font-size:1.25rem;line-height:1}
+.top .ttl{font-family:ui-serif,Georgia,'Times New Roman',serif;font-weight:800;font-size:1.25rem;padding:6px 4px;white-space:nowrap}
+.top .ttl .b{color:var(--acc);display:inline}
+.top .sp{flex:1}
+.circle svg,.leverbox svg{display:block;width:100%;height:auto}
+.circle text,.leverbox text{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;fill:var(--ink)}
+.leverbox .beam{transition:transform .45s cubic-bezier(.3,.7,.3,1)}
+.leverbox .wt{transition:transform .45s cubic-bezier(.3,.7,.3,1)}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 4px}
+.steps .chip{font-size:.85rem;padding:7px 11px;min-height:36px}
+.caption{font-family:ui-serif,Georgia,'Times New Roman',serif;font-size:1.15rem;line-height:1.4;margin:8px 0 4px;min-height:3.2em}
+.flag{border:1px solid var(--warn);background:var(--warn-soft);border-radius:14px;padding:10px 14px;font-size:.9rem;margin:14px 0 4px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="sheet-bg" id="sheetBg"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" tabindex="-1" aria-hidden="true"></div>
+<script>
+'use strict';
+const VER='0.6.2';
+/* ---------- the pool: ten twin duels, two per level; replaced by ./words.json when the site serves one ---------- */
+let POOL_VERSION='2026-11-08b';
+let POOL=[
+ {id:'health',en:'Health',fr:'Santé',level:'body',side:'h',twin:'comfort'},
+ {id:'comfort',en:'Comfort',fr:'Le réconfort',level:'body',side:'p',twin:'health'},
+ {id:'sleep',en:'Sleep',fr:'Dormir',level:'body',side:'h',twin:'fun'},
+ {id:'fun',en:'Fun',fr:'Le plaisir',level:'body',side:'p',twin:'sleep'},
+ {id:'safety',en:'Safety',fr:'La sécurité',level:'safety',side:'h',twin:'thrill'},
+ {id:'thrill',en:'A thrill',fr:'Le frisson',level:'safety',side:'p',twin:'safety'},
+ {id:'tomorrow',en:'Tomorrow',fr:'Demain',level:'safety',side:'h',twin:'now'},
+ {id:'now',en:'Right now',fr:'Tout de suite',level:'safety',side:'p',twin:'tomorrow'},
+ {id:'family',en:'Family',fr:'La famille',level:'belong',side:'h',twin:'alone'},
+ {id:'alone',en:'Being left alone',fr:'Qu’on me laisse tranquille',level:'belong',side:'p',twin:'family'},
+ {id:'love',en:'Love',fr:'L’amour',level:'belong',side:'h',twin:'numb'},
+ {id:'numb',en:'Numb',fr:'Ne rien sentir',level:'belong',side:'p',twin:'love'},
+ {id:'honesty',en:'Honesty',fr:'L’honnêteté',level:'esteem',side:'h',twin:'secrets'},
+ {id:'secrets',en:'Secrets',fr:'Les secrets',level:'esteem',side:'p',twin:'honesty'},
+ {id:'work',en:'Work',fr:'Le travail',level:'esteem',side:'h',twin:'escape'},
+ {id:'escape',en:'Escape',fr:'Décrocher',level:'esteem',side:'p',twin:'work'},
+ {id:'enough',en:'Enough',fr:'Assez',level:'growth',side:'h',twin:'more'},
+ {id:'more',en:'More',fr:'Encore',level:'growth',side:'p',twin:'enough'},
+ {id:'purpose',en:'Purpose',fr:'Un but',level:'growth',side:'h',twin:'rush'},
+ {id:'rush',en:'Rush',fr:'Le buzz',level:'growth',side:'p',twin:'purpose'}
+];
+const LEVELS={body:['Body','Le corps'],safety:['Safety','La sécurité'],belong:['Belonging','Les liens'],esteem:['Esteem','L’estime'],growth:['Growth','Grandir']};
+const WATCH_ID='watch';
+/* ---------- goals: the watched word, two one-shot duels (round 1 only), the chip, the help line ---------- */
+const GOALS=[
+ {id:'alcohol',en:'Alcohol',fr:'L’alcool',watch:['A drink','Un verre'],chip:'al',help:'addiction',rail:true,
+  duels:[['Quiet','Le calme','Facing it','Faire face'],['Tonight','Ce soir','Tomorrow morning','Demain matin']]},
+ {id:'caffeine',en:'Caffeine and energy drinks',fr:'La caféine et les boissons énergisantes',watch:['Another coffee or can','Un café ou une canette de plus'],chip:'caf',help:'none',
+  duels:[['Sleep','Dormir','Staying awake','Rester réveillé'],['Stopping','Arrêter','Keeping going','Continuer']]},
+ {id:'gambling',en:'Gambling',fr:'Le jeu',watch:['A bet','Une mise'],chip:'wt',help:'gambling',
+  duels:[['Letting it go','Laisser aller','Getting it back','Me refaire'],['Money','L’argent','Winning','Gagner']]},
+ {id:'pills',en:'Pills',fr:'Les pilules',watch:['The pill','La pilule'],chip:'wt',help:'addiction',rail:true,
+  duels:[['Rest','Me reposer','Getting things done','En abattre'],['Steady','Stable','Sharp','Vif']]},
+ {id:'cannabis',en:'Cannabis',fr:'Le cannabis',watch:['A joint','Un joint'],chip:'wt',help:'addiction',
+  duels:[['Showing up','Être là','Zoning out','Planer']]},
+ {id:'nicotine',en:'Nicotine',fr:'La nicotine',watch:['A smoke','Une cigarette'],chip:'wt',help:'tobacco',
+  duels:[['A breath','Respirer','A break','Une pause']]},
+ {id:'sugar',en:'Sugar',fr:'Le sucre',watch:['Something sweet','Quelque chose de sucré'],chip:'fd',help:'none',
+  duels:[['Full','Rassasié','A treat','Une gâterie']]},
+ {id:'other',en:'Something else',fr:'Autre chose',watch:['It','Ça'],chip:'wt',help:'general',duels:[]}
+];
+/* help lines — checked 8 Nov 2026. Addiction lines: the Canadian Centre on Substance Use and Addiction's list (ccsa.ca), plus each
+   service's own pages for AB and QC. Gambling lines: the Responsible Gambling Council and provincial directories. Quit line: Health
+   Canada (1-866-366-3667 routes to the caller's own province). NORS: provincial 211 directories. tel: links, never dialled by the app. */
+const HELP_CHECKED='2026-11-08';
+const QUIT={n:['Quit line (Health Canada) — routes to your province','Ligne pour arrêter (Santé Canada) — vers ta province'],tel:'1-866-366-3667',h:['tobacco and vaping','tabac et vapotage']};
+const H811={n:['811','811'],tel:'811',h:['nurse and health line','ligne santé']};
+const hl=(en,fr,tel,hen,hfr)=>({n:[en,fr],tel,h:[hen||'',hfr||hen||'']});
+const PROVS=[['AB','Alberta','Alberta'],['BC','British Columbia','Colombie-Britannique'],['MB','Manitoba','Manitoba'],['NB','New Brunswick','Nouveau-Brunswick'],['NL','Newfoundland and Labrador','Terre-Neuve-et-Labrador'],['NS','Nova Scotia','Nouvelle-Écosse'],['ON','Ontario','Ontario'],['PE','Prince Edward Island','Île-du-Prince-Édouard'],['QC','Quebec','Québec'],['SK','Saskatchewan','Saskatchewan'],['NT','Northwest Territories','Territoires du Nord-Ouest'],['NU','Nunavut','Nunavut'],['YT','Yukon','Yukon'],['other','Outside Canada / not saying','Hors Canada / je préfère ne pas dire']];
+const HELP={
+ AB:{addiction:hl('Addiction Helpline (Alberta Health Services)','Ligne d’aide en dépendance (Alberta Health Services)','1-866-332-2322','24 h · alcohol, drugs, gambling, tobacco','24 h · alcool, drogues, jeu, tabac'),
+     gambling:hl('Addiction Helpline (Alberta Health Services)','Ligne d’aide en dépendance (Alberta Health Services)','1-866-332-2322','24 h · gambling too','24 h · le jeu aussi'),
+     tobacco:hl('AlbertaQuits Helpline','AlbertaQuits Helpline','1-866-710-7848','8 a.m. – 8 p.m.','8 h à 20 h'),general:H811},
+ BC:{addiction:hl('Alcohol and Drug Information and Referral Service','Alcohol and Drug Information and Referral Service','1-800-663-1441'),
+     gambling:hl('BC Problem Gambling Help Line','BC Problem Gambling Help Line','1-888-795-6111','24 h','24 h'),tobacco:QUIT,general:H811},
+ MB:{addiction:hl('Manitoba Addictions Helpline','Ligne d’aide manitobaine pour la lutte contre les dépendances','1-855-662-6605','call or text','appel ou texto'),
+     gambling:hl('Problem gambling line (Addictions Foundation of Manitoba)','Ligne pour le jeu (Addictions Foundation of Manitoba)','1-800-463-1554','24 h','24 h'),tobacco:QUIT,general:H811},
+ NB:{addiction:hl('Addiction and Mental Health Helpline (New Brunswick)','Ligne d’écoute en dépendances et santé mentale (Nouveau-Brunswick)','1-866-355-5550','24 h','24 h'),
+     gambling:hl('Gambling Information Line','Ligne d’information sur le jeu','1-800-461-1234','24 h','24 h'),tobacco:QUIT,general:H811},
+ NL:{addiction:hl('811 HealthLine — mental health and addictions','811 HealthLine — santé mentale et dépendances','811','24 h · navigator on weekdays: 1-877-999-7589','24 h · navigateur en semaine\u00a0: 1-877-999-7589'),
+     gambling:hl('Problem Gambling Help Line','Ligne d’aide pour le jeu','1-888-899-4357'),tobacco:QUIT,general:H811},
+ NS:{addiction:hl('Mental Health and Addictions Crisis Line (Nova Scotia)','Ligne de crise en santé mentale et dépendances (Nouvelle-Écosse)','1-888-429-8167','24 h','24 h'),
+     gambling:hl('Gambling Support Network','Gambling Support Network','1-888-347-8888','24 h','24 h'),tobacco:QUIT,general:H811},
+ ON:{addiction:hl('ConnexOntario','ConnexOntario','1-866-531-2600','addiction, mental health, gambling','dépendances, santé mentale, jeu'),
+     gambling:hl('ConnexOntario','ConnexOntario','1-866-531-2600','gambling too','le jeu aussi'),tobacco:QUIT,general:H811},
+ PE:{addiction:hl('Addiction Services (Health PEI)','Services en dépendance (Santé Î.-P.-É.)','1-833-553-6983'),
+     gambling:hl('Problem Gambling Help Line','Ligne d’aide pour le jeu','1-855-255-4255','24 h','24 h'),tobacco:QUIT,general:H811},
+ QC:{addiction:hl('Drogue : aide et référence','Drogue : aide et référence','1-800-265-2626','24 h · alcohol, drugs, medications','24 h · alcool, drogues, médicaments'),
+     gambling:hl('Jeu : aide et référence','Jeu : aide et référence','1-800-461-0140','24 h','24 h'),
+     tobacco:hl('J’ARRÊTE','J’ARRÊTE','1-866-527-7383','tobacco and vaping','tabac et vapotage'),
+     general:hl('Info-Social','Info-Social','811','option 2 · 24 h','option 2 · 24 h')},
+ SK:{addiction:hl('HealthLine (Ministry of Health)','HealthLine (ministère de la Santé)','811','or 1-877-800-0002','ou 1-877-800-0002'),
+     gambling:hl('Problem Gambling Helpline','Ligne d’aide pour le jeu','1-800-306-6789','24 h','24 h'),tobacco:QUIT,general:H811},
+ NT:{addiction:hl('NWT 811 — nurses, addictions recovery support','NWT 811 — infirmières, soutien au rétablissement','1-844-259-1793','24 h · or dial 811','24 h · ou compose le 811'),
+     gambling:hl('NWT Help Line','Ligne d’aide des T.N.-O.','1-800-661-0844','24 h','24 h'),tobacco:QUIT,general:hl('NWT 811','NWT 811','1-844-259-1793','24 h · or dial 811','24 h · ou compose le 811')},
+ NU:{addiction:hl('Kamatsiaqtut Help Line','Ligne d’aide Kamatsiaqtut','1-800-265-3333'),
+     gambling:hl('Kamatsiaqtut Help Line','Ligne d’aide Kamatsiaqtut','1-800-265-3333'),tobacco:QUIT,general:hl('Kamatsiaqtut Help Line','Ligne d’aide Kamatsiaqtut','1-800-265-3333')},
+ YT:{addiction:hl('Mental Wellness and Substance Use Services','Mieux-être mental et consommation de substances','1-866-456-3838'),
+     gambling:hl('Mental Wellness and Substance Use Services','Mieux-être mental et consommation de substances','1-866-456-3838','gambling too','le jeu aussi'),tobacco:QUIT,general:H811},
+ other:{addiction:{n:['Your province’s line — the Canadian Centre on Substance Use and Addiction lists them all','La ligne de ta province — le Centre canadien sur les dépendances les liste toutes'],tel:'',url:'https://ccsa.ca/en/contact-us/addictions-treatment-helplines-canada',h:['','']},
+     gambling:{n:['Your province’s gambling line — listed by the Responsible Gambling Council','La ligne de ta province pour le jeu — listée par le Responsible Gambling Council'],tel:'',url:'https://responsiblegambling.org/for-the-public/problem-gambling-help/find-a-treatment-centre/',h:['','']},
+     tobacco:QUIT,general:{n:['811 where it exists','811 là où ça existe'],tel:'811',h:['','']}}
+};
+const NORS=hl('National Overdose Response Service — call before using alone','Service national de réponse aux surdoses — appelle avant de consommer seul','1-888-688-6677','24 h · they stay on the line and call 911 if you stop answering','24 h · ils restent en ligne et appellent le 911 si tu ne réponds plus');
+/* ---------- the day's conditions: the chain, in order ---------- */
+const CHIPS=[
+ {id:'sl',ic:'🌙',en:'Sleep last night',fr:'Sommeil la nuit dernière',heavy:'s',opts:[['s','Under 6 h','Moins de 6 h'],['m','6–8 h','6–8 h'],['l','8 h or more','8 h ou plus']],days:['short-sleep days','journées de nuit courte'],link:['short night','nuit courte']},
+ {id:'caf',ic:'☕',en:'Caffeine today',fr:'Caféine aujourd’hui',heavy:'3',opts:[['0','None','Aucune'],['1','1–2','1–2'],['3','3+ or an energy drink','3+ ou une boisson énergisante']],days:['heavy-caffeine days','journées à forte caféine'],link:['3+ caffeine','caféine 3+']},
+ {id:'al',ic:'🍺',en:'Drinks today',fr:'Verres aujourd’hui',heavy:'3',opts:[['0','None','Aucun'],['1','1–2','1–2'],['3','3 or more','3 ou plus']],days:['3-drink days','journées à 3 verres ou plus'],link:['3+ drinks','3 verres ou plus']},
+ {id:'wt',ic:'👁',en:'The thing you’re watching, today',fr:'Ce que tu surveilles, aujourd’hui',heavy:'3',goalOnly:true,opts:[['0','None','Rien'],['1','Some','Un peu'],['3','A lot','Beaucoup']],days:['heavy days','grosses journées'],link:['a lot of it','beaucoup']},
+ {id:'fd',ic:'🍟',en:'Food today',fr:'Nourriture aujourd’hui',heavy:'j',opts:[['j','Junk','Malbouffe'],['u','Usual','Comme d’habitude'],['w','Whole food','Vrais aliments']],days:['junk-food days','journées de malbouffe'],link:['junk food','malbouffe']},
+ {id:'cr',ic:'⚡',en:'Crash',fr:'Crash',heavy:'y',patchOnly:true,opts:[['n','No','Non'],['y','Yes','Oui']],days:['crash days','journées de crash'],link:['crash','crash']}
+];
+const ROUNDS_DEFAULT=6, ROUNDS_MAX=12, BASE_WINDOW=15, NORMAL_MIN=3, NORMAL_SOFT=7, MOVE_MIN=3, Z_MIN=2.5, UPSET_P=0.15, UPSETS_MIN=2, SIDE_MIN=4, SIDE_SOFT=6, SD_FLOOR=0.3;
+const HES_FLOOR=1.3, HES_MIN=2, LV_K=2, LV_SD_FLOOR=1.0, LV_MIN=2, FLIP_MAX=0.1, FLIP_N=5, FOG_C=0.5, FOG_REPEATS=4, LINKS_FIRE=3, SLIPS_MIN=3, SLIPS_SOFT=5;
+const UNIVERSAL=['tomorrow|now','enough|more'], FLIP_GAP=1.5;
+/* like V3KTOR: a blank beat between pairs so a tap can't carry over, and anything under a quarter second is a reflex, not a choice */
+let PAUSE_MS=250; const REFLEX_MS=250;
+
+/* ---------- text ---------- */
+const NB=' ';
+const I18N={
+en:{
+ gloss:'whole',tagline:'See what moves your priorities — before the scale tips.',
+ start:'Test',calendar:'History',settings:'Settings',back:'Back',home:'Home',done:'Done',skip:'Skip',next:'Next',save:'Save',cancel:'Cancel',undo:'‹ Undo',
+ days:n=>`${n} day${n===1?'':'s'} so far`,firstLine:'About two minutes of taps.',morning:'Best taken before the first coffee.',
+ pickQ:'Which one matters more?',round:(r,n)=>`Round ${r} of ${n}`,
+ chipsTitle:'Today, roughly?',chipsHint:'All optional. They let Sollum tell your short nights from your other days.',
+ fromPatch:'filled in from The Patch — change it if it’s wrong',
+ yourOrder:'Your order',showOrder:'Show my order',hideOrder:'Hide my order',showAll:'Show all',showTop:'Show top 10',
+ keep:'Sharpen the middle (+2 rounds)',softMiddle:'Top and bottom are solid. The middle is still soft.',
+ hook:'Do this again on a short night, or a day you had three, and see what moves.',
+ normalSoon:k=>`${k} more day${k===1?'':'s'} and Sollum can compare today with your normal.`,
+ sameAsNormal:'Same as your normal.',normalOn:n=>`Your normal is built on ${n} day${n===1?'':'s'}.`,normalSoft:'Still soft — it firms up around 7.',
+ hes:(a,b)=>`You’re putting ${a} vs ${b} back in question tonight. It’s still time.`,
+ flip:(p,h,k,n)=>`${p} beat ${h} tonight. On your ordinary days it lost ${k} of ${n}.`,
+ flips:(list,n)=>`Tonight it went the other way where it almost never does: ${list}. On your ordinary days they lost nearly every time (${n} days).`,
+ alsoFlips:list=>`Where it almost never goes the other way: ${list}.`,
+ tipped:(lv,mv)=>`The scale tipped: ${lv} below your normal — ${mv}.`,over:(p,h)=>`${p} over ${h}`,
+ fog:(k,n)=>`Shaky hand tonight: you changed your mind on ${k} of ${n} repeated choices. The order is hard to read.`,
+ fogSoft:'Read it loosely — the hand was shaky.',
+ upBoth:(w,x,y)=>`${w} is above ${x} and ${y} today. Your normal: below both.`,upOne:(w,x)=>`${w} is above ${x} today. Your normal: below it.`,upN:(w,n)=>`${w} climbed ${n} places today.`,
+ dnBoth:(w,x,y)=>`${w} fell below ${x} and ${y} today. Your normal: above both.`,dnOne:(w,x)=>`${w} fell below ${x} today. Your normal: above it.`,dnN:(w,n)=>`${w} dropped ${n} places today.`,
+ leverT:(n,l)=>n?`Tonight you’re ${n} link${n===1?'':'s'} in: ${l}.`:'No links lit today.',
+ leverSlips:(n,k,m)=>`Your incidents happened at ${n} link${n===1?'':'s'} or more ${k} time${k===1?'':'s'} out of ${m}.`,
+ reflexN:n=>`${n} tap${n===1?'':'s'} under a quarter second set aside and asked again.`,
+ noteHead:'From you, on a good day:',call:n=>`Call ${n}`,text:n=>`Text ${n}`,
+ rail:'Slowing down is a pharmacist’s or doctor’s job — never a cold stop.',
+ contrast:(a,lab,b)=>`Your ${a} ${lab} vs your ${b} other day${b===1?'':'s'}:`,
+ climbed:(w,n)=>`${w} climbed ${n} place${n===1?'':'s'}`,dropped:(w,n)=>`${w} dropped ${n} place${n===1?'':'s'}`,
+ nothingMoved:'nothing moved more than 2 places.',hint:'A hint, not a finding — under 6 days on one side.',
+ connectTitle:'Connect what’s already on this phone?',connectLead:'Local only. Nothing is sent anywhere. Sollum reads the days The Patch already has, so the chips fill themselves.',
+ connect:'Connect',notNow:'Not now',
+ patchName:'The Patch',patchFound:n=>`${n} day${n===1?'':'s'} found on this phone`,patchNone:'not found here — open The Patch on this phone once, or paste a backup below',patchPasted:n=>`${n} day${n===1?'':'s'} from a pasted backup`,
+ v3kName:'V3KTOR',v3kSoon:'doesn’t share its days yet — coming',
+ pasteTitle:'Paste a Patch backup',pasteHint:'In The Patch: Menu ☰ → Back up my data → Copy the backup. Paste it here. Only the days are kept; the rest is dropped.',paste:'Use it',pasteBad:'That doesn’t look like a Patch backup.',pasteOk:n=>`${n} day${n===1?'':'s'} read.`,
+ calTitle:'History',noSessions:'No sessions yet.',slipMark:'incident',
+ setTitle:'Settings',language:'Language',province:'Where are you? (for the help lines)',provWhy:'So the right line shows up — every province and territory has its own.',provAB:'Alberta',provQC:'Quebec',provOther:'Elsewhere',
+ watching:'What I’m watching',changeWatch:'Change',noteSet:'My message to the future me',contactSet:'Who I call',
+ exportData:'Export my data',download:'Download file',restore:'Restore a Sollum export',copy:'Copy',
+ reset:'Erase everything',resetAgain:'Tap again to erase everything',resetDone:'Erased.',restored:'Restored.',importBad:'Could not read that file.',
+ exportHint:'Copy this, or download it, and keep it somewhere safe. Nothing is stored anywhere else.',
+ copyAI:'Copy for an AI',aiAmounts:'include amounts',copied:'Copied.',copyFail:'Couldn’t copy — select the text below and copy it yourself.',
+ privacy:'Nothing leaves your phone.',
+ menu:'Menu',close:'Close',
+ patTitle:'Your pattern',patSub:'The circle, and why more reasons don’t tip it back.',patMine:'Your last incident, the hours before',
+ patCircleHead:'The circle — an example',patCircleText:'A short night calls for caffeine. Caffeine skips the meal and wants sugar. The wired tired wants something to quiet it. Quiet wants a lift. The lift ends in a crash — and the crash steals the next night. Each one fixes the last. Yours may have other links; your incidents will show them.',
+ patLeverHead:'The lever — tap through the day',
+ patLeverText:'The pivot doesn’t move. You do: every link slides your reasons toward it, so the same Family, Tomorrow and Love weigh less. Near the pivot, piling on more reasons barely moves the beam. What moves it is getting your reasons back out — sleep, a meal, the first link not taken. That’s why Sollum watches the start of the chain, not the end. (An example, not a limit: where you tip is yours.)',
+ patAdd:'Add a reason',patReset:'Take them back',
+ patTake:'The earlier in the chain you break it, the less it costs.',howTitle:'How it works',aboutTitle:'About & privacy',improve:'Improve the app',
+ howBody:`<ul>
+<li><b>Twenty words in ten pairs.</b> Each pair has a steady side and a pull side — Tomorrow · Right now, Enough · More, Family · Being left alone. About two minutes of taps. The first round is always the ten pairs; the rest builds your full order.</li>
+<li><b>Your normal.</b> From your ordinary days (about a week of them), Sollum learns how you usually choose and how fast. A heavy day, or a day with an incident, never becomes the normal.</li>
+<li><b>Three readings, in the order they usually come:</b> the hand rocks — you take longer than usual on a pair; a pair flips — the pull side wins where it almost never does; the scale tips — two levels fall below your normal at once.</li>
+<li><b>The chain.</b> Sleep, caffeine, drinks, the thing you’re watching, food. Each heavy one is a link. The more links lit, the closer you sit to the tip — the same drink weighs more on a short night.</li>
+<li><b>When something fires</b> you see your own message from a good day, a button to call the person you chose, and your province’s line.</li>
+<li><b>Report an incident</b> afterwards: what, when, what it cost. Sollum lines up the hours before (from The Patch, if connected). From three incidents, it compares those days with the others, in your own counts.</li>
+<li>A tap under a quarter second is a reflex, not a choice: it’s asked again later. The words blink between pairs for the same reason.</li>
+</ul><p class="small">Best taken before the first coffee. It measures; it doesn’t diagnose, and it never tells you how much.</p>`,
+ aboutBody:`<p class="small"><b>Made by Tobie and Claude. Free version at v3ktor.org/sollum.</b> Part of the experiment with The Patch (body) and V3KTOR (feeling). True Color Foundation. © 2026 Tobie David.</p>
+<p class="small">Sollum is free software: you can use, share and change it under the <a href="https://github.com/tobiedavid/v3ktor.org/blob/main/LICENSE" target="_blank" rel="noopener">GNU Affero General Public License</a>, version 3 or later. If you share a changed version — even just by putting it online for other people — you have to share your changes under the same license. Source code: <a href="https://github.com/tobiedavid/v3ktor.org" target="_blank" rel="noopener">github.com/tobiedavid/v3ktor.org</a></p>
+<p class="small">Not a diagnosis, and not medical advice. It shows you a pattern in your own choices; what you do with it is yours.</p>
+<p class="small">Everything stays in this browser’s storage on this phone. Nothing is sent anywhere, except what you type in “Improve the app”, and only when you send it. That storage isn’t encrypted: anyone who can unlock the phone can read it. Erase everything in Settings.</p>
+<p class="small">The help lines come from the Canadian Centre on Substance Use and Addiction, the provinces’ own pages and Health Canada. Numbers change — the check date is on every card.</p>
+<p class="small"><b>Not a doctor.</b> Thinking about ending your life: call or text 9-8-8. Emergency: 911.</p>`,
+ fbLead:x=>`Recommendations, what bugs you, what’s confusing, what helped. It goes to <b>${x}</b>. Only what you type here is sent — your taps, your incidents and your message stay on this phone.`,
+ fbLabel:'Your message',fbSend:'Send by email',fbShare:'Share another way',fbEmpty:'Type something first.',fbCopied:x=>`Copied — paste it in an email to ${x}.`,
+ incSub:n=>n?`${n} reported · what happened, when, and the hours before`:'What happened, when, and the hours before. No judgement.',histSub:n=>`${n} day${n===1?'':'s'} · your normal, the readings, the incidents`,
+ crisis:'<b>Not a doctor.</b> Thinking about ending your life: call or text 9-8-8. Emergency: 911.',storage:'This browser’s storage isn’t encrypted: anyone who can unlock the phone can read it.',
+ about:'Part of the experiment with The Patch (body) and V3KTOR (feeling). True Color Foundation. Not a diagnosis of anything.',
+ // setup
+ q1:'Is there something you’d like to stop, or keep an eye on?',q1hint:'Several is fine. “Nothing” is a complete answer.',
+ curious:'Nothing — I’m just curious',otherWord:'What is it, in a word or two?',
+ q1b:'The word for it, in your choices',q1bHint:'It’ll be on screen a few times a session. A stand-in nobody else would recognize is fine — or leave it out.',useIt:'Use it',leaveOut:'Leave it out',
+ q2:'What would you like to say to the future you, before the wrong choice?',q2hint:'Your words. Sollum reads them back once, unedited, when the needle moves. Skipping is fine.',
+ q3:'Who would you like to call when this happens?',q3hint:'A name and a number. They stay on this phone; nothing is dialled without your tap.',name:'Name',phone:'Phone',
+ setupDone:'Set. Two minutes of taps, then you’ll see where you stand.',
+ // slips
+ slipBtn:'Report an incident',slipTitle:'Report an incident',slipWhat:'What',slipWhen:'When',slipDay:'Day',today:'Today',yesterday:'Yesterday',slipStart:'Started',slipEnd:'Ended',slipCost:'What it cost',unit:'Unit',
+ units:{money:'$',drinks:'drinks',cans:'cans',cigs:'cigarettes',hours:'hours',other:'other'},
+ slipSaved:'Reported. No judgement here — it’s a data point with a time on it.',
+ hoursBefore:'The hours before:',chainNone:'No day record from The Patch for that day.',
+ slipsCard:(n,m)=>`Your ${n} incident day${n===1?'':'s'} vs your ${m} other day${m===1?'':'s'}:`,slipsSoon:n=>`${n} of ${SLIPS_MIN} incidents reported. Sollum compares them with the other days from three.`,
+ slipsHint:'A hint, not a finding — under 5 incidents.',
+ helpHead:'Someone to talk to, any time:',helpChecked:d=>`checked ${d}`,
+ amountsOff:'Amounts are not shown here. Export shows them.'
+},
+fr:{
+ gloss:'entier',tagline:'Vois ce qui fait bouger tes priorités — avant que la balance bascule.',
+ start:'Faire le test',calendar:'Historique',settings:'Réglages',back:'Retour',home:'Accueil',done:'Terminé',skip:'Passer',next:'Suivant',save:'Enregistrer',cancel:'Annuler',undo:'‹ Annuler',
+ days:n=>`${n} journée${n>1?'s':''} jusqu’ici`,firstLine:'Environ deux minutes de touches.',morning:'À faire de préférence avant le premier café.',
+ pickQ:'Lequel compte le plus?',round:(r,n)=>`Tour ${r} sur ${n}`,
+ chipsTitle:'Aujourd’hui, en gros?',chipsHint:'Tout est facultatif. Ça permet à Sollum de distinguer tes nuits courtes de tes autres journées.',
+ fromPatch:'rempli à partir de La Patch — change-le si c’est faux',
+ yourOrder:'Ton ordre',showOrder:'Voir mon ordre',hideOrder:'Cacher mon ordre',showAll:'Tout voir',showTop:'Voir le top 10',
+ keep:'Préciser le milieu (+2 tours)',softMiddle:'Le haut et le bas sont solides. Le milieu est encore flou.',
+ hook:'Refais-le après une nuit courte, ou une journée où t’en as pris trois, et regarde ce qui bouge.',
+ normalSoon:k=>`Encore ${k} journée${k>1?'s':''} et Sollum pourra comparer aujourd’hui avec ta normale.`,
+ sameAsNormal:'Comme ta normale.',normalOn:n=>`Ta normale repose sur ${n} journée${n>1?'s':''}.`,normalSoft:'Encore floue — ça se précise vers 7.',
+ hes:(a,b)=>`Tu remets ${a} contre ${b} en question ce soir. Il est encore temps.`,
+ flip:(p,h,k,n)=>`${p} a battu ${h} ce soir. Dans tes journées ordinaires, il perdait ${k} fois sur ${n}.`,
+ flips:(list,n)=>`Ce soir, ça a basculé là où ça ne bascule presque jamais${NB}: ${list}. Dans tes journées ordinaires, ça perdait presque à tous les coups (${n} journées).`,
+ alsoFlips:list=>`Là où ça ne bascule presque jamais${NB}: ${list}.`,
+ tipped:(lv,mv)=>`La balance a basculé${NB}: ${lv} sous ta normale — ${mv}.`,over:(p,h)=>`${p} devant ${h}`,
+ fog:(k,n)=>`Main qui tremble ce soir${NB}: tu as changé d’idée sur ${k} des ${n} choix répétés. L’ordre est difficile à lire.`,
+ fogSoft:'À lire avec un grain de sel — la main tremblait.',
+ upBoth:(w,x,y)=>`${w} passe devant ${x} et ${y} aujourd’hui. Ta normale${NB}: derrière les deux.`,upOne:(w,x)=>`${w} passe devant ${x} aujourd’hui. Ta normale${NB}: derrière.`,upN:(w,n)=>`${w} a monté de ${n} places aujourd’hui.`,
+ dnBoth:(w,x,y)=>`${w} passe derrière ${x} et ${y} aujourd’hui. Ta normale${NB}: devant les deux.`,dnOne:(w,x)=>`${w} passe derrière ${x} aujourd’hui. Ta normale${NB}: devant.`,dnN:(w,n)=>`${w} a descendu de ${n} places aujourd’hui.`,
+ leverT:(n,l)=>n?`Ce soir, tu es à ${n} maillon${n>1?'s':''}${NB}: ${l}.`:'Aucun maillon allumé aujourd’hui.',
+ leverSlips:(n,k,m)=>`Tes incidents sont arrivés à ${n} maillon${n>1?'s':''} ou plus ${k} fois sur ${m}.`,
+ reflexN:n=>`${n} touche${n>1?'s':''} de moins d’un quart de seconde mise${n>1?'s':''} de côté et redemandée${n>1?'s':''}.`,
+ noteHead:'De toi, un bon jour${NB}:'.replace('${NB}',NB),call:n=>`Appeler ${n}`,text:n=>`Texter ${n}`,
+ rail:'Ralentir, c’est l’affaire d’un pharmacien ou d’un médecin — jamais d’un arrêt sec.',
+ contrast:(a,lab,b)=>`Tes ${a} ${lab} vs tes ${b} autre${b>1?'s':''} journée${b>1?'s':''}${NB}:`,
+ climbed:(w,n)=>`${w} a monté de ${n} place${n>1?'s':''}`,dropped:(w,n)=>`${w} a descendu de ${n} place${n>1?'s':''}`,
+ nothingMoved:'rien n’a bougé de plus de 2 places.',hint:'Un indice, pas une conclusion — moins de 6 journées d’un côté.',
+ connectTitle:'Croiser ce qui est déjà sur ce téléphone?',connectLead:'Local seulement. Rien n’est envoyé nulle part. Sollum lit les journées que La Patch a déjà, et les touches se remplissent toutes seules.',
+ connect:'Croiser',notNow:'Pas maintenant',
+ patchName:'La Patch',patchFound:n=>`${n} journée${n>1?'s':''} trouvée${n>1?'s':''} sur ce téléphone`,patchNone:'introuvable ici — ouvre La Patch une fois sur ce téléphone, ou colle une sauvegarde plus bas',patchPasted:n=>`${n} journée${n>1?'s':''} d’une sauvegarde collée`,
+ v3kName:'V3KTOR',v3kSoon:'ne partage pas encore ses journées — à venir',
+ pasteTitle:'Coller une sauvegarde de La Patch',pasteHint:`Dans La Patch${NB}: Menu ☰ → Sauvegarder mes données → Copier la sauvegarde. Colle-la ici. Seules les journées sont gardées; le reste est jeté.`,paste:'Utiliser',pasteBad:'Ça ne ressemble pas à une sauvegarde de La Patch.',pasteOk:n=>`${n} journée${n>1?'s':''} lue${n>1?'s':''}.`,
+ calTitle:'Historique',noSessions:'Aucune session pour l’instant.',slipMark:'incident',
+ setTitle:'Réglages',language:'Langue',province:'Où es-tu? (pour les lignes d’aide)',provWhy:'Pour que la bonne ligne apparaisse — chaque province et territoire a la sienne.',provAB:'Alberta',provQC:'Québec',provOther:'Ailleurs',
+ watching:'Ce que je surveille',changeWatch:'Changer',noteSet:'Mon message au moi de plus tard',contactSet:'Qui j’appelle',
+ exportData:'Exporter mes données',download:'Télécharger le fichier',restore:'Restaurer un export Sollum',copy:'Copier',
+ reset:'Tout effacer',resetAgain:'Touche encore pour tout effacer',resetDone:'Effacé.',restored:'Restauré.',importBad:'Impossible de lire ce fichier.',
+ exportHint:'Copie ceci, ou télécharge-le, et garde-le en lieu sûr. Rien n’est stocké ailleurs.',
+ copyAI:'Copier pour une IA',aiAmounts:'inclure les montants',copied:'Copié.',copyFail:'Impossible de copier — sélectionne le texte ci-dessous et copie-le toi-même.',
+ privacy:'Rien ne quitte ton téléphone.',
+ menu:'Menu',close:'Fermer',
+ patTitle:'Ton motif',patSub:'Le cercle, et pourquoi plus de raisons ne le font pas rebasculer.',patMine:'Ton dernier incident, les heures d’avant',
+ patCircleHead:'Le cercle — un exemple',patCircleText:'Une nuit courte appelle la caféine. La caféine saute le repas et veut du sucre. La fatigue sur les nerfs veut quelque chose pour se calmer. Le calme veut un remontant. Le remontant finit en crash — et le crash vole la nuit suivante. Chacun répare le précédent. Le tien a peut-être d’autres maillons; tes incidents vont les montrer.',
+ patLeverHead:'Le levier — avance dans la journée',
+ patLeverText:'Le pivot ne bouge pas. C’est toi qui bouges\u00a0: chaque maillon fait glisser tes raisons vers lui, alors la même famille, le même demain et le même amour pèsent moins. Près du pivot, empiler des raisons fait à peine bouger la poutre. Ce qui la fait bouger, c’est de ramener tes raisons vers l’extérieur — dormir, un repas, le premier maillon pas pris. C’est pour ça que Sollum surveille le début de la chaîne, pas la fin. (Un exemple, pas une limite\u00a0: là où tu bascules t’appartient.)',
+ patAdd:'Ajouter une raison',patReset:'Les retirer',
+ patTake:'Plus tôt tu brises la chaîne, moins ça coûte.',howTitle:'Comment ça marche',aboutTitle:'À propos et confidentialité',improve:'Améliorer l’app',
+ howBody:`<ul>
+<li><b>Vingt mots en dix paires.</b> Chaque paire a un côté stable et un côté qui tire — Demain · Tout de suite, Assez · Encore, La famille · Qu’on me laisse tranquille. Environ deux minutes de touches. Le premier tour, c’est toujours les dix paires; le reste bâtit ton ordre au complet.</li>
+<li><b>Ta normale.</b> À partir de tes journées ordinaires (environ une semaine), Sollum apprend comment tu choisis d’habitude, et à quelle vitesse. Une grosse journée, ou une journée avec un incident, ne devient jamais la normale.</li>
+<li><b>Trois lectures, dans l’ordre où elles arrivent d’habitude${NB}:</b> la main hésite — tu prends plus de temps que d’habitude sur une paire; une paire bascule — le côté qui tire gagne là où il ne gagne presque jamais; la balance bascule — deux niveaux tombent sous ta normale en même temps.</li>
+<li><b>La chaîne.</b> Le sommeil, la caféine, l’alcool, ce que tu surveilles, la nourriture. Chaque gros morceau est un maillon. Plus il y a de maillons allumés, plus tu es proche du point de bascule — le même verre pèse plus lourd après une nuit courte.</li>
+<li><b>Quand quelque chose s’allume,</b> tu vois ton propre message d’un bon jour, un bouton pour appeler la personne que tu as choisie, et la ligne de ta province.</li>
+<li><b>Signale un incident</b> après coup${NB}: quoi, quand, ce que ça a coûté. Sollum aligne les heures d’avant (à partir de La Patch, si elle est croisée). À partir de trois incidents, il compare ces journées avec les autres, dans tes propres chiffres.</li>
+<li>Une touche de moins d’un quart de seconde, c’est un réflexe, pas un choix${NB}: elle est redemandée plus tard. Les mots clignotent entre les paires pour la même raison.</li>
+</ul><p class="small">À faire de préférence avant le premier café. Ça mesure; ça ne diagnostique pas, et ça ne te dit jamais combien.</p>`,
+ aboutBody:`<p class="small"><b>Fait par Tobie et Claude. Version gratuite sur v3ktor.org/sollum.</b> Fait partie de l’expérience avec La Patch (le corps) et V3KTOR (le ressenti). True Color Foundation. © 2026 Tobie David.</p>
+<p class="small">Sollum est un logiciel libre : tu peux l’utiliser, le partager et le modifier selon la <a href="https://github.com/tobiedavid/v3ktor.org/blob/main/LICENSE" target="_blank" rel="noopener">licence publique générale GNU Affero</a>, version 3 ou plus récente. Si tu partages une version modifiée, même en la mettant seulement en ligne pour d’autres, tu dois partager tes changements sous la même licence. Code source${NB}: <a href="https://github.com/tobiedavid/v3ktor.org" target="_blank" rel="noopener">github.com/tobiedavid/v3ktor.org</a></p>
+<p class="small">Ce n’est pas un diagnostic ni un avis médical. Ça te montre un motif dans tes propres choix; ce que tu en fais t’appartient.</p>
+<p class="small">Tout reste dans la mémoire de ce navigateur, sur ce téléphone. Rien n’est envoyé nulle part, sauf ce que tu écris dans «${NB}Améliorer l’app${NB}», et seulement quand tu l’envoies. Cette mémoire n’est pas chiffrée${NB}: quiconque peut déverrouiller le téléphone peut la lire. Tout effacer, c’est dans les Réglages.</p>
+<p class="small">Les lignes d’aide viennent du Centre canadien sur les dépendances et l’usage de substances, des pages des provinces et de Santé Canada. Les numéros changent — la date de vérification est sur chaque carte.</p>
+<p class="small"><b>Pas un médecin.</b> Tu penses à mettre fin à tes jours${NB}: appelle ou texte le 9-8-8. Urgence${NB}: 911.</p>`,
+ fbLead:x=>`Des recommandations, ce qui t’agace, ce qui est mêlant, ce qui a aidé. Ça s’en va à <b>${x}</b>. Seul ce que tu écris ici est envoyé — tes touches, tes incidents et ton message restent sur ce téléphone.`,
+ fbLabel:'Ton message',fbSend:'Envoyer par courriel',fbShare:'Partager autrement',fbEmpty:'Écris quelque chose d’abord.',fbCopied:x=>`Copié — colle-le dans un courriel à ${x}.`,
+ incSub:n=>n?`${n} signalé${n>1?'s':''} · ce qui s’est passé, quand, et les heures d’avant`:'Ce qui s’est passé, quand, et les heures d’avant. Pas de jugement.',histSub:n=>`${n} journée${n>1?'s':''} · ta normale, les lectures, les incidents`,
+ crisis:`<b>Pas un médecin.</b> Tu penses à mettre fin à tes jours${NB}: appelle ou texte le 9-8-8. Urgence${NB}: 911.`,storage:'La mémoire de ce navigateur n’est pas chiffrée${NB}: quiconque peut déverrouiller le téléphone peut la lire.'.replace('${NB}',NB),
+ about:'Fait partie de l’expérience avec La Patch (le corps) et V3KTOR (le ressenti). True Color Foundation. Ce n’est le diagnostic de rien.',
+ q1:'Y a-t-il quelque chose que tu voudrais arrêter, ou garder à l’œil?',q1hint:'Plusieurs, c’est correct. «${NB}Rien${NB}» est une réponse complète.'.replace(/\$\{NB\}/g,NB),
+ curious:'Rien — simple curiosité',otherWord:'C’est quoi, en un mot ou deux?',
+ q1b:'Le mot pour ça, dans tes choix',q1bHint:'Il sera à l’écran quelques fois par session. Un mot de remplacement que personne d’autre ne reconnaîtrait, c’est correct — ou laisse-le de côté.',useIt:'L’utiliser',leaveOut:'Le laisser de côté',
+ q2:'Qu’est-ce que tu voudrais dire au toi de plus tard, avant le mauvais choix?',q2hint:'Tes mots. Sollum te les relit une fois, tels quels, quand l’aiguille bouge. Passer, c’est correct.',
+ q3:'Qui voudrais-tu appeler quand ça arrive?',q3hint:'Un nom et un numéro. Ils restent sur ce téléphone; rien n’est composé sans que tu touches.',name:'Nom',phone:'Téléphone',
+ setupDone:'C’est réglé. Deux minutes de touches, et tu verras où tu en es.',
+ slipBtn:'Signaler un incident',slipTitle:'Signaler un incident',slipWhat:'Quoi',slipWhen:'Quand',slipDay:'Jour',today:'Aujourd’hui',yesterday:'Hier',slipStart:'Début',slipEnd:'Fin',slipCost:'Ce que ça a coûté',unit:'Unité',
+ units:{money:'$',drinks:'verres',cans:'canettes',cigs:'cigarettes',hours:'heures',other:'autre'},
+ slipSaved:'Signalé. Pas de jugement ici — c’est une donnée avec une heure dessus.',
+ hoursBefore:'Les heures d’avant${NB}:'.replace('${NB}',NB),chainNone:'Pas de journée de La Patch pour ce jour-là.',
+ slipsCard:(n,m)=>`Tes ${n} journée${n>1?'s':''} d’incident vs tes ${m} autre${m>1?'s':''} journée${m>1?'s':''}${NB}:`,slipsSoon:n=>`${n} incident${n>1?'s':''} signalé${n>1?'s':''} sur ${SLIPS_MIN}. Sollum les compare aux autres journées à partir de trois.`,
+ slipsHint:'Un indice, pas une conclusion — moins de 5 incidents.',
+ helpHead:'Quelqu’un à qui parler, n’importe quand${NB}:'.replace('${NB}',NB),helpChecked:d=>`vérifié le ${d}`,
+ amountsOff:'Les montants ne sont pas affichés ici. L’export les contient.'
+}};
+
+/* ---------- storage ---------- */
+const KEY='sollum.v1', SHARED='v3k.days.v1', PATCH_KEY='thepatch.v1';
+function defaults(){return {sollum_version:VER,pool_version:POOL_VERSION,lang:(navigator.language||'').toLowerCase().startsWith('fr')?'fr':'en',province:'other',
+ setup:{done:false,goals:[],other:'',watch:null,note:'',contact:null},sessions:[],slips:[],connect:{patch:false,v3k:false},patch_paste:null,connect_asked:false}}
+let store=load();
+function load(){try{const raw=localStorage.getItem(KEY);if(raw){const o=Object.assign(defaults(),JSON.parse(raw));
+ if(!Array.isArray(o.sessions))o.sessions=[];if(!Array.isArray(o.slips))o.slips=[];if(!o.connect||typeof o.connect!=='object')o.connect={patch:false,v3k:false};
+ if(!o.setup||typeof o.setup!=='object')o.setup=defaults().setup;if(!Array.isArray(o.setup.goals))o.setup.goals=[];if(!PROVS.some(p=>p[0]===o.province))o.province='other';
+ o.sollum_version=VER;return o}}catch(e){}return defaults()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}}
+function t(k,...a){const d=I18N[store.lang]||I18N.en;const s=d[k]!==undefined?d[k]:I18N.en[k];return typeof s==='function'?s(...a):(s===undefined?k:s)}
+function L(en,fr){return store.lang==='fr'?fr:en}
+function P2(a){return store.lang==='fr'?a[1]:a[0]}
+function wordOf(id){if(id===WATCH_ID)return store.setup.watch?{id,en:store.setup.watch.en,fr:store.setup.watch.fr,level:null,side:'p'}:null;return POOL.find(p=>p.id===id)||null}
+function wname(id){const w=wordOf(id);return w?(w[store.lang]||w.en):id}
+function wmid(id){const n=wname(id);return store.lang==='fr'&&/^[A-ZÀ-Ü]/.test(n)&&!/^[A-Z]{2,}/.test(n)?n[0].toLowerCase()+n.slice(1):n}
+function activeWords(){const ids=POOL.map(p=>p.id);if(hasGoals()&&store.setup.watch)ids.push(WATCH_ID);return ids}
+function twins(){const seen=new Set(),out=[];for(const w of POOL){if(w.side!=='h')continue;const p=POOL.find(x=>x.id===w.twin);if(!p||seen.has(w.id))continue;seen.add(w.id);seen.add(p.id);out.push({h:w.id,p:p.id,level:w.level,key:w.id+'|'+p.id})}return out}
+function hasGoals(){return store.setup.done&&store.setup.goals.length>0}
+function goalDuels(){const out=[];for(const g of store.setup.goals){const G=GOALS.find(x=>x.id===g);if(!G)continue;G.duels.forEach((d,i)=>out.push({key:g+':'+i,goal:g,h:{en:d[0],fr:d[1]},p:{en:d[2],fr:d[3]}}))}return out}
+function chipLabel(c,v){const o=c.opts.find(x=>x[0]===v);return o?(store.lang==='fr'?o[2]:o[1]):''}
+function visibleChips(pre){const goals=store.setup.goals;const gchips=new Set(GOALS.filter(g=>goals.includes(g.id)).map(g=>g.chip));
+ return CHIPS.filter(c=>{if(c.patchOnly)return !!(pre&&pre[c.id]!=null);if(c.goalOnly)return hasGoals()&&gchips.has('wt');return true})}
+
+/* ---------- helpers ---------- */
+const key=(a,b)=>a<b?a+'|'+b:b+'|'+a;
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const avg=v=>v.length?v.reduce((a,b)=>a+b,0)/v.length:0;
+function stdev(v){if(v.length<2)return 0;const m=avg(v);return Math.sqrt(v.reduce((a,b)=>a+(b-m)*(b-m),0)/(v.length-1))}
+function q90(v){if(!v.length)return 0;const s=v.slice().sort((a,b)=>a-b);return s[Math.min(s.length-1,Math.floor(0.9*(s.length-1)))]}
+function median(v){if(!v.length)return 0;const s=v.slice().sort((a,b)=>a-b);const m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2}
+function fmtDate(d){const p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())}
+function dayWithRoll(roll,d){d=d?new Date(d.getTime()):new Date();const h=d.getHours();if(roll>0&&h<roll)d.setDate(d.getDate()-1);else if(roll<0&&h>=24+roll)d.setDate(d.getDate()+1);return fmtDate(d)}
+function shiftDay(s,n){const [y,m,d]=s.split('-').map(Number);const dt=new Date(y,m-1,d+n);return fmtDate(dt)}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function sizeClass(label){const n=label.length;return n<=6?'s1':n<=9?'s2':n<=12?'s3':'s4'}
+function firstPerDay(sessions){const by={};sessions.slice().sort((a,b)=>a.t_start-b.t_start).forEach(s=>{if(!by[s.date])by[s.date]=s});return Object.values(by).sort((a,b)=>a.t_start-b.t_start)}
+function orderOf(rank){return Object.keys(rank).sort((a,b)=>rank[a]-rank[b])}
+function slipDays(){return new Set(store.slips.map(s=>s.date))}
+function joinList(a){const sep=store.lang==='fr'?' et ':' and ';return a.length<=1?(a[0]||''):a.slice(0,-1).join(', ')+sep+a[a.length-1]}
+
+/* ---------- The Patch, read on this phone or from a pasted backup ---------- */
+function fromSummary(p){
+ const d={};
+ if(typeof p.sleep==='number')d.sl=p.sleep<6?'s':p.sleep<8?'m':'l';
+ const c=p.caffeine||{};
+ if((c.energyDrinks||0)>=1||(c.servings||0)>=3)d.caf='3';else if((c.servings||0)>=1)d.caf='1';else if(p.meals&&p.meals.complete)d.caf='0';
+ const a=p.alcohol||{};const n=a.drinks!=null?a.drinks:(a.level==='0'?0:a.level==='low'?1.5:a.level?4:null);
+ if(n!=null)d.al=n===0?'0':n<3?'1':'3';
+ if(p.crash===true)d.cr='y';else if(p.crash===false)d.cr='n';
+ d.sum=p;return d;
+}
+function patchExtract(P){
+ if(!P||typeof P!=='object')return null;
+ const S=P.state&&typeof P.state==='object'?P.state:P;
+ if(!S.tank&&!S.crashes&&!S.a&&!S.sum)return null;
+ const out={};
+ if(S.sum&&typeof S.sum==='object'){for(const k in S.sum){if(/^\d{4}-\d{2}-\d{2}$/.test(k)&&S.sum[k]&&typeof S.sum[k]==='object')out[k]=fromSummary(S.sum[k])}}
+ if(Object.keys(out).length)return {days:out,roll:(S.tank&&typeof S.tank.roll==='number')?S.tank.roll:0};
+ const R=(S.tank&&S.tank.rate)||{};
+ for(const k in R){const r=R[k];if(!r||typeof r!=='object'||!/^\d{4}-\d{2}-\d{2}$/.test(k))continue;const d=out[k]||(out[k]={});
+  if(r.al!=null)d.al=r.al==='0'?'0':r.al==='low'?'1':'3';if(typeof r.s==='number')d.sl=r.s<6?'s':r.s<8?'m':'l';if(r.ed!=null&&+r.ed>0)d.caf='3';
+  if(r.fl&&r.fl.cr)d.cr='y';else if(r.fin&&d.cr==null)d.cr='n'}
+ (Array.isArray(S.crashes)?S.crashes:[]).forEach(c=>{if(c&&typeof c.day==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(c.day)){const d=out[c.day]||(out[c.day]={});d.cr='y'}});
+ return {days:out,roll:(S.tank&&typeof S.tank.roll==='number')?S.tank.roll:0};
+}
+function sharedPatchDays(){try{const T=JSON.parse(localStorage.getItem(SHARED)||'{}');const out={};let n=0;for(const k in T){if(T[k]&&T[k].patch&&typeof T[k].patch==='object'&&/^\d{4}-\d{2}-\d{2}$/.test(k)){out[k]=fromSummary(T[k].patch);n++}}return n?out:null}catch(e){return null}}
+let patchCache=null;
+function patchData(){
+ if(!store.connect.patch)return null;
+ if(patchCache)return patchCache;
+ try{const sh=sharedPatchDays();if(sh){let roll=0;try{const raw=localStorage.getItem(PATCH_KEY);if(raw){const S=JSON.parse(raw);if(S&&S.tank&&typeof S.tank.roll==='number')roll=S.tank.roll}}catch(e){}patchCache={days:sh,roll,src:'live'};return patchCache}}catch(e){}
+ try{const raw=localStorage.getItem(PATCH_KEY);if(raw){const x=patchExtract(JSON.parse(raw));if(x){x.src='live';patchCache=x;return x}}}catch(e){}
+ if(store.patch_paste&&store.patch_paste.days){patchCache={days:store.patch_paste.days,roll:store.patch_paste.roll||0,src:'paste'};return patchCache}
+ return null;
+}
+function patchLiveCount(){try{const sh=sharedPatchDays();if(sh)return Object.keys(sh).length;const raw=localStorage.getItem(PATCH_KEY);if(!raw)return null;const x=patchExtract(JSON.parse(raw));return x?Object.keys(x.days).length:null}catch(e){return null}}
+function sessDay(){const pd=patchData();return dayWithRoll(pd?pd.roll:0)}
+function patchChips(date){const pd=patchData();if(!pd)return null;const d=pd.days[date];if(!d)return null;const o={};['caf','al','sl','cr'].forEach(k=>{if(d[k]!=null)o[k]=d[k]});return Object.keys(o).length?o:null}
+function patchSum(date){const pd=patchData();return pd&&pd.days[date]&&pd.days[date].sum||null}
+
+/* ---------- session engine: round 1 = the duels, then Swiss rounds with a running Elo ---------- */
+let S=null, view='home', ui={showAll:false,showOrder:false,msg:'',resetArmed:false,exportText:'',chips:null,pre:null,pasteText:'',aiAmounts:false,setupStep:0,setupTmp:null,slip:null,slipSaved:null};
+function startSession(){
+ const words=activeWords();
+ S={id:uid(),date:sessDay(),t_start:Date.now(),choices:[],duelPicks:[],goalPicks:[],taps:[],reflex:0,paused:false,r:{},cmp:{},played:new Set(),repeated:new Set(),round:0,roundsTarget:ROUNDS_DEFAULT,queue:[],current:null,lastWords:[],tShown:0,result:null};
+ words.forEach(w=>{S.r[w]=0;S.cmp[w]=0});
+ nextRound();
+}
+function nextRound(){
+ S.round++;
+ let pairs=[];
+ if(S.round===1){
+  pairs=twins().map(tw=>({pair:[tw.h,tw.p],isDuel:true,key:tw.key}));
+  goalDuels().forEach(g=>pairs.push({pair:[g.key+'|h',g.key+'|p'],isGoal:true,goal:g}));
+  pairs=shuffle(pairs);
+ }else{
+  let words=activeWords().slice();
+  if(words.length%2){words.sort((a,b)=>(S.cmp[b]-S.cmp[a])||(Math.random()-0.5));words.shift()}
+  const pool=words.slice().sort((a,b)=>(S.r[b]-S.r[a])||(Math.random()-0.5));
+  while(pool.length>=2){const a=pool.shift();let idx=pool.findIndex(w=>!S.played.has(key(a,w)));if(idx<0)idx=0;const b=pool.splice(idx,1)[0];pairs.push({pair:[a,b]})}
+  const cands=S.choices.filter(c=>!c.isRepeat&&!S.repeated.has(key(c.pair[0],c.pair[1]))).sort((a,b)=>b.gap-a.gap);
+  if(cands.length){const top=cands.slice(0,Math.max(1,Math.ceil(cands.length/2)));const c=top[Math.floor(Math.random()*top.length)];S.repeated.add(key(c.pair[0],c.pair[1]));pairs.push({pair:[c.pair[0],c.pair[1]],isRepeat:true,forceLeft:(c.leftId===c.pair[0]?c.pair[1]:c.pair[0])})}
+  pairs=shuffle(pairs);
+ }
+ let prev=S.lastWords;
+ for(let i=0;i<pairs.length;i++){if(pairs[i].pair.some(w=>prev.includes(w))){const j=pairs.findIndex((p,k)=>k>i&&!p.pair.some(w=>prev.includes(w)));if(j>0)[pairs[i],pairs[j]]=[pairs[j],pairs[i]]}prev=pairs[i].pair}
+ pairs.forEach(p=>{p.leftId=p.forceLeft||(Math.random()<0.5?p.pair[0]:p.pair[1]);p.rightId=p.leftId===p.pair[0]?p.pair[1]:p.pair[0]});
+ S.queue=pairs;showPair();
+}
+function showPair(){S.current=S.queue.shift();S.paused=false;view='pair';render();S.tShown=performance.now()}
+/* the blink: only the two words go blank, in place — the top bar, the progress and Undo aren't redrawn, so nothing else flickers */
+function nextPair(){if(PAUSE_MS>0&&view==='pair'&&app.querySelector('.pair')){S.current=null;S.paused=true;app.querySelectorAll('.pair .card').forEach(c=>{c.textContent=''});setTimeout(()=>{if(S&&S.paused)showPair()},PAUSE_MS)}else showPair()}
+function labelOf(p,id){if(p.isGoal){const side=id.endsWith('|h')?'h':'p';return p.goal[side][store.lang]||p.goal[side].en}return wname(id)}
+function perRound(){return Math.floor(activeWords().length/2)+1}
+function choose(chosenId){
+ const p=S.current;if(!p||S.paused)return;
+ const rt=Math.round(performance.now()-S.tShown);
+ if(rt<REFLEX_MS){S.reflex++;S.current=null;const at=S.queue.length?1+Math.floor(Math.random()*S.queue.length):0;S.queue.splice(at,0,p);nextPair();return}
+ if(p.isGoal){S.goalPicks.push({key:p.goal.key,goal:p.goal.goal,pull:chosenId.endsWith('|p'),rt_ms:rt,leftId:p.leftId});S.taps.push('goal');S.current=null;advance();return}
+ const loser=chosenId===p.leftId?p.rightId:p.leftId;
+ const gap=Math.abs(S.r[chosenId]-S.r[loser]);
+ const pw=1/(1+Math.exp(-(S.r[chosenId]-S.r[loser])));const d=1-pw;
+ S.r[chosenId]+=d;S.r[loser]-=d;S.cmp[chosenId]++;S.cmp[loser]++;
+ S.played.add(key(p.pair[0],p.pair[1]));
+ S.choices.push({pair:p.pair,leftId:p.leftId,chosenId,rt_ms:rt,round:S.round,isRepeat:!!p.isRepeat,isDuel:!!p.isDuel,gap,d,t:Date.now()});
+ if(p.isDuel){const tw=twins().find(x=>x.key===p.key);if(tw)S.duelPicks.push({key:p.key,pull:chosenId===tw.p,rt_ms:rt})}
+ S.taps.push('word');S.lastWords=p.pair;S.current=null;advance();
+}
+function advance(){
+ if(S.queue.length)nextPair();
+ else if(S.round<S.roundsTarget)nextRound();
+ else if(S.keepChips)finalize(S.keepChips);
+ else{ui.pre=patchChips(S.date);ui.chips=Object.assign({},ui.pre||{});view='chips';render()}
+}
+function undo(){
+ if(!S||!S.taps.length)return;
+ const kind=S.taps[S.taps.length-1];
+ if(kind==='goal'){
+  if(S.round!==1)return;
+  const g=S.goalPicks.pop();S.taps.pop();const G=goalDuels().find(x=>x.key===g.key);if(!G)return;
+  if(S.current)S.queue.unshift(S.current);
+  S.queue.unshift({pair:[G.key+'|h',G.key+'|p'],isGoal:true,goal:G,leftId:g.leftId,rightId:g.leftId.endsWith('|h')?G.key+'|p':G.key+'|h'});
+  showPair();return;
+ }
+ const last=S.choices[S.choices.length-1];
+ if(!last||last.round!==S.round)return;
+ S.choices.pop();S.taps.pop();
+ const loser=last.chosenId===last.pair[0]?last.pair[1]:last.pair[0];
+ S.r[last.chosenId]-=last.d;S.r[loser]+=last.d;S.cmp[last.chosenId]--;S.cmp[loser]--;
+ if(!last.isRepeat)S.played.delete(key(last.pair[0],last.pair[1]));
+ const tw=last.isDuel?twins().find(x=>(x.h===last.pair[0]&&x.p===last.pair[1])||(x.h===last.pair[1]&&x.p===last.pair[0])):null;
+ if(tw){const i=S.duelPicks.findIndex(x=>x.key===tw.key);if(i>=0)S.duelPicks.splice(i,1)}
+ if(S.current)S.queue.unshift(S.current);
+ S.queue.unshift({pair:last.pair,leftId:last.leftId,rightId:last.leftId===last.pair[0]?last.pair[1]:last.pair[0],isRepeat:last.isRepeat,isDuel:last.isDuel,key:tw?tw.key:undefined});
+ const prev=S.choices[S.choices.length-1];S.lastWords=prev?prev.pair:[];
+ showPair();
+}
+
+/* ---------- analysis: Bradley-Terry, consistency, timing, duels, levels ---------- */
+function analyze(choices,words){
+ const n=words.length,idx={};words.forEach((w,i)=>idx[w]=i);
+ const W=Array.from({length:n},()=>Array(n).fill(0));
+ choices.forEach(c=>{if(idx[c.chosenId]==null)return;const l=c.chosenId===c.pair[0]?c.pair[1]:c.pair[0];if(idx[l]==null)return;W[idx[c.chosenId]][idx[l]]++});
+ let s=Array(n).fill(1);
+ for(let it=0;it<60;it++){const ns=s.slice();for(let i=0;i<n;i++){let wins=0.5,den=1/(s[i]+1);for(let j=0;j<n;j++){if(i===j)continue;wins+=W[i][j];const nij=W[i][j]+W[j][i];if(nij>0)den+=nij/(s[i]+s[j])}ns[i]=wins/den}const gm=Math.exp(ns.reduce((a,b)=>a+Math.log(b),0)/n);s=ns.map(v=>v/gm)}
+ const strength={},se={};
+ words.forEach((w,i)=>{strength[w]=Math.log(s[i]);let info=0;for(let j=0;j<n;j++){if(i===j)continue;const nij=W[i][j]+W[j][i];if(nij>0){const p=s[i]/(s[i]+s[j]);info+=nij*p*(1-p)}}se[w]=info>0?1/Math.sqrt(info):9});
+ const order=words.slice().sort((a,b)=>strength[b]-strength[a]);const rank={};order.forEach((w,i)=>rank[w]=i+1);
+ const first={};let agreed=0,total=0;
+ choices.forEach(c=>{if(!c.isRepeat){const k=key(c.pair[0],c.pair[1]);if(!(k in first))first[k]=c.chosenId}});
+ choices.forEach(c=>{if(c.isRepeat){const k=key(c.pair[0],c.pair[1]);if(k in first){total++;if(first[k]===c.chosenId)agreed++}}});
+ const later=choices.filter(c=>c.round>1).map(c=>c.rt_ms);
+ const med=median(later.length?later:choices.map(c=>c.rt_ms))||1;
+ return {strength,rank,se,order,repeats:total,agreed,C:total?agreed/total:null,rt_median:med};
+}
+function levelScores(rank){const out={};for(const lv in LEVELS){const h=POOL.filter(w=>w.level===lv&&w.side==='h'&&rank[w.id]!=null).map(w=>rank[w.id]);const p=POOL.filter(w=>w.level===lv&&w.side==='p'&&rank[w.id]!=null).map(w=>rank[w.id]);if(h.length&&p.length)out[lv]=avg(p)-avg(h)}return out}
+function duelMap(sess){const m={};(sess.duels||[]).forEach(d=>{m[d.key]={pull:d.pull,ratio:sess.rt_median?d.rt_ms/sess.rt_median:null}});return m}
+
+/* ---------- the normal: the person's ordinary days — no slip, chain light (under 3 links), and not a day that itself read as
+   tipped or flipped twice. Like The Patch's set-aside days: one heavy evening can't become the baseline. If that leaves fewer
+   than 3 days, every non-slip day counts, so the normal always exists once there are 3 days. ---------- */
+function ordinaryDay(s,slips){return !(slips.has(s.date)||(s.links||[]).length>=LINKS_FIRE||(s.tipped&&s.tipped.length)||(s.flips&&s.flips.length>=2))}
+function normalOf(prior,words){
+ const slips=slipDays();
+ const same=prior.filter(s=>s.pool===POOL_VERSION);
+ let B=firstPerDay(same.filter(s=>ordinaryDay(s,slips))).slice(-BASE_WINDOW);
+ if(B.length<NORMAL_MIN)B=firstPerDay(same.filter(s=>!slips.has(s.date))).slice(-BASE_WINDOW);
+ const N={n:B.length,days:B.map(s=>s.date)};
+ if(B.length<NORMAL_MIN)return N;
+ const common=words.filter(w=>B.every(s=>s.rank&&s.rank[w]!=null&&s.strength&&s.strength[w]!=null));
+ if(common.length<6)return N;
+ N.common=common;N.mean={};N.sd={};N.meanS={};N.sdS={};
+ common.forEach(w=>{const v=B.map(s=>s.rank[w]);N.mean[w]=avg(v);N.sd[w]=stdev(v);const u=B.map(s=>s.strength[w]);N.meanS[w]=avg(u);N.sdS[w]=stdev(u)});
+ N.upsetBar=UPSETS_MIN;let worst=0;B.forEach(s=>{const u=upsetsOf(s,N);for(const w in u.won)worst=Math.max(worst,u.won[w].length);for(const w in u.lost)worst=Math.max(worst,u.lost[w].length)});N.upsetBar=Math.max(UPSETS_MIN,worst+1);
+ N.duel={};twins().forEach(tw=>{const rows=B.map(duelMap).filter(m=>m[tw.key]);N.duel[tw.key]={n:rows.length,pull:rows.filter(m=>m[tw.key].pull).length,ratios:rows.map(m=>m[tw.key].ratio).filter(r=>r!=null)}});
+ N.lv={};const L=B.map(s=>levelScores(s.rank));for(const lv in LEVELS){const v=L.map(x=>x[lv]).filter(x=>x!=null);if(v.length)N.lv[lv]={mean:avg(v),sd:Math.max(LV_SD_FLOOR,stdev(v))}}
+ const Cs=B.map(s=>s.C).filter(c=>c!=null);N.meanC=Cs.length?avg(Cs):null;
+ N.prevHes=B.length?(B[B.length-1].hes||[]):[];
+ return N;
+}
+function upsetsOf(sess,N){
+ const pN=(w,x)=>1/(1+Math.exp(N.meanS[x]-N.meanS[w]));const won={},lost={},sw={},sl={};
+ (Array.isArray(sess.choices)?sess.choices:[]).forEach(c=>{const w=c.chosenId,l=c.chosenId===c.pair[0]?c.pair[1]:c.pair[0];if(N.meanS[w]==null||N.meanS[l]==null)return;const p=pN(w,l);if(p>=UPSET_P)return;const k=w+'|'+l;if(!sw[k]){sw[k]=1;(won[w]=won[w]||[]).push({x:l,p})}if(!sl[k]){sl[k]=1;(lost[l]=lost[l]||[]).push({x:w,p})}});
+ for(const w in won)won[w].sort((a,b)=>a.p-b.p);for(const w in lost)lost[w].sort((a,b)=>a.p-b.p);return {won,lost};
+}
+function warnOf(sess,N){
+ if(!N.common)return [];
+ const U=upsetsOf(sess,N),bar=N.upsetBar||UPSETS_MIN;
+ const cand=N.common.filter(w=>sess.rank[w]!=null&&sess.strength&&sess.strength[w]!=null).map(w=>{const se=sess.se&&sess.se[w]!=null?sess.se[w]:1;const z=(sess.strength[w]-N.meanS[w])/Math.sqrt(se*se+Math.max(SD_FLOOR,N.sdS[w])**2);return {w,delta:N.mean[w]-sess.rank[w],z,uw:U.won[w]||[],ul:U.lost[w]||[]}});
+ const up=cand.filter(m=>m.delta>=MOVE_MIN&&(m.uw.length>=bar||m.z>=Z_MIN)).sort((a,b)=>(b.uw.length-a.uw.length)||(b.z-a.z))[0];
+ const dn=cand.filter(m=>m.delta<=-MOVE_MIN&&(m.ul.length>=bar||m.z<=-Z_MIN)).sort((a,b)=>(b.ul.length-a.ul.length)||(a.z-b.z))[0];
+ const lines=[];
+ if(up){let over=up.uw.map(o=>o.x).slice(0,2);if(!over.length)over=N.common.filter(x=>x!==up.w&&N.mean[x]<=N.mean[up.w]-2&&sess.rank[x]!=null&&sess.rank[x]>sess.rank[up.w]).sort((a,b)=>N.mean[a]-N.mean[b]).slice(0,2);lines.push({w:up.w,dir:'up',over,n:Math.round(up.delta)})}
+ if(dn&&(!up||dn.w!==up.w)){let over=dn.ul.map(o=>o.x).slice(0,2);if(!over.length)over=N.common.filter(x=>x!==dn.w&&N.mean[x]>=N.mean[dn.w]+2&&sess.rank[x]!=null&&sess.rank[x]<sess.rank[dn.w]).sort((a,b)=>N.mean[b]-N.mean[a]).slice(0,2);lines.push({w:dn.w,dir:'down',over,n:Math.round(-dn.delta)})}
+ return lines;
+}
+function warnText(l){const w=wname(l.w),o=l.over.map(wmid);if(l.dir==='up')return o.length>=2?t('upBoth',w,o[0],o[1]):o.length===1?t('upOne',w,o[0]):t('upN',w,l.n);return o.length>=2?t('dnBoth',w,o[0],o[1]):o.length===1?t('dnOne',w,o[0]):t('dnN',w,l.n)}
+
+/* ---------- the three readings, in the order they arrive: the hand rocks, the duel flips, the scale tips — and the fog ----------
+   hesitation: a duel's tap time over the session's median tap, against the 90th percentile of the person's own ordinary ratios for
+   that pair (one slow day in the normal doesn't raise the bar for good); two duels at once, or the same duel two sessions running */
+function readingsOf(sess,N){
+ const R={fog:null,hes:[],flips:[],tipped:null,words:[],levels:levelScores(sess.rank)};
+ if(sess.repeats>=FOG_REPEATS&&sess.C!=null&&sess.C<=FOG_C&&(N.meanC==null||sess.C<=N.meanC-0.25))R.fog={k:sess.repeats-sess.agreed,n:sess.repeats};
+ if(!N.common)return R;
+ const D=duelMap(sess);
+ twins().forEach(tw=>{const d=D[tw.key],nd=N.duel&&N.duel[tw.key];if(!d||!nd||nd.n<NORMAL_MIN)return;
+  // a flip: the pull side won a duel it loses on the person's ordinary days — never, or at most 1 in 10 once there are 5 days —
+  // and a duel that is clear for them (the healthy twin's usual strength well above the pull's), not a near-tie that flips by itself
+  const clear=N.meanS[tw.h]!=null&&N.meanS[tw.p]!=null&&(N.meanS[tw.h]-N.meanS[tw.p])>=FLIP_GAP;
+  if(d.pull&&clear&&(nd.pull===0||(nd.n>=FLIP_N&&nd.pull/nd.n<=FLIP_MAX)))R.flips.push({key:tw.key,h:tw.h,p:tw.p,k:nd.n-nd.pull,n:nd.n});
+  if(!d.pull&&!R.fog&&d.ratio!=null&&nd.ratios.length>=NORMAL_MIN){const bar=q90(nd.ratios);if(d.ratio>=HES_FLOOR&&d.ratio>bar)R.hes.push({key:tw.key,h:tw.h,p:tw.p,ratio:Math.round(d.ratio*100)/100})}});
+ // hesitation needs two duels at once, or the same duel two sessions running
+ if(R.hes.length&&R.hes.length<HES_MIN){const prev=new Set(N.prevHes||[]);R.hes=R.hes.filter(h=>prev.has(h.key))}
+ const low=[];for(const lv in R.levels){const nl=N.lv&&N.lv[lv];if(nl&&R.levels[lv]<nl.mean-LV_K*nl.sd)low.push(lv)}
+ if(low.length>=LV_MIN){const movers=low.map(lv=>{const ws=POOL.filter(w=>w.level===lv);const p=ws.filter(w=>w.side==='p').map(w=>({id:w.id,d:(N.mean[w.id]||0)-sess.rank[w.id]})).sort((a,b)=>b.d-a.d)[0];const h=ws.filter(w=>w.side==='h').map(w=>({id:w.id,d:sess.rank[w.id]-(N.mean[w.id]||0)})).sort((a,b)=>b.d-a.d)[0];return {lv,p:p?p.id:null,h:h?h.id:null}});R.tipped={levels:low,movers}}
+ if(!R.fog)R.words=warnOf(sess,N);
+ return R;
+}
+function linksOf(chips){if(!chips)return [];return CHIPS.filter(c=>chips[c.id]!=null&&chips[c.id]===c.heavy).map(c=>c.id)}
+/* the message and the call appear on: two flips, or one on a universal duel (Tomorrow·Right now, Enough·More); the scale tipping;
+   hesitation (already two duels or two sessions); or three links lit */
+function fires(R,links){const flip=R.flips.length>=2||R.flips.some(f=>UNIVERSAL.includes(f.key));return !!(hasGoals()&&(flip||R.tipped||R.hes.length||links.length>=LINKS_FIRE))}
+
+function finalize(chips){
+ const words=activeWords();
+ const an=analyze(S.choices,words);
+ const prior=store.sessions.filter(s=>s.id!==S.id&&s.t_start<S.t_start);
+ const N=normalOf(prior,words);
+ const sess={id:S.id,date:S.date,t_start:Date.now(),hour:new Date().getHours(),rounds:S.round,pool:POOL_VERSION,chips:chips&&Object.keys(chips).length?chips:null,choices:S.choices,duels:S.duelPicks,goals:S.goalPicks,
+  strength:an.strength,rank:an.rank,se:an.se,C:an.C,repeats:an.repeats,agreed:an.agreed,rt_median:an.rt_median,reflex:S.reflex};
+ const R=readingsOf(sess,N);
+ sess.hes=R.hes.map(h=>h.key);sess.flips=R.flips.map(f=>f.key);sess.tipped=R.tipped?R.tipped.levels:null;sess.fog=!!R.fog;sess.warn=R.words;sess.normal_n=N.n;sess.links=linksOf(sess.chips);
+ const i=store.sessions.findIndex(s=>s.id===S.id);if(i>=0)store.sessions[i]=sess;else store.sessions.push(sess);
+ save();writeShared(sess);
+ S.result={sess,N,R,order:an.order,first:prior.filter(s=>s.pool===POOL_VERSION).length===0};ui.showAll=false;ui.showOrder=false;ui.msg='';view='result';render();
+}
+function keepGoing(){if(!S||S.round>=ROUNDS_MAX)return;S.keepChips=(S.result&&S.result.sess.chips)||{};S.roundsTarget=Math.min(ROUNDS_MAX,S.round+2);nextRound()}
+function writeShared(sess){try{const T=JSON.parse(localStorage.getItem(SHARED)||'{}');const d=T[sess.date]&&typeof T[sess.date]==='object'?T[sess.date]:(T[sess.date]={});
+ const duels={};(sess.duels||[]).forEach(x=>duels[x.key]=x.pull?'p':'h');
+ d.sollum={v:VER,pool:sess.pool,order:orderOf(sess.rank),chips:sess.chips,duels,levels:levelScores(sess.rank),tipped:sess.tipped,hes:sess.hes,fog:sess.fog,slip:slipDays().has(sess.date),t:sess.t_start};localStorage.setItem(SHARED,JSON.stringify(T))}catch(e){}}
+function clearShared(){try{const T=JSON.parse(localStorage.getItem(SHARED)||'{}');for(const k in T){if(T[k]&&T[k].sollum)delete T[k].sollum;if(T[k]&&!Object.keys(T[k]).length)delete T[k]}localStorage.setItem(SHARED,JSON.stringify(T))}catch(e){}}
+
+/* ---------- contrasts: heavy days vs the others; slip days vs the others ---------- */
+function contrastOf(sessions,words){
+ const D=firstPerDay(sessions.filter(s=>s.pool===POOL_VERSION));let best=null;
+ CHIPS.forEach(c=>{const have=D.filter(s=>s.chips&&s.chips[c.id]!=null&&s.rank);const A=have.filter(s=>s.chips[c.id]===c.heavy),B=have.filter(s=>s.chips[c.id]!==c.heavy);if(A.length<SIDE_MIN||B.length<SIDE_MIN)return;
+  const common=words.filter(w=>have.every(s=>s.rank[w]!=null));
+  const moves=common.map(w=>{const a=A.map(s=>s.rank[w]),b=B.map(s=>s.rank[w]);const va=Math.max(2.5,stdev(a))**2,vb=Math.max(2.5,stdev(b))**2;const d=avg(b)-avg(a);return {w,d,z:d/Math.sqrt(va/a.length+vb/b.length)}}).filter(m=>Math.abs(m.d)>=MOVE_MIN&&Math.abs(m.z)>=2.2).sort((a,b)=>Math.abs(b.z)-Math.abs(a.z));
+  const score=Math.min(A.length,B.length)*100+moves.length;if(!best||score>best.score)best={score,c,nA:A.length,nB:B.length,up:moves.filter(m=>m.d>0).slice(0,2),dn:moves.filter(m=>m.d<0).slice(0,2)}});
+ return best;
+}
+function contrastHTML(K){if(!K)return '';const lab=P2(K.c.days);const parts=K.up.map(m=>t('climbed',wname(m.w),Math.round(m.d))).concat(K.dn.map(m=>t('dropped',wname(m.w),Math.round(-m.d))));const soft=Math.min(K.nA,K.nB)<SIDE_SOFT;
+ return `<div class="box${soft?' soft':''}"><div class="small">${K.c.ic} ${t('contrast',K.nA,lab,K.nB)}</div><p class="big" style="margin-top:6px">${parts.length?esc(parts.join(' · '))+'.':t('nothingMoved')}</p>${soft?`<div class="sub">${t('hint')}</div>`:''}</div>`}
+function slipsCardHTML(){
+ if(!hasGoals())return '';
+ const slips=slipDays();if(store.slips.length<SLIPS_MIN)return store.slips.length?`<div class="box soft"><div class="small">${t('slipsSoon',store.slips.length)}</div></div>`:'';
+ const D=firstPerDay(store.sessions.filter(s=>s.pool===POOL_VERSION));
+ const dayChips=d=>d.chips||patchChips(d.date)||{};
+ const A=D.filter(s=>slips.has(s.date)),B=D.filter(s=>!slips.has(s.date));
+ // slip days without a session still have chips from The Patch
+ const extra=[...slips].filter(day=>!D.some(s=>s.date===day)).map(day=>({date:day,chips:patchChips(day),duels:null,tipped:null}));
+ const AA=A.concat(extra.filter(x=>x.chips));
+ if(!AA.length||!B.length)return `<div class="box soft"><div class="small">${t('slipsSoon',store.slips.length)}</div></div>`;
+ const rows=[];
+ const rate=(ds,f)=>{const v=ds.map(f).filter(x=>x!=null);return v.length?[v.filter(Boolean).length,v.length]:null};
+ const chipRow=(id)=>{const c=CHIPS.find(x=>x.id===id);const a=rate(AA,d=>{const ch=dayChips(d);return ch[id]!=null?ch[id]===c.heavy:null}),b=rate(B,d=>{const ch=dayChips(d);return ch[id]!=null?ch[id]===c.heavy:null});if(a&&b)rows.push({l:`${c.ic} ${P2(c.link)}`,a,b})};
+ ['sl','caf','al','wt','fd'].forEach(chipRow);
+ twins().filter(tw=>['tomorrow|now','enough|more'].includes(tw.key)).forEach(tw=>{const f=d=>{const m=d.duels?duelMap(d)[tw.key]:null;return m?m.pull:null};const a=rate(AA,f),b=rate(B,f);if(a&&b)rows.push({l:t('over',wname(tw.p),wmid(tw.h)),a,b})});
+ {const f=d=>!d.rank?null:!!(d.tipped&&d.tipped.length);const a=rate(AA,f),b=rate(B,f);if(a&&b&&(a[1]||b[1]))rows.push({l:L('the scale tipped','la balance a basculé'),a,b})}
+ if(!rows.length)return '';
+ const soft=store.slips.length<SLIPS_SOFT;
+ return `<div class="box${soft?' soft':''}"><div class="small">${t('slipsCard',AA.length,B.length)}</div>${rows.map(r=>`<div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)"><span>${r.l}</span><span><b>${r.a[0]}</b>/${r.a[1]} <span class="small">vs</span> ${r.b[0]}/${r.b[1]}</span></div>`).join('')}${soft?`<div class="sub">${t('slipsHint')}</div>`:''}</div>`;
+}
+function leverHTML(links,sess){
+ const n=links.length;const labels=links.map(id=>P2(CHIPS.find(c=>c.id===id).link));
+ let more='';
+ if(store.slips.length>=SLIPS_MIN){const slips=slipDays();const D=firstPerDay(store.sessions.filter(s=>s.pool===POOL_VERSION&&slips.has(s.date)));const m=D.length;if(m&&n){const k=D.filter(s=>(s.links||[]).length>=n).length;more=`<div class="sub">${t('leverSlips',n,k,m)}</div>`}}
+ return `<div class="box ${n>=LINKS_FIRE?'bad':n?'warn':''}"><div class="lever">${CHIPS.filter(c=>c.id!=='cr').map(c=>`<div class="lk ${links.includes(c.id)?(n>=LINKS_FIRE?'hot':'on'):''}" title="${esc(P2(c.link))}"></div>`).join('')}</div><p class="big">${t('leverT',n,labels.join(' · '))}</p>${more}</div>`;
+}
+function helpFor(goalIds){
+ const prov=HELP[store.province]||HELP.other;const seen=new Set(),out=[];
+ (goalIds.length?goalIds:['other']).forEach(g=>{const G=GOALS.find(x=>x.id===g);const k=G?G.help:'general';if(k==='none')return;const h=prov[k]||prov.general;if(!h||seen.has(h.tel+h.n[0]))return;seen.add(h.tel+h.n[0]);out.push(h)});
+ if(goalIds.includes('pills'))out.push(NORS);
+ return out;
+}
+function helpHTML(goalIds){const hs=helpFor(goalIds);if(!hs.length)return '';
+ return `<div class="small" style="margin-top:12px">${t('helpHead')}</div>${hs.map(h=>`<div style="margin:6px 0">${h.tel?`<a class="tel" href="tel:${h.tel.replace(/[^0-9+]/g,'')}">${esc(P2(h.n))} · ${esc(h.tel)}</a>`:`<a class="tel" href="${h.url}" target="_blank" rel="noopener">${esc(P2(h.n))} ↗</a>`} ${P2(h.h)?`<span class="small">${esc(P2(h.h))}</span>`:''}</div>`).join('')}<div class="small">${t('helpChecked',HELP_CHECKED)}</div>`}
+function noteCardHTML(){
+ const su=store.setup;const c=su.contact;const rail=su.goals.some(g=>{const G=GOALS.find(x=>x.id===g);return G&&G.rail});
+ const digits=c&&c.phone?c.phone.replace(/[^0-9+]/g,''):'';
+ return `<div class="box note">${su.note?`<div class="small">${t('noteHead')}</div><p class="big" style="margin-top:6px">${esc(su.note)}</p>`:''}${rail?`<div class="sub">${t('rail')}</div>`:''}${c&&digits?`<div style="margin-top:12px"><a class="btn sm" href="tel:${digits}">${t('call',esc(c.name||''))}</a><a class="btn sm sec" href="sms:${digits}">${t('text',esc(c.name||''))}</a></div>`:''}${helpHTML(su.goals)}<button class="btn sm sec" style="margin-top:10px" data-act="go" data-arg="slip">${t('slipBtn')}</button></div>`;
+}
+
+/* ---------- import / export ---------- */
+function exportJSON(){return JSON.stringify(store,null,1)}
+function tryDownload(text,name){try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'application/json'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}catch(e){}}
+function copyText(text,okKey,failKey){const done=ok=>{ui.msg=t(ok?okKey:failKey);render()};try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(()=>done(true),()=>done(false));return}}catch(e){}try{const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();const ok=document.execCommand('copy');ta.remove();done(ok)}catch(e){done(false)}}
+function handleRestore(file){const rd=new FileReader();rd.onload=()=>{try{const o=JSON.parse(rd.result);if(o&&o.sollum_version&&Array.isArray(o.sessions)){localStorage.setItem(KEY,JSON.stringify(o));store=load();patchCache=null;ui.msg=t('restored');render();return}ui.msg=t('importBad');render()}catch(e){ui.msg=t('importBad');render()}};rd.readAsText(file)}
+function usePaste(text){try{const x=patchExtract(JSON.parse(text));if(!x||!Object.keys(x.days).length){ui.msg=t('pasteBad');render();return}store.patch_paste={days:x.days,roll:x.roll,saved:Date.now()};store.connect.patch=true;patchCache=null;save();ui.pasteText='';ui.msg=t('pasteOk',Object.keys(x.days).length);render()}catch(e){ui.msg=t('pasteBad');render()}}
+function aiText(){
+ const r=S.result,sess=r.sess,R=r.R,Lx=[];
+ Lx.push(L('I just did a Sollum session (forced choices between twenty words in ten twin pairs, to see whether a short night, drinks, caffeine or junk food move my priorities). Here is my data. Help me read it; don’t diagnose me.','Je viens de faire une session Sollum (des choix forcés entre vingt mots en dix paires jumelles, pour voir si une nuit courte, l’alcool, la caféine ou la malbouffe font bouger mes priorités). Voici mes données. Aide-moi à les lire; ne me diagnostique pas.'));
+ const ch=sess.chips?CHIPS.filter(c=>sess.chips[c.id]!=null).map(c=>`${c.en}: ${c.opts.find(o=>o[0]===sess.chips[c.id])[1]}`).join(', '):'not answered';
+ Lx.push(`Session ${sess.date} ${sess.hour}h: ${sess.rounds} rounds, ${sess.choices.length} choices. Day: ${ch}. Links lit: ${(sess.links||[]).length}.`);
+ Lx.push('Ranking: '+r.order.map((w,i)=>`${i+1}. ${wname(w)}`).join(', '));
+ Lx.push('Duels (pull side won?): '+(sess.duels||[]).map(d=>{const tw=twins().find(x=>x.key===d.key);return tw?`${wname(tw.h)}/${wname(tw.p)}=${d.pull?'pull':'healthy'} (${d.rt_ms} ms)`:''}).filter(Boolean).join('; ')+`; median tap ${sess.rt_median} ms`);
+ if(sess.goals&&sess.goals.length)Lx.push('Goal duels: '+sess.goals.map(g=>`${g.key}=${g.pull?'pull':'healthy'}`).join(', '));
+ Lx.push(`Levels (pull − healthy mean place): ${Object.entries(R.levels).map(([k,v])=>`${k} ${v.toFixed(1)}`).join(', ')}. Repeats kept ${sess.agreed} of ${sess.repeats}.`);
+ if(r.N.common)Lx.push(`Normal (${r.N.n} ordinary days). Readings: hesitation ${R.hes.map(h=>wname(h.h)+'/'+wname(h.p)+' ×'+h.ratio).join(', ')||'none'}; flips ${R.flips.map(f=>wname(f.p)+' over '+wname(f.h)).join(', ')||'none'}; tipped ${R.tipped?R.tipped.levels.join('+'):'no'}; fog ${R.fog?'yes':'no'}.`);
+ else Lx.push(`Normal: ${r.N.n} of ${NORMAL_MIN} days — no comparison yet.`);
+ if(store.slips.length)Lx.push(`Slips noted: ${store.slips.length}${ui.aiAmounts?' — '+store.slips.map(s=>`${s.date} ${s.goal} ${s.start||'?'}–${s.end||'?'} ${s.cost&&s.cost.n!=null?s.cost.n+' '+s.cost.unit:''}`).join('; '):' (amounts left out)'}.`);
+ const recent=firstPerDay(store.sessions.filter(s=>s.pool===POOL_VERSION)).slice(-10).map(s=>`${s.date} top3=${orderOf(s.rank).slice(0,3).map(wname).join('/')}${s.chips?' '+Object.entries(s.chips).map(([k,v])=>k+'='+v).join(','):''}${s.tipped?' tipped':''}${slipDays().has(s.date)?' slip':''}`);
+ Lx.push('Last days: '+recent.join(' | '));
+ return Lx.join('\n');
+}
+
+/* ---------- views ---------- */
+const app=document.getElementById('app');
+function render(){
+ let h='';
+ switch(view){
+  case 'home':h=vHome();break;case 'setup':h=vSetup();break;case 'pair':h=vPair();break;case 'chips':h=vChips();break;case 'result':h=vResult();break;
+  case 'connect':h=vConnect();break;case 'calendar':h=vCalendar();break;case 'pattern':h=vPattern();break;case 'settings':h=vSettings();break;case 'slip':h=vSlip();break;case 'slipdone':h=vSlipDone();break;
+  default:h=vHome();
+ }
+ app.innerHTML=h;bind();
+}
+function langSw(){return `<span class="lang"><button type="button" data-act="setLang" data-arg="fr" aria-pressed="${store.lang==='fr'}">FR</button><button type="button" data-act="setLang" data-arg="en" aria-pressed="${store.lang==='en'}">EN</button></span>`}
+function setupTop(){return `<div class="top"><button data-act="setupBack">‹ ${t('back')}</button><span>${langSw()}</span></div>`}
+function topbar(backTo){return `<div class="top"><button type="button" class="menuBtn" data-act="menu" aria-haspopup="dialog" aria-label="${esc(t('menu'))}"><span aria-hidden="true">☰</span></button><button type="button" class="ttl" data-act="go" data-arg="home">Sollum<span class="b">.</span></button>${backTo&&backTo!=='home'?`<button type="button" data-act="go" data-arg="${backTo}">‹ ${t('back')}</button>`:''}<span class="sp"></span>${langSw()}</div>`}
+function vHome(){
+ const n=firstPerDay(store.sessions.filter(s=>s.pool===POOL_VERSION)).length;const pd=patchData();
+ const today=sessDay();const pre=patchChips(today);const links=pre?linksOf(pre):[];
+ const nInc=store.slips.length;
+ const testSub=n?t('days',n)+(pd?` · ${t('patchName')} ✓`:'')+' · '+t('morning'):t('firstLine')+' '+t('morning');
+ return topbar()+`
+ <p class="tagline" style="margin-top:22px">${t('tagline')}</p>
+ ${ui.msg?`<div class="msg">${esc(ui.msg)}</div>`:''}
+ ${pre&&hasGoals()?leverHTML(links,null):''}
+ <div class="doors">
+  <button class="door main" data-act="start"><span class="dt">${t('start')} →</span><span class="ds">${esc(testSub)}</span></button>
+  ${hasGoals()?`<button class="door teal" data-act="go" data-arg="slip"><span class="dt">${t('slipBtn')}</span><span class="ds">${esc(t('incSub',nInc))}</span></button>`:''}
+  <button class="door" style="border-left-color:var(--warn)" data-act="go" data-arg="pattern"><span class="dt">${t('patTitle')}</span><span class="ds">${esc(t('patSub'))}</span></button>
+  <button class="door ink" data-act="go" data-arg="calendar"><span class="dt">${t('calendar')}</span><span class="ds">${esc(n?t('histSub',n):t('noSessions'))}</span></button>
+ </div>
+ <div class="flag">${t('crisis')}</div>
+ <div class="foot">${t('privacy')}<br>${t('about')}</div>`;
+}
+function vSetup(){
+ const st=ui.setupStep,tmp=ui.setupTmp;
+ if(st===0){
+  const opts=[`<span class="chip ${tmp.goals.length===0&&tmp.curious?'on':''}" data-act="goalCurious">${t('curious')}</span>`].concat(GOALS.map(g=>`<span class="chip ${tmp.goals.includes(g.id)?'on':''}" data-act="goalTog" data-arg="${g.id}">${esc(store.lang==='fr'?g.fr:g.en)}</span>`));
+  return (store.setup.done?topbar('settings'):`<div class="top"><span>Sollum</span>${langSw()}</div>`)+`<h2 style="margin-top:30px">${t('q1')}</h2><p class="small">${t('q1hint')}</p><div class="chips big">${opts.join('')}</div>
+  ${tmp.goals.includes('other')?`<label class="lb">${t('otherWord')}</label><input type="text" id="otherWord" value="${esc(tmp.other)}" maxlength="40">`:''}
+  <button class="btn" style="margin-top:22px" data-act="setupNext" ${(tmp.goals.length||tmp.curious)?'':'disabled'}>${t('next')}</button>`;
+ }
+ if(st===1){
+  return setupTop()+`<h2 style="margin-top:30px">${t('q1b')}</h2><p class="small">${t('q1bHint')}</p><input type="text" id="watchWord" value="${esc(tmp.watchLabel)}" maxlength="30">
+  <div class="row" style="margin-top:18px"><button class="btn" data-act="watchUse">${t('useIt')}</button><button class="btn sec" data-act="watchSkip">${t('leaveOut')}</button></div>`;
+ }
+ if(st===2){
+  return setupTop()+`<h2 style="margin-top:30px">${t('q2')}</h2><p class="small">${t('q2hint')}</p><textarea id="noteBox" maxlength="600">${esc(tmp.note)}</textarea>
+  <div class="row" style="margin-top:18px"><button class="btn" data-act="noteNext">${t('next')}</button><button class="btn ghost" data-act="noteSkip">${t('skip')}</button></div>`;
+ }
+ return setupTop()+`<h2 style="margin-top:30px">${t('q3')}</h2><p class="small">${t('q3hint')}</p>
+  <label class="lb">${t('name')}</label><input type="text" id="cName" value="${esc(tmp.cName)}" maxlength="40"><label class="lb">${t('phone')}</label><input type="tel" id="cPhone" value="${esc(tmp.cPhone)}" maxlength="24">
+  <label class="lb">${t('province')}</label>${provSelect('provSel')}<div class="small" style="margin-top:4px">${t('provWhy')}</div>
+  <div class="row" style="margin-top:18px"><button class="btn" data-act="contactDone">${t('done')}</button><button class="btn ghost" data-act="contactSkip">${t('skip')}</button></div>`;
+}
+function vPair(){
+ if(S.paused||!S.current)return `<div class="top"><span></span><span>${t('round',S.round,S.roundsTarget)}</span></div><div class="prog"><i style="width:${Math.min(100,100*(S.choices.length+S.goalPicks.length)/Math.max(1,S.choices.length+S.goalPicks.length+S.queue.length+Math.max(0,S.roundsTarget-S.round)*perRound()))}%"></i></div><p class="pairq">${t('pickQ')}</p><div class="pair"><div class="card"></div><div class="card"></div></div><button class="btn ghost" disabled>${t('undo')}</button>`;
+ const p=S.current,per=perRound(),done=S.choices.length+S.goalPicks.length,total=done+1+S.queue.length+Math.max(0,S.roundsTarget-S.round)*per;
+ const Lw=labelOf(p,p.leftId),Rw=labelOf(p,p.rightId);
+ const lastKind=S.taps[S.taps.length-1];const canUndo=lastKind==='goal'?S.round===1:(S.choices.length&&S.choices[S.choices.length-1].round===S.round);
+ return `<div class="top"><button data-act="abandon">‹ ${t('home')}</button><span>${t('round',S.round,S.roundsTarget)}</span></div>
+ <div class="prog"><i style="width:${Math.min(100,100*done/total)}%"></i></div>
+ <p class="pairq">${t('pickQ')}</p>
+ <div class="pair"><div class="card ${sizeClass(Lw.length>=Rw.length?Lw:Rw)}" data-act="choose" data-arg="${esc(p.leftId)}">${esc(Lw)}</div><div class="card ${sizeClass(Lw.length>=Rw.length?Lw:Rw)}" data-act="choose" data-arg="${esc(p.rightId)}">${esc(Rw)}</div></div>
+ <button class="btn ghost" data-act="undo" ${canUndo?'':'disabled'}>${t('undo')}</button>`;
+}
+function vChips(){
+ const rows=visibleChips(ui.pre).map(c=>{const pre=ui.pre&&ui.pre[c.id]!=null;const lab=c.id==='wt'&&store.setup.watch?`${c.ic} ${esc(store.setup.watch[store.lang]||store.setup.watch.en)} — ${esc(L('today','aujourd’hui'))}`:`${c.ic} ${esc(store.lang==='fr'?c.fr:c.en)}`;
+  return `<div class="q"><div class="lb">${lab}${pre?` <span class="small">· ${t('fromPatch')}</span>`:''}</div><div class="chips">${c.opts.map(o=>`<span class="chip ${ui.chips[c.id]===o[0]?'on':''}${pre&&ui.pre[c.id]===o[0]?' pre':''}" data-act="chip" data-arg="${c.id}:${o[0]}">${esc(store.lang==='fr'?o[2]:o[1])}</span>`).join('')}</div></div>`}).join('');
+ return `<div class="top"><span></span><span>${t('round',S.round,S.round)}</span></div><h2 style="margin-top:30px">${t('chipsTitle')}</h2><p class="small">${t('chipsHint')}</p>${rows}
+ <button class="btn" style="margin-top:22px" data-act="finish">${t('done')}</button><button class="btn ghost" data-act="finishSkip">${t('skip')}</button>`;
+}
+function orderList(sess,order){
+ const vals=order.map(w=>sess.strength[w]),mn=Math.min(...vals),mx=Math.max(...vals),span=(mx-mn)||1;const show=ui.showAll?order:order.slice(0,10);
+ return `<ol class="rank">${show.map((w,i)=>{const wd=8+92*(sess.strength[w]-mn)/span,sw=Math.min(60,92*sess.se[w]/span);return `<li class="${i>=10?'dim':''}"><span class="n">${i+1}</span><div><div>${esc(wname(w))}</div><div class="bar"><b style="width:${wd}%"></b><s style="left:${Math.max(0,wd-sw)}%;width:${2*sw}%"></s></div></div></li>`}).join('')}</ol>${order.length>10?`<button class="btn ghost" data-act="toggleAll">${ui.showAll?t('showTop'):t('showAll')}</button>`:''}`;
+}
+function chipsLine(ch){if(!ch)return '';return CHIPS.filter(c=>ch[c.id]!=null).map(c=>`${c.ic} ${esc(chipLabel(c,ch[c.id]))}`).join(' · ')}
+function readingsHTML(R,sess,N){
+ const out=[];
+ if(R.fog)out.push(`<div class="box warn"><p class="big">${t('fog',R.fog.k,R.fog.n)}</p></div>`);
+ R.hes.forEach(h=>out.push(`<div class="box warn"><p class="big">${t('hes',wname(h.h),wname(h.p))}</p></div>`));
+ const flipList=R.flips.map(f=>t('over',wmid(f.p),wmid(f.h))).join(', ');
+ if(!R.tipped){if(R.flips.length===1){const f=R.flips[0];out.push(`<div class="box warn"><p class="big">${t('flip',wname(f.p),wmid(f.h),f.k,f.n)}</p></div>`)}
+ else if(R.flips.length>1)out.push(`<div class="box warn"><p class="big">${t('flips',flipList,R.flips[0].n)}</p></div>`)}
+ if(R.tipped){const lv=joinList(R.tipped.levels.map(l=>P2(LEVELS[l])));const mv=R.tipped.movers.filter(m=>m.p&&m.h).slice(0,3).map(m=>t('over',wmid(m.p),wmid(m.h))).join(', ');out.push(`<div class="box bad"><p class="big">${t('tipped',lv,mv)}</p>${R.flips.length?`<div class="sub">${t('alsoFlips',flipList)}</div>`:''}${R.fog?`<div class="sub">${t('fogSoft')}</div>`:''}</div>`)}
+ if(!R.tipped)R.words.forEach(l=>out.push(`<div class="box warn"><p class="big">${esc(warnText(l))}</p></div>`));
+ if(!out.length)out.push(`<div class="box ok"><p class="big">${t('sameAsNormal')}</p></div>`);
+ out.push(`<div class="small">${t('normalOn',N.n)}${N.n<NORMAL_SOFT?' '+t('normalSoft'):''}${sess.reflex?' '+t('reflexN',sess.reflex):''}</div>`);
+ return out.join('');
+}
+function vResult(){
+ const r=S.result,sess=r.sess,N=r.N,R=r.R;let main='';
+ const links=sess.links||[];
+ if(r.first||!N.common){
+  main=`<h2>${t('yourOrder')}</h2>${orderList(sess,r.order)}<div class="box"><p class="big">${t('hook')}</p>${!r.first?`<div class="sub">${t('normalSoon',Math.max(1,NORMAL_MIN-N.n))}</div>`:''}</div>${hasGoals()&&sess.chips?leverHTML(links,sess):''}${hasGoals()&&links.length>=LINKS_FIRE?noteCardHTML():''}`;
+ }else{
+  main=readingsHTML(R,sess,N)+(hasGoals()&&sess.chips?leverHTML(links,sess):'')+(fires(R,links)?noteCardHTML():'')+contrastHTML(contrastOf(store.sessions,activeWords()))+slipsCardHTML()
+   +`<button class="btn sec" data-act="toggleOrder">${ui.showOrder?t('hideOrder'):t('showOrder')}</button>${ui.showOrder?orderList(sess,r.order):''}`;
+ }
+ const offer=!store.connect_asked&&!store.connect.patch?`<div class="box"><h3>${t('connectTitle')}</h3><p class="small" style="margin:0 0 6px">${t('connectLead')}</p><button class="btn sm" data-act="go" data-arg="connect">${t('connect')}</button><button class="btn sm sec" data-act="connectDone">${t('notNow')}</button></div>`:'';
+ return `<div class="top"><span>${sess.date}${sess.chips?' · '+chipsLine(sess.chips):''}</span>${langSw()}</div>${main}
+ ${sess.rounds<ROUNDS_MAX?`<p class="small">${t('softMiddle')}</p><button class="btn ghost" data-act="keep">${t('keep')}</button>`:''}${offer}
+ <button class="btn ghost" data-act="copyAI">${t('copyAI')}</button>${store.slips.length?`<label class="small" style="display:block;text-align:center"><input type="checkbox" id="aiAmounts" ${ui.aiAmounts?'checked':''}> ${t('aiAmounts')}</label>`:''}
+ ${ui.msg?`<div class="msg">${esc(ui.msg)}</div>${ui.msg===t('copyFail')?`<textarea class="mono" readonly>${esc(aiText())}</textarea>`:''}`:''}
+ <button class="btn" data-act="go" data-arg="home">${t('done')}</button>`;
+}
+function connectRows(){
+ const live=patchLiveCount();const pasted=store.patch_paste?Object.keys(store.patch_paste.days).length:0;const st=live!=null?t('patchFound',live):pasted?t('patchPasted',pasted):t('patchNone');
+ return `<div class="sw"><div><div>${t('patchName')}</div><div class="st">${st}</div></div><button class="tog ${store.connect.patch?'on':''}" data-act="togPatch" aria-pressed="${store.connect.patch}"><i></i></button></div>
+ <div class="sw"><div><div>${t('v3kName')}</div><div class="st">${t('v3kSoon')}</div></div><button class="tog" disabled><i></i></button></div>
+ ${live==null?`<div class="sect">${t('pasteTitle')}</div><p class="small">${t('pasteHint')}</p><textarea class="mono" id="pasteBox" placeholder="{ &quot;app&quot;: &quot;the-patch&quot;, … }">${esc(ui.pasteText)}</textarea><button class="btn sec" data-act="usePaste">${t('paste')}</button>`:''}`;
+}
+function vConnect(){return topbar('result')+`<h2>${t('connectTitle')}</h2><p class="small">${t('connectLead')}</p>${connectRows()}${ui.msg?`<div class="msg">${esc(ui.msg)}</div>`:''}<button class="btn" data-act="connectDone">${t('done')}</button>`}
+function vSlip(){
+ const s=ui.slip;const goals=store.setup.goals.length?store.setup.goals:['other'];const today=sessDay();
+ const u=t('units');
+ return topbar('home')+`<h2>${t('slipTitle')}</h2>
+ <div class="sect">${t('slipWhat')}</div><div class="chips">${goals.map(g=>{const G=GOALS.find(x=>x.id===g);const lab=g==='other'&&store.setup.other?store.setup.other:(store.lang==='fr'?G.fr:G.en);return `<span class="chip ${s.goal===g?'on':''}" data-act="slipGoal" data-arg="${g}">${esc(lab)}</span>`}).join('')}</div>
+ <div class="sect">${t('slipWhen')}</div><div class="chips"><span class="chip ${s.date===today?'on':''}" data-act="slipDay" data-arg="${today}">${t('today')}</span><span class="chip ${s.date===shiftDay(today,-1)?'on':''}" data-act="slipDay" data-arg="${shiftDay(today,-1)}">${t('yesterday')}</span></div>
+ <div class="row"><div style="flex:1"><label class="lb">${t('slipStart')}</label><input type="time" id="slipStart" value="${esc(s.start||'')}"></div><div style="flex:1"><label class="lb">${t('slipEnd')}</label><input type="time" id="slipEnd" value="${esc(s.end||'')}"></div></div>
+ <div class="sect">${t('slipCost')}</div><div class="row"><input type="number" id="slipN" inputmode="decimal" step="any" value="${s.n!=null?esc(s.n):''}" style="flex:1"><select id="slipUnit" style="flex:1">${Object.keys(u).map(k=>`<option value="${k}" ${s.unit===k?'selected':''}>${esc(u[k])}</option>`).join('')}</select></div>
+ ${helpHTML(goals)}
+ <div class="row" style="margin-top:18px"><button class="btn" data-act="slipSave" ${s.goal?'':'disabled'}>${t('save')}</button><button class="btn sec" data-act="go" data-arg="home">${t('cancel')}</button></div>`;
+}
+function chainLine(slip){
+ const p=patchSum(slip.date);const parts=[];
+ if(p){if(typeof p.sleep==='number')parts.push(L(`${p.sleep} h sleep`,`${p.sleep} h de sommeil`));
+  const c=p.caffeine||{};if((c.servings||0)>0||(c.energyDrinks||0)>0)parts.push(L(`${c.servings||0} caffeine${c.energyDrinks?` (+${c.energyDrinks} energy)`:''}${c.last?' by '+c.last:''}`,`${c.servings||0} caféine${c.energyDrinks?` (+${c.energyDrinks} énergisante)`:''}${c.last?' jusqu’à '+c.last:''}`));
+  if(p.sugar&&p.sugar.servings>0)parts.push(L(`${p.sugar.servings} sweet${p.sugar.servings>1?'s':''}`,`${p.sugar.servings} sucrerie${p.sugar.servings>1?'s':''}`));
+  if(p.meals)parts.push(p.meals.count?L(`${p.meals.count} meal${p.meals.count>1?'s':''}${p.meals.last?', last '+p.meals.last:''}${p.meals.low?' (thin)':''}`,`${p.meals.count} repas${p.meals.last?', dernier '+p.meals.last:''}${p.meals.low?' (léger)':''}`):L('no meal logged','aucun repas noté'));
+  const a=p.alcohol||{};if(a.drinks)parts.push(L(`${a.drinks} drink${a.drinks>1?'s':''}${a.late?' late':''}`,`${a.drinks} verre${a.drinks>1?'s':''}${a.late?' tard':''}`));
+  if(p.crash)parts.push(L(`crash${p.crashAt?' at '+p.crashAt.join(', '):''}`,`crash${p.crashAt?' à '+p.crashAt.join(', '):''}`));
+ }else{const ch=firstPerDay(store.sessions).find(s=>s.date===slip.date);const cc=ch&&ch.chips;if(cc)CHIPS.forEach(c=>{if(cc[c.id]!=null)parts.push(`${c.ic} ${chipLabel(c,cc[c.id])}`)})}
+ const G=GOALS.find(x=>x.id===slip.goal);const what=slip.goal==='other'&&store.setup.other?store.setup.other:(G?(store.lang==='fr'?G.fr:G.en):slip.goal);
+ parts.push(`<b>${esc(what)}${slip.start?' '+esc(slip.start):''}${slip.end?'–'+esc(slip.end):''}</b>`);
+ return parts.length>1?parts.join(' → '):(p?parts.join(''):t('chainNone')+' '+parts.join(''));
+}
+function vSlipDone(){const s=ui.slipSaved;return topbar('home')+`<div class="box ok"><p class="big">${t('slipSaved')}</p></div><div class="box"><div class="small">${t('hoursBefore')}</div><p style="margin:6px 0 0">${chainLine(s)}</p><div class="sub">${t('amountsOff')}</div></div>${slipsCardHTML()}${noteCardHTML()}<button class="btn" data-act="go" data-arg="home">${t('done')}</button>`}
+/* ---------- your pattern: the vicious circle and the lever ---------- */
+const PAT_STEPS=[
+ {id:'rest',  en:'Rested',               fr:'Reposé'},
+ {id:'sleep', en:'4 h of sleep',         fr:'4 h de sommeil'},
+ {id:'caf',   en:'+ 4 energy drinks',    fr:'+ 4 boissons énergisantes'},
+ {id:'sugar', en:'+ sugar, no meal',     fr:'+ du sucre, pas de repas'},
+ {id:'al',    en:'+ 3 beers',            fr:'+ 3 bières'},
+ {id:'bet',   en:'+ “just one bet”',      fr:'+ « juste une mise »'}
+];
+/* the physics, kept simple: reasons weigh 3 units and sit at a distance from the pivot that shrinks with every link; the pull weighs
+   more with every link and stays far out. torque = weight x distance. The beam leans toward the bigger torque. */
+const PAT_D=[1.0,0.82,0.68,0.6,0.55,0.24], PAT_P=[0.9,1.0,1.15,1.3,1.6,2.2], PAT_PD=0.95, PAT_W=3;
+let pat={step:0,extra:0};
+function patTorque(){const dh=PAT_D[pat.step],h=(PAT_W+pat.extra)*dh,p=PAT_P[pat.step]*PAT_PD;return {h,p,dh}}
+function patAngle(){const {h,p}=patTorque();const d=p-h;return Math.max(-14,Math.min(14,d*9))}
+function patCaption(){
+ const {h,p,dh}=patTorque();const tipped=p>h, close=!tipped&&p>h*0.82;
+ const add=pat.extra?(store.lang==='fr'?` Tu as ajouté ${pat.extra} raison${pat.extra>1?'s':''} — chacune pèse ${Math.round(dh*100)}\u00a0% de ce qu’elle pèse un jour reposé.`:` You added ${pat.extra} reason${pat.extra>1?'s':''} — each weighs ${Math.round(dh*100)}% of what it weighs on a rested day.`):'';
+ const C={
+  rest:L('Rested, your reasons sit far out on the beam. Family, Tomorrow and Love outweigh the pull easily.','Reposé, tes raisons sont loin sur la poutre. La famille, demain et l’amour l’emportent facilement.'),
+  sleep:L('A short night. Nothing has happened yet — but your reasons have slid a little toward the pivot.','Une nuit courte. Rien n’est encore arrivé — mais tes raisons ont glissé un peu vers le pivot.'),
+  caf:L('Caffeine to fix the tired. It works for a while; the pull gets a little heavier, your reasons slide closer.','De la caféine pour régler la fatigue. Ça marche un temps; ce qui tire devient un peu plus lourd, tes raisons glissent plus près.'),
+  sugar:L('Sugar instead of a meal. The crash is booked for later. Still holding.','Du sucre au lieu d’un repas. Le crash est réservé pour plus tard. Ça tient encore.'),
+  al:L('Three beers to quiet the storm. Right now starts to make more sense than Tomorrow; Fun feels better than Work. Not tipped yet — but close.','Trois bières pour calmer la tempête. Tout de suite commence à avoir plus de sens que Demain; le plaisir a l’air mieux que le travail. Pas encore basculé — mais proche.'),
+  bet:L('“Just one bet” for the lift. Your reasons are right next to the pivot now: they’re all still there, they just don’t weigh anything from where they sit.','« Juste une mise » pour le remontant. Tes raisons sont collées sur le pivot maintenant\u00a0: elles sont toutes encore là, elles ne pèsent juste plus rien d’où elles sont.')
+ }[PAT_STEPS[pat.step].id];
+ const state=tipped?L(' → The scale tips.',' → La balance bascule.'):close?L(' → On the edge.',' → Sur le bord.'):'';
+ return C+state+add;
+}
+function leverSVG(){
+ const cx=200,by=118,half=150,ang=patAngle(),{dh}=patTorque();
+ const xh=cx-half*dh, xp=cx+half*PAT_PD;
+ const hw=Math.min(3+pat.extra,9);
+ const names=[L('Family','Famille'),L('Tomorrow','Demain'),L('Love','Amour'),L('Future','Avenir'),L('Kids','Enfants'),L('Health','Santé'),L('Work','Travail'),L('Home','Maison'),L('Friends','Amis')];
+ const blocks=[];
+ for(let i=0;i<hw;i++){const col=i%3,row=Math.floor(i/3);const x=xh-57+col*38,y=by-25-row*24;blocks.push(`<rect x="${x}" y="${y}" width="36" height="22" rx="5" fill="var(--teal)"/><text x="${x+18}" y="${y+14.5}" font-size="7.5" font-weight="700" text-anchor="middle" style="fill:#fff">${esc(names[i])}</text>`)}
+ const ps=Math.round(40+PAT_P[pat.step]*8);
+ return `<svg viewBox="-24 0 448 180" role="img" aria-label="${esc(L('A lever: your reasons on the left, the pull on the right, the pivot in the middle.','Un levier : tes raisons à gauche, ce qui tire à droite, le pivot au milieu.'))}">
+  <g class="beam" style="transform-origin:${cx}px ${by}px;transform:rotate(${ang}deg)">
+   <rect x="${cx-half-12}" y="${by-3}" width="${2*half+24}" height="6" rx="3" fill="var(--ink)"/>
+   ${blocks.join('')}
+   <rect x="${xp-ps/2}" y="${by-3-ps}" width="${ps}" height="${ps}" rx="6" fill="var(--acc)"/>
+   <text x="${xp}" y="${by-3-ps/2+4}" font-size="9" font-weight="700" text-anchor="middle" style="fill:#fff">${esc(L('The pull','Ça tire'))}</text>
+  </g>
+  <polygon points="${cx-16},${by+42} ${cx+16},${by+42} ${cx},${by+4}" fill="var(--mute)"/>
+  <text x="${cx}" y="${by+58}" font-size="11" text-anchor="middle" style="fill:var(--mute)">${esc(L('the pivot','le pivot'))}</text>
+ </svg><div class="small" style="display:flex;gap:14px;justify-content:center;margin-top:2px"><span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--teal);margin-right:5px"></span>${esc(L('your reasons','tes raisons'))}</span><span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--acc);margin-right:5px"></span>${esc(L('the pull','ce qui tire'))}</span></div>`;
+}
+function circleSVG(){
+ const nodes=[[L('4 h of sleep','4 h de sommeil'),'🌙'],[L('Caffeine','Caféine'),'☕'],[L('Sugar, no meal','Sucre, pas de repas'),'🍫'],[L('Alcohol','Alcool'),'🍺'],[L('Gambling','Le jeu'),'🎲'],[L('Crash','Crash'),'⚡']];
+ const cx=200,cy=185,R=108,n=nodes.length,ang=i=>-Math.PI/2+i*2*Math.PI/n;
+ const arcs=nodes.map((_,i)=>{const a1=ang(i)+0.3,a2=ang(i+1)-0.3;const x1=cx+R*Math.cos(a1),y1=cy+R*Math.sin(a1),x2=cx+R*Math.cos(a2),y2=cy+R*Math.sin(a2);return `<path d="M${x1.toFixed(1)},${y1.toFixed(1)} A${R},${R} 0 0 1 ${x2.toFixed(1)},${y2.toFixed(1)}" fill="none" stroke="var(--acc)" stroke-width="2.5" marker-end="url(#ah)"/>`}).join('');
+ const dots=nodes.map((nd,i)=>{const a=ang(i),x=cx+R*Math.cos(a),y=cy+R*Math.sin(a),lx=cx+(R+50)*Math.cos(a),ly=cy+(R+44)*Math.sin(a)+4;
+  return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="26" fill="var(--card)" stroke="var(--line)" stroke-width="1.5"/><text x="${x.toFixed(1)}" y="${(y+7).toFixed(1)}" font-size="20" text-anchor="middle">${nd[1]}</text><text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" font-size="12" font-weight="700" text-anchor="middle">${esc(nd[0])}</text>`}).join('');
+ return `<svg viewBox="0 0 400 370" role="img" aria-label="${esc(L('The circle: a short night, caffeine, sugar, alcohol, gambling, a crash — and back to a short night.','Le cercle : une nuit courte, la caféine, le sucre, l’alcool, le jeu, un crash — et retour à une nuit courte.'))}"><defs><marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--acc)"/></marker></defs>${arcs}${dots}<text x="${cx}" y="${cy-4}" font-size="12" text-anchor="middle" style="fill:var(--mute)">${esc(L('each one','chacun'))}</text><text x="${cx}" y="${cy+12}" font-size="12" text-anchor="middle" style="fill:var(--mute)">${esc(L('fixes the last','répare le précédent'))}</text></svg>`;
+}
+function vPattern(){
+ const mine=hasGoals()&&store.slips.length?(()=>{const last=store.slips[store.slips.length-1];return `<div class="box"><div class="eyebrow" style="margin-top:0">${t('patMine')}</div><p style="margin:0">${chainLine(last)}</p></div>${slipsCardHTML()}`})():'';
+ return topbar('home')+`<h2>${t('patTitle')}</h2>
+ ${mine}
+ <div class="box circle"><div class="eyebrow" style="margin-top:0">${t('patCircleHead')}</div>${circleSVG()}<p class="small" style="margin:6px 0 0">${t('patCircleText')}</p></div>
+ <div class="box leverbox"><div class="eyebrow" style="margin-top:0">${t('patLeverHead')}</div>${leverSVG()}
+  <p class="caption" id="patCap">${esc(patCaption())}</p>
+  <div class="steps">${PAT_STEPS.map((st,i)=>`<span class="chip ${pat.step===i?'on':''}" data-act="patStep" data-arg="${i}">${esc(store.lang==='fr'?st.fr:st.en)}</span>`).join('')}</div>
+  <div class="row" style="margin-top:6px"><button class="btn sm sec" data-act="patAdd">${t('patAdd')}</button>${pat.extra?`<button class="btn sm sec" data-act="patReset">${t('patReset')}</button>`:''}</div>
+  <p class="small" style="margin:10px 0 0">${t('patLeverText')}</p></div>
+ <div class="box soft"><p class="big">${t('patTake')}</p></div>`;
+}
+function vCalendar(){
+ const slips=slipDays();const days=firstPerDay(store.sessions.filter(s=>s.pool===POOL_VERSION)).slice().reverse();
+ const list=days.length?days.map(s=>{const top3=orderOf(s.rank).slice(0,3).map(wname).join(' · ');const marks=[];if(s.fog)marks.push(L('shaky hand','main qui tremble'));if(s.hes&&s.hes.length)marks.push(L('hesitation','hésitation'));if(s.flips&&s.flips.length)marks.push(L('flip','bascule'));if(s.tipped&&s.tipped.length)marks.push(L('tipped','balance basculée'));if(slips.has(s.date))marks.push(`<b>${t('slipMark')}</b>`);
+  return `<div class="day"><div><b>${s.date}</b> <span class="small">${chipsLine(s.chips)}${s.links&&s.links.length?` · ${s.links.length} ${L('links','maillons')}`:''}</span></div><div>${esc(top3)}</div>${marks.length?`<div class="small">${marks.join(' · ')}</div>`:''}</div>`}).join(''):`<p class="small">${t('noSessions')}</p>`;
+ return topbar('home')+`<h2>${t('calTitle')}</h2>${contrastHTML(contrastOf(store.sessions,activeWords()))}${slipsCardHTML()}${list}`;
+}
+function provSelect(id){return `<select id="${id}">${PROVS.map(p=>`<option value="${p[0]}" ${store.province===p[0]?'selected':''}>${esc(store.lang==='fr'?p[2]:p[1])}</option>`).join('')}</select>`}
+function vSettings(){
+ const su=store.setup;const gl=su.goals.map(g=>{const G=GOALS.find(x=>x.id===g);return g==='other'&&su.other?su.other:(G?(store.lang==='fr'?G.fr:G.en):g)}).join(', ')||t('curious');
+ return topbar('home')+`<h2>${t('setTitle')}</h2>
+ <div class="sect">${t('language')}</div><div class="chips"><span class="chip ${store.lang==='en'?'on':''}" data-act="setLang" data-arg="en">English</span><span class="chip ${store.lang==='fr'?'on':''}" data-act="setLang" data-arg="fr">Français</span></div>
+ <div class="sect">${t('province')}</div>${provSelect('provSel')}
+ <div class="sect">${t('watching')}</div><div class="sw"><div><div>${esc(gl)}</div>${su.watch?`<div class="st">${esc(su.watch[store.lang]||su.watch.en)}</div>`:''}</div><button class="btn sm sec" data-act="setupStart">${t('changeWatch')}</button></div>
+ ${hasGoals()?`<div class="sect">${t('noteSet')}</div><textarea id="noteEdit" maxlength="600">${esc(su.note||'')}</textarea><div class="sect">${t('contactSet')}</div><div class="row"><input type="text" id="cNameEdit" placeholder="${t('name')}" value="${esc(su.contact?su.contact.name:'')}"><input type="tel" id="cPhoneEdit" placeholder="${t('phone')}" value="${esc(su.contact?su.contact.phone:'')}"></div><button class="btn sm sec" data-act="saveNote">${t('save')}</button>`:''}
+ <div class="sect">${t('connectTitle')}</div><p class="small">${t('connectLead')}</p>${connectRows()}
+ <div class="sect">${t('exportData')}</div><button class="btn sec" data-act="export">${t('exportData')}</button>
+ ${ui.exportText?`<p class="small">${t('exportHint')}</p><textarea class="mono" readonly id="exp">${esc(ui.exportText)}</textarea><div class="row"><button class="btn sec" data-act="copyExport">${t('copy')}</button><button class="btn sec" data-act="download">${t('download')}</button></div>`:''}
+ <label class="btn sec" for="fRestore">${t('restore')}</label><input type="file" id="fRestore" accept=".json,application/json" style="display:none">
+ <button class="btn danger" data-act="reset">${ui.resetArmed?t('resetAgain'):t('reset')}</button>
+ ${ui.msg?`<div class="msg">${esc(ui.msg)}</div>`:''}
+ <div class="foot">${t('privacy')} ${t('storage')}<br>${t('about')}<br>Sollum v${VER} · ${L('words','mots')} ${POOL_VERSION} · ${L('help lines','lignes d’aide')} ${t('helpChecked',HELP_CHECKED)}</div>`;
+}
+
+/* ---------- the sheet and the menu (as in The Patch) ---------- */
+const sheet=document.getElementById('sheet'), sheetBg=document.getElementById('sheetBg');
+let sheetOpener=null;
+function showSheet(html,opener){if(!sheet.classList.contains('on'))sheetOpener=opener||document.activeElement;sheet.innerHTML=html;sheet.classList.add('on');sheetBg.classList.add('on');sheet.setAttribute('aria-hidden','false');document.documentElement.classList.add('locked');
+ sheet.querySelectorAll('[data-act]').forEach(el=>el.addEventListener('click',ev=>{ev.preventDefault();const a=el.dataset.act,arg=el.dataset.arg;if(a!=='feedbackSend'&&a!=='feedbackShare'&&a!=='feedbackCopy')closeSheet(true);act(a,arg)}));
+ const c=sheet.querySelector('#closeSheet');if(c)c.onclick=()=>closeSheet();
+ const ta=sheet.querySelector('#fbText');if(ta)ta.oninput=()=>{fbDraft=ta.value};
+ sheet.scrollTop=0;try{sheet.focus({preventScroll:true})}catch(e){}}
+function closeSheet(noFocus){if(!sheet.classList.contains('on'))return;sheet.classList.remove('on');sheetBg.classList.remove('on');sheet.setAttribute('aria-hidden','true');document.documentElement.classList.remove('locked');const o=sheetOpener;sheetOpener=null;if(noFocus!==true&&o&&document.body.contains(o)){try{o.focus({preventScroll:true})}catch(e){}}}
+sheetBg.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});sheetBg.onclick=()=>closeSheet();
+document.addEventListener('keydown',e=>{if(sheet.classList.contains('on')&&e.key==='Escape'){e.preventDefault();closeSheet()}});
+function openMenu(){
+ const items=[['go','home',t('home')],['start','',t('start')]];
+ if(hasGoals())items.push(['go','slip',t('slipBtn')]);
+ items.push(['go','pattern',t('patTitle')],['go','calendar',t('calendar')],['how','',t('howTitle')],['go','settings',t('settings')],['feedback','',t('improve')],['about','',t('aboutTitle')]);
+ showSheet(`<div class="handle"></div><h3 id="sheetTitle">${t('menu')}</h3><div class="menu">${items.map(([a,arg,l])=>`<button type="button" data-act="${a}" data-arg="${arg}">${esc(l)}</button>`).join('')}</div><p class="small" style="margin:12px 0 0">Sollum v${VER} · ${L('help lines','lignes d’aide')} ${t('helpChecked',HELP_CHECKED)}</p><div class="row" style="margin-top:12px"><button type="button" class="btn sm sec" id="closeSheet">${t('close')}</button></div>`);
+}
+function openHow(){showSheet(`<div class="handle"></div><h3 id="sheetTitle">${t('howTitle')}</h3>${t('howBody')}<div class="row" style="margin-top:12px"><button type="button" class="btn sm sec" id="closeSheet">${t('close')}</button></div>`)}
+function openAbout(){showSheet(`<div class="handle"></div><h3 id="sheetTitle">${t('aboutTitle')}</h3>${t('aboutBody')}<p class="small">Sollum v${VER} · ${L('words','mots')} ${POOL_VERSION} · ${L('help lines','lignes d’aide')} ${t('helpChecked',HELP_CHECKED)}</p><div class="row" style="margin-top:12px"><button type="button" class="btn sm" data-act="feedback">${t('improve')}</button><button type="button" class="btn sm sec" id="closeSheet">${t('close')}</button></div>`)}
+const FEEDBACK_TO='tobiedavid@hotmail.com';let fbDraft='';
+function fbMsg(){return (fbDraft||'').trim()+'\n\n— Sollum v'+VER+' ('+String(store.lang||'en').toUpperCase()+')'}
+function openFeedback(){showSheet(`<div class="handle"></div><h3 id="sheetTitle">${t('improve')}</h3><p class="small">${t('fbLead',FEEDBACK_TO)}</p><textarea id="fbText" style="min-height:120px" aria-label="${esc(t('fbLabel'))}">${esc(fbDraft)}</textarea><div class="row" style="margin-top:10px;flex-wrap:wrap"><button type="button" class="btn sm" data-act="feedbackSend">${t('fbSend')}</button>${navigator.share?`<button type="button" class="btn sm sec" data-act="feedbackShare">${t('fbShare')}</button>`:''}<button type="button" class="btn sm sec" data-act="feedbackCopy">${t('copy')}</button><button type="button" class="btn sm sec" id="closeSheet">${t('close')}</button></div><div class="small" id="fbNote"></div>`)}
+function fbNote(x){const n=document.getElementById('fbNote');if(n)n.textContent=x}
+
+/* ---------- events ---------- */
+function bind(){
+ app.querySelectorAll('[data-act]').forEach(el=>{el.addEventListener('click',ev=>{if(el.tagName==='A'&&!el.dataset.act)return;ev.preventDefault();act(el.dataset.act,el.dataset.arg)})});
+ const ps=document.getElementById('provSel');if(ps)ps.addEventListener('change',e=>{store.province=e.target.value;save();if(view!=='setup')render()});
+ const fr=document.getElementById('fRestore');if(fr)fr.addEventListener('change',e=>{if(e.target.files[0])handleRestore(e.target.files[0])});
+ const pb=document.getElementById('pasteBox');if(pb)pb.addEventListener('input',e=>{ui.pasteText=e.target.value});
+ const ai=document.getElementById('aiAmounts');if(ai)ai.addEventListener('change',e=>{ui.aiAmounts=e.target.checked});
+ const ow=document.getElementById('otherWord');if(ow)ow.addEventListener('input',e=>{ui.setupTmp.other=e.target.value});
+ const ww=document.getElementById('watchWord');if(ww)ww.addEventListener('input',e=>{ui.setupTmp.watchLabel=e.target.value});
+ const nb=document.getElementById('noteBox');if(nb)nb.addEventListener('input',e=>{ui.setupTmp.note=e.target.value});
+ const cn=document.getElementById('cName');if(cn)cn.addEventListener('input',e=>{ui.setupTmp.cName=e.target.value});
+ const cp=document.getElementById('cPhone');if(cp)cp.addEventListener('input',e=>{ui.setupTmp.cPhone=e.target.value});
+ ['slipStart','slipEnd','slipN','slipUnit'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('input',e=>{if(id==='slipStart')ui.slip.start=e.target.value;if(id==='slipEnd')ui.slip.end=e.target.value;if(id==='slipN')ui.slip.n=e.target.value===''?null:Number(e.target.value);if(id==='slipUnit')ui.slip.unit=e.target.value})});
+}
+function newSetupTmp(){const su=store.setup;return {goals:su.goals.slice(),curious:su.done&&!su.goals.length,other:su.other||'',watchLabel:'',note:su.note||'',cName:su.contact?su.contact.name:'',cPhone:su.contact?su.contact.phone:''}}
+function defaultWatch(goals){const g=GOALS.find(x=>goals.includes(x.id)&&x.id!=='other')||GOALS.find(x=>goals.includes(x.id));return g?g.watch:['It','Ça']}
+function act(a,arg){
+ if(a!=='reset')ui.resetArmed=false;
+ switch(a){
+  case 'go':ui.msg='';ui.exportText='';if(arg==='home')S=null;if(arg==='result'&&!(S&&S.result)){view='home';render();break}if(arg==='slip'){ui.slip={goal:store.setup.goals.length===1?store.setup.goals[0]:null,date:sessDay(),start:'',end:'',n:null,unit:'money'}}view=arg;render();break;
+  case 'lang':store.lang=store.lang==='fr'?'en':'fr';save();render();break;
+  case 'menu':openMenu();break;
+  case 'patStep':pat.step=Math.max(0,Math.min(PAT_STEPS.length-1,+arg));render();break;
+  case 'patAdd':pat.extra=Math.min(6,pat.extra+1);render();break;
+  case 'patReset':pat.extra=0;render();break;
+  case 'how':openHow();break;
+  case 'about':openAbout();break;
+  case 'feedback':openFeedback();break;
+  case 'feedbackSend':{if(!(fbDraft||'').trim()){fbNote(t('fbEmpty'));break}location.href='mailto:'+FEEDBACK_TO+'?subject='+encodeURIComponent('Sollum v'+VER+' — '+L('a recommendation','une recommandation'))+'&body='+encodeURIComponent(fbMsg());break}
+  case 'feedbackShare':{if(!(fbDraft||'').trim()){fbNote(t('fbEmpty'));break}try{navigator.share({text:fbMsg()}).catch(()=>{})}catch(e){}break}
+  case 'feedbackCopy':{if(!(fbDraft||'').trim()){fbNote(t('fbEmpty'));break}const m=fbMsg();try{navigator.clipboard.writeText(m).then(()=>fbNote(t('fbCopied',FEEDBACK_TO)),()=>fbNote(t('copyFail')))}catch(e){fbNote(t('copyFail'))}break}
+  case 'setLang':store.lang=arg;save();render();break;
+  case 'setProv':store.province=arg;save();render();break;
+  case 'start':ui.msg='';if(!store.setup.done){ui.setupStep=0;ui.setupTmp=newSetupTmp();view='setup';render();break}startSession();break;
+  case 'setupStart':ui.setupStep=0;ui.setupTmp=newSetupTmp();view='setup';render();break;
+  case 'goalCurious':ui.setupTmp.goals=[];ui.setupTmp.curious=true;render();break;
+  case 'goalTog':{const g=ui.setupTmp.goals;const i=g.indexOf(arg);if(i>=0)g.splice(i,1);else g.push(arg);ui.setupTmp.curious=false;render();break}
+  case 'setupNext':{const tmp=ui.setupTmp;if(tmp.curious||!tmp.goals.length){store.setup={done:true,goals:[],other:'',watch:null,note:'',contact:null};save();view='home';render();break}
+   if(!tmp.watchLabel){const d=defaultWatch(tmp.goals);tmp.watchLabel=tmp.goals.includes('other')&&tmp.other?tmp.other:(store.lang==='fr'?d[1]:d[0])}ui.setupStep=1;render();break}
+  case 'setupBack':ui.setupStep=Math.max(0,ui.setupStep-1);render();break;
+  case 'watchUse':{const lab=(ui.setupTmp.watchLabel||'').trim();ui.setupTmp.watch=lab?{en:lab,fr:lab}:null;ui.setupStep=2;render();break}
+  case 'watchSkip':ui.setupTmp.watch=null;ui.setupStep=2;render();break;
+  case 'noteNext':case 'noteSkip':if(a==='noteSkip')ui.setupTmp.note='';ui.setupStep=3;render();break;
+  case 'contactDone':case 'contactSkip':{const tmp=ui.setupTmp;const name=(tmp.cName||'').trim(),phone=(tmp.cPhone||'').trim();
+   store.setup={done:true,goals:tmp.goals.slice(),other:(tmp.other||'').trim(),watch:tmp.watch||null,note:(tmp.note||'').trim(),contact:(a==='contactDone'&&phone)?{name:name||phone,phone}:null};save();ui.msg=t('setupDone');view='home';render();break}
+  case 'saveNote':{const n=document.getElementById('noteEdit'),cn=document.getElementById('cNameEdit'),cp=document.getElementById('cPhoneEdit');store.setup.note=n?n.value.trim():store.setup.note;const phone=cp?cp.value.trim():'';store.setup.contact=phone?{name:(cn&&cn.value.trim())||phone,phone}:null;save();ui.msg=L('Saved.','Enregistré.');render();break}
+  case 'choose':choose(arg);break;
+  case 'undo':undo();break;
+  case 'abandon':S=null;view='home';render();break;
+  case 'chip':{const [id,v]=arg.split(':');if(ui.chips[id]===v)delete ui.chips[id];else ui.chips[id]=v;render();break}
+  case 'finish':finalize(Object.assign({},ui.chips));break;
+  case 'finishSkip':finalize(ui.pre?Object.assign({},ui.pre):{});break;
+  case 'keep':keepGoing();break;
+  case 'toggleAll':ui.showAll=!ui.showAll;render();break;
+  case 'toggleOrder':ui.showOrder=!ui.showOrder;render();break;
+  case 'copyAI':copyText(aiText(),'copied','copyFail');break;
+  case 'togPatch':store.connect.patch=!store.connect.patch;store.connect_asked=true;patchCache=null;save();render();break;
+  case 'connectDone':store.connect_asked=true;save();view=(S&&S.result)?'result':'home';ui.msg='';render();break;
+  case 'usePaste':usePaste(ui.pasteText||'');break;
+  case 'slipGoal':ui.slip.goal=arg;render();break;
+  case 'slipDay':ui.slip.date=arg;render();break;
+  case 'slipSave':{const s=ui.slip;if(!s.goal)break;const rec={id:uid(),date:s.date,goal:s.goal,start:s.start||null,end:s.end||null,cost:(s.n!=null&&!isNaN(s.n))?{n:s.n,unit:s.unit||'other'}:null,t:Date.now()};store.slips.push(rec);save();
+   // the day's session, if any, now carries the slip flag in the shared table
+   const ds=store.sessions.filter(x=>x.date===rec.date);ds.forEach(writeShared);ui.slipSaved=rec;view='slipdone';render();break}
+  case 'export':ui.exportText=exportJSON();ui.msg='';render();break;
+  case 'copyExport':copyText(ui.exportText,'copied','copyFail');break;
+  case 'download':tryDownload(ui.exportText,`sollum-${fmtDate(new Date())}.json`);break;
+  case 'reset':if(!ui.resetArmed){ui.resetArmed=true;render()}else{clearShared();store=defaults();save();patchCache=null;ui.resetArmed=false;ui.exportText='';ui.msg=t('resetDone');render()}break;
+ }
+}
+
+/* ---------- words.json, when the site serves one (same origin only) ---------- */
+(function loadWords(){
+ if(!/^https?:$/.test(location.protocol))return;
+ fetch('words.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(j=>{
+  if(!j||!Array.isArray(j.words)||j.words.length<10)return;
+  const ids=new Set(j.words.map(w=>w&&w.id));
+  const ok=j.words.every(w=>w&&typeof w.id==='string'&&typeof w.en==='string'&&typeof w.fr==='string'&&LEVELS[w.level]&&(w.side==='h'||w.side==='p')&&ids.has(w.twin));
+  if(!ok)return;
+  POOL=j.words.map(w=>({id:w.id,en:w.en,fr:w.fr,level:w.level,side:w.side,twin:w.twin}));POOL_VERSION=String(j.version||POOL_VERSION);
+  store.pool_version=POOL_VERSION;save();if(view==='home'||view==='settings')render();
+ }).catch(()=>{});
+})();
+render();
+</script>
+<script>/* offline: only on https (v3ktor.org) or localhost — a file opened from the phone just runs */
+if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){navigator.serviceWorker.register('sw.js').catch(function(){})}
+</script>
+</body>
+</html>
