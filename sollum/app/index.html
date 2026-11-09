@@ -164,7 +164,7 @@ html.locked,html.locked body{overflow:hidden}
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" tabindex="-1" aria-hidden="true"></div>
 <script>
 'use strict';
-const VER='0.6.5';
+const VER='0.6.6';
 /* ---------- the pool: ten twin duels, two per level; replaced by ./words.json when the site serves one ---------- */
 let POOL_VERSION='2026-11-08b';
 let POOL=[
@@ -273,7 +273,7 @@ const I18N={
 en:{
  gloss:'whole',tagline:'See what moves your priorities — before the scale tips.',
  start:'Test',calendar:'History',settings:'Settings',back:'Back',home:'Home',done:'Done',skip:'Skip',next:'Next',save:'Save',cancel:'Cancel',undo:'‹ Undo',
- days:n=>`${n} day${n===1?'':'s'} so far`,firstLine:'About two minutes of taps.',morning:'Best taken before the first coffee.',
+ days:n=>`${n} day${n===1?'':'s'} tested so far`,firstLine:'About two minutes of taps.',morning:'Best taken before the first coffee.',
  pickQ:'Which one matters more?',round:(r,n)=>`Round ${r} of ${n}`,
  chipsTitle:'Today, roughly?',chipsHint:'All optional. They let Sollum tell your short nights from your other days.',
  fromPatch:'filled in from The Patch — change it if it’s wrong',
@@ -309,7 +309,7 @@ en:{
  setTitle:'Settings',language:'Language',province:'Where are you? (for the help lines)',provWhy:'So the right line shows up — every province and territory has its own.',provAB:'Alberta',provQC:'Quebec',provOther:'Elsewhere',
  watching:'What I’m watching',changeWatch:'Change',noteSet:'My message to the future me',contactSet:'Who I call',
  exportData:'Export my data',download:'Download file',restore:'Restore a Sollum export',copy:'Copy',
- reset:'Erase everything',resetAgain:'Tap again to erase everything',resetDone:'Erased.',restored:'Restored.',importBad:'Could not read that file.',
+ reset:'Erase everything',resetAgain:'Tap again to erase everything',resetDone:'Erased.',restoredSkip:n=>`${n} broken record${n===1?'':'s'} left out.`,restored:'Restored.',importBad:'Could not read that file.',
  exportHint:'Copy this, or download it, and keep it somewhere safe. Nothing is stored anywhere else.',
  copyAI:'Copy for an AI',aiAmounts:'include amounts',copied:'Copied.',copyFail:'Couldn’t copy — select the text below and copy it yourself.',
  privacy:'Nothing leaves your phone.',
@@ -360,7 +360,7 @@ en:{
 fr:{
  gloss:'entier',tagline:'Vois ce qui fait bouger tes priorités — avant que la balance bascule.',
  start:'Faire le test',calendar:'Historique',settings:'Réglages',back:'Retour',home:'Accueil',done:'Terminé',skip:'Passer',next:'Suivant',save:'Enregistrer',cancel:'Annuler',undo:'‹ Annuler',
- days:n=>`${n} journée${n>1?'s':''} jusqu’ici`,firstLine:'Environ deux minutes de touches.',morning:'À faire de préférence avant le premier café.',
+ days:n=>`${n} journée${n>1?'s':''} testée${n>1?'s':''} jusqu’ici`,firstLine:'Environ deux minutes de touches.',morning:'À faire de préférence avant le premier café.',
  pickQ:'Lequel compte le plus?',round:(r,n)=>`Tour ${r} sur ${n}`,
  chipsTitle:'Aujourd’hui, en gros?',chipsHint:'Tout est facultatif. Ça permet à Sollum de distinguer tes nuits courtes de tes autres journées.',
  fromPatch:'rempli à partir de La Patch — change-le si c’est faux',
@@ -396,7 +396,7 @@ fr:{
  setTitle:'Réglages',language:'Langue',province:'Où es-tu? (pour les lignes d’aide)',provWhy:'Pour que la bonne ligne apparaisse — chaque province et territoire a la sienne.',provAB:'Alberta',provQC:'Québec',provOther:'Ailleurs',
  watching:'Ce que je surveille',changeWatch:'Changer',noteSet:'Mon message au moi de plus tard',contactSet:'Qui j’appelle',
  exportData:'Exporter mes données',download:'Télécharger le fichier',restore:'Restaurer une sauvegarde Sollum',copy:'Copier',
- reset:'Tout effacer',resetAgain:'Touche encore pour tout effacer',resetDone:'Effacé.',restored:'Restauré.',importBad:'Impossible de lire ce fichier.',
+ reset:'Tout effacer',resetAgain:'Touche encore pour tout effacer',resetDone:'Effacé.',restoredSkip:n=>`${n} enregistrement${n>1?'s':''} abîmé${n>1?'s':''} laissé${n>1?'s':''} de côté.`,restored:'Restauré.',importBad:'Impossible de lire ce fichier.',
  exportHint:'Copie ceci, ou télécharge-le, et garde-le en lieu sûr. Rien n’est stocké ailleurs.',
  copyAI:'Copier pour une IA',aiAmounts:'inclure les quantités',copied:'Copié.',copyFail:'Impossible de copier — sélectionne le texte ci-dessous et copie-le toi-même.',
  privacy:'Rien ne quitte ton téléphone.',
@@ -520,6 +520,7 @@ function patchExtract(P){
 }
 function sharedPatchDays(){try{const T=JSON.parse(localStorage.getItem(SHARED)||'{}');const out={};let n=0;for(const k in T){if(T[k]&&T[k].patch&&typeof T[k].patch==='object'&&/^\d{4}-\d{2}-\d{2}$/.test(k)){out[k]=fromSummary(T[k].patch);n++}}return n?out:null}catch(e){return null}}
 let patchCache=null;
+window.addEventListener('storage',e=>{if(e.key===SHARED||e.key===PATCH_KEY){patchCache=null;if(typeof render==='function'&&view!=='pair')render()}});
 function patchData(){
  if(!store.connect.patch)return null;
  if(patchCache)return patchCache;
@@ -550,6 +551,8 @@ function nextRound(){
   pairs=shuffle(pairs);
  }else{
   let words=activeWords().slice();
+  // odd count: the word with the MOST comparisons so far sits this round out (shift after a descending sort), so the
+  // least-compared words always get a partner and the counts stay even. pop() would bench the word that needs it most.
   if(words.length%2){words.sort((a,b)=>(S.cmp[b]-S.cmp[a])||(Math.random()-0.5));words.shift()}
   const pool=words.slice().sort((a,b)=>(S.r[b]-S.r[a])||(Math.random()-0.5));
   while(pool.length>=2){const a=pool.shift();let idx=pool.findIndex(w=>!S.played.has(key(a,w)));if(idx<0)idx=0;const b=pool.splice(idx,1)[0];pairs.push({pair:[a,b]})}
@@ -632,9 +635,9 @@ function levelScores(rank){const out={};for(const lv in LEVELS){const h=POOL.fil
 function duelMap(sess){const m={};(sess.duels||[]).forEach(d=>{m[d.key]={pull:d.pull,ratio:sess.rt_median?d.rt_ms/sess.rt_median:null}});return m}
 
 /* ---------- the normal: the person's ordinary days — no slip, chain light (under 3 links), and not a day that itself read as
-   tipped or flipped twice. Like The Patch's set-aside days: one heavy evening can't become the baseline. If that leaves fewer
-   than 3 days, every non-slip day counts, so the normal always exists once there are 3 days. ---------- */
-function sleepKnown(s){const c=s.chips||patchChips(s.date)||{};return c.sl!=null}
+   tipped or flipped twice, sleep noted (here or in The Patch), steady hand. Like The Patch's set-aside days: one heavy evening
+   can't become the baseline. There is no fallback: until 3 such days exist, there is no normal, and the result says so. ---------- */
+function sleepKnown(s){const c=Object.assign({},patchChips(s.date)||{},s.chips||{});return c.sl!=null}
 function ordinaryDay(s,slips){return sleepKnown(s)&&!s.fog&&!(slips.has(s.date)||(s.chips&&s.chips.cr==='y')||(s.links||[]).length>=LINKS_FIRE||(s.tipped&&s.tipped.length)||(s.flips&&s.flips.length>=2))}
 function normalOf(prior,words){
  const slips=slipDays();
@@ -753,7 +756,7 @@ function slipsCardHTML(){
 function leverHTML(links,sess){
  const n=links.length;const labels=links.map(id=>P2(CHIPS.find(c=>c.id===id).link));
  let more='';
- if(store.slips.length>=SLIPS_MIN){const slips=slipDays();const D=dayView(store.sessions.filter(s=>s.pool===POOL_VERSION&&slips.has(s.date)));const m=D.length;if(m&&n){const k=D.filter(s=>(s.links||[]).length>=n).length;more=`<div class="sub">${t('leverSlips',n,k,m)}</div>`}}
+ if(store.slips.length>=SLIPS_MIN){const slips=slipDays();const D=dayView(store.sessions.filter(s=>s.pool===POOL_VERSION&&slips.has(s.date)));const L=[...slips].map(d=>{const x=D.find(s=>s.date===d);const c=Object.assign({},patchChips(d)||{},(x&&x.chips)||{});return Object.keys(c).length?linksOf(c).length:null}).filter(v=>v!=null);const m=L.length;if(m&&n){const k=L.filter(v=>v>=n).length;more=`<div class="sub">${t('leverSlips',n,k,m)}</div>`}}
  return `<div class="box ${n>=LINKS_FIRE?'bad':n?'warn':''}"><div class="lever">${CHIPS.filter(c=>c.id!=='cr').map(c=>`<div class="lk ${links.includes(c.id)?(n>=LINKS_FIRE?'hot':'on'):''}" title="${esc(P2(c.link))}"></div>`).join('')}</div><p class="big">${t('leverT',n,labels.join(' · '))}</p>${more}</div>`;
 }
 function helpFor(goalIds){
@@ -774,7 +777,14 @@ function noteCardHTML(){
 function exportJSON(){return JSON.stringify(store,null,1)}
 function tryDownload(text,name){try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'application/json'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}catch(e){}}
 function copyText(text,okKey,failKey){const done=ok=>{ui.msg=t(ok?okKey:failKey);render()};try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(()=>done(true),()=>done(false));return}}catch(e){}try{const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();const ok=document.execCommand('copy');ta.remove();done(ok)}catch(e){done(false)}}
-function handleRestore(file){const rd=new FileReader();rd.onload=()=>{try{const o=JSON.parse(rd.result);if(o&&o.sollum_version&&Array.isArray(o.sessions)){localStorage.setItem(KEY,JSON.stringify(o));store=load();patchCache=null;ui.msg=t('restored');render();return}ui.msg=t('importBad');render()}catch(e){ui.msg=t('importBad');render()}};rd.readAsText(file)}
+function cleanBackup(o){if(!o||typeof o!=='object'||!o.sollum_version||!Array.isArray(o.sessions))return null;
+ const isObj=x=>x&&typeof x==='object'&&!Array.isArray(x);
+ const okS=x=>isObj(x)&&typeof x.date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(x.date)&&typeof x.t_start==='number'&&isObj(x.rank)&&isObj(x.strength);
+ const okL=x=>isObj(x)&&typeof x.date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(x.date);
+ const out=Object.assign({},o);out.sessions=o.sessions.filter(okS);out.slips=Array.isArray(o.slips)?o.slips.filter(okL):[];
+ if(!isObj(o.setup))delete out.setup;if(!isObj(o.connect))delete out.connect;
+ out._dropped=(o.sessions.length-out.sessions.length)+((Array.isArray(o.slips)?o.slips.length:0)-out.slips.length);return out}
+function handleRestore(file){const rd=new FileReader();rd.onload=()=>{try{const o=cleanBackup(JSON.parse(rd.result));if(o&&!(o.sessions.length===0&&o._dropped>0)){const dropped=o._dropped;delete o._dropped;if(o.setup)o.setup=Object.assign(defaults().setup,o.setup);localStorage.setItem(KEY,JSON.stringify(o));store=load();patchCache=null;ui.msg=t('restored')+(dropped?' '+t('restoredSkip',dropped):'');render();return}ui.msg=t('importBad');render()}catch(e){ui.msg=t('importBad');render()}};rd.readAsText(file)}
 function usePaste(text){try{const x=patchExtract(JSON.parse(text));if(!x||!Object.keys(x.days).length){ui.msg=t('pasteBad');render();return}store.patch_paste={days:x.days,roll:x.roll,saved:Date.now()};store.connect.patch=true;patchCache=null;save();ui.pasteText='';ui.msg=t('pasteOk',Object.keys(x.days).length);render()}catch(e){ui.msg=t('pasteBad');render()}}
 function aiText(){
  const r=S.result,sess=r.sess,R=r.R,Lx=[];
@@ -1028,13 +1038,16 @@ function vSettings(){
 const sheet=document.getElementById('sheet'), sheetBg=document.getElementById('sheetBg');
 let sheetOpener=null;
 function showSheet(html,opener){if(!sheet.classList.contains('on'))sheetOpener=opener||document.activeElement;sheet.innerHTML=html;sheet.classList.add('on');sheetBg.classList.add('on');sheet.setAttribute('aria-hidden','false');document.documentElement.classList.add('locked');
+ sheet.querySelectorAll('[data-act]').forEach(el=>{asButton(el)});
  sheet.querySelectorAll('[data-act]').forEach(el=>el.addEventListener('click',ev=>{ev.preventDefault();const a=el.dataset.act,arg=el.dataset.arg;if(a!=='feedbackSend'&&a!=='feedbackShare'&&a!=='feedbackCopy')closeSheet(true);act(a,arg)}));
  const c=sheet.querySelector('#closeSheet');if(c)c.onclick=()=>closeSheet();
  const ta=sheet.querySelector('#fbText');if(ta)ta.oninput=()=>{fbDraft=ta.value};
  sheet.scrollTop=0;try{sheet.focus({preventScroll:true})}catch(e){}}
 function closeSheet(noFocus){if(!sheet.classList.contains('on'))return;sheet.classList.remove('on');sheetBg.classList.remove('on');sheet.setAttribute('aria-hidden','true');document.documentElement.classList.remove('locked');const o=sheetOpener;sheetOpener=null;if(noFocus!==true&&o&&document.body.contains(o)){try{o.focus({preventScroll:true})}catch(e){}}}
 sheetBg.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});sheetBg.onclick=()=>closeSheet();
-document.addEventListener('keydown',e=>{if(sheet.classList.contains('on')&&e.key==='Escape'){e.preventDefault();closeSheet()}});
+document.addEventListener('keydown',e=>{if(!sheet.classList.contains('on'))return;if(e.key==='Escape'){e.preventDefault();closeSheet();return}
+ if(e.key==='Tab'){const f=[...sheet.querySelectorAll('button,a[href],input,select,textarea,[tabindex="0"]')].filter(x=>!x.disabled&&x.offsetParent!==null);if(!f.length)return;
+  const first=f[0],last=f[f.length-1];if(e.shiftKey&&(document.activeElement===first||document.activeElement===sheet)){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}});
 function openMenu(){
  const items=[['go','home',t('home')],['start','',t('start')]];
  if(hasGoals())items.push(['go','slip',t('slipBtn')]);
@@ -1049,8 +1062,12 @@ function openFeedback(){showSheet(`<div class="handle"></div><h3 id="sheetTitle"
 function fbNote(x){const n=document.getElementById('fbNote');if(n)n.textContent=x}
 
 /* ---------- events ---------- */
+function asButton(el){if(/^(BUTTON|A|INPUT|SELECT|TEXTAREA)$/.test(el.tagName))return;if(!el.hasAttribute('role'))el.setAttribute('role','button');if(!el.hasAttribute('tabindex'))el.tabIndex=0;
+ if(el.classList.contains('chip'))el.setAttribute('aria-pressed',String(el.classList.contains('on')));
+ el.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();el.click()}})}
 function bind(){
- app.querySelectorAll('[data-act]').forEach(el=>{el.addEventListener('click',ev=>{if(el.tagName==='A'&&!el.dataset.act)return;ev.preventDefault();act(el.dataset.act,el.dataset.arg)})});
+ document.documentElement.lang=store.lang==='fr'?'fr-CA':'en-CA';
+ app.querySelectorAll('[data-act]').forEach(el=>{asButton(el);el.addEventListener('click',ev=>{if(el.tagName==='A'&&!el.dataset.act)return;ev.preventDefault();act(el.dataset.act,el.dataset.arg)})});
  const ps=document.getElementById('provSel');if(ps)ps.addEventListener('change',e=>{store.province=e.target.value;save();if(view!=='setup')render()});
  const fr=document.getElementById('fRestore');if(fr)fr.addEventListener('change',e=>{if(e.target.files[0])handleRestore(e.target.files[0])});
  const pb=document.getElementById('pasteBox');if(pb)pb.addEventListener('input',e=>{ui.pasteText=e.target.value});
@@ -1085,7 +1102,7 @@ function act(a,arg){
   case 'setupStart':ui.setupStep=0;ui.setupTmp=newSetupTmp();view='setup';render();break;
   case 'goalCurious':ui.setupTmp.goals=[];ui.setupTmp.curious=true;render();break;
   case 'goalTog':{const g=ui.setupTmp.goals;const i=g.indexOf(arg);if(i>=0)g.splice(i,1);else g.push(arg);ui.setupTmp.curious=false;render();break}
-  case 'setupNext':{const tmp=ui.setupTmp;if(tmp.curious||!tmp.goals.length){store.setup={done:true,goals:[],other:'',watch:null,note:'',contact:null};save();view='home';render();break}
+  case 'setupNext':{const tmp=ui.setupTmp;if(tmp.curious||!tmp.goals.length){const old=store.setup||{};store.setup={done:true,goals:[],other:'',watch:old.watch||null,note:old.note||'',contact:old.contact||null};save();view='home';render();break}
    if(!tmp.watchLabel){const d=defaultWatch(tmp.goals);tmp.watchLabel=tmp.goals.includes('other')&&tmp.other?tmp.other:(store.lang==='fr'?d[1]:d[0])}ui.setupStep=1;render();break}
   case 'setupBack':ui.setupStep=Math.max(0,ui.setupStep-1);render();break;
   case 'watchUse':{const lab=(ui.setupTmp.watchLabel||'').trim();ui.setupTmp.watch=lab?{en:lab,fr:lab}:null;ui.setupStep=2;render();break}
@@ -1115,7 +1132,7 @@ function act(a,arg){
   case 'export':ui.exportText=exportJSON();ui.msg='';render();break;
   case 'copyExport':copyText(ui.exportText,'copied','copyFail');break;
   case 'download':tryDownload(ui.exportText,`sollum-${fmtDate(new Date())}.json`);break;
-  case 'reset':if(!ui.resetArmed){ui.resetArmed=true;render()}else{clearShared();store=defaults();save();patchCache=null;ui.resetArmed=false;ui.exportText='';ui.msg=t('resetDone');render()}break;
+  case 'reset':if(!ui.resetArmed){ui.resetArmed=true;render()}else{clearShared();store=defaults();save();patchCache=null;ui.resetArmed=false;ui.exportText='';ui.pasteText='';ui.chips=null;ui.pre=null;fbDraft='';pat={step:0,extra:0};ui.msg=t('resetDone');render()}break;
  }
 }
 
