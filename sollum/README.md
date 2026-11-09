@@ -39,4 +39,4 @@ Copyright (C) 2026 Tobie David. Free software under the [GNU Affero General Publ
 
 There are two extra terms under section 7 (full wording at the top of `app/index.html`):
 - Every copy keeps this line in its About screen: "Made by Tobie and Claude. Free version at v3ktor.org/sollum."
-- A changed version can't be presented as the original Sollum.
+- A changed version can't be presented as the original Sollum, and it has to say who changed it and when, next to that line: "Changed by [name] on [date]. Not checked by the original authors."
