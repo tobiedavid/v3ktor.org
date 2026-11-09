@@ -370,7 +370,7 @@ const KEY='thepatch.v1';
 try{ const s=localStorage.getItem(KEY)||localStorage.getItem('patch'); if(s) S=Object.assign(S, JSON.parse(s)); if(!localStorage.getItem(KEY)&&s) localStorage.setItem(KEY,s); if(localStorage.getItem('patch')) localStorage.removeItem('patch'); }catch(e){}
 /* v1.2.55: the weight plan used to ask about trouble with eating itself; the answer now lives in question 16 */
 try{ if(S.wl&&S.wl.ed===true&&S.a){ const sa=Array.isArray(S.a.safety)?S.a.safety.filter(x=>x!=='none'):[]; if(!sa.includes('ed')){ sa.push('ed'); S.a.safety=sa; } } }catch(e){}
-const VER='1.2.59'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
+const VER='1.2.60'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
 /* v1.2.21 (5 Nov 2026): prenatal / folic-acid and pregnancy-iron lines aligned with Health Canada; Quebec route for bloodwork; hard-stool branch;
    pattern messages match the 5-a-side rule; iPhone storage note + persist(); protein note by life stage; French fixes; "about $8" in English. */
 /* v1.2.22 (6 Nov 2026): one-screen result (plain-words test card, three-line week, one notes card with the crisis line kept open); glossary words underlined once per screen;
@@ -2058,7 +2058,7 @@ function tankPrefill(){ const p=S.tank.p; if(Array.isArray(p.life) || (!S.a.fuel
 function tankLife(){ const p=S.tank.p; const l=Array.isArray(p.life)?p.life:[]; return { smoke:l.includes('smoke'), drink:l.includes('drink'), preg:(l.includes('preg')||(has('safety','preg')&&!l.includes('bf'))) && p.sex!=='m', bf:(l.includes('bf')||(has('safety','bf')&&!has('safety','preg'))) && p.sex!=='m' && !l.includes('preg'), coffee:any('fuel','coffee','energy'), veg:l.includes('veg')||l.includes('vegan')||any('safety','veg','vegan'), vegan:l.includes('vegan')||(has('safety','vegan')&&!l.includes('veg')) }; }
 /* Targets: Health Canada DRI tables (elements, vitamins; sodium/potassium 2019 values). Protein: RDA 0.8 g/kg. Calories: rough kg × activity factor — not a DRI. */
 function tankTargets(){
-  const p=S.tank.p; const life=tankLife(); const sex=p.sex||'hi'; const age=p.age==='minor'?'a1':(p.age||'a2'); const kg=+(p.wt||70); const work=p.work||'feet';
+  const p=S.tank.p; const life=tankLife(); const sex=p.sex||'hi'; const age=p.age==='minor'?'a1':(p.age||'a2'); const kg=(Number.isFinite(+p.wt)&&+p.wt>0)?+p.wt:70; const work=p.work||'feet';
   const M={ca:age==='a4'?1200:1000, fe:8, mg:age==='a1'?400:420, k:3400, zn:11, c:90, b1:1.2, fol:400, b12:2.4, d:age==='a4'?800:600, vk:120, va:900, mn:2.3, cu:0.9, fib:(age==='a3'||age==='a4')?30:38, e:15, b2:1.3, b3:16, b6:(age==='a3'||age==='a4')?1.7:1.3, se:55};
   const F={ca:(age==='a3'||age==='a4')?1200:1000, fe:(age==='a1'||age==='a2')?18:8, mg:age==='a1'?310:320, k:2600, zn:8, c:75, b1:1.1, fol:400, b12:2.4, d:age==='a4'?800:600, vk:90, va:700, mn:1.8, cu:0.9, fib:(age==='a3'||age==='a4')?21:25, e:15, b2:1.1, b3:14, b6:(age==='a3'||age==='a4')?1.5:1.3, se:55};
   let T={}; for(const k of Object.keys(M)) T[k]= sex==='m'?M[k] : sex==='f'?F[k] : Math.max(M[k],F[k]);
@@ -2557,7 +2557,7 @@ function tankFoot(){
 }
 /* ===================== RENDER ===================== */
 const app=document.getElementById('app'), bar=document.getElementById('bar');
-function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function toast(m){const t=document.getElementById('toast'); if(!t) return; t.textContent=m; t.classList.add('show'); clearTimeout(toast._h); toast._h=setTimeout(()=>t.classList.remove('show'),1600);}
 function view(){
   if(!S.ack) return 'start';
@@ -2989,6 +2989,8 @@ function foodDay(k){ if(!tankReady()||!loggedDay(k)||!isClosed(k)) return null; 
 function pathDrinkOk(r){ return r.al==='0'?true:r.alt==='early'?true:r.alt==='late'?false:null; }
 function pathBasicsDay(k){ if(!usable(k)) return null; const r=rates()[k]; const d=pathDrinkOk(r); if(d==null) return null;
   const f=foodDay(k); return r.cf!=='eve' && d && (!f || f.ok); }
+/* warning-sign events (blood, black) aren't in SYMK, so syncEv never marks a day "off" for them: they go to the alarm card,
+   not to this count. A day is bad here for low energy, a crash, or an everyday symptom. */
 function pathBad(k){ if(!usable(k)||wlAdapt(k)) return null; const r=rates()[k]; return +r.e<=2 || crashP(k)===true || !!(r.fl&&r.fl.off); }
 /* still bad = 4 or more bad days in the last 14 finished days (8 needed to say): one rough week shouldn't send anyone for blood work */
 function pathWeek(){ let n=0,b=0; for(let i=1;i<=14;i++){ const x=pathBad(keyAdd(dayKey(),-i)); if(x==null) continue; n++; if(x) b++; } return {n,b,bad:n>=8?b>=4:null}; }
@@ -4077,6 +4079,11 @@ function cleanState(){ const okD=s=>typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.t
     S.labs=keep(S.labs,x=>okD(x.day)&&['fer','crp','hb','b12','d'].every(k=>x[k]==null||Number.isFinite(+x[k])));
     for(const o of [T.log,T.closed,T.rate]) if(o&&typeof o==='object') for(const k of Object.keys(o)) if(!okD(k)){ delete o[k]; n++; }
     if(S.learn&&(typeof S.learn.text!=='string'||!okD(S.learn.day))){ delete S.learn; n++; }
+    /* v1.2.60: the profile — each answer must be one of its question's own options, or it's dropped and the default applies */
+    if(T.p!=null&&(typeof T.p!=='object'||Array.isArray(T.p))){ T.p={}; n++; }
+    if(T.p) for(const q of TQ){ const v=T.p[q.id]; if(v==null) continue; const ok=new Set(q.opts.map(o=>o.v));
+      if(q.multi){ if(!Array.isArray(v)){ delete T.p[q.id]; n++; continue; } const w=v.filter(x=>ok.has(x)); n+=v.length-w.length; T.p[q.id]=w; }
+      else if(!ok.has(v)){ delete T.p[q.id]; n++; } }
   }catch(e){} return n; }
 /* A crash report ticks the day's ⚡; it remembers it did (crA), so deleting the report un-ticks it. A ⚡ the person ticked
    themselves stays; if a deleted report leaves one behind, the toast says where to change it. */
@@ -4520,7 +4527,7 @@ render();
 <script>
 /* installed-app layer (website build only) */
 (function(){
-  if('serviceWorker' in navigator && location.protocol==='https:' || location.hostname==='localhost'){
+  if('serviceWorker' in navigator && (location.protocol==='https:' || location.hostname==='localhost')){
     navigator.serviceWorker && navigator.serviceWorker.register('sw.js').catch(function(){});
   }
   var ev=null, KEY='thepatch.installDismissed';
