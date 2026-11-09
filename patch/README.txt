@@ -36,4 +36,5 @@ file and the notice at the top of app/index.html. If you put a changed copy onli
 people, share your changes under the same license. Source: https://github.com/tobiedavid/v3ktor.org
 Two extra terms (section 7 of the license): every copy keeps the line "Made by Tobie and Claude.
 Free version at v3ktor.org/patch." (or the French one) in its About screen, and a changed version
-can't be presented as the original. The full wording is in the notice at the top of app/index.html.
+can't be presented as the original. A changed version also has to say, next to that line:
+"Changed by [name] on [date]. Not checked by the original authors." The full wording is in the notice at the top of app/index.html.

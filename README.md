@@ -42,9 +42,9 @@ In plain words: copies and changed versions stay under the same license, with th
 
 **Two extra terms**, which section 7 of the AGPL allows (the full wording is in the notice at the top of `patch/app/index.html`):
 - Every copy and changed version keeps this line, word for word, in its About screen: "Made by Tobie and Claude. Free version at v3ktor.org/patch." In French: "Faite par Tobie et Claude. Version gratuite sur v3ktor.org/patch."
-- A changed version can't be presented as the original The Patch.
+- A changed version can't be presented as the original The Patch, and it has to say who changed it and when, next to that line: "Changed by [name] on [date]. Not checked by the original authors."
 
-So you can sell a copy, but the app has to say where the free version is.
+So you can sell a copy, but the app has to say where the free version is — and if you changed it, that you did. That way nobody mistakes your changes for ours.
 
 ### Archived and timestamped
 - **Software, v1.2.50:** https://doi.org/10.5281/zenodo.24046421
