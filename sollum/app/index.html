@@ -164,11 +164,11 @@ html.locked,html.locked body{overflow:hidden}
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" tabindex="-1" aria-hidden="true"></div>
 <script>
 'use strict';
-const VER='0.6.2';
+const VER='0.6.3';
 /* ---------- the pool: ten twin duels, two per level; replaced by ./words.json when the site serves one ---------- */
 let POOL_VERSION='2026-11-08b';
 let POOL=[
- {id:'health',en:'Health',fr:'Santé',level:'body',side:'h',twin:'comfort'},
+ {id:'health',en:'Health',fr:'La santé',level:'body',side:'h',twin:'comfort'},
  {id:'comfort',en:'Comfort',fr:'Le réconfort',level:'body',side:'p',twin:'health'},
  {id:'sleep',en:'Sleep',fr:'Dormir',level:'body',side:'h',twin:'fun'},
  {id:'fun',en:'Fun',fr:'Le plaisir',level:'body',side:'p',twin:'sleep'},
@@ -227,7 +227,7 @@ const HELP={
      gambling:hl('Problem gambling line (Addictions Foundation of Manitoba)','Ligne pour le jeu (Addictions Foundation of Manitoba)','1-800-463-1554','24 h','24 h'),tobacco:QUIT,general:H811},
  NB:{addiction:hl('Addiction and Mental Health Helpline (New Brunswick)','Ligne d’écoute en dépendances et santé mentale (Nouveau-Brunswick)','1-866-355-5550','24 h','24 h'),
      gambling:hl('Gambling Information Line','Ligne d’information sur le jeu','1-800-461-1234','24 h','24 h'),tobacco:QUIT,general:H811},
- NL:{addiction:hl('811 HealthLine — mental health and addictions','811 HealthLine — santé mentale et dépendances','811','24 h · navigator on weekdays: 1-877-999-7589','24 h · navigateur en semaine\u00a0: 1-877-999-7589'),
+ NL:{addiction:hl('811 HealthLine — mental health and addictions','811 HealthLine — santé mentale et dépendances','811','24 h · navigator on weekdays: 1-877-999-7589','24 h · intervenant pivot en semaine\u00a0: 1-877-999-7589'),
      gambling:hl('Problem Gambling Help Line','Ligne d’aide pour le jeu','1-888-899-4357'),tobacco:QUIT,general:H811},
  NS:{addiction:hl('Mental Health and Addictions Crisis Line (Nova Scotia)','Ligne de crise en santé mentale et dépendances (Nouvelle-Écosse)','1-888-429-8167','24 h','24 h'),
      gambling:hl('Gambling Support Network','Gambling Support Network','1-888-347-8888','24 h','24 h'),tobacco:QUIT,general:H811},
@@ -254,7 +254,7 @@ const HELP={
 const NORS=hl('National Overdose Response Service — call before using alone','Service national de réponse aux surdoses — appelle avant de consommer seul','1-888-688-6677','24 h · they stay on the line and call 911 if you stop answering','24 h · ils restent en ligne et appellent le 911 si tu ne réponds plus');
 /* ---------- the day's conditions: the chain, in order ---------- */
 const CHIPS=[
- {id:'sl',ic:'🌙',en:'Sleep last night',fr:'Sommeil la nuit dernière',heavy:'s',opts:[['s','Under 6 h','Moins de 6 h'],['m','6–8 h','6–8 h'],['l','8 h or more','8 h ou plus']],days:['short-sleep days','journées de nuit courte'],link:['short night','nuit courte']},
+ {id:'sl',ic:'🌙',en:'Sleep last night',fr:'Sommeil la nuit dernière',heavy:'s',opts:[['s','Under 6 h','Moins de 6 h'],['m','6–8 h','6–8 h'],['l','8 h or more','8 h ou plus']],days:['short-sleep days','journées après une nuit courte'],link:['short night','nuit courte']},
  {id:'caf',ic:'☕',en:'Caffeine today',fr:'Caféine aujourd’hui',heavy:'3',opts:[['0','None','Aucune'],['1','1–2','1–2'],['3','3+ or an energy drink','3+ ou une boisson énergisante']],days:['heavy-caffeine days','journées à forte caféine'],link:['3+ caffeine','caféine 3+']},
  {id:'al',ic:'🍺',en:'Drinks today',fr:'Verres aujourd’hui',heavy:'3',opts:[['0','None','Aucun'],['1','1–2','1–2'],['3','3 or more','3 ou plus']],days:['3-drink days','journées à 3 verres ou plus'],link:['3+ drinks','3 verres ou plus']},
  {id:'wt',ic:'👁',en:'The thing you’re watching, today',fr:'Ce que tu surveilles, aujourd’hui',heavy:'3',goalOnly:true,opts:[['0','None','Rien'],['1','Some','Un peu'],['3','A lot','Beaucoup']],days:['heavy days','grosses journées'],link:['a lot of it','beaucoup']},
@@ -375,15 +375,15 @@ fr:{
  tipped:(lv,mv)=>`La balance a basculé${NB}: ${lv} sous ta normale — ${mv}.`,over:(p,h)=>`${p} devant ${h}`,
  fog:(k,n)=>`Main qui tremble ce soir${NB}: tu as changé d’idée sur ${k} des ${n} choix répétés. L’ordre est difficile à lire.`,
  fogSoft:'À lire avec un grain de sel — la main tremblait.',
- upBoth:(w,x,y)=>`${w} passe devant ${x} et ${y} aujourd’hui. Ta normale${NB}: derrière les deux.`,upOne:(w,x)=>`${w} passe devant ${x} aujourd’hui. Ta normale${NB}: derrière.`,upN:(w,n)=>`${w} a monté de ${n} places aujourd’hui.`,
- dnBoth:(w,x,y)=>`${w} passe derrière ${x} et ${y} aujourd’hui. Ta normale${NB}: devant les deux.`,dnOne:(w,x)=>`${w} passe derrière ${x} aujourd’hui. Ta normale${NB}: devant.`,dnN:(w,n)=>`${w} a descendu de ${n} places aujourd’hui.`,
+ upBoth:(w,x,y)=>`${w} passe devant ${x} et ${y} aujourd’hui. Ta normale${NB}: derrière les deux.`,upOne:(w,x)=>`${w} passe devant ${x} aujourd’hui. Ta normale${NB}: derrière.`,upN:(w,n)=>`${w} gagne ${n} places aujourd’hui.`,
+ dnBoth:(w,x,y)=>`${w} passe derrière ${x} et ${y} aujourd’hui. Ta normale${NB}: devant les deux.`,dnOne:(w,x)=>`${w} passe derrière ${x} aujourd’hui. Ta normale${NB}: devant.`,dnN:(w,n)=>`${w} perd ${n} places aujourd’hui.`,
  leverT:(n,l)=>n?`Ce soir, tu es à ${n} maillon${n>1?'s':''}${NB}: ${l}.`:'Aucun maillon allumé aujourd’hui.',
  leverSlips:(n,k,m)=>`Tes incidents sont arrivés à ${n} maillon${n>1?'s':''} ou plus ${k} fois sur ${m}.`,
  reflexN:n=>`${n} touche${n>1?'s':''} de moins d’un quart de seconde mise${n>1?'s':''} de côté et redemandée${n>1?'s':''}.`,
  noteHead:'De toi, un bon jour${NB}:'.replace('${NB}',NB),call:n=>`Appeler ${n}`,text:n=>`Texter ${n}`,
  rail:'Ralentir, c’est l’affaire d’un pharmacien ou d’un médecin — jamais d’un arrêt sec.',
  contrast:(a,lab,b)=>`Tes ${a} ${lab} vs tes ${b} autre${b>1?'s':''} journée${b>1?'s':''}${NB}:`,
- climbed:(w,n)=>`${w} a monté de ${n} place${n>1?'s':''}`,dropped:(w,n)=>`${w} a descendu de ${n} place${n>1?'s':''}`,
+ climbed:(w,n)=>`${w} a gagné ${n} place${n>1?'s':''}`,dropped:(w,n)=>`${w} a perdu ${n} place${n>1?'s':''}`,
  nothingMoved:'rien n’a bougé de plus de 2 places.',hint:'Un indice, pas une conclusion — moins de 6 journées d’un côté.',
  connectTitle:'Croiser ce qui est déjà sur ce téléphone?',connectLead:'Local seulement. Rien n’est envoyé nulle part. Sollum lit les journées que La Patch a déjà, et les touches se remplissent toutes seules.',
  connect:'Croiser',notNow:'Pas maintenant',
@@ -393,10 +393,10 @@ fr:{
  calTitle:'Historique',noSessions:'Aucune session pour l’instant.',slipMark:'incident',
  setTitle:'Réglages',language:'Langue',province:'Où es-tu? (pour les lignes d’aide)',provWhy:'Pour que la bonne ligne apparaisse — chaque province et territoire a la sienne.',provAB:'Alberta',provQC:'Québec',provOther:'Ailleurs',
  watching:'Ce que je surveille',changeWatch:'Changer',noteSet:'Mon message au moi de plus tard',contactSet:'Qui j’appelle',
- exportData:'Exporter mes données',download:'Télécharger le fichier',restore:'Restaurer un export Sollum',copy:'Copier',
+ exportData:'Exporter mes données',download:'Télécharger le fichier',restore:'Restaurer une sauvegarde Sollum',copy:'Copier',
  reset:'Tout effacer',resetAgain:'Touche encore pour tout effacer',resetDone:'Effacé.',restored:'Restauré.',importBad:'Impossible de lire ce fichier.',
  exportHint:'Copie ceci, ou télécharge-le, et garde-le en lieu sûr. Rien n’est stocké ailleurs.',
- copyAI:'Copier pour une IA',aiAmounts:'inclure les montants',copied:'Copié.',copyFail:'Impossible de copier — sélectionne le texte ci-dessous et copie-le toi-même.',
+ copyAI:'Copier pour une IA',aiAmounts:'inclure les quantités',copied:'Copié.',copyFail:'Impossible de copier — sélectionne le texte ci-dessous et copie-le toi-même.',
  privacy:'Rien ne quitte ton téléphone.',
  menu:'Menu',close:'Fermer',
  patTitle:'Ton motif',patSub:'Le cercle, et pourquoi plus de raisons ne le font pas rebasculer.',patMine:'Ton dernier incident, les heures d’avant',
@@ -429,7 +429,7 @@ fr:{
  curious:'Rien — simple curiosité',otherWord:'C’est quoi, en un mot ou deux?',
  q1b:'Le mot pour ça, dans tes choix',q1bHint:'Il sera à l’écran quelques fois par session. Un mot de remplacement que personne d’autre ne reconnaîtrait, c’est correct — ou laisse-le de côté.',useIt:'L’utiliser',leaveOut:'Le laisser de côté',
  q2:'Qu’est-ce que tu voudrais dire au toi de plus tard, avant le mauvais choix?',q2hint:'Tes mots. Sollum te les relit une fois, tels quels, quand l’aiguille bouge. Passer, c’est correct.',
- q3:'Qui voudrais-tu appeler quand ça arrive?',q3hint:'Un nom et un numéro. Ils restent sur ce téléphone; rien n’est composé sans que tu touches.',name:'Nom',phone:'Téléphone',
+ q3:'Qui voudrais-tu appeler quand ça arrive?',q3hint:'Un nom et un numéro. Ils restent sur ce téléphone; rien n’est composé sans que tu y touches.',name:'Nom',phone:'Téléphone',
  setupDone:'C’est réglé. Deux minutes de touches, et tu verras où tu en es.',
  slipBtn:'Signaler un incident',slipTitle:'Signaler un incident',slipWhat:'Quoi',slipWhen:'Quand',slipDay:'Jour',today:'Aujourd’hui',yesterday:'Hier',slipStart:'Début',slipEnd:'Fin',slipCost:'Ce que ça a coûté',unit:'Unité',
  units:{money:'$',drinks:'verres',cans:'canettes',cigs:'cigarettes',hours:'heures',other:'autre'},
@@ -438,7 +438,7 @@ fr:{
  slipsCard:(n,m)=>`Tes ${n} journée${n>1?'s':''} d’incident vs tes ${m} autre${m>1?'s':''} journée${m>1?'s':''}${NB}:`,slipsSoon:n=>`${n} incident${n>1?'s':''} signalé${n>1?'s':''} sur ${SLIPS_MIN}. Sollum les compare aux autres journées à partir de trois.`,
  slipsHint:'Un indice, pas une conclusion — moins de 5 incidents.',
  helpHead:'Quelqu’un à qui parler, n’importe quand${NB}:'.replace('${NB}',NB),helpChecked:d=>`vérifié le ${d}`,
- amountsOff:'Les montants ne sont pas affichés ici. L’export les contient.'
+ amountsOff:'Les quantités ne sont pas affichées ici. La sauvegarde les contient.'
 }};
 
 /* ---------- storage ---------- */
@@ -905,7 +905,7 @@ function vSlip(){
 function chainLine(slip){
  const p=patchSum(slip.date);const parts=[];
  if(p){if(typeof p.sleep==='number')parts.push(L(`${p.sleep} h sleep`,`${p.sleep} h de sommeil`));
-  const c=p.caffeine||{};if((c.servings||0)>0||(c.energyDrinks||0)>0)parts.push(L(`${c.servings||0} caffeine${c.energyDrinks?` (+${c.energyDrinks} energy)`:''}${c.last?' by '+c.last:''}`,`${c.servings||0} caféine${c.energyDrinks?` (+${c.energyDrinks} énergisante)`:''}${c.last?' jusqu’à '+c.last:''}`));
+  const c=p.caffeine||{};if((c.servings||0)>0||(c.energyDrinks||0)>0)parts.push(L(`${c.servings||0} caffeine${c.energyDrinks?` (+${c.energyDrinks} energy)`:''}${c.last?' by '+c.last:''}`,`${c.servings||0} caféine${c.energyDrinks?` (+${c.energyDrinks} boisson${c.energyDrinks>1?'s':''} énergisante${c.energyDrinks>1?'s':''})`:''}${c.last?' jusqu’à '+c.last:''}`));
   if(p.sugar&&p.sugar.servings>0)parts.push(L(`${p.sugar.servings} sweet${p.sugar.servings>1?'s':''}`,`${p.sugar.servings} sucrerie${p.sugar.servings>1?'s':''}`));
   if(p.meals)parts.push(p.meals.count?L(`${p.meals.count} meal${p.meals.count>1?'s':''}${p.meals.last?', last '+p.meals.last:''}${p.meals.low?' (thin)':''}`,`${p.meals.count} repas${p.meals.last?', dernier '+p.meals.last:''}${p.meals.low?' (léger)':''}`):L('no meal logged','aucun repas noté'));
   const a=p.alcohol||{};if(a.drinks)parts.push(L(`${a.drinks} drink${a.drinks>1?'s':''}${a.late?' late':''}`,`${a.drinks} verre${a.drinks>1?'s':''}${a.late?' tard':''}`));
