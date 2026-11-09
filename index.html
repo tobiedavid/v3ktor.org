@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  v3ktor.org — the front door: V3KTOR™ or The Patch.
+  v3ktor.org — the front door: V3KTOR, mapping the self. Corpus (The Patch), Fulcrum (Sollum), Mentis (V3KTOR™).
   Copyright (C) 2026  Tobie David
   SPDX-License-Identifier: AGPL-3.0-or-later — see LICENSE at https://github.com/tobiedavid/v3ktor.org
 -->
@@ -8,8 +8,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>v3ktor.org — V3KTOR™ or The Patch</title>
-<meta name="description" content="Two free tools by Tobie David: V3KTOR™, an affective calibration instrument, and The Patch, which finds the foods that work for you. Deux outils gratuits : V3KTOR™ et La Patch.">
+<title>v3ktor.org — V3KTOR // Mapping the Self</title>
+<meta name="description" content="V3KTOR, mapping the self: three free tools by Tobie David. Corpus — The Patch, the body. Fulcrum — Sollum, the pivot. Mentis — V3KTOR™, the mind. Trois outils gratuits&nbsp;: le corps, le pivot, l’esprit.">
 <link rel="canonical" href="https://v3ktor.org/">
 <style>
 :root{--bg:#050508;--ink:#e8e4da;--muted:#9a958a;--gold:#C9980A;--line:#26262c;--paper:#f7f4ee;--paper-ink:#1c1b19;--paper-muted:#6b665d;--accent:#c8481f;--teal:#0f6b6b}
@@ -21,6 +21,11 @@ header .site{font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.0
 header p{margin:0;color:var(--muted);font-size:.95rem}
 .doors{display:grid;grid-template-columns:1fr;gap:16px}
 @media (min-width:640px){.doors{grid-template-columns:1fr 1fr}}
+@media (min-width:880px){.doors{grid-template-columns:1fr 1fr 1fr}}
+.wrap{max-width:1040px}
+header{flex-direction:column;align-items:flex-start;gap:6px}
+header h1{margin:0;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:1.5rem;letter-spacing:.02em;color:var(--ink)}
+header h1 span{color:var(--gold)}
 a.door{display:block;text-decoration:none;border-radius:20px;padding:24px 22px 22px;min-height:230px;border:1px solid var(--line);position:relative;transition:transform .12s ease,box-shadow .12s ease}
 a.door:hover,a.door:focus-visible{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,0,0,.35);outline:none}
 a.door:focus-visible{box-shadow:0 0 0 3px var(--gold)}
@@ -41,6 +46,12 @@ a.patch h2{font-family:ui-serif,Georgia,"Times New Roman",serif}
 a.patch h2 span{color:var(--accent)}
 a.patch .sub{color:var(--paper-muted)}
 a.patch .go{color:var(--teal)}
+a.sollum{background:#fff;color:var(--paper-ink);border-color:#fff}
+a.sollum .eyebrow{color:var(--accent)}
+a.sollum h2{font-family:ui-serif,Georgia,"Times New Roman",serif}
+a.sollum h2 span{color:var(--accent)}
+a.sollum .sub{color:var(--paper-muted)}
+a.sollum .go{color:var(--accent)}
 footer{margin-top:28px;color:var(--muted);font-size:.85rem}
 footer a{color:var(--muted)}
 </style>
@@ -49,24 +60,33 @@ footer a{color:var(--muted)}
 <div class="wrap">
 <header>
   <div class="site">v3ktor.org</div>
-  <p>Two free tools. Pick one. <span lang="fr">Deux outils gratuits. Choisis.</span></p>
+  <h1>V3KTOR <span>// Mapping the Self</span></h1>
+  <p>Three free tools: the body, the pivot, the mind. <span lang="fr">Trois outils gratuits&nbsp;: le corps, le pivot, l’esprit.</span></p>
 </header>
 <div class="doors">
-  <a class="door v3k" href="https://v3ktor.app/">
-    <p class="eyebrow">Instrument</p>
-    <h2>V3KTOR™</h2>
-    <p class="sub">// Mapping the Self</p>
-    <p>An affective calibration instrument. Free, open source, no account, no tracking, no verdict.</p>
-    <p class="fr" lang="fr">Un instrument de calibration affective. Gratuit, libre, sans compte, sans pistage, sans verdict.</p>
-    <span class="go">v3ktor.app →</span>
-  </a>
   <a class="door patch" href="/patch/">
-    <p class="eyebrow">App · Appli</p>
+    <p class="eyebrow">Corpus · the body · le corps</p>
     <h2>The Patch<span>.</span></h2>
     <p class="sub" lang="fr">La Patch</p>
     <p>Find the foods that work for you, with everything your body needs. Three minutes of questions; it runs on your phone and nothing leaves it.</p>
     <p class="fr" lang="fr">Trouve les aliments qui te conviennent, avec tout ce qu’il faut à ton corps. Trois minutes de questions; ça tourne sur ton téléphone et rien n’en sort.</p>
     <span class="go">v3ktor.org/patch →</span>
+  </a>
+  <a class="door sollum" href="/sollum/">
+    <p class="eyebrow">Fulcrum · the pivot · le pivot</p>
+    <h2>Sollum<span>.</span></h2>
+    <p class="sub">Your pattern · Ton motif</p>
+    <p>Pick between pairs of words. See how your priorities move with sleep, caffeine, sugar and alcohol, and where the chain starts. Nothing leaves your phone.</p>
+    <p class="fr" lang="fr">Choisis entre des paires de mots. Vois comment tes priorités bougent avec le sommeil, la caféine, le sucre et l’alcool, et où la chaîne commence. Rien ne quitte ton téléphone.</p>
+    <span class="go">v3ktor.org/sollum →</span>
+  </a>
+  <a class="door v3k" href="https://v3ktor.app/">
+    <p class="eyebrow">Mentis · the mind · l’esprit</p>
+    <h2>V3KTOR™</h2>
+    <p class="sub">// Instrument</p>
+    <p>An affective calibration instrument. Free, open source, no account, no tracking, no verdict.</p>
+    <p class="fr" lang="fr">Un instrument de calibration affective. Gratuit, libre, sans compte, sans pistage, sans verdict.</p>
+    <span class="go">v3ktor.app →</span>
   </a>
 </div>
 <footer>
