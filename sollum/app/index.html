@@ -164,7 +164,7 @@ html.locked,html.locked body{overflow:hidden}
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" tabindex="-1" aria-hidden="true"></div>
 <script>
 'use strict';
-const VER='0.6.3';
+const VER='0.6.4';
 /* ---------- the pool: ten twin duels, two per level; replaced by ./words.json when the site serves one ---------- */
 let POOL_VERSION='2026-11-08b';
 let POOL=[
@@ -280,7 +280,8 @@ en:{
  yourOrder:'Your order',showOrder:'Show my order',hideOrder:'Hide my order',showAll:'Show all',showTop:'Show top 10',
  keep:'Sharpen the middle (+2 rounds)',softMiddle:'Top and bottom are solid. The middle is still soft.',
  hook:'Do this again on a short night, or a day you had three, and see what moves.',
- normalSoon:k=>`${k} more day${k===1?'':'s'} and Sollum can compare today with your normal.`,
+ normalSoon:k=>`${k} more ordinary day${k===1?'':'s'} — fewer than 3 links, no incident — and Sollum can compare today with your normal.`,
+ saveFail:'Couldn’t save on this phone: the browser refused. What you do now may be lost. Back up your data in Settings.',
  sameAsNormal:'Same as your normal.',normalOn:n=>`Your normal is built on ${n} day${n===1?'':'s'}.`,normalSoft:'Still soft — it firms up around 7.',
  hes:(a,b)=>`You’re putting ${a} vs ${b} back in question tonight. It’s still time.`,
  flip:(p,h,k,n)=>`${p} beat ${h} tonight. On your ordinary days it lost ${k} of ${n}.`,
@@ -322,7 +323,7 @@ en:{
  howBody:`<ul>
 <li><b>Twenty words in ten pairs.</b> Each pair has a steady side and a pull side — Tomorrow · Right now, Enough · More, Family · Being left alone. About two minutes of taps. The first round is always the ten pairs; the rest builds your full order.</li>
 <li><b>Your normal.</b> From your ordinary days (about a week of them), Sollum learns how you usually choose and how fast. A heavy day, or a day with an incident, never becomes the normal.</li>
-<li><b>Three readings, in the order they usually come:</b> the hand rocks — you take longer than usual on a pair; a pair flips — the pull side wins where it almost never does; the scale tips — two levels fall below your normal at once.</li>
+<li><b>Three readings, in the order we expect them (not tested yet):</b> the hand rocks — you take longer than usual on a pair; a pair flips — the pull side wins where it almost never does; the scale tips — two levels fall below your normal at once.</li>
 <li><b>The chain.</b> Sleep, caffeine, drinks, the thing you’re watching, food. Each heavy one is a link. The more links lit, the closer you sit to the tip — the same drink weighs more on a short night.</li>
 <li><b>When something fires</b> you see your own message from a good day, a button to call the person you chose, and your province’s line.</li>
 <li><b>Report an incident</b> afterwards: what, when, what it cost. Sollum lines up the hours before (from The Patch, if connected). From three incidents, it compares those days with the others, in your own counts.</li>
@@ -366,7 +367,8 @@ fr:{
  yourOrder:'Ton ordre',showOrder:'Voir mon ordre',hideOrder:'Cacher mon ordre',showAll:'Tout voir',showTop:'Voir le top 10',
  keep:'Préciser le milieu (+2 tours)',softMiddle:'Le haut et le bas sont solides. Le milieu est encore flou.',
  hook:'Refais-le après une nuit courte, ou une journée où t’en as pris trois, et regarde ce qui bouge.',
- normalSoon:k=>`Encore ${k} journée${k>1?'s':''} et Sollum pourra comparer aujourd’hui avec ta normale.`,
+ normalSoon:k=>`Encore ${k} journée${k>1?'s':''} ordinaire${k>1?'s':''} — moins de 3 maillons, aucun incident — et Sollum pourra comparer aujourd’hui avec ta normale.`,
+ saveFail:'Impossible d’enregistrer sur ce téléphone${NB}: le navigateur a refusé. Ce que tu fais maintenant pourrait être perdu. Fais une sauvegarde dans les Réglages.'.replace('${NB}',NB),
  sameAsNormal:'Comme ta normale.',normalOn:n=>`Ta normale repose sur ${n} journée${n>1?'s':''}.`,normalSoft:'Encore floue — ça se précise vers 7.',
  hes:(a,b)=>`Tu remets ${a} contre ${b} en question ce soir. Il est encore temps.`,
  flip:(p,h,k,n)=>`${p} a battu ${h} ce soir. Dans tes journées ordinaires, il perdait ${k} fois sur ${n}.`,
@@ -408,7 +410,7 @@ fr:{
  howBody:`<ul>
 <li><b>Vingt mots en dix paires.</b> Chaque paire a un côté stable et un côté qui tire — Demain · Tout de suite, Assez · Encore, La famille · Qu’on me laisse tranquille. Environ deux minutes de touches. Le premier tour, c’est toujours les dix paires; le reste bâtit ton ordre au complet.</li>
 <li><b>Ta normale.</b> À partir de tes journées ordinaires (environ une semaine), Sollum apprend comment tu choisis d’habitude, et à quelle vitesse. Une grosse journée, ou une journée avec un incident, ne devient jamais la normale.</li>
-<li><b>Trois lectures, dans l’ordre où elles arrivent d’habitude${NB}:</b> la main hésite — tu prends plus de temps que d’habitude sur une paire; une paire bascule — le côté qui tire gagne là où il ne gagne presque jamais; la balance bascule — deux niveaux tombent sous ta normale en même temps.</li>
+<li><b>Trois lectures, dans l’ordre où on s’attend à les voir (pas encore testé)${NB}:</b> la main hésite — tu prends plus de temps que d’habitude sur une paire; une paire bascule — le côté qui tire gagne là où il ne gagne presque jamais; la balance bascule — deux niveaux tombent sous ta normale en même temps.</li>
 <li><b>La chaîne.</b> Le sommeil, la caféine, l’alcool, ce que tu surveilles, la nourriture. Chaque gros morceau est un maillon. Plus il y a de maillons allumés, plus tu es proche du point de bascule — le même verre pèse plus lourd après une nuit courte.</li>
 <li><b>Quand quelque chose s’allume,</b> tu vois ton propre message d’un bon jour, un bouton pour appeler la personne que tu as choisie, et la ligne de ta province.</li>
 <li><b>Signale un incident</b> après coup${NB}: quoi, quand, ce que ça a coûté. Sollum aligne les heures d’avant (à partir de La Patch, si elle est croisée). À partir de trois incidents, il compare ces journées avec les autres, dans tes propres chiffres.</li>
@@ -450,7 +452,9 @@ function load(){try{const raw=localStorage.getItem(KEY);if(raw){const o=Object.a
  if(!Array.isArray(o.sessions))o.sessions=[];if(!Array.isArray(o.slips))o.slips=[];if(!o.connect||typeof o.connect!=='object')o.connect={patch:false,v3k:false};
  if(!o.setup||typeof o.setup!=='object')o.setup=defaults().setup;if(!Array.isArray(o.setup.goals))o.setup.goals=[];if(!PROVS.some(p=>p[0]===o.province))o.province='other';
  o.sollum_version=VER;return o}}catch(e){}return defaults()}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}}
+/* 0.6.4: a failed save shows a warning on every screen until saving works again (code review, 8 Nov) */
+let saveFail=false;
+function save(){try{localStorage.setItem(KEY,JSON.stringify(store));saveFail=false}catch(e){saveFail=true}}
 function t(k,...a){const d=I18N[store.lang]||I18N.en;const s=d[k]!==undefined?d[k]:I18N.en[k];return typeof s==='function'?s(...a):(s===undefined?k:s)}
 function L(en,fr){return store.lang==='fr'?fr:en}
 function P2(a){return store.lang==='fr'?a[1]:a[0]}
@@ -478,6 +482,12 @@ function shiftDay(s,n){const [y,m,d]=s.split('-').map(Number);const dt=new Date(
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function sizeClass(label){const n=label.length;return n<=6?'s1':n<=9?'s2':n<=12?'s3':'s4'}
+/* 0.6.4: a session remembers which watched word it ranked, so a changed word isn't compared with the old one */
+function watchKey(){const w=store.setup.watch;return w?(w.en||'')+'|'+(w.fr||''):''}
+function sameWatch(s,w){return w!==WATCH_ID||s.watchKey==null||s.watchKey===watchKey()}
+/* 0.6.4: comparisons across days (contrasts, incidents, history) use each day's latest session, the state closest to
+   the evening; the normal still uses each day's first ordinary session */
+function dayView(sessions){const by={};sessions.slice().sort((a,b)=>a.t_start-b.t_start).forEach(s=>{by[s.date]=s});return Object.values(by).sort((a,b)=>a.t_start-b.t_start)}
 function firstPerDay(sessions){const by={};sessions.slice().sort((a,b)=>a.t_start-b.t_start).forEach(s=>{if(!by[s.date])by[s.date]=s});return Object.values(by).sort((a,b)=>a.t_start-b.t_start)}
 function orderOf(rank){return Object.keys(rank).sort((a,b)=>rank[a]-rank[b])}
 function slipDays(){return new Set(store.slips.map(s=>s.date))}
@@ -624,15 +634,16 @@ function duelMap(sess){const m={};(sess.duels||[]).forEach(d=>{m[d.key]={pull:d.
 /* ---------- the normal: the person's ordinary days — no slip, chain light (under 3 links), and not a day that itself read as
    tipped or flipped twice. Like The Patch's set-aside days: one heavy evening can't become the baseline. If that leaves fewer
    than 3 days, every non-slip day counts, so the normal always exists once there are 3 days. ---------- */
-function ordinaryDay(s,slips){return !(slips.has(s.date)||(s.links||[]).length>=LINKS_FIRE||(s.tipped&&s.tipped.length)||(s.flips&&s.flips.length>=2))}
+function ordinaryDay(s,slips){return !(slips.has(s.date)||(s.chips&&s.chips.cr==='y')||(s.links||[]).length>=LINKS_FIRE||(s.tipped&&s.tipped.length)||(s.flips&&s.flips.length>=2))}
 function normalOf(prior,words){
  const slips=slipDays();
  const same=prior.filter(s=>s.pool===POOL_VERSION);
  let B=firstPerDay(same.filter(s=>ordinaryDay(s,slips))).slice(-BASE_WINDOW);
- if(B.length<NORMAL_MIN)B=firstPerDay(same.filter(s=>!slips.has(s.date))).slice(-BASE_WINDOW);
  const N={n:B.length,days:B.map(s=>s.date)};
+ // hesitation two sessions running: the session just before, heavy day or not
+ const last=same.slice().sort((a,b)=>a.t_start-b.t_start).pop();N.prevHes=last&&last.hes?last.hes:[];
  if(B.length<NORMAL_MIN)return N;
- const common=words.filter(w=>B.every(s=>s.rank&&s.rank[w]!=null&&s.strength&&s.strength[w]!=null));
+ const common=words.filter(w=>B.every(s=>s.rank&&s.rank[w]!=null&&s.strength&&s.strength[w]!=null&&sameWatch(s,w)));
  if(common.length<6)return N;
  N.common=common;N.mean={};N.sd={};N.meanS={};N.sdS={};
  common.forEach(w=>{const v=B.map(s=>s.rank[w]);N.mean[w]=avg(v);N.sd[w]=stdev(v);const u=B.map(s=>s.strength[w]);N.meanS[w]=avg(u);N.sdS[w]=stdev(u)});
@@ -640,7 +651,6 @@ function normalOf(prior,words){
  N.duel={};twins().forEach(tw=>{const rows=B.map(duelMap).filter(m=>m[tw.key]);N.duel[tw.key]={n:rows.length,pull:rows.filter(m=>m[tw.key].pull).length,ratios:rows.map(m=>m[tw.key].ratio).filter(r=>r!=null)}});
  N.lv={};const L=B.map(s=>levelScores(s.rank));for(const lv in LEVELS){const v=L.map(x=>x[lv]).filter(x=>x!=null);if(v.length)N.lv[lv]={mean:avg(v),sd:Math.max(LV_SD_FLOOR,stdev(v))}}
  const Cs=B.map(s=>s.C).filter(c=>c!=null);N.meanC=Cs.length?avg(Cs):null;
- N.prevHes=B.length?(B[B.length-1].hes||[]):[];
  return N;
 }
 function upsetsOf(sess,N){
@@ -682,7 +692,8 @@ function readingsOf(sess,N){
  if(!R.fog)R.words=warnOf(sess,N);
  return R;
 }
-function linksOf(chips){if(!chips)return [];return CHIPS.filter(c=>chips[c.id]!=null&&chips[c.id]===c.heavy).map(c=>c.id)}
+/* 0.6.4: a crash is an outcome, not a link — it's shown, but never counts toward the three */
+function linksOf(chips){if(!chips)return [];return CHIPS.filter(c=>c.id!=='cr'&&chips[c.id]!=null&&chips[c.id]===c.heavy).map(c=>c.id)}
 /* the message and the call appear on: two flips, or one on a universal duel (Tomorrow·Right now, Enough·More); the scale tipping;
    hesitation (already two duels or two sessions); or three links lit */
 function fires(R,links){const flip=R.flips.length>=2||R.flips.some(f=>UNIVERSAL.includes(f.key));return !!(hasGoals()&&(flip||R.tipped||R.hes.length||links.length>=LINKS_FIRE))}
@@ -695,7 +706,7 @@ function finalize(chips){
  const sess={id:S.id,date:S.date,t_start:Date.now(),hour:new Date().getHours(),rounds:S.round,pool:POOL_VERSION,chips:chips&&Object.keys(chips).length?chips:null,choices:S.choices,duels:S.duelPicks,goals:S.goalPicks,
   strength:an.strength,rank:an.rank,se:an.se,C:an.C,repeats:an.repeats,agreed:an.agreed,rt_median:an.rt_median,reflex:S.reflex};
  const R=readingsOf(sess,N);
- sess.hes=R.hes.map(h=>h.key);sess.flips=R.flips.map(f=>f.key);sess.tipped=R.tipped?R.tipped.levels:null;sess.fog=!!R.fog;sess.warn=R.words;sess.normal_n=N.n;sess.links=linksOf(sess.chips);
+ sess.hes=R.hes.map(h=>h.key);sess.flips=R.flips.map(f=>f.key);sess.tipped=R.tipped?R.tipped.levels:null;sess.fog=!!R.fog;sess.warn=R.words;sess.normal_n=N.n;sess.links=linksOf(sess.chips);sess.watchKey=watchKey();
  const i=store.sessions.findIndex(s=>s.id===S.id);if(i>=0)store.sessions[i]=sess;else store.sessions.push(sess);
  save();writeShared(sess);
  S.result={sess,N,R,order:an.order,first:prior.filter(s=>s.pool===POOL_VERSION).length===0};ui.showAll=false;ui.showOrder=false;ui.msg='';view='result';render();
@@ -708,9 +719,9 @@ function clearShared(){try{const T=JSON.parse(localStorage.getItem(SHARED)||'{}'
 
 /* ---------- contrasts: heavy days vs the others; slip days vs the others ---------- */
 function contrastOf(sessions,words){
- const D=firstPerDay(sessions.filter(s=>s.pool===POOL_VERSION));let best=null;
+ const D=dayView(sessions.filter(s=>s.pool===POOL_VERSION));let best=null;
  CHIPS.forEach(c=>{const have=D.filter(s=>s.chips&&s.chips[c.id]!=null&&s.rank);const A=have.filter(s=>s.chips[c.id]===c.heavy),B=have.filter(s=>s.chips[c.id]!==c.heavy);if(A.length<SIDE_MIN||B.length<SIDE_MIN)return;
-  const common=words.filter(w=>have.every(s=>s.rank[w]!=null));
+  const common=words.filter(w=>have.every(s=>s.rank[w]!=null&&sameWatch(s,w)));
   const moves=common.map(w=>{const a=A.map(s=>s.rank[w]),b=B.map(s=>s.rank[w]);const va=Math.max(2.5,stdev(a))**2,vb=Math.max(2.5,stdev(b))**2;const d=avg(b)-avg(a);return {w,d,z:d/Math.sqrt(va/a.length+vb/b.length)}}).filter(m=>Math.abs(m.d)>=MOVE_MIN&&Math.abs(m.z)>=2.2).sort((a,b)=>Math.abs(b.z)-Math.abs(a.z));
   const score=Math.min(A.length,B.length)*100+moves.length;if(!best||score>best.score)best={score,c,nA:A.length,nB:B.length,up:moves.filter(m=>m.d>0).slice(0,2),dn:moves.filter(m=>m.d<0).slice(0,2)}});
  return best;
@@ -720,7 +731,7 @@ function contrastHTML(K){if(!K)return '';const lab=P2(K.c.days);const parts=K.up
 function slipsCardHTML(){
  if(!hasGoals())return '';
  const slips=slipDays();if(store.slips.length<SLIPS_MIN)return store.slips.length?`<div class="box soft"><div class="small">${t('slipsSoon',store.slips.length)}</div></div>`:'';
- const D=firstPerDay(store.sessions.filter(s=>s.pool===POOL_VERSION));
+ const D=dayView(store.sessions.filter(s=>s.pool===POOL_VERSION));
  const dayChips=d=>d.chips||patchChips(d.date)||{};
  const A=D.filter(s=>slips.has(s.date)),B=D.filter(s=>!slips.has(s.date));
  // slip days without a session still have chips from The Patch
@@ -740,7 +751,7 @@ function slipsCardHTML(){
 function leverHTML(links,sess){
  const n=links.length;const labels=links.map(id=>P2(CHIPS.find(c=>c.id===id).link));
  let more='';
- if(store.slips.length>=SLIPS_MIN){const slips=slipDays();const D=firstPerDay(store.sessions.filter(s=>s.pool===POOL_VERSION&&slips.has(s.date)));const m=D.length;if(m&&n){const k=D.filter(s=>(s.links||[]).length>=n).length;more=`<div class="sub">${t('leverSlips',n,k,m)}</div>`}}
+ if(store.slips.length>=SLIPS_MIN){const slips=slipDays();const D=dayView(store.sessions.filter(s=>s.pool===POOL_VERSION&&slips.has(s.date)));const m=D.length;if(m&&n){const k=D.filter(s=>(s.links||[]).length>=n).length;more=`<div class="sub">${t('leverSlips',n,k,m)}</div>`}}
  return `<div class="box ${n>=LINKS_FIRE?'bad':n?'warn':''}"><div class="lever">${CHIPS.filter(c=>c.id!=='cr').map(c=>`<div class="lk ${links.includes(c.id)?(n>=LINKS_FIRE?'hot':'on'):''}" title="${esc(P2(c.link))}"></div>`).join('')}</div><p class="big">${t('leverT',n,labels.join(' · '))}</p>${more}</div>`;
 }
 function helpFor(goalIds){
@@ -775,7 +786,7 @@ function aiText(){
  if(r.N.common)Lx.push(`Normal (${r.N.n} ordinary days). Readings: hesitation ${R.hes.map(h=>wname(h.h)+'/'+wname(h.p)+' ×'+h.ratio).join(', ')||'none'}; flips ${R.flips.map(f=>wname(f.p)+' over '+wname(f.h)).join(', ')||'none'}; tipped ${R.tipped?R.tipped.levels.join('+'):'no'}; fog ${R.fog?'yes':'no'}.`);
  else Lx.push(`Normal: ${r.N.n} of ${NORMAL_MIN} days — no comparison yet.`);
  if(store.slips.length)Lx.push(`Slips noted: ${store.slips.length}${ui.aiAmounts?' — '+store.slips.map(s=>`${s.date} ${s.goal} ${s.start||'?'}–${s.end||'?'} ${s.cost&&s.cost.n!=null?s.cost.n+' '+s.cost.unit:''}`).join('; '):' (amounts left out)'}.`);
- const recent=firstPerDay(store.sessions.filter(s=>s.pool===POOL_VERSION)).slice(-10).map(s=>`${s.date} top3=${orderOf(s.rank).slice(0,3).map(wname).join('/')}${s.chips?' '+Object.entries(s.chips).map(([k,v])=>k+'='+v).join(','):''}${s.tipped?' tipped':''}${slipDays().has(s.date)?' slip':''}`);
+ const recent=dayView(store.sessions.filter(s=>s.pool===POOL_VERSION)).slice(-10).map(s=>`${s.date} top3=${orderOf(s.rank).slice(0,3).map(wname).join('/')}${s.chips?' '+Object.entries(s.chips).map(([k,v])=>k+'='+v).join(','):''}${s.tipped?' tipped':''}${slipDays().has(s.date)?' slip':''}`);
  Lx.push('Last days: '+recent.join(' | '));
  return Lx.join('\n');
 }
@@ -793,7 +804,7 @@ function render(){
 }
 function langSw(){return `<span class="lang"><button type="button" data-act="setLang" data-arg="fr" aria-pressed="${store.lang==='fr'}">FR</button><button type="button" data-act="setLang" data-arg="en" aria-pressed="${store.lang==='en'}">EN</button></span>`}
 function setupTop(){return `<div class="top"><button data-act="setupBack">‹ ${t('back')}</button><span>${langSw()}</span></div>`}
-function topbar(backTo){return `<div class="top"><button type="button" class="menuBtn" data-act="menu" aria-haspopup="dialog" aria-label="${esc(t('menu'))}"><span aria-hidden="true">☰</span></button><button type="button" class="ttl" data-act="go" data-arg="home">Sollum<span class="b">.</span></button>${backTo&&backTo!=='home'?`<button type="button" data-act="go" data-arg="${backTo}">‹ ${t('back')}</button>`:''}<span class="sp"></span>${langSw()}</div>`}
+function topbar(backTo){return `<div class="top"><button type="button" class="menuBtn" data-act="menu" aria-haspopup="dialog" aria-label="${esc(t('menu'))}"><span aria-hidden="true">☰</span></button><button type="button" class="ttl" data-act="go" data-arg="home">Sollum<span class="b">.</span></button>${backTo&&backTo!=='home'?`<button type="button" data-act="go" data-arg="${backTo}">‹ ${t('back')}</button>`:''}<span class="sp"></span>${langSw()}</div>${saveFail?`<div class="box bad" role="alert"><b>${t('saveFail')}</b></div>`:''}`}
 function vHome(){
  const n=firstPerDay(store.sessions.filter(s=>s.pool===POOL_VERSION)).length;const pd=patchData();
  const today=sessDay();const pre=patchChips(today);const links=pre?linksOf(pre):[];
@@ -902,15 +913,19 @@ function vSlip(){
  ${helpHTML(goals)}
  <div class="row" style="margin-top:18px"><button class="btn" data-act="slipSave" ${s.goal?'':'disabled'}>${t('save')}</button><button class="btn sec" data-act="go" data-arg="home">${t('cancel')}</button></div>`;
 }
+/* 0.6.4: The Patch gives day totals with a few times. Anything whose time is after the incident's start is marked,
+   and crashes after the start are left out (code review, 8 Nov) */
+function clockMin(h){if(typeof h!=='string')return null;const m=/^(\d{1,2}):(\d{2})/.exec(h);if(!m)return null;let v=+m[1]*60+ +m[2];if(v<5*60)v+=1440;return v}
 function chainLine(slip){
- const p=patchSum(slip.date);const parts=[];
+ const p=patchSum(slip.date);const parts=[];const st=clockMin(slip.start);const after=h=>st!=null&&clockMin(h)!=null&&clockMin(h)>st;const aft=L(' (last one after it started)',' (le dernier après le début)');
  if(p){if(typeof p.sleep==='number')parts.push(L(`${p.sleep} h sleep`,`${p.sleep} h de sommeil`));
-  const c=p.caffeine||{};if((c.servings||0)>0||(c.energyDrinks||0)>0)parts.push(L(`${c.servings||0} caffeine${c.energyDrinks?` (+${c.energyDrinks} energy)`:''}${c.last?' by '+c.last:''}`,`${c.servings||0} caféine${c.energyDrinks?` (+${c.energyDrinks} boisson${c.energyDrinks>1?'s':''} énergisante${c.energyDrinks>1?'s':''})`:''}${c.last?' jusqu’à '+c.last:''}`));
+  const c=p.caffeine||{};if((c.servings||0)>0||(c.energyDrinks||0)>0)parts.push(L(`${c.servings||0} caffeine${c.energyDrinks?` (+${c.energyDrinks} energy)`:''}${c.last?' by '+c.last:''}${after(c.last)?aft:''}`,`${c.servings||0} caféine${c.energyDrinks?` (+${c.energyDrinks} boisson${c.energyDrinks>1?'s':''} énergisante${c.energyDrinks>1?'s':''})`:''}${c.last?' jusqu’à '+c.last:''}${after(c.last)?aft:''}`));
   if(p.sugar&&p.sugar.servings>0)parts.push(L(`${p.sugar.servings} sweet${p.sugar.servings>1?'s':''}`,`${p.sugar.servings} sucrerie${p.sugar.servings>1?'s':''}`));
-  if(p.meals)parts.push(p.meals.count?L(`${p.meals.count} meal${p.meals.count>1?'s':''}${p.meals.last?', last '+p.meals.last:''}${p.meals.low?' (thin)':''}`,`${p.meals.count} repas${p.meals.last?', dernier '+p.meals.last:''}${p.meals.low?' (léger)':''}`):L('no meal logged','aucun repas noté'));
+  if(p.meals)parts.push(p.meals.count?L(`${p.meals.count} meal${p.meals.count>1?'s':''}${p.meals.last?', last '+p.meals.last:''}${p.meals.low?' (thin)':''}${after(p.meals.last)?aft:''}`,`${p.meals.count} repas${p.meals.last?', dernier '+p.meals.last:''}${p.meals.low?' (léger)':''}${after(p.meals.last)?aft:''}`):L('no meal logged','aucun repas noté'));
   const a=p.alcohol||{};if(a.drinks)parts.push(L(`${a.drinks} drink${a.drinks>1?'s':''}${a.late?' late':''}`,`${a.drinks} verre${a.drinks>1?'s':''}${a.late?' tard':''}`));
-  if(p.crash)parts.push(L(`crash${p.crashAt?' at '+p.crashAt.join(', '):''}`,`crash${p.crashAt?' à '+p.crashAt.join(', '):''}`));
- }else{const ch=firstPerDay(store.sessions).find(s=>s.date===slip.date);const cc=ch&&ch.chips;if(cc)CHIPS.forEach(c=>{if(cc[c.id]!=null)parts.push(`${c.ic} ${chipLabel(c,cc[c.id])}`)})}
+  const ca=Array.isArray(p.crashAt)?p.crashAt.filter(h=>!after(h)):null;
+  if(p.crash&&(!ca||ca.length||!p.crashAt.length))parts.push(L(`crash${ca&&ca.length?' at '+ca.join(', '):''}`,`crash${ca&&ca.length?' à '+ca.join(', '):''}`));
+ }else{const ch=dayView(store.sessions).find(s=>s.date===slip.date);const cc=ch&&ch.chips;if(cc)CHIPS.forEach(c=>{if(cc[c.id]!=null)parts.push(`${c.ic} ${chipLabel(c,cc[c.id])}`)})}
  const G=GOALS.find(x=>x.id===slip.goal);const what=slip.goal==='other'&&store.setup.other?store.setup.other:(G?(store.lang==='fr'?G.fr:G.en):slip.goal);
  parts.push(`<b>${esc(what)}${slip.start?' '+esc(slip.start):''}${slip.end?'–'+esc(slip.end):''}</b>`);
  return parts.length>1?parts.join(' → '):(p?parts.join(''):t('chainNone')+' '+parts.join(''));
@@ -985,7 +1000,7 @@ function vPattern(){
  <div class="box soft"><p class="big">${t('patTake')}</p></div>`;
 }
 function vCalendar(){
- const slips=slipDays();const days=firstPerDay(store.sessions.filter(s=>s.pool===POOL_VERSION)).slice().reverse();
+ const slips=slipDays();const days=dayView(store.sessions.filter(s=>s.pool===POOL_VERSION)).slice().reverse();
  const list=days.length?days.map(s=>{const top3=orderOf(s.rank).slice(0,3).map(wname).join(' · ');const marks=[];if(s.fog)marks.push(L('shaky hand','main qui tremble'));if(s.hes&&s.hes.length)marks.push(L('hesitation','hésitation'));if(s.flips&&s.flips.length)marks.push(L('flip','bascule'));if(s.tipped&&s.tipped.length)marks.push(L('tipped','balance basculée'));if(slips.has(s.date))marks.push(`<b>${t('slipMark')}</b>`);
   return `<div class="day"><div><b>${s.date}</b> <span class="small">${chipsLine(s.chips)}${s.links&&s.links.length?` · ${s.links.length} ${L('links','maillons')}`:''}</span></div><div>${esc(top3)}</div>${marks.length?`<div class="small">${marks.join(' · ')}</div>`:''}</div>`}).join(''):`<p class="small">${t('noSessions')}</p>`;
  return topbar('home')+`<h2>${t('calTitle')}</h2>${contrastHTML(contrastOf(store.sessions,activeWords()))}${slipsCardHTML()}${list}`;
