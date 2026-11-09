@@ -5,6 +5,11 @@ Tired, crashing, running on coffee or energy drinks? Three minutes of questions,
 - **The page:** https://v3ktor.org/patch/
 - **The app:** https://v3ktor.org/patch/app/ (it installs on a phone and works offline)
 
+**Also in this repository:** [Sollum](sollum/) (https://v3ktor.org/sollum/), the pivot, under the same license. v3ktor.org is V3KTOR // Mapping the Self:
+- **Corpus** (The Patch): the body.
+- **Fulcrum** (Sollum): the pivot.
+- **Mentis** (V3KTOR™): the mind.
+
 ## What it does
 - **The questions** lead to a one-week patch: what to keep, what to swap, what to add on your budget, and the blood test to ask for.
 - **Report** is where you note crashes, meals and symptoms, and do a short daily check-in.
