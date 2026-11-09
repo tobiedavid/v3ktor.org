@@ -20,8 +20,9 @@ For the zip, download it from the software DOI.
 
 Or drop any `.ots` file and its original file on https://opentimestamps.org.
 
-**Status:** these proofs were saved right after stamping, before Bitcoin confirmed them, so each one still points at the
-OpenTimestamps calendars that anchor it. `ots upgrade <file>.ots` fetches the Bitcoin attestation and writes it into the proof.
+**Status: confirmed.** All three proofs are anchored in the Bitcoin blockchain at block 975020 (the night of 7 November 2026
+MST, which is 8 November UTC), with later attestations at blocks 975023 and 975026 from the other calendars. The proofs in this
+folder are the complete, upgraded ones, so they verify without contacting the OpenTimestamps calendars.
 
 These timestamps establish prior art for The Patch's method and reference implementation. All three files were timestamped
 on 8 November 2026 (UTC).
