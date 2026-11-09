@@ -2,7 +2,7 @@
 
 The Patch's method, design rationale, safety rules and reference implementation were timestamped on 8 November 2026 (UTC) via:
 
-- **OpenTimestamps (Bitcoin anchor):** see `docs/timestamps/`
+- **OpenTimestamps (Bitcoin anchor):** all three files confirmed in Bitcoin block 975020 (8 November 2026 UTC); the proofs are in `docs/timestamps/`
 - **Zenodo (DOI deposits, 8 November 2026 UTC):**
   - Software, v1.2.50: https://doi.org/10.5281/zenodo.24046421
   - Method paper, v1.0: https://doi.org/10.5281/zenodo.24046691
