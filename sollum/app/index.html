@@ -164,7 +164,7 @@ html.locked,html.locked body{overflow:hidden}
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" tabindex="-1" aria-hidden="true"></div>
 <script>
 'use strict';
-const VER='0.6.4';
+const VER='0.6.5';
 /* ---------- the pool: ten twin duels, two per level; replaced by ./words.json when the site serves one ---------- */
 let POOL_VERSION='2026-11-08b';
 let POOL=[
@@ -280,7 +280,7 @@ en:{
  yourOrder:'Your order',showOrder:'Show my order',hideOrder:'Hide my order',showAll:'Show all',showTop:'Show top 10',
  keep:'Sharpen the middle (+2 rounds)',softMiddle:'Top and bottom are solid. The middle is still soft.',
  hook:'Do this again on a short night, or a day you had three, and see what moves.',
- normalSoon:k=>`${k} more ordinary day${k===1?'':'s'} — fewer than 3 links, no incident — and Sollum can compare today with your normal.`,
+ normalSoon:k=>`${k} more ordinary day${k===1?'':'s'} — sleep noted, fewer than 3 links, no incident — and Sollum can compare today with your normal.`,
  saveFail:'Couldn’t save on this phone: the browser refused. What you do now may be lost. Back up your data in Settings.',
  sameAsNormal:'Same as your normal.',normalOn:n=>`Your normal is built on ${n} day${n===1?'':'s'}.`,normalSoft:'Still soft — it firms up around 7.',
  hes:(a,b)=>`You’re putting ${a} vs ${b} back in question tonight. It’s still time.`,
@@ -367,7 +367,7 @@ fr:{
  yourOrder:'Ton ordre',showOrder:'Voir mon ordre',hideOrder:'Cacher mon ordre',showAll:'Tout voir',showTop:'Voir le top 10',
  keep:'Préciser le milieu (+2 tours)',softMiddle:'Le haut et le bas sont solides. Le milieu est encore flou.',
  hook:'Refais-le après une nuit courte, ou une journée où t’en as pris trois, et regarde ce qui bouge.',
- normalSoon:k=>`Encore ${k} journée${k>1?'s':''} ordinaire${k>1?'s':''} — moins de 3 maillons, aucun incident — et Sollum pourra comparer aujourd’hui avec ta normale.`,
+ normalSoon:k=>`Encore ${k} journée${k>1?'s':''} ordinaire${k>1?'s':''} — sommeil noté, moins de 3 maillons, aucun incident — et Sollum pourra comparer aujourd’hui avec ta normale.`,
  saveFail:'Impossible d’enregistrer sur ce téléphone${NB}: le navigateur a refusé. Ce que tu fais maintenant pourrait être perdu. Fais une sauvegarde dans les Réglages.'.replace('${NB}',NB),
  sameAsNormal:'Comme ta normale.',normalOn:n=>`Ta normale repose sur ${n} journée${n>1?'s':''}.`,normalSoft:'Encore floue — ça se précise vers 7.',
  hes:(a,b)=>`Tu remets ${a} contre ${b} en question ce soir. Il est encore temps.`,
@@ -484,7 +484,7 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;',
 function sizeClass(label){const n=label.length;return n<=6?'s1':n<=9?'s2':n<=12?'s3':'s4'}
 /* 0.6.4: a session remembers which watched word it ranked, so a changed word isn't compared with the old one */
 function watchKey(){const w=store.setup.watch;return w?(w.en||'')+'|'+(w.fr||''):''}
-function sameWatch(s,w){return w!==WATCH_ID||s.watchKey==null||s.watchKey===watchKey()}
+function sameWatch(s,w){return w!==WATCH_ID||(s.watchKey!=null&&s.watchKey===watchKey())}
 /* 0.6.4: comparisons across days (contrasts, incidents, history) use each day's latest session, the state closest to
    the evening; the normal still uses each day's first ordinary session */
 function dayView(sessions){const by={};sessions.slice().sort((a,b)=>a.t_start-b.t_start).forEach(s=>{by[s.date]=s});return Object.values(by).sort((a,b)=>a.t_start-b.t_start)}
@@ -634,7 +634,8 @@ function duelMap(sess){const m={};(sess.duels||[]).forEach(d=>{m[d.key]={pull:d.
 /* ---------- the normal: the person's ordinary days — no slip, chain light (under 3 links), and not a day that itself read as
    tipped or flipped twice. Like The Patch's set-aside days: one heavy evening can't become the baseline. If that leaves fewer
    than 3 days, every non-slip day counts, so the normal always exists once there are 3 days. ---------- */
-function ordinaryDay(s,slips){return !(slips.has(s.date)||(s.chips&&s.chips.cr==='y')||(s.links||[]).length>=LINKS_FIRE||(s.tipped&&s.tipped.length)||(s.flips&&s.flips.length>=2))}
+function sleepKnown(s){const c=s.chips||patchChips(s.date)||{};return c.sl!=null}
+function ordinaryDay(s,slips){return sleepKnown(s)&&!s.fog&&!(slips.has(s.date)||(s.chips&&s.chips.cr==='y')||(s.links||[]).length>=LINKS_FIRE||(s.tipped&&s.tipped.length)||(s.flips&&s.flips.length>=2))}
 function normalOf(prior,words){
  const slips=slipDays();
  const same=prior.filter(s=>s.pool===POOL_VERSION);
@@ -696,7 +697,8 @@ function readingsOf(sess,N){
 function linksOf(chips){if(!chips)return [];return CHIPS.filter(c=>c.id!=='cr'&&chips[c.id]!=null&&chips[c.id]===c.heavy).map(c=>c.id)}
 /* the message and the call appear on: two flips, or one on a universal duel (Tomorrow·Right now, Enough·More); the scale tipping;
    hesitation (already two duels or two sessions); or three links lit */
-function fires(R,links){const flip=R.flips.length>=2||R.flips.some(f=>UNIVERSAL.includes(f.key));return !!(hasGoals()&&(flip||R.tipped||R.hes.length||links.length>=LINKS_FIRE))}
+/* 0.6.5: with a shaky hand (repeats that don't agree), flips can be noise, so they don't bring up the card; tipping and links still do */
+function fires(R,links){const flip=!R.fog&&(R.flips.length>=2||R.flips.some(f=>UNIVERSAL.includes(f.key)));return !!(hasGoals()&&(flip||R.tipped||R.hes.length||links.length>=LINKS_FIRE))}
 
 function finalize(chips){
  const words=activeWords();
