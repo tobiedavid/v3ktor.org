@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<!--
+    Food Trial Log — the website page.
+    Copyright (C) 2026  Tobie David
+    SPDX-License-Identifier: AGPL-3.0-or-later — see LICENSE at https://github.com/tobiedavid/v3ktor.org
+-->
+<html lang="en-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Food Trial Log — find the food that upsets your digestive system</title>
+<meta name="description" content="Eat a few plain foods until your gut calms, then add foods back one at a time. About a week. Free and private: everything stays on your phone.">
+<meta name="theme-color" content="#c8481f">
+<link rel="icon" type="image/png" sizes="32x32" href="app/icons/favicon-32.png">
+<link rel="apple-touch-icon" href="app/icons/apple-touch-icon.png">
+<meta property="og:title" content="Food Trial Log">
+<meta property="og:description" content="Find the food that upsets your digestive system. About a week. Free and private.">
+<meta property="og:image" content="app/icons/icon-512.png">
+<style>
+:root{--bg:#f7f4ee;--card:#fff;--ink:#1c1b19;--muted:#6b665d;--line:#e6e0d4;--accent:#c8481f;--teal:#0f6b6b;--warn:#b3261e;--warn-soft:#fbe9e7}
+@media (prefers-color-scheme:dark){:root{--bg:#15161a;--card:#1e2026;--ink:#ececea;--muted:#a19d95;--line:#2d3038;--accent:#e3633a;--teal:#5fb3b3;--warn:#ff7b6e;--warn-soft:#3a1f1c}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-text-size-adjust:100%}
+h1,h2{font-family:ui-serif,Georgia,'Times New Roman',serif;line-height:1.12;margin:0 0 .45em}
+h1{font-size:clamp(2rem,8vw,3rem);font-weight:800}
+h2{font-size:1.5rem;font-weight:800;margin-top:1.6em}
+p,ul,ol{margin:0 0 .9em} li{margin-bottom:.4em}
+a{color:var(--teal)}
+.wrap{max-width:620px;margin:0 auto;padding:28px 20px 60px}
+.btn{display:block;text-align:center;background:var(--accent);color:#fff;font-weight:800;font-size:1.15rem;padding:16px 20px;border-radius:14px;text-decoration:none;margin:18px 0 6px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:0 0 14px}
+.flag{background:var(--warn-soft);border-color:var(--warn)}
+.small{font-size:.92rem;color:var(--muted)}
+img.ic{width:72px;height:72px;border-radius:16px;display:block;margin:0 0 14px}
+</style>
+</head>
+<body>
+<main class="wrap">
+<img class="ic" src="app/icons/icon-192.png" alt="" width="72" height="72">
+<h1>Food Trial Log</h1>
+<p><b>Find the food that upsets your digestive system. About a week.</b></p>
+<p>You eat a few plain foods until your gut calms. Then you add foods back one at a time. Whatever brings the loose stools back is your answer.</p>
+<a class="btn" href="app/">Open the app</a>
+<p class="small" style="text-align:center">Free. No account, no ads, no server. It never leaves your phone.</p>
+
+<h2>How it works</h2>
+<ol>
+<li><b>Keep it boring.</b> Eat only the plain foods on your starting list. Report every stool. After 2 good days in a row, you move on.</li>
+<li><b>Add one food a day.</b> Easy foods first. If a food upsets you, it comes off your list and you go back to step 1.</li>
+<li><b>Show the result.</b> The app keeps a list of the foods that upset you, and a summary you can show a doctor or a pharmacist.</li>
+</ol>
+<p>If your loose stools come and go, there is a slower route: it cuts one food group at a time.</p>
+
+<h2>Put it on your phone</h2>
+<ul>
+<li><b>Android (Chrome):</b> menu, then Install app.</li>
+<li><b>iPhone (Safari):</b> Share, then Add to Home Screen.</li>
+</ul>
+<p>It works offline once it has loaded. Your log lives in this browser on this phone, so back it up from the app's menu.</p>
+
+<h2>Read this first</h2>
+<div class="card flag"><p style="margin:0"><b>Blood in your stool, black stool, fainting, chest pain or trouble breathing:</b> get care now. The app has a <b>Something’s wrong</b> button on every screen.</p></div>
+<div class="card"><p style="margin:0">Food Trial Log is a log with rules, not medical or dietitian advice. <b>A doctor or a dietitian hasn’t checked it yet.</b> If you are pregnant, breastfeeding, or living with Crohn’s, colitis, celiac disease or an eating disorder, talk to your doctor before cutting foods. If you have had loose stools for weeks, ask your doctor for a celiac blood test before you start.</p></div>
+
+<h2>Free software</h2>
+<p>Made by Tobie and Claude. Free version at v3ktor.org/gut. Published by Aplomb Institute. © 2026 Tobie David.</p>
+<p class="small">Free software under the GNU Affero General Public License, version 3 or later, with two extra terms. Source code and license: <a href="https://github.com/tobiedavid/v3ktor.org">github.com/tobiedavid/v3ktor.org</a>. Provided as-is, without warranty. Food values: Canadian Nutrient File, Health Canada, 2015, licensed under the Open Government Licence – Canada; blanks filled from the USDA’s SR28. Look, food list and nutrient needs come from <a href="../patch/">The Patch</a>.</p>
+</main>
+</body>
+</html>

@@ -1,0 +1,38 @@
+{
+ "name": "Food Trial Log",
+ "short_name": "Food Trial",
+ "id": "./",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "orientation": "portrait",
+ "background_color": "#f7f4ee",
+ "theme_color": "#c8481f",
+ "lang": "en-CA",
+ "dir": "ltr",
+ "description": "Find the food that upsets your digestive system. Free and private: everything stays on your phone.",
+ "categories": [
+  "health",
+  "lifestyle"
+ ],
+ "icons": [
+  {
+   "src": "icons/icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "icons/icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "icons/maskable-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ]
+}
