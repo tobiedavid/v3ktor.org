@@ -21,11 +21,12 @@
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-text-size-adjust:100%}
 h1,h2,h3{font-family:ui-serif,Georgia,'Times New Roman',serif;line-height:1.12;margin:0 0 .45em}
-h1{font-size:clamp(2.2rem,8vw,3.4rem);font-weight:800;letter-spacing:-.01em}
-h2{font-size:clamp(1.5rem,5vw,2rem);font-weight:800}
+h1{font-size:clamp(2.2rem,8vw,3.4rem);font-weight:800;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:clamp(1.5rem,5vw,2rem);font-weight:800;margin-bottom:.7em}
 h3{font-size:1.15rem;font-weight:800}
 p{margin:0 0 .9em}
-a{color:var(--teal)}
+a{color:var(--teal);text-underline-offset:3px}
+:focus-visible{outline:3px solid var(--teal);outline-offset:3px;border-radius:6px}
 .wrap{max-width:980px;margin:0 auto;padding:0 20px}
 .l-en .fr,.l-fr .en{display:none!important}
 header.top{display:flex;align-items:center;gap:10px;padding:14px 0}
@@ -48,7 +49,9 @@ header.top .home{font-size:.9rem;color:var(--muted);text-decoration:none}
 .small{font-size:.9rem;color:var(--muted)}
 .phone{justify-self:center;width:min(300px,78vw);border-radius:34px;border:10px solid #1c1b19;box-shadow:0 30px 60px -30px rgba(0,0,0,.45);overflow:hidden;background:#fff;aspect-ratio:1/2}
 .phone img{display:block;width:100%;height:100%;object-fit:cover;object-position:top}
-section{padding:34px 0;border-top:1px solid var(--line)}
+section{padding:44px 0;border-top:1px solid var(--line)}
+@media(min-width:820px){section{padding:58px 0}.hero{padding:44px 0 60px}}
+section>p,section>.small,section>.how-list{max-width:46em}
 .grid{display:grid;gap:14px}
 @media(min-width:720px){.grid.g2{grid-template-columns:1fr 1fr}.grid.g4{grid-template-columns:repeat(4,1fr)}.grid.g3{grid-template-columns:repeat(3,1fr)}}
 .card{background:var(--card);border-radius:18px;padding:18px;box-shadow:0 1px 2px rgba(0,0,0,.05),0 6px 20px -10px rgba(0,0,0,.15)}
@@ -116,7 +119,7 @@ kbd{font:600 .85em system-ui;background:var(--chip);border-radius:6px;padding:1p
 
   <section>
     <h2><span class="en">What’s inside</span><span class="fr">Ce qu’il y a dedans</span></h2>
-    <div class="grid g4">
+    <div class="grid g2">
       <div class="card door"><h3><span class="en">Test</span><span class="fr">Test</span></h3><p><span class="en">About two minutes of taps between pairs of words. Best before the first coffee, and again when the day gets heavy. Over a week it learns your normal.</span><span class="fr">Environ deux minutes de choix entre des paires de mots. Idéal avant le premier café, et encore quand la journée devient lourde. En une semaine, il apprend ta normale.</span></p></div>
       <div class="card door t"><h3><span class="en">Report an incident</span><span class="fr">Signaler un incident</span></h3><p><span class="en">What happened, when, and what it cost. No judgement. With The Patch on the same phone, the hours before fill in by themselves: sleep, caffeine, sugar, meals, drinks.</span><span class="fr">Ce qui est arrivé, quand, et ce que ça a coûté. Sans jugement. Avec La Patch sur le même téléphone, les heures d’avant se remplissent toutes seules&nbsp;: sommeil, caféine, sucre, repas, verres.</span></p></div>
       <div class="card door w"><h3><span class="en">Your pattern</span><span class="fr">Ton motif</span></h3><p><span class="en">The vicious circle — short night, caffeine, sugar, alcohol, the bet, the crash — and a scale you tap through to see why more reasons don’t tip it back. Your own chain shows here once you have incidents.</span><span class="fr">Le cercle vicieux — nuit courte, caféine, sucre, alcool, la mise, le crash — et une balance que tu fais avancer pour voir pourquoi plus de raisons ne la redressent pas. Ta propre chaîne s’affiche ici quand tu as des incidents.</span></p></div>
