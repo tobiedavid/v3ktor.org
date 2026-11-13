@@ -168,7 +168,7 @@ html.locked,html.locked body{overflow:hidden}
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" tabindex="-1" aria-hidden="true"></div>
 <script>
 'use strict';
-const VER='0.6.6';
+const VER='0.6.7';
 /* ---------- the pool: ten twin duels, two per level; replaced by ./words.json when the site serves one ---------- */
 let POOL_VERSION='2026-11-08b';
 let POOL=[
@@ -276,6 +276,7 @@ const NB=' ';
 const I18N={
 en:{
  gloss:'whole',tagline:'See what moves your priorities — before the scale tips.',
+ instBig:'Install Sollum',instSub:'Home-screen icon · full screen · works offline',
  start:'Test',calendar:'History',settings:'Settings',back:'Back',home:'Home',done:'Done',skip:'Skip',next:'Next',save:'Save',cancel:'Cancel',undo:'‹ Undo',
  days:n=>`${n} day${n===1?'':'s'} tested so far`,firstLine:'About two minutes of taps.',morning:'Best taken before the first coffee.',
  pickQ:'Which one matters more?',round:(r,n)=>`Round ${r} of ${n}`,
@@ -363,6 +364,7 @@ en:{
 },
 fr:{
  gloss:'entier',tagline:'Vois ce qui fait bouger tes priorités — avant que la balance bascule.',
+ instBig:'Installer Sollum',instSub:'Icône d’accueil · plein écran · fonctionne hors ligne',
  start:'Faire le test',calendar:'Historique',settings:'Réglages',back:'Retour',home:'Accueil',done:'Terminé',skip:'Passer',next:'Suivant',save:'Enregistrer',cancel:'Annuler',undo:'‹ Annuler',
  days:n=>`${n} journée${n>1?'s':''} testée${n>1?'s':''} jusqu’ici`,firstLine:'Environ deux minutes de touches.',morning:'À faire de préférence avant le premier café.',
  pickQ:'Lequel compte le plus?',round:(r,n)=>`Tour ${r} sur ${n}`,
@@ -821,6 +823,10 @@ function render(){
 function langSw(){return `<span class="lang"><button type="button" data-act="setLang" data-arg="fr" aria-pressed="${store.lang==='fr'}">FR</button><button type="button" data-act="setLang" data-arg="en" aria-pressed="${store.lang==='en'}">EN</button></span>`}
 function setupTop(){return `<div class="top"><button data-act="setupBack">‹ ${t('back')}</button><span>${langSw()}</span></div>`}
 function topbar(backTo){return `<div class="top"><button type="button" class="menuBtn" data-act="menu" aria-haspopup="dialog" aria-label="${esc(t('menu'))}"><span aria-hidden="true">☰</span></button><button type="button" class="ttl" data-act="go" data-arg="home">Sollum<span class="b">.</span></button>${backTo&&backTo!=='home'?`<button type="button" data-act="go" data-arg="${backTo}">‹ ${t('back')}</button>`:''}<span class="sp"></span>${langSw()}</div>${saveFail?`<div class="box bad" role="alert"><b>${t('saveFail')}</b></div>`:''}`}
+/* a big Install button on Home, like V3KTOR's (v0.6.7): the phone's own install dialog when the browser offers one, the steps on the site page otherwise */
+function instBig(){let inst=false;try{inst=!!(navigator.standalone||matchMedia('(display-mode: standalone)').matches)||window.top!==window.self}catch(e){inst=true}
+ if(inst||window.__installed||!/^https?:$/.test(location.protocol))return '';
+ return `<div class="instbig" style="margin:16px 0"><button type="button" data-install-big style="display:block;width:100%;box-sizing:border-box;min-height:64px;padding:14px 18px;font:inherit;font-size:1.12rem;font-weight:800;letter-spacing:.02em;border:2px solid currentColor;border-radius:14px;background:transparent;color:inherit;cursor:pointer">↓ ${t('instBig')}</button><p style="margin:6px 0 0;text-align:center;font-size:.85rem;opacity:.72">${t('instSub')}</p></div>`}
 function vHome(){
  const n=firstPerDay(store.sessions.filter(s=>s.pool===POOL_VERSION)).length;const pd=patchData();
  const today=sessDay();const pre=patchChips(today);const links=pre?linksOf(pre):[];
@@ -836,6 +842,7 @@ function vHome(){
   <button class="door" style="border-left-color:var(--warn)" data-act="go" data-arg="pattern"><span class="dt">${t('patTitle')}</span><span class="ds">${esc(t('patSub'))}</span></button>
   <button class="door ink" data-act="go" data-arg="calendar"><span class="dt">${t('calendar')}</span><span class="ds">${esc(n?t('histSub',n):t('noSessions'))}</span></button>
  </div>
+ ${instBig()}
  <div class="flag">${t('crisis')}</div>
  <div class="foot">${t('privacy')}<br>${t('about')}</div>`;
 }
@@ -1156,6 +1163,13 @@ render();
 </script>
 <script>/* offline: only on https (v3ktor.org) or localhost — a file opened from the phone just runs */
 if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){navigator.serviceWorker.register('sw.js').catch(function(){})}
+/* install: keep the browser's offer for the big Install button on Home; without an offer (iPhone, some browsers) the button opens the steps on the site page */
+(function(){var ev=null;
+ window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();ev=e});
+ window.addEventListener('appinstalled',function(){ev=null;window.__installed=true;document.querySelectorAll('.instbig').forEach(function(x){x.remove()})});
+ document.addEventListener('click',function(e){var b=e.target&&e.target.closest?e.target.closest('[data-install-big]'):null;if(!b)return;e.preventDefault();
+  if(ev){var p=ev;p.prompt();p.userChoice.finally(function(){ev=null})}else{location.href='../#install'}});
+})();
 </script>
 </body>
 </html>
