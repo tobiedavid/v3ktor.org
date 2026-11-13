@@ -382,7 +382,7 @@ details.note summary{cursor:pointer;padding:8px 0;min-height:44px}
 .toptabs{flex-wrap:nowrap}.toptabs button{flex:1 1 auto;white-space:nowrap;padding:6px 10px}
 .mealhd .row{flex-wrap:wrap}
 html.noinst .inst,html.noinst #installPill,html.locked #installPill{display:none!important}
-body:has(.bar:not(.hidden)) #installPill{display:none}
+body:has(.bar:not(.hidden)) #installPill,body:has(.instbig) #installPill{display:none}
 #installPill{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));z-index:20;display:flex;gap:6px;align-items:center;width:max-content;max-width:calc(100vw - 24px);box-sizing:border-box;background:var(--ink);color:var(--bg);border-radius:22px;padding:6px 6px 6px 16px;box-shadow:0 6px 20px -8px rgba(0,0,0,.45);font-weight:600;font-size:.94rem;line-height:1.25}
 #installPill button{border:0;font:inherit;cursor:pointer;min-height:42px;flex:none} #installPill .ipy{background:var(--accent);color:#fff;border-radius:999px;padding:9px 16px} #installPill .ipn{background:transparent;color:inherit;padding:8px 10px}
 .bar{z-index:25}
@@ -644,7 +644,7 @@ const UA=navigator.userAgent||'', IOS=/iPad|iPhone|iPod/.test(UA)||(navigator.pl
   STANDALONE=(()=>{ try{ return navigator.standalone===true||matchMedia('(display-mode: standalone)').matches; }catch(e){ return false; } })(),
   SHARE='<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M7 11H5v10h14V11h-2"/></svg>';
 if(FRAMED||STANDALONE) document.documentElement.classList.add('noinst');
-const VER='1.4.5', RULES=5, CONSENT=3, KEY='v3k.gut.v1', H=36e5;
+const VER='1.4.6', RULES=5, CONSENT=3, KEY='v3k.gut.v1', H=36e5;
 const BK={alc:[4,'Alcohol'],caf:[4,'Caffeine and coffee'],proc:[4,'Processed or packaged food'],swt:[4,'Sugar-free sweeteners'],sup:[4,'Supplements and protein powder'],dairy:[3,'Dairy'],fat:[3,'Fatty or fried food'],sugar:[3,'Sugar and fructose'],rawsea:[3,'Raw shellfish'],gluten:[2,'Wheat, barley and rye'],fibre:[2,'Bran and high-fibre food'],legume:[2,'Beans and lentils'],onion:[2,'Onion and garlic'],spicy:[2,'Spicy food'],hist:[2,'Histamine-rich food'],veg:[1,'Vegetables, other than the plain ones'],fruit:[1,'Fruit, other than banana'],nuts:[1,'Nuts and seeds']};
 const BKN={caf:'coffee (decaf too), tea, energy drinks, cola',proc:'most have 20 or more ingredients, so one product is one suspect',swt:'sorbitol, xylitol, sugar-free gum and candy',sup:'over-the-counter only. Never stop a prescribed medicine to test it.',sugar:'juice, honey, soft drinks, apples, pears, mango',hist:'aged cheese, cured meat, canned fish, leftovers, wine, fermented food',veg:'plain: peeled potatoes and squash',fruit:'banana is plain',dairy:'all of it when cutting. Coming back: milk proves it fastest; hard cheese has almost no lactose and is worth its own test'};
 /* the Plain tab leads with what people reach for when their gut is off; the rest follow in A to Z */
@@ -1023,7 +1023,7 @@ function renderBar(v){ const B=(label,right)=>{ bar.classList.remove('hidden'); 
 function doors(dis,small){ return `<div class="doors${small?' small':''}"><button type="button" class="door main" data-act="door" data-v="fast" ${dis}><span class="eyebrow">My stool is loose now</span><span class="dt">Find the food</span><span class="ds">Eat a few plain foods until your gut calms. This is the fastest way.</span></button><button type="button" class="door teal" data-act="door" data-v="slow" ${dis}><span class="eyebrow">It comes and goes</span><span class="dt">One suspect at a time</span><span class="ds">Eat as usual, then stop one food or drink at a time and watch what changes.</span></button></div>`; }
 function startButtons(){ return S.minor?`<button type="button" class="btn primary" style="width:100%" data-act="door" data-v="log">Start logging</button>`:`<button type="button" class="btn primary" style="width:100%;padding:18px 20px;font-size:1.1rem" data-act="door" data-v="fast">${S.ack?'Start my list':'I agree. Start my list'}</button>`; }
 function vStart(){ const ok=S.ack, i=UI.is==null?0:UI.is;
-  const top=`<p class="tagline">Find the food that upsets your digestive system.</p><p style="margin:0 0 6px"><b>Less cramping. More energy.</b></p>`,
+  const top=`<p class="tagline">Find the food that upsets your digestive system.</p><p style="margin:0 0 6px"><b>Less cramping. More energy.</b></p>${instBig()}`,
     warn=`<div class="card flag"><p class="small" style="margin:0">Do you have blood in your stool, black stool, fainting, chest pain or trouble breathing? Tap <b>Something’s wrong</b> at the top.</p></div>`,
     foot=`<p class="small muted" style="margin-top:16px">Pregnant, breastfeeding, or living with ${G('crohn','Crohn’s, colitis')}, ${G('celiac','celiac disease')} or an eating disorder (NEDIC: 1-866-633-4220)? Talk to your doctor or a ${G('dietitian','dietitian')} before cutting foods.</p><p class="small muted">v${VER} · <button type="button" class="lnk" data-act="faq">Questions</button> · <button type="button" class="lnk" data-act="about">About</button></p>`;
   if(!ok&&i<INTRO.length){ const c=INTRO[i]; return top+`<div class="card one"><div class="eyebrow">${i+1} of ${INTRO.length} · ${c[2]}</div><p class="big">${c[0]}</p><ul style="margin:0;padding-left:1.1em">${c[1].map(l=>`<li style="margin:0 0 6px">${l}</li>`).join('')}</ul></div><div class="row"><button type="button" class="btn primary" data-act="intro">${i<INTRO.length-1?'Next':'Got it'}</button></div>`+foot; }
@@ -1280,6 +1280,9 @@ function pharmSheet(){ const N=nutri(), fi=D.fi, sl=sitList(), low=N.low.map(r=>
 /* the black install bar at the bottom, like The Patch's (v1.4.5). It stays until the app is installed or the bar is closed. */
 function installPill(){ if(FRAMED||STANDALONE||document.getElementById('installPill')) return; try{ if(localStorage.getItem(KEY+'.noinst')) return; }catch(e){}
   const b=document.createElement('div'); b.id='installPill'; b.innerHTML=`<span>Install Food Trial Log on this phone</span><button type="button" class="ipy" data-act="install">Install</button><button type="button" class="ipn" data-act="instno" aria-label="No thanks">✕</button>`; document.body.appendChild(b); }
+/* the big Install button on the first screen, like V3KTOR's (v1.4.6). Same action as the bar: the phone's own install dialog when the browser offers one, the steps otherwise. */
+function instBig(){ if(FRAMED||STANDALONE) return ''; try{ if(localStorage.getItem(KEY+'.noinst')) return ''; }catch(e){}
+  return `<div class="instbig inst" style="margin:14px 0"><button type="button" data-act="install" style="display:block;width:100%;box-sizing:border-box;min-height:64px;padding:14px 18px;font:inherit;font-size:1.12rem;font-weight:800;letter-spacing:.02em;border:2px solid currentColor;border-radius:14px;background:transparent;color:inherit;cursor:pointer">↓ Install Food Trial Log</button><p style="margin:6px 0 0;text-align:center;font-size:.85rem;opacity:.72">Home-screen icon · full screen · works offline</p></div>`; }
 function installSheet(){
   const icon=`<li>From now on, open the app from its icon.</li>`,
     iph=`<ol class="steps">${SAFARI?'':`<li>Open this page in <b>Safari</b>.</li>`}<li>Tap <b>⋯</b> beside the address bar, then <b>Share</b>. No <b>⋯</b>? Tap the Share button ${SHARE}.</li><li>Scroll down the list and tap <b>Add to Home Screen</b>.</li><li>Tap <b>Add</b>.</li>${icon}</ol>`,
@@ -1400,7 +1403,7 @@ const ACT={
     try{ S=migrate(o.state); S.tab='report'; V=null; MEMO={}; D=derive(); vReport(); vHist(); summaryText(); nutri(); }
     catch(e){ S=old; STORE=oldStore; NOSAVE=false; MEMO={}; closeSheet(); render(); toast('That backup couldn’t be read. Nothing was changed.'); return; }
     NOSAVE=false; if(STORE==='bad') STORE='ok'; closeSheet(); render(); toast('Restored'); },
-  instno:()=>{ const b=document.getElementById('installPill'); if(b) b.remove(); try{ localStorage.setItem(KEY+'.noinst','1'); }catch(e){} },
+  instno:()=>{ const b=document.getElementById('installPill'); if(b) b.remove(); document.querySelectorAll('.instbig').forEach(x=>x.remove()); try{ localStorage.setItem(KEY+'.noinst','1'); }catch(e){} },
   install:()=>{ const e=window.INSTALL; if(!e){ installSheet(); return; } closeSheet(); e.prompt(); e.userChoice.finally(()=>{ window.INSTALL=null; }); },
   erase:b=>{ if(b.dataset.sure){ eraseAll(); return; } b.dataset.sure='1'; b.textContent='Tap again to erase everything'; },
   restart:()=>{ const r=running(); if(r) r.stop={res:'void',d:today(),why:'the trial was started over'}; S.route=null; S.fast=null; S.slow=null; S.base0=[]; S.adds=[]; UI={}; V=null; closeSheet(); save(); render(); }
