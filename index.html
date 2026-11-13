@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <!--
-  v3ktor.org — the front door: V3KTOR, mapping the self. Corpus (The Patch), Fulcrum (Sollum), Mentis (V3KTOR™).
+  v3ktor.org — the front door: V3KTOR, mapping the self. A series of free, open-source apps that gather data from the body at different levels:
+  Food Trial Log (the gut), The Patch (the body), Sollum (the pivot), V3KTOR™ (the mind).
   Copyright (C) 2026  Tobie David
   SPDX-License-Identifier: AGPL-3.0-or-later — see LICENSE at https://github.com/tobiedavid/v3ktor.org
 -->
@@ -9,7 +10,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>v3ktor.org — V3KTOR // Mapping the Self</title>
-<meta name="description" content="V3KTOR, mapping the self: three free tools by Tobie David. Corpus — The Patch, the body. Fulcrum — Sollum, the pivot. Mentis — V3KTOR™, the mind. Trois outils gratuits&nbsp;: le corps, le pivot, l’esprit.">
+<meta name="description" content="V3KTOR, mapping the self: a series of free, open-source apps by Tobie David that gather data from the body at different levels. Food Trial Log, the gut. The Patch, the body. Sollum, the pivot. V3KTOR™, the mind. Quatre applications gratuites et libres&nbsp;: l’intestin, le corps, le pivot, l’esprit.">
 <link rel="canonical" href="https://v3ktor.org/">
 <style>
 :root{--bg:#050508;--ink:#e8e4da;--muted:#9a958a;--gold:#C9980A;--line:#26262c;--paper:#f7f4ee;--paper-ink:#1c1b19;--paper-muted:#6b665d;--accent:#c8481f;--teal:#0f6b6b}
@@ -21,12 +22,11 @@ header .site{font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.0
 header p{margin:0;color:var(--muted);font-size:.95rem}
 .doors{display:grid;grid-template-columns:1fr;gap:16px}
 @media (min-width:640px){.doors{grid-template-columns:1fr 1fr}}
-@media (min-width:880px){.doors{grid-template-columns:1fr 1fr 1fr}}
 .wrap{max-width:1040px}
 header{flex-direction:column;align-items:flex-start;gap:6px}
 header h1{margin:0;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:1.5rem;letter-spacing:.02em;color:var(--ink)}
 header h1 span{color:var(--gold)}
-a.door{display:block;text-decoration:none;border-radius:20px;padding:24px 22px 22px;min-height:230px;border:1px solid var(--line);position:relative;transition:transform .12s ease,box-shadow .12s ease}
+.door{display:block;text-decoration:none;border-radius:20px;padding:24px 22px 22px;min-height:230px;border:1px solid var(--line);position:relative;transition:transform .12s ease,box-shadow .12s ease}
 a.door:hover,a.door:focus-visible{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,0,0,.35);outline:none}
 a.door:focus-visible{box-shadow:0 0 0 3px var(--gold)}
 .door .eyebrow{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;margin:0 0 10px}
@@ -35,6 +35,8 @@ a.door:focus-visible{box-shadow:0 0 0 3px var(--gold)}
 .door p{margin:0 0 8px;font-size:.98rem}
 .door .fr{opacity:.85}
 .door .go{display:inline-block;margin-top:14px;font-weight:700}
+.door .trk{font-size:.92rem}
+.door a.go{text-decoration:none;margin-right:18px}.door a.go:hover,.door a.go:focus-visible{text-decoration:underline}
 a.v3k{background:linear-gradient(160deg,#0b0b12,#050508);color:var(--ink)}
 a.v3k .eyebrow,a.v3k .go{color:var(--gold)}
 a.v3k h2{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700}
@@ -46,6 +48,11 @@ a.patch h2{font-family:ui-serif,Georgia,"Times New Roman",serif}
 a.patch h2 span{color:var(--accent)}
 a.patch .sub{color:var(--paper-muted)}
 a.patch .go{color:var(--teal)}
+div.gut{background:var(--paper);color:var(--paper-ink);border-color:var(--paper)}
+div.gut .eyebrow,div.gut .go{color:var(--accent)}
+div.gut h2{font-family:ui-serif,Georgia,"Times New Roman",serif}
+div.gut h2 span{color:var(--accent)}
+div.gut .sub{color:var(--paper-muted)}
 a.sollum{background:#fff;color:var(--paper-ink);border-color:#fff}
 a.sollum .eyebrow{color:var(--accent)}
 a.sollum h2{font-family:ui-serif,Georgia,"Times New Roman",serif}
@@ -61,31 +68,48 @@ footer a{color:var(--muted)}
 <header>
   <div class="site">v3ktor.org</div>
   <h1>V3KTOR <span>// Mapping the Self</span></h1>
-  <p>Three free tools: the body, the pivot, the mind. <span lang="fr">Trois outils gratuits&nbsp;: le corps, le pivot, l’esprit.</span></p>
+  <p>A series of free, open-source apps. Each one helps you gather data from your own body, at a different level.</p>
+  <p lang="fr">Une série d’applications gratuites et à code source ouvert. Chacune t’aide à recueillir des données sur ton propre corps, à un niveau différent.</p>
 </header>
 <div class="doors">
+  <div class="door gut">
+    <p class="eyebrow">The gut · l’intestin</p>
+    <h2>Food Trial Log<span>.</span></h2>
+    <p class="sub">A test, not a diet · <span lang="fr">Un test, pas un régime</span></p>
+    <p>Eliminate the food that triggers your gut. Eat a few plain foods, report every stool, then add foods back, one a day. Nothing leaves your phone.</p>
+    <p class="trk"><b>Data:</b> stools, meals, symptoms.</p>
+    <p class="fr" lang="fr">Élimine l’aliment qui perturbe ton intestin. Mange quelques aliments simples, signale chaque selle, puis réintroduis les aliments, un par jour. Rien ne quitte ton téléphone.</p>
+    <p class="trk fr" lang="fr"><b>Données&nbsp;:</b> selles, repas, symptômes.</p>
+    <a class="go" href="/gut/">English: v3ktor.org/gut →</a><a class="go" href="/gut/fr/" lang="fr">Français&nbsp;: v3ktor.org/gut/fr →</a>
+  </div>
   <a class="door patch" href="/patch/">
-    <p class="eyebrow">Corpus · the body · le corps</p>
+    <p class="eyebrow">The body · le corps</p>
     <h2>The Patch<span>.</span></h2>
     <p class="sub" lang="fr">La Patch</p>
     <p>Find the foods that work for you, with everything your body needs. Three minutes of questions; it runs on your phone and nothing leaves it.</p>
+    <p class="trk"><b>Data:</b> meals, energy, sleep, caffeine, alcohol, crashes and symptoms.</p>
     <p class="fr" lang="fr">Trouve les aliments qui te conviennent, avec tout ce qu’il faut à ton corps. Trois minutes de questions; ça tourne sur ton téléphone et rien n’en sort.</p>
+    <p class="trk fr" lang="fr"><b>Données&nbsp;:</b> repas, énergie, sommeil, caféine, alcool, crashs et symptômes.</p>
     <span class="go">v3ktor.org/patch →</span>
   </a>
   <a class="door sollum" href="/sollum/">
-    <p class="eyebrow">Fulcrum · the pivot · le pivot</p>
+    <p class="eyebrow">The pivot · le pivot</p>
     <h2>Sollum<span>.</span></h2>
     <p class="sub">Your pattern · Ton motif</p>
     <p>Pick between pairs of words. See how your priorities move with sleep, caffeine, sugar and alcohol, and where the chain starts. Nothing leaves your phone.</p>
+    <p class="trk"><b>Data:</b> your word choices, your hesitations, and the incidents you report.</p>
     <p class="fr" lang="fr">Choisis entre des paires de mots. Vois comment tes priorités bougent avec le sommeil, la caféine, le sucre et l’alcool, et où la chaîne commence. Rien ne quitte ton téléphone.</p>
+    <p class="trk fr" lang="fr"><b>Données&nbsp;:</b> tes choix de mots, tes hésitations et les incidents que tu signales.</p>
     <span class="go">v3ktor.org/sollum →</span>
   </a>
   <a class="door v3k" href="https://v3ktor.app/">
-    <p class="eyebrow">Mentis · the mind · l’esprit</p>
+    <p class="eyebrow">The mind · l’esprit</p>
     <h2>V3KTOR™</h2>
     <p class="sub">// Instrument</p>
     <p>An affective calibration instrument. Free, open source, no account, no tracking, no verdict.</p>
+    <p class="trk"><b>Data:</b> the words you choose, how fast you choose them, and where you hesitate.</p>
     <p class="fr" lang="fr">Un instrument de calibration affective. Gratuit, libre, sans compte, sans pistage, sans verdict.</p>
+    <p class="trk fr" lang="fr"><b>Données&nbsp;:</b> les mots que tu choisis, à quelle vitesse, et où tu hésites.</p>
     <span class="go">v3ktor.app →</span>
   </a>
 </div>
