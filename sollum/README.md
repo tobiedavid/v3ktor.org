@@ -1,9 +1,10 @@
 # Sollum
 
-**Fulcrum — the pivot.** One of the three parts of V3KTOR // Mapping the Self:
-- **Corpus** (The Patch): the body.
-- **Fulcrum** (Sollum): the pivot.
-- **Mentis** (V3KTOR™): the mind.
+**The pivot.** One of the four parts of V3KTOR // Mapping the Self, a series of free, open-source apps that gather data from the body at different levels:
+- **Food Trial Log:** the gut.
+- **The Patch:** the body.
+- **Sollum:** the pivot.
+- **V3KTOR™:** the mind.
 
 Sollum asks you to pick between pairs of words, a quarter-second apart, and keeps the order your choices make. On an ordinary day you get your normal. On a short-sleep, four-coffee, no-meal, three-beer day it shows whether "Tomorrow" still beats "Right now", and which links in the chain came before.
 
