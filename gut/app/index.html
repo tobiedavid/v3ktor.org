@@ -644,7 +644,7 @@ const UA=navigator.userAgent||'', IOS=/iPad|iPhone|iPod/.test(UA)||(navigator.pl
   STANDALONE=(()=>{ try{ return navigator.standalone===true||matchMedia('(display-mode: standalone)').matches; }catch(e){ return false; } })(),
   SHARE='<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M7 11H5v10h14V11h-2"/></svg>';
 if(FRAMED||STANDALONE) document.documentElement.classList.add('noinst');
-const VER='1.4.6', RULES=5, CONSENT=3, KEY='v3k.gut.v1', H=36e5;
+const VER='1.4.7', RULES=5, CONSENT=3, KEY='v3k.gut.v1', H=36e5;
 const BK={alc:[4,'Alcohol'],caf:[4,'Caffeine and coffee'],proc:[4,'Processed or packaged food'],swt:[4,'Sugar-free sweeteners'],sup:[4,'Supplements and protein powder'],dairy:[3,'Dairy'],fat:[3,'Fatty or fried food'],sugar:[3,'Sugar and fructose'],rawsea:[3,'Raw shellfish'],gluten:[2,'Wheat, barley and rye'],fibre:[2,'Bran and high-fibre food'],legume:[2,'Beans and lentils'],onion:[2,'Onion and garlic'],spicy:[2,'Spicy food'],hist:[2,'Histamine-rich food'],veg:[1,'Vegetables, other than the plain ones'],fruit:[1,'Fruit, other than banana'],nuts:[1,'Nuts and seeds']};
 const BKN={caf:'coffee (decaf too), tea, energy drinks, cola',proc:'most have 20 or more ingredients, so one product is one suspect',swt:'sorbitol, xylitol, sugar-free gum and candy',sup:'over-the-counter only. Never stop a prescribed medicine to test it.',sugar:'juice, honey, soft drinks, apples, pears, mango',hist:'aged cheese, cured meat, canned fish, leftovers, wine, fermented food',veg:'plain: peeled potatoes and squash',fruit:'banana is plain',dairy:'all of it when cutting. Coming back: milk proves it fastest; hard cheese has almost no lactose and is worth its own test'};
 /* the Plain tab leads with what people reach for when their gut is off; the rest follow in A to Z */
@@ -1404,7 +1404,10 @@ const ACT={
     catch(e){ S=old; STORE=oldStore; NOSAVE=false; MEMO={}; closeSheet(); render(); toast('That backup couldn’t be read. Nothing was changed.'); return; }
     NOSAVE=false; if(STORE==='bad') STORE='ok'; closeSheet(); render(); toast('Restored'); },
   instno:()=>{ const b=document.getElementById('installPill'); if(b) b.remove(); document.querySelectorAll('.instbig').forEach(x=>x.remove()); try{ localStorage.setItem(KEY+'.noinst','1'); }catch(e){} },
-  install:()=>{ const e=window.INSTALL; if(!e){ installSheet(); return; } closeSheet(); e.prompt(); e.userChoice.finally(()=>{ window.INSTALL=null; }); },
+  /* v1.4.7: on Android the browser's offer can arrive a moment after the page; wait up to 2.5 seconds for it before showing the steps */
+  install:()=>{ const go=()=>{ const e=window.INSTALL; closeSheet(); e.prompt(); e.userChoice.finally(()=>{ window.INSTALL=null; }); };
+    if(window.INSTALL){ go(); return; } if(!ANDROID||window.INSTWAIT){ if(!window.INSTWAIT) installSheet(); return; }
+    window.INSTWAIT=1; let n=0; const iv=setInterval(()=>{ n++; if(window.INSTALL){ clearInterval(iv); window.INSTWAIT=0; go(); } else if(n>=10){ clearInterval(iv); window.INSTWAIT=0; installSheet(); } },250); },
   erase:b=>{ if(b.dataset.sure){ eraseAll(); return; } b.dataset.sure='1'; b.textContent='Tap again to erase everything'; },
   restart:()=>{ const r=running(); if(r) r.stop={res:'void',d:today(),why:'the trial was started over'}; S.route=null; S.fast=null; S.slow=null; S.base0=[]; S.adds=[]; UI={}; V=null; closeSheet(); save(); render(); }
 };

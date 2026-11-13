@@ -4642,7 +4642,11 @@ render();
   });
   /* the big Install button on Home: the phone's own dialog when the browser offered one, the steps on the site page otherwise */
   document.addEventListener('click',function(e){ var t=e.target&&e.target.closest?e.target.closest('[data-install-big]'):null; if(!t) return; e.preventDefault();
-    if(ev){ var p=ev, b=document.getElementById('installPill'); if(b) b.remove(); p.prompt(); p.userChoice.finally(function(){ ev=null; }); } else { location.href='../#install'; } });
+    function go(){ var p=ev, b=document.getElementById('installPill'); if(b) b.remove(); p.prompt(); p.userChoice.finally(function(){ ev=null; }); }
+    function steps(){ try{ sessionStorage.setItem('v3k.inst.tried','1'); }catch(x){} location.href='../#install'; }
+    if(ev){ go(); return; } if(!/Android/i.test(navigator.userAgent)){ steps(); return; } if(t.disabled) return;
+    /* on Android the browser's offer can arrive a moment after the page: wait up to 2.5 seconds before going to the steps */
+    t.disabled=true; var n=0, iv=setInterval(function(){ n++; if(ev){ clearInterval(iv); t.disabled=false; go(); } else if(n>=10){ clearInterval(iv); steps(); } },250); });
   window.addEventListener('appinstalled',function(){ window.__installed=true; var b=document.getElementById('installPill'); if(b) b.remove(); document.querySelectorAll('.instbig').forEach(function(x){ x.remove(); }); });
 })();
 </script>

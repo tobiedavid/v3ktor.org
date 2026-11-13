@@ -168,7 +168,7 @@ html.locked,html.locked body{overflow:hidden}
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" tabindex="-1" aria-hidden="true"></div>
 <script>
 'use strict';
-const VER='0.6.7';
+const VER='0.6.8';
 /* ---------- the pool: ten twin duels, two per level; replaced by ./words.json when the site serves one ---------- */
 let POOL_VERSION='2026-11-08b';
 let POOL=[
@@ -1168,7 +1168,11 @@ if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostn
  window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();ev=e});
  window.addEventListener('appinstalled',function(){ev=null;window.__installed=true;document.querySelectorAll('.instbig').forEach(function(x){x.remove()})});
  document.addEventListener('click',function(e){var b=e.target&&e.target.closest?e.target.closest('[data-install-big]'):null;if(!b)return;e.preventDefault();
-  if(ev){var p=ev;p.prompt();p.userChoice.finally(function(){ev=null})}else{location.href='../#install'}});
+  function go(){var p=ev;p.prompt();p.userChoice.finally(function(){ev=null})}
+  function steps(){try{sessionStorage.setItem('v3k.inst.tried','1')}catch(x){}location.href='../#install'}
+  if(ev){go();return}if(!/Android/i.test(navigator.userAgent)){steps();return}if(b.disabled)return;
+  /* on Android the browser's offer can arrive a moment after the page: wait up to 2.5 seconds before going to the steps */
+  b.disabled=true;var n=0,iv=setInterval(function(){n++;if(ev){clearInterval(iv);b.disabled=false;go()}else if(n>=10){clearInterval(iv);steps()}},250)});
 })();
 </script>
 </body>
