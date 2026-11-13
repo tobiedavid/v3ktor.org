@@ -16,80 +16,174 @@
 <link rel="alternate" hreflang="fr" href="https://v3ktor.org/gut/fr/">
 <link rel="icon" type="image/png" sizes="32x32" href="app/icons/favicon-32.png">
 <link rel="apple-touch-icon" href="app/icons/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://v3ktor.org/gut/">
 <meta property="og:title" content="Food Trial Log">
 <meta property="og:description" content="Find the food that upsets your digestive system. Less cramping. More energy.">
 <meta property="og:image" content="https://v3ktor.org/gut/app/icons/icon-512.png">
 <style>
-:root{--bg:#f7f4ee;--card:#fff;--ink:#1c1b19;--muted:#6b665d;--line:#e6e0d4;--accent:#c8481f;--teal:#0f6b6b;--warn:#b3261e;--warn-soft:#fbe9e7}
-@media (prefers-color-scheme:dark){:root{--bg:#15161a;--card:#1e2026;--ink:#ececea;--muted:#a19d95;--line:#2d3038;--accent:#e3633a;--teal:#5fb3b3;--warn:#ff7b6e;--warn-soft:#3a1f1c}}
+:root{--bg:#f7f4ee;--card:#fff;--ink:#1c1b19;--muted:#6b665d;--line:#e6e0d4;--accent:#c8481f;--teal:#0f6b6b;--warn:#b3261e;--warn-soft:#fbe9e7;--frame:#1c1b19}
+@media (prefers-color-scheme:dark){:root{--bg:#15161a;--card:#1e2026;--ink:#ececea;--muted:#a19d95;--line:#2d3038;--accent:#e3633a;--teal:#5fb3b3;--warn:#ff7b6e;--warn-soft:#3a1f1c;--frame:#3a3d47}}
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-text-size-adjust:100%}
-h1,h2{font-family:ui-serif,Georgia,'Times New Roman',serif;line-height:1.12;margin:0 0 .45em}
-h1{font-size:clamp(2rem,8vw,3rem);font-weight:800}
-h2{font-size:1.5rem;font-weight:800;margin-top:1.6em}
-p,ul,ol{margin:0 0 .9em} li{margin-bottom:.4em}
-a{color:var(--teal)}
-.wrap{max-width:620px;margin:0 auto;padding:28px 20px 60px}
-.btn{display:block;text-align:center;background:var(--accent);color:#fff;font-weight:800;font-size:1.15rem;padding:16px 20px;border-radius:14px;text-decoration:none;margin:18px 0 6px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:0 0 14px}
-.flag{background:var(--warn-soft);border-color:var(--warn)}
-.lang{float:right;font-weight:700;text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:.95rem}
-h3{font-size:1.12rem;margin:1.2em 0 .3em}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+h1,h2{font-family:ui-serif,Georgia,'Times New Roman',serif;line-height:1.12;font-weight:800;margin:0}
+h1{font-size:clamp(2rem,6.4vw,3.1rem);letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:clamp(1.5rem,3.6vw,1.9rem);margin-bottom:.7em}
+h3{font-size:1.12rem;line-height:1.3;margin:0 0 .45em}
+p,ul,ol{margin:0 0 .9em}
+ul,ol{padding-left:1.25em}
+li{margin-bottom:.4em}
+li:last-child,p:last-child,ul:last-child,ol:last-child{margin-bottom:0}
+a{color:var(--teal);text-underline-offset:3px}
+:focus-visible{outline:3px solid var(--teal);outline-offset:3px;border-radius:6px}
+.wrap{max-width:1000px;margin:0 auto;padding:0 20px}
+.text{max-width:660px}
 .small{font-size:.92rem;color:var(--muted)}
-img.ic{width:72px;height:72px;border-radius:16px;display:block;margin:0 0 14px}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 0}
+.brand{display:flex;align-items:center;gap:12px;font:800 1.2rem ui-serif,Georgia,'Times New Roman',serif;color:var(--ink);text-decoration:none}
+.brand img{width:40px;height:40px;border-radius:10px;display:block}
+.lang{font-weight:700;font-size:.95rem;text-decoration:none;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:8px 16px;background:var(--card)}
+
+.hero{display:grid;gap:32px;padding:26px 0 46px}
+.hero .sub{font-size:1.25rem;margin:.6em 0 0}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin:26px 0 12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:56px;padding:14px 26px;border-radius:14px;border:2px solid var(--accent);background:var(--accent);color:#fff;font-weight:800;font-size:1.1rem;text-decoration:none}
+.btn.ghost{background:transparent;border-color:var(--ink);color:var(--ink)}
+.shot{margin:0;justify-self:center;width:min(100%,300px)}
+.shot img{display:block;width:100%;height:auto;border:8px solid var(--frame);border-radius:30px;background:#f7f4ee;box-shadow:0 18px 40px rgba(28,27,25,.16)}
+.shot figcaption{margin-top:12px;text-align:center;font-size:.92rem;color:var(--muted)}
+
+section{padding:42px 0;border-top:1px solid var(--line)}
+.cards{display:grid;gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.flag{background:var(--warn-soft);border-color:var(--warn)}
+.day{display:grid;gap:30px;align-items:center}
+.tiles{list-style:none;padding:0;margin:0 0 18px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tiles li{margin:0;background:var(--card);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:14px;padding:14px 8px;text-align:center;font-weight:800;font-size:.95rem;line-height:1.25}
+.tiles span{display:block;font-size:1.7rem;line-height:1.2;margin-bottom:4px}
+.research{list-style:none;padding:0}
+.research li{padding:0 0 0 16px;border-left:3px solid var(--line);margin-bottom:16px}
+.steps{padding-left:1.3em}
+.foot{padding:34px 0 60px;border-top:1px solid var(--line)}
+.foot h2{font-size:1.2rem;margin-bottom:.5em}
+
+@media (min-width:760px){
+  .hero{grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);align-items:center;gap:48px;padding:44px 0 64px}
+  .cards.two{grid-template-columns:1fr 1fr}
+  .day{grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:48px}
+  section{padding:56px 0}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 </style>
 <link rel="manifest" href="app/manifest.webmanifest">
 </head>
 <body>
-<main class="wrap">
-<a class="lang" href="fr/" lang="fr">Français</a>
-<img class="ic" src="app/icons/icon-192.png" alt="" width="72" height="72">
-<h1>Food Trial Log</h1>
-<p><b>Find the food that upsets your digestive system.</b><br>Less cramping. More energy.</p>
-<a class="btn" href="app/">Open the app</a>
-<p class="small" style="text-align:center">Free. No account, no ads, no server. Your log stays on your phone.</p>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="./"><img src="app/icons/icon-192.png" alt="" width="40" height="40">Food Trial Log</a>
+    <a class="lang" href="fr/" lang="fr">Français</a>
+  </header>
 
-<h2>How it works</h2>
-<h3>A test, not a diet.</h3><ul><li>Eat a few simple, single-ingredient foods and log your daily symptoms.</li><li>When your gut settles, add foods back, one a day.</li><li>A food that brings symptoms back is a confirmed trigger.</li><li>The timeline depends entirely on how many foods you want in your diet.</li></ul><h3>Listen to the signals.</h3><ul><li>Loose stool, gas, or cramps after eating are direct signals from your gut.</li><li>It is not normal, and you should not get used to it.</li><li>Log every single occurrence.</li></ul><h3>You control the variables.</h3><ul><li>Spices, oils, sauces, and cooking methods all change how your gut reacts.</li><li>Eliminating those variables is your job.</li><li>Buy the same ingredients and cook them the exact same plain way every time.</li></ul><h3>It takes effort.</h3><ul><li>Eating the same plain food every day is hard.</li><li>This app is a helper, not a shortcut.</li><li>If plain food doesn’t calm your gut, the app stops and tells you to see a doctor.</li></ul>
+  <main>
+  <div class="hero">
+    <div>
+      <h1>Find the food that upsets your digestive system.</h1>
+      <p class="sub">Less cramping. More energy.</p>
+      <div class="cta">
+        <a class="btn" href="app/">Open the app</a>
+        <a class="btn ghost" href="#install">Install on your phone</a>
+      </div>
+      <p class="small">Free. No account, no ads, no server. Your log stays on your phone.</p>
+    </div>
+    <figure class="shot">
+      <img src="img/list-en.webp" alt="The app’s starting list: white rice, potato, chicken, egg and beef" width="780" height="1400">
+      <figcaption>Step 1: your starting list of plain foods.</figcaption>
+    </figure>
+  </div>
 
-<h2>What you do each day</h2>
-<p>Three buttons: <b>Stool report</b>, <b>Meal or drink</b>, <b>Symptom report</b>. The app tells you what to eat today, when to add a food, and which food to take off your list. It keeps a calendar of good and bad days, shows which nutrients your list is low in, and writes a summary you can show a doctor or a pharmacist.</p>
+  <section>
+    <h2>How it works</h2>
+    <div class="cards two">
+      <div class="card"><h3>A test, not a diet.</h3><ul><li>Eat a few simple, single-ingredient foods and log your daily symptoms.</li><li>When your gut settles, add foods back, one a day.</li><li>A food that brings symptoms back is a confirmed trigger.</li><li>The timeline depends entirely on how many foods you want in your diet.</li></ul></div>
+      <div class="card"><h3>Listen to the signals.</h3><ul><li>Loose stool, gas, or cramps after eating are direct signals from your gut.</li><li>It is not normal, and you should not get used to it.</li><li>Log every single occurrence.</li></ul></div>
+      <div class="card"><h3>You control the variables.</h3><ul><li>Spices, oils, sauces, and cooking methods all change how your gut reacts.</li><li>Eliminating those variables is your job.</li><li>Buy the same ingredients and cook them the exact same plain way every time.</li></ul></div>
+      <div class="card"><h3>It takes effort.</h3><ul><li>Eating the same plain food every day is hard.</li><li>This app is a helper, not a shortcut.</li><li>If plain food doesn’t calm your gut, the app stops and tells you to see a doctor.</li></ul></div>
+    </div>
+  </section>
 
-<h2>Is there research behind this?</h2>
-<ul>
-<li>In a Swedish study of people with irritable bowel, 84 in 100 said at least one food set off their symptoms. <a href="https://doi.org/10.1038/ajg.2013.105">Böhn and others, 2013</a>.</li><li>In a 2024 trial of 294 people, changing the diet helped 7 to 8 people in 10. Medicine helped about 6 in 10. <a href="https://doi.org/10.1016/S2468-1253(24)00045-1">Nybacka and others, 2024</a>.</li><li>The British gut doctors’ guideline says diet advice comes first. <a href="https://doi.org/10.1136/gutjnl-2021-324598">British Society of Gastroenterology, 2021</a>.</li><li>The best-studied gut diet works the way this app does: cut foods, then add them back to find your own triggers.</li>
-</ul>
+  <section>
+    <div class="day">
+      <div>
+        <h2>What you do each day</h2>
+        <ul class="tiles">
+          <li style="--c:#c8481f"><span aria-hidden="true">🚽</span>Stool report</li>
+          <li style="--c:#2f6b3a"><span aria-hidden="true">🍽️</span>Meal or drink</li>
+          <li style="--c:#7a5aa8"><span aria-hidden="true">😣</span>Symptom report</li>
+        </ul>
+        <p>Three buttons: <b>Stool report</b>, <b>Meal or drink</b>, <b>Symptom report</b>. The app tells you what to eat today, when to add a food, and which food to take off your list. It keeps a calendar of good and bad days, shows which nutrients your list is low in, and writes a summary you can show a doctor or a pharmacist.</p>
+      </div>
+      <figure class="shot">
+        <img src="img/day-en.webp" alt="The app’s daily screen with three buttons: Stool report, Meal or drink, Symptom report" loading="lazy" width="780" height="940">
+        <figcaption>The daily screen.</figcaption>
+      </figure>
+    </div>
+  </section>
 
-<h2>Before you start</h2>
-<div class="card flag"><p style="margin:0"><b>Blood in your stool, black stool, fainting, chest pain or trouble breathing:</b> get care now. The app has a <b>Something’s wrong</b> button on every screen.</p></div>
-<div class="card"><p style="margin:0"><b>Loose stools for weeks? Ask your doctor for a celiac blood test before you start.</b> It only works while you still eat wheat, and the starting list has none.</p></div>
-<div class="card"><p style="margin:0">This is a log, not medical or dietitian advice, and you decide what to do with it. It is for adults. If you are pregnant, breastfeeding, or living with Crohn’s, colitis, celiac disease or an eating disorder, talk to your doctor or a dietitian before cutting foods.</p></div>
+  <section>
+    <h2>Is there research behind this?</h2>
+    <ul class="research text">
+      <li>In a Swedish study of people with irritable bowel, 84 in 100 said at least one food set off their symptoms. <a href="https://doi.org/10.1038/ajg.2013.105">Böhn and others, 2013</a>.</li>
+      <li>In a 2024 trial of 294 people, changing the diet helped 7 to 8 people in 10. Medicine helped about 6 in 10. <a href="https://doi.org/10.1016/S2468-1253(24)00045-1">Nybacka and others, 2024</a>.</li>
+      <li>The British gut doctors’ guideline says diet advice comes first. <a href="https://doi.org/10.1136/gutjnl-2021-324598">British Society of Gastroenterology, 2021</a>.</li>
+      <li>The best-studied gut diet works the way this app does: cut foods, then add them back to find your own triggers.</li>
+    </ul>
+  </section>
 
-<h2>Install it on your phone</h2>
-<p>The app gets its own icon on your phone and opens without a connection. There is no store and no account.</p>
-<div id="instBox" hidden style="margin:6px 0 18px"><button type="button" id="instBtn" style="display:block;width:100%;box-sizing:border-box;min-height:64px;padding:14px 18px;font:inherit;font-size:1.12rem;font-weight:800;letter-spacing:.02em;border:2px solid currentColor;border-radius:14px;background:transparent;color:inherit;cursor:pointer">↓ Install Food Trial Log</button><p id="instNote" hidden style="margin:8px 0 0;font-size:.92rem">This browser didn’t offer a one-tap install. Follow the steps for your phone below.</p></div>
-<p>The quick way: <a href="app/">open the app</a> and tap <b>Install Food Trial Log</b> on the first screen, or <b>Install</b> on the black bar at the bottom. If neither is there, follow the steps for your phone.</p>
-<h3>iPhone</h3>
-<ol>
+  <section>
+    <h2>Before you start</h2>
+    <div class="cards text">
+      <div class="card flag"><p><b>Blood in your stool, black stool, fainting, chest pain or trouble breathing:</b> get care now. The app has a <b>Something’s wrong</b> button on every screen.</p></div>
+      <div class="card"><p><b>Loose stools for weeks? Ask your doctor for a celiac blood test before you start.</b> It only works while you still eat wheat, and the starting list has none.</p></div>
+      <div class="card"><p>This is a log, not medical or dietitian advice, and you decide what to do with it. It is for adults. If you are pregnant, breastfeeding, or living with Crohn’s, colitis, celiac disease or an eating disorder, talk to your doctor or a dietitian before cutting foods.</p></div>
+    </div>
+  </section>
+
+  <section id="install">
+    <h2>Install it on your phone</h2>
+    <div class="text">
+      <p>The app gets its own icon on your phone and opens without a connection. There is no store and no account.</p>
+      <div id="instBox" hidden style="margin:6px 0 18px"><button type="button" id="instBtn" style="display:block;width:100%;box-sizing:border-box;min-height:64px;padding:14px 18px;font:inherit;font-size:1.12rem;font-weight:800;letter-spacing:.02em;border:2px solid currentColor;border-radius:14px;background:transparent;color:inherit;cursor:pointer">↓ Install Food Trial Log</button><p id="instNote" hidden style="margin:8px 0 0;font-size:.92rem">This browser didn’t offer a one-tap install. Follow the steps for your phone below.</p></div>
+      <p>The quick way: <a href="app/">open the app</a> and tap <b>Install Food Trial Log</b> on the first screen, or <b>Install</b> on the black bar at the bottom. If neither is there, follow the steps for your phone.</p>
+    </div>
+    <div class="cards two" style="margin:22px 0">
+      <div class="card"><h3>iPhone</h3>
+<ol class="steps">
 <li>Open the app in <b>Safari</b>.</li>
 <li>Tap <b>⋯</b> beside the address bar, then <b>Share</b>. No <b>⋯</b>? Tap the Share button.</li>
 <li>Scroll down the list and tap <b>Add to Home Screen</b>.</li>
 <li>Tap <b>Add</b>.</li>
 </ol>
-<p><b>On an iPhone, install before you start.</b> The installed app does not see the reports made in Safari.</p>
-<h3>Android</h3>
-<ol>
+<p style="margin-top:.9em"><b>On an iPhone, install before you start.</b> The installed app does not see the reports made in Safari.</p></div>
+      <div class="card"><h3>Android</h3>
+<ol class="steps">
 <li>Open the app in <b>Chrome</b>.</li>
 <li>Tap the <b>⋮</b> menu at the top right.</li>
 <li>Tap <b>Add to Home screen</b>. On some phones it says <b>Install app</b>.</li>
 <li>Tap <b>Install</b>.</li>
-</ol>
-<p>From then on, open the app from its icon. Your log lives on your phone only, so back it up from the app’s menu. The English and French versions are two separate apps, each with its own log.</p>
+</ol></div>
+    </div>
+    <p class="text">From then on, open the app from its icon. Your log lives on your phone only, so back it up from the app’s menu. The English and French versions are two separate apps, each with its own log.</p>
+  </section>
+  </main>
 
-<h2>Free software</h2>
-<p>Made by Tobie and Claude. Free version at v3ktor.org/gut. Published by Aplomb Institute. © 2026 Tobie David.</p>
-<p class="small">Free software under the GNU Affero General Public License, version 3 or later, with two extra terms. Source code and license: <a href="https://github.com/tobiedavid/v3ktor.org">github.com/tobiedavid/v3ktor.org</a>. Provided as-is, without warranty. Food values: Canadian Nutrient File, Health Canada, 2015, licensed under the Open Government Licence – Canada; blanks filled from the USDA’s SR28. Look, food list and nutrient needs come from <a href="../patch/">The Patch</a>.</p>
-</main>
+  <footer class="foot">
+    <h2>Free software</h2>
+    <p class="text">Made by Tobie and Claude. Free version at v3ktor.org/gut. Published by Aplomb Institute. © 2026 Tobie David.</p>
+    <p class="small text">Free software under the GNU Affero General Public License, version 3 or later, with two extra terms. Source code and license: <a href="https://github.com/tobiedavid/v3ktor.org">github.com/tobiedavid/v3ktor.org</a>. Provided as-is, without warranty. Food values: Canadian Nutrient File, Health Canada, 2015, licensed under the Open Government Licence – Canada; blanks filled from the USDA’s SR28. Look, food list and nutrient needs come from <a href="../patch/">The Patch</a>.</p>
+  </footer>
+</div>
 <script>
 /* The big Install button on this page. It opens the phone's own install dialog when the browser offers one here. Otherwise it opens the app, where the same button is on the first screen; if that did not work either, it points to the steps. iPhone has no install dialog, so the button stays hidden there. */
 (function(){ var box=document.getElementById('instBox'), btn=document.getElementById('instBtn'), note=document.getElementById('instNote'); if(!box||!btn) return;

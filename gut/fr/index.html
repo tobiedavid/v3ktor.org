@@ -16,80 +16,174 @@
 <link rel="alternate" hreflang="fr" href="https://v3ktor.org/gut/fr/">
 <link rel="icon" type="image/png" sizes="32x32" href="../app/icons/favicon-32.png">
 <link rel="apple-touch-icon" href="../app/icons/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://v3ktor.org/gut/fr/">
 <meta property="og:title" content="Food Trial Log">
 <meta property="og:description" content="Trouve l’aliment qui perturbe ton système digestif. Moins de crampes. Plus d’énergie.">
 <meta property="og:image" content="https://v3ktor.org/gut/app/icons/icon-512.png">
 <style>
-:root{--bg:#f7f4ee;--card:#fff;--ink:#1c1b19;--muted:#6b665d;--line:#e6e0d4;--accent:#c8481f;--teal:#0f6b6b;--warn:#b3261e;--warn-soft:#fbe9e7}
-@media (prefers-color-scheme:dark){:root{--bg:#15161a;--card:#1e2026;--ink:#ececea;--muted:#a19d95;--line:#2d3038;--accent:#e3633a;--teal:#5fb3b3;--warn:#ff7b6e;--warn-soft:#3a1f1c}}
+:root{--bg:#f7f4ee;--card:#fff;--ink:#1c1b19;--muted:#6b665d;--line:#e6e0d4;--accent:#c8481f;--teal:#0f6b6b;--warn:#b3261e;--warn-soft:#fbe9e7;--frame:#1c1b19}
+@media (prefers-color-scheme:dark){:root{--bg:#15161a;--card:#1e2026;--ink:#ececea;--muted:#a19d95;--line:#2d3038;--accent:#e3633a;--teal:#5fb3b3;--warn:#ff7b6e;--warn-soft:#3a1f1c;--frame:#3a3d47}}
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-text-size-adjust:100%}
-h1,h2{font-family:ui-serif,Georgia,'Times New Roman',serif;line-height:1.12;margin:0 0 .45em}
-h1{font-size:clamp(2rem,8vw,3rem);font-weight:800}
-h2{font-size:1.5rem;font-weight:800;margin-top:1.6em}
-p,ul,ol{margin:0 0 .9em} li{margin-bottom:.4em}
-a{color:var(--teal)}
-.wrap{max-width:620px;margin:0 auto;padding:28px 20px 60px}
-.btn{display:block;text-align:center;background:var(--accent);color:#fff;font-weight:800;font-size:1.15rem;padding:16px 20px;border-radius:14px;text-decoration:none;margin:18px 0 6px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:0 0 14px}
-.flag{background:var(--warn-soft);border-color:var(--warn)}
-.lang{float:right;font-weight:700;text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:.95rem}
-h3{font-size:1.12rem;margin:1.2em 0 .3em}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+h1,h2{font-family:ui-serif,Georgia,'Times New Roman',serif;line-height:1.12;font-weight:800;margin:0}
+h1{font-size:clamp(2rem,6.4vw,3.1rem);letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:clamp(1.5rem,3.6vw,1.9rem);margin-bottom:.7em}
+h3{font-size:1.12rem;line-height:1.3;margin:0 0 .45em}
+p,ul,ol{margin:0 0 .9em}
+ul,ol{padding-left:1.25em}
+li{margin-bottom:.4em}
+li:last-child,p:last-child,ul:last-child,ol:last-child{margin-bottom:0}
+a{color:var(--teal);text-underline-offset:3px}
+:focus-visible{outline:3px solid var(--teal);outline-offset:3px;border-radius:6px}
+.wrap{max-width:1000px;margin:0 auto;padding:0 20px}
+.text{max-width:660px}
 .small{font-size:.92rem;color:var(--muted)}
-img.ic{width:72px;height:72px;border-radius:16px;display:block;margin:0 0 14px}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 0}
+.brand{display:flex;align-items:center;gap:12px;font:800 1.2rem ui-serif,Georgia,'Times New Roman',serif;color:var(--ink);text-decoration:none}
+.brand img{width:40px;height:40px;border-radius:10px;display:block}
+.lang{font-weight:700;font-size:.95rem;text-decoration:none;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:8px 16px;background:var(--card)}
+
+.hero{display:grid;gap:32px;padding:26px 0 46px}
+.hero .sub{font-size:1.25rem;margin:.6em 0 0}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin:26px 0 12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:56px;padding:14px 26px;border-radius:14px;border:2px solid var(--accent);background:var(--accent);color:#fff;font-weight:800;font-size:1.1rem;text-decoration:none}
+.btn.ghost{background:transparent;border-color:var(--ink);color:var(--ink)}
+.shot{margin:0;justify-self:center;width:min(100%,300px)}
+.shot img{display:block;width:100%;height:auto;border:8px solid var(--frame);border-radius:30px;background:#f7f4ee;box-shadow:0 18px 40px rgba(28,27,25,.16)}
+.shot figcaption{margin-top:12px;text-align:center;font-size:.92rem;color:var(--muted)}
+
+section{padding:42px 0;border-top:1px solid var(--line)}
+.cards{display:grid;gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.flag{background:var(--warn-soft);border-color:var(--warn)}
+.day{display:grid;gap:30px;align-items:center}
+.tiles{list-style:none;padding:0;margin:0 0 18px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tiles li{margin:0;background:var(--card);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:14px;padding:14px 8px;text-align:center;font-weight:800;font-size:.95rem;line-height:1.25}
+.tiles span{display:block;font-size:1.7rem;line-height:1.2;margin-bottom:4px}
+.research{list-style:none;padding:0}
+.research li{padding:0 0 0 16px;border-left:3px solid var(--line);margin-bottom:16px}
+.steps{padding-left:1.3em}
+.foot{padding:34px 0 60px;border-top:1px solid var(--line)}
+.foot h2{font-size:1.2rem;margin-bottom:.5em}
+
+@media (min-width:760px){
+  .hero{grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);align-items:center;gap:48px;padding:44px 0 64px}
+  .cards.two{grid-template-columns:1fr 1fr}
+  .day{grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:48px}
+  section{padding:56px 0}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 </style>
 <link rel="manifest" href="app/manifest.webmanifest">
 </head>
 <body>
-<main class="wrap">
-<a class="lang" href="../" lang="en">English</a>
-<img class="ic" src="../app/icons/icon-192.png" alt="" width="72" height="72">
-<h1>Food Trial Log</h1>
-<p><b>Trouve l’aliment qui perturbe ton système digestif.</b><br>Moins de crampes. Plus d’énergie.</p>
-<a class="btn" href="app/">Ouvrir l’application</a>
-<p class="small" style="text-align:center">Gratuit. Pas de compte, pas de publicité, pas de serveur. Ton journal reste sur ton téléphone.</p>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="./"><img src="../app/icons/icon-192.png" alt="" width="40" height="40">Food Trial Log</a>
+    <a class="lang" href="../" lang="en">English</a>
+  </header>
 
-<h2>Comment ça marche</h2>
-<h3>Un test, pas un régime.</h3><ul><li>Mange quelques aliments simples, à ingrédient unique, et note tes symptômes chaque jour.</li><li>Quand ton intestin se calme, réintroduis les aliments, un par jour.</li><li>Un aliment qui ramène les symptômes est un déclencheur confirmé.</li><li>La durée dépend entièrement du nombre d’aliments que tu veux dans ton alimentation.</li></ul><h3>Écoute les signaux.</h3><ul><li>Des selles molles, des gaz ou des crampes après avoir mangé sont des signaux directs de ton intestin.</li><li>Ce n’est pas normal, et tu ne devrais pas t’y habituer.</li><li>Note chaque fois que ça arrive.</li></ul><h3>Tu contrôles les variables.</h3><ul><li>Les épices, les huiles, les sauces et les modes de cuisson changent tous la réaction de ton intestin.</li><li>Éliminer ces variables, c’est ton travail.</li><li>Achète les mêmes ingrédients et cuisine-les exactement de la même façon simple, chaque fois.</li></ul><h3>Ça demande un effort.</h3><ul><li>Manger la même nourriture simple tous les jours, c’est difficile.</li><li>Cette application est une aide, pas un raccourci.</li><li>Si la nourriture simple ne calme pas ton intestin, l’application s’arrête et te dit de consulter un médecin.</li></ul>
+  <main>
+  <div class="hero">
+    <div>
+      <h1>Trouve l’aliment qui perturbe ton système digestif.</h1>
+      <p class="sub">Moins de crampes. Plus d’énergie.</p>
+      <div class="cta">
+        <a class="btn" href="app/">Ouvrir l’application</a>
+        <a class="btn ghost" href="#install">Installer sur ton téléphone</a>
+      </div>
+      <p class="small">Gratuit. Pas de compte, pas de publicité, pas de serveur. Ton journal reste sur ton téléphone.</p>
+    </div>
+    <figure class="shot">
+      <img src="../img/list-fr.webp" alt="La liste de départ de l’application : riz blanc, pomme de terre, poulet, œuf et bœuf" width="780" height="1400">
+      <figcaption>Étape 1 : ta liste de départ d’aliments simples.</figcaption>
+    </figure>
+  </div>
 
-<h2>Ce que tu fais chaque jour</h2>
-<p>Trois boutons : <b>Rapport de selles</b>, <b>Repas ou boisson</b>, <b>Rapport de symptômes</b>. L’application te dit quoi manger aujourd’hui, quand ajouter un aliment et quel aliment retirer de ta liste. Elle tient un calendrier des bons et des mauvais jours, montre les nutriments qui manquent à ta liste et rédige un résumé à montrer à un médecin ou à un pharmacien.</p>
+  <section>
+    <h2>Comment ça marche</h2>
+    <div class="cards two">
+      <div class="card"><h3>Un test, pas un régime.</h3><ul><li>Mange quelques aliments simples, à ingrédient unique, et note tes symptômes chaque jour.</li><li>Quand ton intestin se calme, réintroduis les aliments, un par jour.</li><li>Un aliment qui ramène les symptômes est un déclencheur confirmé.</li><li>La durée dépend entièrement du nombre d’aliments que tu veux dans ton alimentation.</li></ul></div>
+      <div class="card"><h3>Écoute les signaux.</h3><ul><li>Des selles molles, des gaz ou des crampes après avoir mangé sont des signaux directs de ton intestin.</li><li>Ce n’est pas normal, et tu ne devrais pas t’y habituer.</li><li>Note chaque fois que ça arrive.</li></ul></div>
+      <div class="card"><h3>Tu contrôles les variables.</h3><ul><li>Les épices, les huiles, les sauces et les modes de cuisson changent tous la réaction de ton intestin.</li><li>Éliminer ces variables, c’est ton travail.</li><li>Achète les mêmes ingrédients et cuisine-les exactement de la même façon simple, chaque fois.</li></ul></div>
+      <div class="card"><h3>Ça demande un effort.</h3><ul><li>Manger la même nourriture simple tous les jours, c’est difficile.</li><li>Cette application est une aide, pas un raccourci.</li><li>Si la nourriture simple ne calme pas ton intestin, l’application s’arrête et te dit de consulter un médecin.</li></ul></div>
+    </div>
+  </section>
 
-<h2>Y a-t-il de la recherche derrière ça ?</h2>
-<ul>
-<li>Dans une étude suédoise auprès de personnes ayant un côlon irritable, 84 sur 100 ont dit qu’au moins un aliment déclenchait leurs symptômes. <a href="https://doi.org/10.1038/ajg.2013.105">Böhn et coll., 2013</a>.</li><li>Dans un essai de 2024 auprès de 294 personnes, changer l’alimentation a aidé 7 à 8 personnes sur 10. Les médicaments en ont aidé environ 6 sur 10. <a href="https://doi.org/10.1016/S2468-1253(24)00045-1">Nybacka et coll., 2024</a>.</li><li>Les lignes directrices des gastroentérologues britanniques placent les conseils alimentaires en premier. <a href="https://doi.org/10.1136/gutjnl-2021-324598">British Society of Gastroenterology, 2021</a>.</li><li>Le régime intestinal le mieux étudié fonctionne comme cette application : éliminer des aliments, puis les réintroduire pour trouver tes propres déclencheurs.</li>
-</ul>
+  <section>
+    <div class="day">
+      <div>
+        <h2>Ce que tu fais chaque jour</h2>
+        <ul class="tiles">
+          <li style="--c:#c8481f"><span aria-hidden="true">🚽</span>Rapport de selles</li>
+          <li style="--c:#2f6b3a"><span aria-hidden="true">🍽️</span>Repas ou boisson</li>
+          <li style="--c:#7a5aa8"><span aria-hidden="true">😣</span>Rapport de symptômes</li>
+        </ul>
+        <p>Trois boutons : <b>Rapport de selles</b>, <b>Repas ou boisson</b>, <b>Rapport de symptômes</b>. L’application te dit quoi manger aujourd’hui, quand ajouter un aliment et quel aliment retirer de ta liste. Elle tient un calendrier des bons et des mauvais jours, montre les nutriments qui manquent à ta liste et rédige un résumé à montrer à un médecin ou à un pharmacien.</p>
+      </div>
+      <figure class="shot">
+        <img src="../img/day-fr.webp" alt="L’écran quotidien de l’application avec trois boutons : Rapport de selles, Repas ou boisson, Rapport de symptômes" loading="lazy" width="780" height="940">
+        <figcaption>L’écran de chaque jour.</figcaption>
+      </figure>
+    </div>
+  </section>
 
-<h2>Avant de commencer</h2>
-<div class="card flag"><p style="margin:0"><b>Du sang dans les selles, des selles noires, un évanouissement, une douleur à la poitrine ou de la difficulté à respirer :</b> va chercher des soins maintenant. L’application a un bouton <b>Ça ne va pas</b> sur chaque écran.</p></div>
-<div class="card"><p style="margin:0"><b>Selles molles depuis des semaines ? Demande à ton médecin un test sanguin pour la maladie cœliaque avant de commencer.</b> Il ne fonctionne que si tu manges encore du blé, et la liste de départ n’en contient pas.</p></div>
-<div class="card"><p style="margin:0">C’est un journal, pas un avis médical ou de diététiste, et c’est toi qui décides quoi en faire. Il est fait pour les adultes. Si tu es enceinte, si tu allaites, ou si tu vis avec la maladie de Crohn, une colite, la maladie cœliaque ou un trouble alimentaire, parle à ton médecin ou à un diététiste avant d’éliminer des aliments.</p></div>
+  <section>
+    <h2>Y a-t-il de la recherche derrière ça ?</h2>
+    <ul class="research text">
+      <li>Dans une étude suédoise auprès de personnes ayant un côlon irritable, 84 sur 100 ont dit qu’au moins un aliment déclenchait leurs symptômes. <a href="https://doi.org/10.1038/ajg.2013.105">Böhn et coll., 2013</a>.</li>
+      <li>Dans un essai de 2024 auprès de 294 personnes, changer l’alimentation a aidé 7 à 8 personnes sur 10. Les médicaments en ont aidé environ 6 sur 10. <a href="https://doi.org/10.1016/S2468-1253(24)00045-1">Nybacka et coll., 2024</a>.</li>
+      <li>Les lignes directrices des gastroentérologues britanniques placent les conseils alimentaires en premier. <a href="https://doi.org/10.1136/gutjnl-2021-324598">British Society of Gastroenterology, 2021</a>.</li>
+      <li>Le régime intestinal le mieux étudié fonctionne comme cette application : éliminer des aliments, puis les réintroduire pour trouver tes propres déclencheurs.</li>
+    </ul>
+  </section>
 
-<h2>Installe-la sur ton téléphone</h2>
-<p>L’application a sa propre icône sur ton téléphone et s’ouvre sans connexion. Pas de boutique d’applications, pas de compte.</p>
-<div id="instBox" hidden style="margin:6px 0 18px"><button type="button" id="instBtn" style="display:block;width:100%;box-sizing:border-box;min-height:64px;padding:14px 18px;font:inherit;font-size:1.12rem;font-weight:800;letter-spacing:.02em;border:2px solid currentColor;border-radius:14px;background:transparent;color:inherit;cursor:pointer">↓ Installer le Journal d’essai alimentaire</button><p id="instNote" hidden style="margin:8px 0 0;font-size:.92rem">Ce navigateur n’a pas offert l’installation en un geste. Suis les étapes pour ton téléphone plus bas.</p></div>
-<p>Le plus rapide : <a href="app/">ouvre l’application</a> et appuie sur <b>Installer le Journal d’essai alimentaire</b> au premier écran, ou sur <b>Installer</b> dans la barre noire en bas. Si tu ne vois ni l’un ni l’autre, suis les étapes pour ton téléphone.</p>
-<h3>iPhone</h3>
-<ol>
+  <section>
+    <h2>Avant de commencer</h2>
+    <div class="cards text">
+      <div class="card flag"><p><b>Du sang dans les selles, des selles noires, un évanouissement, une douleur à la poitrine ou de la difficulté à respirer :</b> va chercher des soins maintenant. L’application a un bouton <b>Ça ne va pas</b> sur chaque écran.</p></div>
+      <div class="card"><p><b>Selles molles depuis des semaines ? Demande à ton médecin un test sanguin pour la maladie cœliaque avant de commencer.</b> Il ne fonctionne que si tu manges encore du blé, et la liste de départ n’en contient pas.</p></div>
+      <div class="card"><p>C’est un journal, pas un avis médical ou de diététiste, et c’est toi qui décides quoi en faire. Il est fait pour les adultes. Si tu es enceinte, si tu allaites, ou si tu vis avec la maladie de Crohn, une colite, la maladie cœliaque ou un trouble alimentaire, parle à ton médecin ou à un diététiste avant d’éliminer des aliments.</p></div>
+    </div>
+  </section>
+
+  <section id="install">
+    <h2>Installe-la sur ton téléphone</h2>
+    <div class="text">
+      <p>L’application a sa propre icône sur ton téléphone et s’ouvre sans connexion. Pas de boutique d’applications, pas de compte.</p>
+      <div id="instBox" hidden style="margin:6px 0 18px"><button type="button" id="instBtn" style="display:block;width:100%;box-sizing:border-box;min-height:64px;padding:14px 18px;font:inherit;font-size:1.12rem;font-weight:800;letter-spacing:.02em;border:2px solid currentColor;border-radius:14px;background:transparent;color:inherit;cursor:pointer">↓ Installer le Journal d’essai alimentaire</button><p id="instNote" hidden style="margin:8px 0 0;font-size:.92rem">Ce navigateur n’a pas offert l’installation en un geste. Suis les étapes pour ton téléphone plus bas.</p></div>
+      <p>Le plus rapide : <a href="app/">ouvre l’application</a> et appuie sur <b>Installer le Journal d’essai alimentaire</b> au premier écran, ou sur <b>Installer</b> dans la barre noire en bas. Si tu ne vois ni l’un ni l’autre, suis les étapes pour ton téléphone.</p>
+    </div>
+    <div class="cards two" style="margin:22px 0">
+      <div class="card"><h3>iPhone</h3>
+<ol class="steps">
 <li>Ouvre l’application dans <b>Safari</b>.</li>
 <li>Appuie sur <b>⋯</b> à côté de la barre d’adresse, puis sur <b>Partager</b>. Pas de <b>⋯</b> ? Appuie sur le bouton Partager.</li>
 <li>Descends dans la liste et choisis <b>Sur l’écran d’accueil</b>.</li>
 <li>Appuie sur <b>Ajouter</b>.</li>
 </ol>
-<p><b>Sur un iPhone, installe avant de commencer.</b> L’application installée ne voit pas les rapports faits dans Safari.</p>
-<h3>Android</h3>
-<ol>
+<p style="margin-top:.9em"><b>Sur un iPhone, installe avant de commencer.</b> L’application installée ne voit pas les rapports faits dans Safari.</p></div>
+      <div class="card"><h3>Android</h3>
+<ol class="steps">
 <li>Ouvre l’application dans <b>Chrome</b>.</li>
 <li>Appuie sur le menu <b>⋮</b> en haut à droite.</li>
 <li>Appuie sur <b>Ajouter à l’écran d’accueil</b>. Sur certains téléphones, c’est écrit <b>Installer l’application</b>.</li>
 <li>Appuie sur <b>Installer</b>.</li>
-</ol>
-<p>Ensuite, ouvre l’application par son icône. Ton journal vit seulement sur ton téléphone : sauvegarde-le à partir du menu de l’application. La version française et la version anglaise sont deux applications séparées, chacune avec son propre journal.</p>
+</ol></div>
+    </div>
+    <p class="text">Ensuite, ouvre l’application par son icône. Ton journal vit seulement sur ton téléphone : sauvegarde-le à partir du menu de l’application. La version française et la version anglaise sont deux applications séparées, chacune avec son propre journal.</p>
+  </section>
+  </main>
 
-<h2>Logiciel libre</h2>
-<p>Créé par Tobie et Claude. Version gratuite à v3ktor.org/gut. Publié par Aplomb Institute. © 2026 Tobie David.</p>
-<p class="small">Logiciel libre sous la licence publique générale GNU Affero, version 3 ou ultérieure, avec deux conditions supplémentaires. Code source et licence : <a href="https://github.com/tobiedavid/v3ktor.org">github.com/tobiedavid/v3ktor.org</a>. Fourni tel quel, sans garantie. Valeurs nutritives : Fichier canadien sur les éléments nutritifs, Santé Canada, 2015, sous la Licence du gouvernement ouvert – Canada; les blancs sont comblés à partir du SR28 de l’USDA. L’apparence, la liste d’aliments et les besoins en nutriments viennent de <a href="../../patch/">The Patch</a>.</p>
-</main>
+  <footer class="foot">
+    <h2>Logiciel libre</h2>
+    <p class="text">Créé par Tobie et Claude. Version gratuite à v3ktor.org/gut. Publié par Aplomb Institute. © 2026 Tobie David.</p>
+    <p class="small text">Logiciel libre sous la licence publique générale GNU Affero, version 3 ou ultérieure, avec deux conditions supplémentaires. Code source et licence : <a href="https://github.com/tobiedavid/v3ktor.org">github.com/tobiedavid/v3ktor.org</a>. Fourni tel quel, sans garantie. Valeurs nutritives : Fichier canadien sur les éléments nutritifs, Santé Canada, 2015, sous la Licence du gouvernement ouvert – Canada; les blancs sont comblés à partir du SR28 de l’USDA. L’apparence, la liste d’aliments et les besoins en nutriments viennent de <a href="../../patch/">The Patch</a>.</p>
+  </footer>
+</div>
 <script>
 /* The big Install button on this page. It opens the phone's own install dialog when the browser offers one here. Otherwise it opens the app, where the same button is on the first screen; if that did not work either, it points to the steps. iPhone has no install dialog, so the button stays hidden there. */
 (function(){ var box=document.getElementById('instBox'), btn=document.getElementById('instBtn'), note=document.getElementById('instNote'); if(!box||!btn) return;
