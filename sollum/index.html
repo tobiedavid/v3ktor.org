@@ -72,6 +72,7 @@ section{padding:34px 0;border-top:1px solid var(--line)}
 footer{padding:28px 0 50px;color:var(--muted);font-size:.9rem;border-top:1px solid var(--line)}
 kbd{font:600 .85em system-ui;background:var(--chip);border-radius:6px;padding:1px 6px}
 </style>
+<link rel="manifest" href="app/manifest.webmanifest">
 </head>
 <body>
 <div class="wrap">
@@ -227,12 +228,13 @@ kbd{font:600 .85em system-ui;background:var(--chip);border-radius:6px;padding:1p
   <section id="install">
     <h2><span class="en">Put it on your phone</span><span class="fr">Le mettre sur ton téléphone</span></h2>
     <p><span class="en">It installs from the browser — no app store. It gets its own icon, opens full screen, and works offline.</span><span class="fr">Ça s’installe à partir du navigateur — pas de magasin d’applis. L’app a sa propre icône, s’ouvre en plein écran et marche hors ligne.</span></p>
+    <div id="instBox" hidden style="margin:6px 0 18px"><button type="button" id="instBtn" style="display:block;width:100%;box-sizing:border-box;min-height:64px;padding:14px 18px;font:inherit;font-size:1.12rem;font-weight:800;letter-spacing:.02em;border:2px solid currentColor;border-radius:14px;background:transparent;color:inherit;cursor:pointer">↓ <span class="en">Install Sollum</span><span class="fr">Installer Sollum</span></button><p id="instNote" hidden style="margin:8px 0 0;font-size:.92rem"><span class="en">This browser didn’t offer a one-tap install. Follow the steps for your phone below.</span><span class="fr">Ce navigateur n’a pas offert l’installation en un geste. Suis les étapes pour ton téléphone plus bas.</span></p></div>
     <div class="grid g2">
       <div class="card">
         <h3>Android (Chrome)</h3>
         <ol class="steps">
           <li><span class="en">Tap <a href="app/">Open Sollum</a>.</span><span class="fr">Appuie sur <a href="app/">Ouvrir Sollum</a>.</span></li>
-          <li><span class="en">Open Chrome’s menu <kbd>⋮</kbd> and choose <b>Install app</b> (or <b>Add to Home screen</b>).</span><span class="fr">Ouvre le menu de Chrome <kbd>⋮</kbd> et choisis <b>Installer l’application</b> (ou <b>Ajouter à l’écran d’accueil</b>).</span></li>
+          <li><span class="en">Tap <b>Install Sollum</b> on the first screen — or open Chrome’s menu <kbd>⋮</kbd> and choose <b>Install app</b> (or <b>Add to Home screen</b>).</span><span class="fr">Appuie sur <b>Installer Sollum</b> au premier écran — ou ouvre le menu de Chrome <kbd>⋮</kbd> et choisis <b>Installer l’application</b> (ou <b>Ajouter à l’écran d’accueil</b>).</span></li>
           <li><span class="en">Open it from the new icon from now on.</span><span class="fr">Ouvre-le avec la nouvelle icône à partir de maintenant.</span></li>
         </ol>
         <p class="small" style="margin-top:8px"><span class="en"><b>Samsung phone?</b> Use Chrome for this — Samsung’s own browser often fails to install apps like this one.</span><span class="fr"><b>Téléphone Samsung?</b> Utilise Chrome pour ça — le navigateur de Samsung échoue souvent à installer ce genre d’app.</span></p>
@@ -265,6 +267,25 @@ kbd{font:600 .85em system-ui;background:var(--chip);border-radius:6px;padding:1p
   set(lang);
   /* the app opens in the page's language the first time */
   document.querySelectorAll('a[href="app/"]').forEach(function(a){ a.addEventListener('click',function(){ try{ if(!localStorage.getItem('sollum.v1')) localStorage.setItem('sollum.v1',JSON.stringify({lang:document.documentElement.className==='l-fr'?'fr':'en'})); }catch(e){} }); });
+})();
+</script>
+<script>
+/* The big Install button on this page. It opens the phone's own install dialog when the browser offers one here. Otherwise it opens the app, where the same button is on the first screen; if that did not work either, it points to the steps. iPhone has no install dialog, so the button stays hidden there. */
+(function(){ var box=document.getElementById('instBox'), btn=document.getElementById('instBtn'), note=document.getElementById('instNote'); if(!box||!btn) return;
+  var ua=navigator.userAgent||'', ios=/iP(hone|ad|od)/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1), ev=null, alone=false;
+  try{ alone=navigator.standalone===true||matchMedia('(display-mode: standalone)').matches; }catch(e){}
+  if(ios||alone) return;
+  window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); ev=e; box.hidden=false; });
+  window.addEventListener('appinstalled',function(){ ev=null; box.hidden=true; });
+  if(/Android/i.test(ua)) box.hidden=false;
+  function fire(){ var p=ev; ev=null; p.prompt(); }
+  btn.addEventListener('click',function(){ if(ev){ fire(); return; }
+    var tried=false; try{ tried=sessionStorage.getItem('v3k.inst.tried')==='1'; }catch(e){}
+    btn.disabled=true; var n=0, iv=setInterval(function(){ n++;
+      if(ev){ clearInterval(iv); btn.disabled=false; fire(); }
+      else if(n>=10){ clearInterval(iv); btn.disabled=false;
+        if(tried){ note.hidden=false; } else { try{ sessionStorage.setItem('v3k.inst.tried','1'); }catch(e){} location.href='app/'; } }
+    },250); });
 })();
 </script>
 </body>

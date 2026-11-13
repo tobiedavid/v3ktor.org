@@ -38,6 +38,7 @@ h3{font-size:1.12rem;margin:1.2em 0 .3em}
 .small{font-size:.92rem;color:var(--muted)}
 img.ic{width:72px;height:72px;border-radius:16px;display:block;margin:0 0 14px}
 </style>
+<link rel="manifest" href="app/manifest.webmanifest">
 </head>
 <body>
 <main class="wrap">
@@ -66,6 +67,7 @@ img.ic{width:72px;height:72px;border-radius:16px;display:block;margin:0 0 14px}
 
 <h2>Install it on your phone</h2>
 <p>The app gets its own icon on your phone and opens without a connection. There is no store and no account.</p>
+<div id="instBox" hidden style="margin:6px 0 18px"><button type="button" id="instBtn" style="display:block;width:100%;box-sizing:border-box;min-height:64px;padding:14px 18px;font:inherit;font-size:1.12rem;font-weight:800;letter-spacing:.02em;border:2px solid currentColor;border-radius:14px;background:transparent;color:inherit;cursor:pointer">↓ Install Food Trial Log</button><p id="instNote" hidden style="margin:8px 0 0;font-size:.92rem">This browser didn’t offer a one-tap install. Follow the steps for your phone below.</p></div>
 <p>The quick way: <a href="app/">open the app</a> and tap <b>Install Food Trial Log</b> on the first screen, or <b>Install</b> on the black bar at the bottom. If neither is there, follow the steps for your phone.</p>
 <h3>iPhone</h3>
 <ol>
@@ -88,5 +90,24 @@ img.ic{width:72px;height:72px;border-radius:16px;display:block;margin:0 0 14px}
 <p>Made by Tobie and Claude. Free version at v3ktor.org/gut. Published by Aplomb Institute. © 2026 Tobie David.</p>
 <p class="small">Free software under the GNU Affero General Public License, version 3 or later, with two extra terms. Source code and license: <a href="https://github.com/tobiedavid/v3ktor.org">github.com/tobiedavid/v3ktor.org</a>. Provided as-is, without warranty. Food values: Canadian Nutrient File, Health Canada, 2015, licensed under the Open Government Licence – Canada; blanks filled from the USDA’s SR28. Look, food list and nutrient needs come from <a href="../patch/">The Patch</a>.</p>
 </main>
+<script>
+/* The big Install button on this page. It opens the phone's own install dialog when the browser offers one here. Otherwise it opens the app, where the same button is on the first screen; if that did not work either, it points to the steps. iPhone has no install dialog, so the button stays hidden there. */
+(function(){ var box=document.getElementById('instBox'), btn=document.getElementById('instBtn'), note=document.getElementById('instNote'); if(!box||!btn) return;
+  var ua=navigator.userAgent||'', ios=/iP(hone|ad|od)/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1), ev=null, alone=false;
+  try{ alone=navigator.standalone===true||matchMedia('(display-mode: standalone)').matches; }catch(e){}
+  if(ios||alone) return;
+  window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); ev=e; box.hidden=false; });
+  window.addEventListener('appinstalled',function(){ ev=null; box.hidden=true; });
+  if(/Android/i.test(ua)) box.hidden=false;
+  function fire(){ var p=ev; ev=null; p.prompt(); }
+  btn.addEventListener('click',function(){ if(ev){ fire(); return; }
+    var tried=false; try{ tried=sessionStorage.getItem('v3k.inst.tried')==='1'; }catch(e){}
+    btn.disabled=true; var n=0, iv=setInterval(function(){ n++;
+      if(ev){ clearInterval(iv); btn.disabled=false; fire(); }
+      else if(n>=10){ clearInterval(iv); btn.disabled=false;
+        if(tried){ note.hidden=false; } else { try{ sessionStorage.setItem('v3k.inst.tried','1'); }catch(e){} location.href='app/'; } }
+    },250); });
+})();
+</script>
 </body>
 </html>
