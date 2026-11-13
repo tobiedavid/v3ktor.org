@@ -5,7 +5,7 @@ Tired, crashing, running on coffee or energy drinks? Three minutes of questions,
 - **The page:** https://v3ktor.org/patch/
 - **The app:** https://v3ktor.org/patch/app/ (it installs on a phone and works offline)
 
-**Also in this repository:** [Sollum](sollum/) (https://v3ktor.org/sollum/), the pivot, under the same license. Also here: [Food Trial Log](gut/) (https://v3ktor.org/gut/), which finds the food behind loose stools by cutting foods and bringing them back one at a time. It is one file, `gut/app/index.html`, under the same license. v3ktor.org is V3KTOR // Mapping the Self:
+**Also in this repository:** [Sollum](sollum/) (https://v3ktor.org/sollum/), the pivot, under the same license. Also here: [Food Trial Log](gut/) (https://v3ktor.org/gut/), which finds the food behind loose stools by cutting foods and bringing them back one at a time. It is one file, `gut/app/index.html`, under the same license. A French copy is at [gut/fr/](gut/fr/) (https://v3ktor.org/gut/fr/); the two are separate apps and keep separate logs. v3ktor.org is V3KTOR // Mapping the Self:
 - **Corpus** (The Patch): the body.
 - **Fulcrum** (Sollum): the pivot.
 - **Mentis** (V3KTOR™): the mind.

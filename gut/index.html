@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-    Food Trial Log — the website page.
+    Food Trial Log — the website page (English).
     Copyright (C) 2026  Tobie David
     SPDX-License-Identifier: AGPL-3.0-or-later — see LICENSE at https://github.com/tobiedavid/v3ktor.org
 -->
@@ -9,13 +9,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Food Trial Log — find the food that upsets your digestive system</title>
-<meta name="description" content="Eat a few plain foods until your gut calms, then add foods back one at a time. About a week. Free and private: everything stays on your phone.">
+<meta name="description" content="Eat a few simple foods until your gut settles, then add foods back, one a day. A food that brings symptoms back is a trigger. Free and private: your log stays on your phone.">
 <meta name="theme-color" content="#c8481f">
+<link rel="canonical" href="https://v3ktor.org/gut/">
+<link rel="alternate" hreflang="en" href="https://v3ktor.org/gut/">
+<link rel="alternate" hreflang="fr" href="https://v3ktor.org/gut/fr/">
 <link rel="icon" type="image/png" sizes="32x32" href="app/icons/favicon-32.png">
 <link rel="apple-touch-icon" href="app/icons/apple-touch-icon.png">
 <meta property="og:title" content="Food Trial Log">
-<meta property="og:description" content="Find the food that upsets your digestive system. About a week. Free and private.">
-<meta property="og:image" content="app/icons/icon-512.png">
+<meta property="og:description" content="Find the food that upsets your digestive system. Less cramping. More energy.">
+<meta property="og:image" content="https://v3ktor.org/gut/app/icons/icon-512.png">
 <style>
 :root{--bg:#f7f4ee;--card:#fff;--ink:#1c1b19;--muted:#6b665d;--line:#e6e0d4;--accent:#c8481f;--teal:#0f6b6b;--warn:#b3261e;--warn-soft:#fbe9e7}
 @media (prefers-color-scheme:dark){:root{--bg:#15161a;--card:#1e2026;--ink:#ececea;--muted:#a19d95;--line:#2d3038;--accent:#e3633a;--teal:#5fb3b3;--warn:#ff7b6e;--warn-soft:#3a1f1c}}
@@ -30,37 +33,42 @@ a{color:var(--teal)}
 .btn{display:block;text-align:center;background:var(--accent);color:#fff;font-weight:800;font-size:1.15rem;padding:16px 20px;border-radius:14px;text-decoration:none;margin:18px 0 6px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:0 0 14px}
 .flag{background:var(--warn-soft);border-color:var(--warn)}
+.lang{float:right;font-weight:700;text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:.95rem}
+h3{font-size:1.12rem;margin:1.2em 0 .3em}
 .small{font-size:.92rem;color:var(--muted)}
 img.ic{width:72px;height:72px;border-radius:16px;display:block;margin:0 0 14px}
 </style>
 </head>
 <body>
 <main class="wrap">
+<a class="lang" href="fr/" lang="fr">Français</a>
 <img class="ic" src="app/icons/icon-192.png" alt="" width="72" height="72">
 <h1>Food Trial Log</h1>
-<p><b>Find the food that upsets your digestive system. About a week.</b></p>
-<p>You eat a few plain foods until your gut calms. Then you add foods back one at a time. Whatever brings the loose stools back is your answer.</p>
+<p><b>Find the food that upsets your digestive system.</b><br>Less cramping. More energy.</p>
 <a class="btn" href="app/">Open the app</a>
-<p class="small" style="text-align:center">Free. No account, no ads, no server. It never leaves your phone.</p>
+<p class="small" style="text-align:center">Free. No account, no ads, no server. Your log stays on your phone.</p>
 
 <h2>How it works</h2>
-<ol>
-<li><b>Keep it boring.</b> Eat only the plain foods on your starting list. Report every stool. After 2 good days in a row, you move on.</li>
-<li><b>Add one food a day.</b> Easy foods first. If a food upsets you, it comes off your list and you go back to step 1.</li>
-<li><b>Show the result.</b> The app keeps a list of the foods that upset you, and a summary you can show a doctor or a pharmacist.</li>
-</ol>
-<p>If your loose stools come and go, there is a slower route: it cuts one food group at a time.</p>
+<h3>A test, not a diet.</h3><ul><li>Eat a few simple, single-ingredient foods and log your daily symptoms.</li><li>When your gut settles, add foods back, one a day.</li><li>A food that brings symptoms back is a confirmed trigger.</li><li>The timeline depends entirely on how many foods you want in your diet.</li></ul><h3>Listen to the signals.</h3><ul><li>Loose stool, gas, or cramps after eating are direct signals from your gut.</li><li>It is not normal, and you should not get used to it.</li><li>Log every single occurrence.</li></ul><h3>You control the variables.</h3><ul><li>Spices, oils, sauces, and cooking methods all change how your gut reacts.</li><li>Eliminating those variables is your job.</li><li>Buy the same ingredients and cook them the exact same plain way every time.</li></ul><h3>It takes effort.</h3><ul><li>Eating the same plain food every day is hard.</li><li>This app is a helper, not a shortcut.</li><li>If plain food doesn’t calm your gut, the app stops and tells you to see a doctor.</li></ul>
+
+<h2>What you do each day</h2>
+<p>Three buttons: <b>Stool report</b>, <b>Meal or drink</b>, <b>Symptom report</b>. The app tells you what to eat today, when to add a food, and which food to take off your list. It keeps a calendar of good and bad days, shows which nutrients your list is low in, and writes a summary you can show a doctor or a pharmacist.</p>
+
+<h2>Is there research behind this?</h2>
+<ul>
+<li>In a Swedish study of people with irritable bowel, 84 in 100 said at least one food set off their symptoms. <a href="https://doi.org/10.1038/ajg.2013.105">Böhn and others, 2013</a>.</li><li>In a 2024 trial of 294 people, changing the diet helped 7 to 8 people in 10. Medicine helped about 6 in 10. <a href="https://doi.org/10.1016/S2468-1253(24)00045-1">Nybacka and others, 2024</a>.</li><li>The British gut doctors’ guideline says diet advice comes first. <a href="https://doi.org/10.1136/gutjnl-2021-324598">British Society of Gastroenterology, 2021</a>.</li><li>The best-studied gut diet works the way this app does: cut foods, then add them back to find your own triggers.</li>
+</ul>
+
+<h2>Before you start</h2>
+<div class="card flag"><p style="margin:0"><b>Blood in your stool, black stool, fainting, chest pain or trouble breathing:</b> get care now. The app has a <b>Something’s wrong</b> button on every screen.</p></div>
+<div class="card"><p style="margin:0"><b>Loose stools for weeks? Ask your doctor for a celiac blood test before you start.</b> It only works while you still eat wheat, and the starting list has none.</p></div>
+<div class="card"><p style="margin:0">This is a log, not medical or dietitian advice, and you decide what to do with it. It is for adults. If you are pregnant, breastfeeding, or living with Crohn’s, colitis, celiac disease or an eating disorder, talk to your doctor or a dietitian before cutting foods.</p></div>
 
 <h2>Put it on your phone</h2>
 <ul>
-<li><b>Android (Chrome):</b> menu, then Install app.</li>
-<li><b>iPhone (Safari):</b> Share, then Add to Home Screen.</li>
+<li><b>Android (Chrome):</b> menu, then Install app.</li><li><b>iPhone (Safari):</b> Share, then Add to Home Screen.</li>
 </ul>
-<p>It works offline once it has loaded. Your log lives in this browser on this phone, so back it up from the app's menu.</p>
-
-<h2>Read this first</h2>
-<div class="card flag"><p style="margin:0"><b>Blood in your stool, black stool, fainting, chest pain or trouble breathing:</b> get care now. The app has a <b>Something’s wrong</b> button on every screen.</p></div>
-<div class="card"><p style="margin:0">Food Trial Log is a log with rules, not medical or dietitian advice. <b>A doctor or a dietitian hasn’t checked it yet.</b> If you are pregnant, breastfeeding, or living with Crohn’s, colitis, celiac disease or an eating disorder, talk to your doctor before cutting foods. If you have had loose stools for weeks, ask your doctor for a celiac blood test before you start.</p></div>
+<p>It works offline once it has loaded. Your log lives in this browser on this phone, so back it up from the app’s menu. The English and French versions are two separate apps, each with its own log.</p>
 
 <h2>Free software</h2>
 <p>Made by Tobie and Claude. Free version at v3ktor.org/gut. Published by Aplomb Institute. © 2026 Tobie David.</p>
