@@ -1,7 +1,7 @@
 {
  "name": "Food Trial Log",
  "short_name": "Food Trial",
- "id": "./",
+ "id": "/gut/app/",
  "start_url": "./",
  "scope": "./",
  "display": "standalone",

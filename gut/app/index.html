@@ -381,7 +381,11 @@ p.note{background:var(--teal-soft);border-radius:12px;padding:8px 12px;margin:-4
 details.note summary{cursor:pointer;padding:8px 0;min-height:44px}
 .toptabs{flex-wrap:nowrap}.toptabs button{flex:1 1 auto;white-space:nowrap;padding:6px 10px}
 .mealhd .row{flex-wrap:wrap}
-html.noinst .inst{display:none!important}
+html.noinst .inst,html.noinst #installPill,html.locked #installPill{display:none!important}
+body:has(.bar:not(.hidden)) #installPill{display:none}
+#installPill{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));z-index:20;display:flex;gap:6px;align-items:center;width:max-content;max-width:calc(100vw - 24px);box-sizing:border-box;background:var(--ink);color:var(--bg);border-radius:22px;padding:6px 6px 6px 16px;box-shadow:0 6px 20px -8px rgba(0,0,0,.45);font-weight:600;font-size:.94rem;line-height:1.25}
+#installPill button{border:0;font:inherit;cursor:pointer;min-height:42px;flex:none} #installPill .ipy{background:var(--accent);color:#fff;border-radius:999px;padding:9px 16px} #installPill .ipn{background:transparent;color:inherit;padding:8px 10px}
+.bar{z-index:25}
 .steps{margin:4px 0 14px;padding-left:1.4em} .steps li{margin:0 0 9px} .ico{display:inline-block;vertical-align:-4px}
 .sheet a:not(.btn),.wrap p a{color:var(--teal);text-underline-offset:3px}
 /* v1.2.0 */
@@ -640,7 +644,7 @@ const UA=navigator.userAgent||'', IOS=/iPad|iPhone|iPod/.test(UA)||(navigator.pl
   STANDALONE=(()=>{ try{ return navigator.standalone===true||matchMedia('(display-mode: standalone)').matches; }catch(e){ return false; } })(),
   SHARE='<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M7 11H5v10h14V11h-2"/></svg>';
 if(FRAMED||STANDALONE) document.documentElement.classList.add('noinst');
-const VER='1.4.4', RULES=5, CONSENT=3, KEY='v3k.gut.v1', H=36e5;
+const VER='1.4.5', RULES=5, CONSENT=3, KEY='v3k.gut.v1', H=36e5;
 const BK={alc:[4,'Alcohol'],caf:[4,'Caffeine and coffee'],proc:[4,'Processed or packaged food'],swt:[4,'Sugar-free sweeteners'],sup:[4,'Supplements and protein powder'],dairy:[3,'Dairy'],fat:[3,'Fatty or fried food'],sugar:[3,'Sugar and fructose'],rawsea:[3,'Raw shellfish'],gluten:[2,'Wheat, barley and rye'],fibre:[2,'Bran and high-fibre food'],legume:[2,'Beans and lentils'],onion:[2,'Onion and garlic'],spicy:[2,'Spicy food'],hist:[2,'Histamine-rich food'],veg:[1,'Vegetables, other than the plain ones'],fruit:[1,'Fruit, other than banana'],nuts:[1,'Nuts and seeds']};
 const BKN={caf:'coffee (decaf too), tea, energy drinks, cola',proc:'most have 20 or more ingredients, so one product is one suspect',swt:'sorbitol, xylitol, sugar-free gum and candy',sup:'over-the-counter only. Never stop a prescribed medicine to test it.',sugar:'juice, honey, soft drinks, apples, pears, mango',hist:'aged cheese, cured meat, canned fish, leftovers, wine, fermented food',veg:'plain: peeled potatoes and squash',fruit:'banana is plain',dairy:'all of it when cutting. Coming back: milk proves it fastest; hard cheese has almost no lactose and is worth its own test'};
 /* the Plain tab leads with what people reach for when their gut is off; the rest follow in A to Z */
@@ -1022,7 +1026,7 @@ function vStart(){ const ok=S.ack, i=UI.is==null?0:UI.is;
   const top=`<p class="tagline">Find the food that upsets your digestive system.</p><p style="margin:0 0 6px"><b>Less cramping. More energy.</b></p>`,
     warn=`<div class="card flag"><p class="small" style="margin:0">Do you have blood in your stool, black stool, fainting, chest pain or trouble breathing? Tap <b>Something’s wrong</b> at the top.</p></div>`,
     foot=`<p class="small muted" style="margin-top:16px">Pregnant, breastfeeding, or living with ${G('crohn','Crohn’s, colitis')}, ${G('celiac','celiac disease')} or an eating disorder (NEDIC: 1-866-633-4220)? Talk to your doctor or a ${G('dietitian','dietitian')} before cutting foods.</p><p class="small muted">v${VER} · <button type="button" class="lnk" data-act="faq">Questions</button> · <button type="button" class="lnk" data-act="about">About</button></p>`;
-  if(!ok&&i<INTRO.length){ const c=INTRO[i]; return top+`<div class="card one"><div class="eyebrow">${i+1} of ${INTRO.length} · ${c[2]}</div><p class="big">${c[0]}</p><ul style="margin:0;padding-left:1.1em">${c[1].map(l=>`<li style="margin:0 0 6px">${l}</li>`).join('')}</ul></div><div class="row"><button type="button" class="btn primary" data-act="intro">${i<INTRO.length-1?'Next':'Got it'}</button>${i===0?`<button type="button" class="btn ghost inst" data-act="install">Install on this phone</button>`:''}</div>`+foot; }
+  if(!ok&&i<INTRO.length){ const c=INTRO[i]; return top+`<div class="card one"><div class="eyebrow">${i+1} of ${INTRO.length} · ${c[2]}</div><p class="big">${c[0]}</p><ul style="margin:0;padding-left:1.1em">${c[1].map(l=>`<li style="margin:0 0 6px">${l}</li>`).join('')}</ul></div><div class="row"><button type="button" class="btn primary" data-act="intro">${i<INTRO.length-1?'Next':'Got it'}</button></div>`+foot; }
   const stm=AGREE.filter((_,j)=>!(S.minor&&j===0)).map(l=>`<li>${l}</li>`).join('');
   return top+(ok?`<div class="chip ack" aria-pressed="true">${S.minor?'Under 18: log only. ':''}I agreed: it’s a log, not advice; no allergy or medicine tests; I stop for the warning signs.</div>`
     :`<div class="card soft"><p class="small" style="margin:0"><b>Loose stools for weeks? Ask your doctor for a celiac blood test before you start.</b> It only works while you still eat wheat, and the starting list has none.</p></div><div class="card"><p class="small" style="margin:0 0 6px"><b>Tapping the button below means you agree:</b></p><ul class="small" style="margin:0;padding-left:1.1em">${stm}</ul></div>`)
@@ -1273,6 +1277,9 @@ function entrySheet(L){ UI.es=L; const lab=e=>e.k==='food'?NM(food(e.key))+qx(e.
   showSheet(`<h3 id="sheetTitle">${L[0].k==='food'?'This meal':'This entry'}</h3><ul class="evs">${L.map(e=>`<li>${lab(e)}<span class="evc">${editable(e)?`<button type="button" class="lnk" data-act="del" data-v="${e.id}">Delete</button>`:'<span class="small muted">locked</span>'}</span>${e.k==='food'?`<br><button type="button" class="lnk" data-act="easy" data-v="${esc(e.key)}" aria-pressed="${ez.includes(e.key)}">${ez.includes(e.key)?'★ Sits well when I’m down':'☆ Sits well when I’m down'}</button>`:''}</li>`).join('')}</ul>${L[0].k==='food'?'<p class="small muted" style="margin:4px 0 0">Star the foods that sit well when you’re sick or your stool is loose. On those days, the Meal or drink screen shows them first.</p>':''}`); }
 function pharmSheet(){ const N=nutri(), fi=D.fi, sl=sitList(), low=N.low.map(r=>nl(r.k)), meds=((S.p||{}).meds||'').trim(), big='font-size:1.08rem;margin:0 0 10px';
   showSheet(`<h3 id="sheetTitle">For the pharmacist</h3><p style="${big}"><b>I’m eating a short list of foods to find what upsets my gut. Is a vitamin pill safe for me?</b></p><p style="${big}">Medicines I take: ${meds?esc(meds):'none entered'}.</p><p style="${big}">What I eat now: ${fi?(fi.base.map(x=>esc(x.n)).join(', ')||'nothing yet'):'not on a list'}.</p>${sl.length?`<p style="${big}">Foods that upset me: ${sl.map(r=>esc(food(r.key).n)).join(', ')}.</p>`:''}<p style="${big}">${low.length?`My food is low in: ${low.map(esc).join(', ')}.`:'Nothing looks low.'}</p><p class="small muted" style="margin:0">A log I kept, not a diagnosis.</p>`); }
+/* the black install bar at the bottom, like The Patch's (v1.4.5). It stays until the app is installed or the bar is closed. */
+function installPill(){ if(FRAMED||STANDALONE||document.getElementById('installPill')) return; try{ if(localStorage.getItem(KEY+'.noinst')) return; }catch(e){}
+  const b=document.createElement('div'); b.id='installPill'; b.innerHTML=`<span>Install Food Trial Log on this phone</span><button type="button" class="ipy" data-act="install">Install</button><button type="button" class="ipn" data-act="instno" aria-label="No thanks">✕</button>`; document.body.appendChild(b); }
 function installSheet(){
   const icon=`<li>From now on, open the app from its icon.</li>`,
     iph=`<ol class="steps">${SAFARI?'':`<li>Open this page in <b>Safari</b>.</li>`}<li>Tap <b>⋯</b> beside the address bar, then <b>Share</b>. No <b>⋯</b>? Tap the Share button ${SHARE}.</li><li>Scroll down the list and tap <b>Add to Home Screen</b>.</li><li>Tap <b>Add</b>.</li>${icon}</ol>`,
@@ -1393,6 +1400,7 @@ const ACT={
     try{ S=migrate(o.state); S.tab='report'; V=null; MEMO={}; D=derive(); vReport(); vHist(); summaryText(); nutri(); }
     catch(e){ S=old; STORE=oldStore; NOSAVE=false; MEMO={}; closeSheet(); render(); toast('That backup couldn’t be read. Nothing was changed.'); return; }
     NOSAVE=false; if(STORE==='bad') STORE='ok'; closeSheet(); render(); toast('Restored'); },
+  instno:()=>{ const b=document.getElementById('installPill'); if(b) b.remove(); try{ localStorage.setItem(KEY+'.noinst','1'); }catch(e){} },
   install:()=>{ const e=window.INSTALL; if(!e){ installSheet(); return; } closeSheet(); e.prompt(); e.userChoice.finally(()=>{ window.INSTALL=null; }); },
   erase:b=>{ if(b.dataset.sure){ eraseAll(); return; } b.dataset.sure='1'; b.textContent='Tap again to erase everything'; },
   restart:()=>{ const r=running(); if(r) r.stop={res:'void',d:today(),why:'the trial was started over'}; S.route=null; S.fast=null; S.slow=null; S.base0=[]; S.adds=[]; UI={}; V=null; closeSheet(); save(); render(); }
@@ -1414,6 +1422,7 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden&&!sheet.c
 { let raw=null; try{ raw=localStorage.getItem(KEY); }catch(e){ STORE='none'; }
   if(raw){ try{ const o=JSON.parse(raw); if(o&&typeof o==='object'&&Array.isArray(o.ev)) S=migrate(o); else STORE='bad'; }catch(e){ S=S0(); STORE='bad'; } } }
 S.tab='report'; render();
+if(IOS||(ANDROID&&!CHROME)) installPill(); else if(ANDROID) setTimeout(installPill,4000); /* Chrome on Android: the bar comes with Chrome's offer, or after 4 seconds without one */
 if(STORE==='bad') toast('Couldn’t read your saved data. It hasn’t been overwritten.');
 /* home-screen shortcuts (the installed app's icon, long-pressed): ?r=stool, meal or sym opens that report */
 { let r=null; try{ r=new URLSearchParams(location.search).get('r'); }catch(e){} if(r&&['stool','meal','sym'].includes(r)&&S.ack&&S.route){ ACT[r](null); try{ history.replaceState(null,'',location.pathname); }catch(e){} } }
@@ -1427,8 +1436,8 @@ try{ history.pushState({ftl:1},''); window.addEventListener('popstate',()=>{ if(
 /* installed-app layer (website build only) */
 (function(){
   try{ if('serviceWorker' in navigator && (location.protocol==='https:' || location.hostname==='localhost')){ navigator.serviceWorker.register('sw.js').catch(function(){}); } }catch(e){ /* a sandboxed preview has no service worker */ }
-  /* "Install on this phone" uses the browser's own prompt when it offers one (Android); otherwise the app shows the steps */
-  window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.INSTALL=e; });
+  /* the install bar appears when the browser offers its prompt (Android, desktop); Install uses that prompt, or shows the steps when there is none */
+  window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.INSTALL=e; installPill(); });
   window.addEventListener('appinstalled',function(){ window.INSTALL=null; document.documentElement.classList.add('noinst'); });
 })();
 </script>
