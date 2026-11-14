@@ -72,7 +72,7 @@ async function open(browser, base, o) {
       await tap('[data-act=tab][data-v=nut]'); for (const per of ['today', 'week', 'month']) { await tap(`[data-act=nper][data-v=${per}]`); await visit('Nutrition, ' + per); } await tap('details.note summary'); await visit('Nutrition, the reference questions');
       if (B.gut) { await tap('[data-act=impread]'); await visit('import, confirm'); await shut(); const rej = page.locator('#app [data-act=foodrd]'); if (await rej.count()) { await rej.first().click(); await visit('one food, rejected in the Food Trial Log'); await shut(); } }
       await tap('[data-act=tab][data-v=thr]'); for (const mode of ['meal', 'day']) { await tap(`[data-act=tmode][data-v=${mode}]`); await visit('Threshold, ' + mode);
-        const st = page.locator('button.step.mk'); if (await st.count()) { await st.last().click(); const f = page.locator('#sheet [data-act=stfx]'); if (await f.count()) await f.first().click(); await visit('a step, ' + mode); await shut(); } }
+        const st = page.locator('button.step:is(.r,.m)'); if (await st.count()) { await st.last().click(); const f = page.locator('#sheet [data-act=stfx]'); if (await f.count()) await f.first().click(); await visit('a step, ' + mode); await shut(); } }
       const chip = page.locator('#tqRows [data-act=foodrd]'); if (await chip.count()) { await chip.first().click(); const f = page.locator('#sheet [data-act=frfx]'); if (await f.count()) await f.first().click(); await visit('one food'); await shut(); }
       await page.fill('#tQ', lang === 'fr' ? 'pain' : 'bread'); await visit('Threshold, a food search'); await page.fill('#tQ', 'zzzz'); await visit('Threshold, a food search with no match'); await page.fill('#tQ', '');
       await tap('#topbar [data-act=ai]'); await visit('Ask AI, this month'); await tap('#sheet [data-act=aiscope][data-v=all]'); await visit('Ask AI, everything'); await shut();
@@ -108,7 +108,10 @@ async function open(browser, base, o) {
     // ================= offline =================
     { const person = people.varied, B = build(person, table, 'fr'), A = await open(browser, base, { state: B.state, now: person.now, lang: 'fr', sw: true }), page = A.page;
       await page.evaluate(() => navigator.serviceWorker.ready); await page.waitForFunction(async () => { const ks = await caches.keys(); if (!ks.length) return false; const c = await caches.open(ks[0]); return (await c.keys()).length >= 8; }, null, { timeout: 15000 });
-      same('[offline] the cache carries the app’s own name', (await page.evaluate(() => caches.keys())).every(k => /^thresholdlog-0\.1\.0-[0-9a-f]{8}$/.test(k)), true);
+      // the one cache on the phone is named by sw.js, and that name is this version of the app and the first 8 characters of its file's hash
+      { const named = (/const CACHE='([^']+)'/.exec(fs.readFileSync(path.join(ROOT, 'threshold', 'app', 'sw.js'), 'utf8')) || [])[1], ver = await page.evaluate(() => VER);
+        same('[offline] the cache carries the app’s own name', await page.evaluate(() => caches.keys()), [named]);
+        ok('[offline] that name holds the app’s version', new RegExp('^thresholdlog-' + ver.replace(/\./g, '\\.') + '-[0-9a-f]{8}$').test(named), named + ', version ' + ver); }
       await A.ctx.setOffline(true); await page.reload(); await page.waitForSelector('.mb.meal'); same('[offline] the app opens with no connection, with the data', (await A.S()).ev.length, B.state.ev.length);
       await page.click('[data-act=tab][data-v=thr]'); ok('[offline] the bars draw', (await page.locator('.tbar button.step').count()) > 10);
       await page.goto(base + '/threshold/app/?r=meal'); await page.waitForSelector('#mQ'); ok('[offline] the home-screen shortcut for a meal opens the meal screen', true);

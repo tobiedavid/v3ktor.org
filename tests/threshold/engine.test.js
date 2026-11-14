@@ -82,7 +82,7 @@ eq('a headache belongs to its own day', E.fxDay(fx('2026-11-10', '07:00', 'head'
   eq('the day itself', U.units[1].fx, ['head']);
   eq('a day with nothing that day, that night or the next', U.units[2].fx, []); }
 
-// ---- rule 6 and 8: steps, pale and solid ----
+// ---- rule 6 and 8: steps, each shown from its first entry ----
 eq('step width for a 60 g range', E.stepWidth(60), 10);
 eq('step width for a 3 mg range', E.stepWidth(3), 0.5);
 { const units = []; for (let i = 0; i < 6; i++) units.push({ x: 5, fx: [], id: 'a' + i }); for (let i = 0; i < 2; i++) units.push({ x: 35, fx: ['head'], id: 'b' + i }); units.push({ x: 60, fx: ['head', 'gut'], id: 'c' }); units.push({ x: 60, fx: [], id: 'd' });
@@ -90,12 +90,12 @@ eq('step width for a 3 mg range', E.stepWidth(3), 0.5);
   eq('six steps of 10 g', [B.w, B.steps.length, B.max], [10, 6, 60]);
   eq('entries land in their step, the top edge included', B.steps.map(s => s.n), [6, 0, 0, 2, 0, 2]);
   eq('share of entries followed by an effect', B.steps.map(s => s.share), [0, null, null, 1, null, 0.5]);
-  eq('solid from five entries, pale below', B.steps.map(s => s.pale), [false, false, false, true, false, true]);
+  eq('a step shows from its first entry', E.steps([{ x: 5, fx: ['head'], id: 1 }]).steps.filter(s => s.n).map(s => [s.n, s.k, s.share]), [[1, 1, 1]]);
   eq('effects counted by kind, once per entry', B.steps[5].fx, { head: 1, gut: 1 });
   eq('no amounts, no bar', E.steps([{ x: 0, fx: [], id: 1 }]).steps.length, 0); }
 // "none of it" has its own cell, so a meal with no lactose is never counted as a meal with a little
 { const B = E.steps([{ x: 0, fx: [], id: 1 }, { x: 0, fx: ['gut'], id: 2 }, { x: 0.001, fx: [], id: 3 }, { x: 4, fx: ['gut'], id: 4 }, { x: 12, fx: ['gut'], id: 5 }]);
-  eq('the none cell: its entries, and how many were followed by an effect', [B.zero.n, B.zero.k, B.zero.share, B.zero.pale], [3, 1, 1 / 3, true]);
+  eq('the none cell: its entries, and how many were followed by an effect', [B.zero.n, B.zero.k, B.zero.share], [3, 1, 1 / 3]);
   eq('the steps hold only the entries with some of it', B.steps.map(s => s.n), [0, 0, 1, 0, 0, 1]);
   eq('everything is counted once', B.zero.n + B.steps.reduce((t, s) => t + s.n, 0), B.n);
   eq('with no amounts at all, the none cell still holds the entries', E.steps([{ x: 0, fx: ['head'], id: 1 }]).zero.k, 1); }
@@ -126,8 +126,7 @@ eq('nothing to compare with', E.luck(3, 0, 0, 0), null);
   eq('next day', R.rows[0].next, { lowen: 1, gut: 1 });
   eq('the days without it stay on screen', [R.without.n, R.without.fx], [2, { lowen: 1, gut: 1 }]);
   eq('how clean it was: days where nothing else was new', R.clean, 2);
-  eq('days with any effect that day, that night or the next day, at each amount', R.rows.map(r => r.k), [2, 1]);
-  eq('a row is pale under five', R.rows[0].pale, true); }
+  eq('days with any effect that day, that night or the next day, at each amount', R.rows.map(r => r.k), [2, 1]); }
 
 // ---- Home: what went in, what came out ----
 { const S = { roll: 0, ev: [] }; for (let d = 1; d <= 9; d++) { const k = '2026-11-' + (d < 10 ? '0' + d : d); S.ev.push(meal(k, '08:00', [['steak', 1]])); for (let i = 0; i < (d === 5 ? 4 : 1); i++) S.ev.push(fx(k, '1' + i + ':00', 'head')); }
