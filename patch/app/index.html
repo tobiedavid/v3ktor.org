@@ -345,6 +345,15 @@ ul.pay{padding-left:18px} ul.pay li{margin:.2em 0}
 .card .x{position:absolute;top:2px;right:2px;width:44px;height:44px;border:0;background:transparent;color:var(--muted);font-size:1.5rem;line-height:1;cursor:pointer;border-radius:22px}
 .card .x:focus-visible{outline:3px solid var(--accent)}
 .chip.alarm{border-color:var(--warn)} .chip.alarm[aria-pressed="true"]{background:var(--warn);border-color:var(--warn);color:#fff}
+/* dark mode: a selected warning sign and the links in a sheet were too faint (white on coral, browser blue on charcoal) */
+@media (prefers-color-scheme:dark){.chip.alarm[aria-pressed="true"]{color:#1c0d0b} .sheet a:not(.btn){color:var(--teal)}}
+/* a glossary word inside a coloured tag takes the tag's own text colour (teal on orange couldn't be read) */
+.tag .t{color:inherit}
+/* PIN: each label above its own field */
+label[for="pinA"],label[for="pinB"],label[for="pinIn"]{display:block;margin:10px 0 4px}
+#pinA,#pinB,#pinIn{display:block;width:100%;max-width:240px;min-height:44px;box-sizing:border-box}
+/* 320px screens: Back, the progress dots and "None of these →" fit on one line */
+@media (max-width:340px){.bar{padding-left:10px;padding-right:10px} #bar .in{gap:6px} #bar .in .btn{padding:9px 10px} .prog{gap:2px;margin:0 6px}}
 .labgrid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px} @media(min-width:520px){.labgrid{grid-template-columns:1fr 1fr}}
 .labgrid label.lab{display:flex;flex-direction:column;gap:4px;font-size:.95rem} .labgrid label.lab span{font-weight:600}
 .labform input.sel{min-height:44px} .labform input[type=date]{max-width:220px}
@@ -498,7 +507,8 @@ const VER='1.2.61'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
 /* v1.2.59 (8 Nov 2026): a day summary for other v3ktor.org apps on this phone (Sollum first): sleep, caffeine, sugar, meals, drinks,
    crashes — counts and times, never the answers or the food list — under one shared local key, next to the app's own storage.
    Nothing leaves the phone. Off in the menu; erasing the app clears it. The summaries also ride along in the backup (S.sum). */
-if(!S.lang){ S.lang = (navigator.language||'en').toLowerCase().startsWith('fr') ? 'fr' : 'en'; }
+if(!S.lang){ let fp=null; try{ fp=localStorage.getItem('v3ktor-lang'); }catch(e){}   /* the choice made on the v3ktor.org front page, if there is one */
+  S.lang = (fp==='fr'||fp==='en') ? fp : (navigator.language||'en').toLowerCase().startsWith('fr') ? 'fr' : 'en'; }
 /* v0.7: three doors. Older saves have no mode — someone mid-questions lands back on their question, everyone else on the chooser. */
 if(!S.mode){ S.mode = S.step>0 ? 'patch' : 'home'; }
 if(!S.c||typeof S.c!=='object') S.c={}; if(Array.isArray(S.c.cstim)) S.c.cstim=S.c.cstim[0]||null; if(!Array.isArray(S.crashes)) S.crashes=[]; if(!S.cstep) S.cstep=0;
@@ -1443,7 +1453,7 @@ function buildPatch(){
   const P={keep:[],keepShort:[],swap:[],swapShort:[],add:[],eat:[],timing:[],leak:[],number:[],plain:[],always:[],stops:[],book:[],notes:[],cost:0,addNote:'',deferred:0};
 
   /* safety answers: not emergencies, but they rewrite the card */
-  if(minor) P.notes.push(L(`<b>Under 18: this wasn’t built for you.</b> The doses and the alcohol advice are for adults, so the Add card is empty on purpose. What still holds: protein before noon, caffeine done by noon, and if you’re tired all the time, ask a parent, school nurse or doctor for a ferritin test — low iron is very common at your age and it looks exactly like “lazy”.`,
+  if(minor) P.notes.push(P.minorNote=L(`<b>Under 18: this wasn’t built for you.</b> The doses and the alcohol advice are for adults, so the Add card is empty on purpose. What still holds: protein before noon, caffeine done by noon, and if you’re tired all the time, ask a parent, school nurse or doctor for a ferritin test — low iron is very common at your age and it looks exactly like “lazy”.`,
     `<b>Moins de 18 ans : ça n’a pas été bâti pour toi.</b> Les doses et les conseils sur l’alcool sont pour des adultes, alors la carte Ajouter est vide exprès. Ce qui s’applique quand même : des protéines avant midi, la caféine finie à midi, et si tu es toujours à plat, demande à un parent, à l’infirmière de l’école ou à un médecin un test de ferritine — manquer de fer est très fréquent à ton âge, et de l’extérieur, ça passe pour de la paresse.`));
   const BF=SF.bf;
   if(preg) P.notes.push(L(`<b>Pregnant: the patch changes for you.</b> No liver, no creatine, no salt water. Caffeine: 300 mg a day at most — about a mug and a half of drip coffee.${drinks?' Alcohol: no amount is known to be safe in pregnancy; if stopping is hard, that’s a pharmacist or prenatal-clinic conversation this week, not a swap.':''} Every supplement below gets a yes from the pharmacist first — ${T('prenatal','a prenatal vitamin with 16–20 mg of iron')} is the base (Health Canada). Ferritin matters more for you, not less: the iron target goes up by half in pregnancy, from 18 to 27 mg. Ask at your next visit.`,
@@ -2670,9 +2680,11 @@ function daysLine(){ const n=usableKeys().length, sa=asideKeys().length; if(n<MI
    So on iPhone, outside the installed app (and outside Claude), say so once — dismissible. */
 const IOS=(()=>{ try{ return /iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1); }catch(_){ return false; } })();
 /* A big Install button on Home, like V3KTOR's (13 Nov 2026). It opens the phone's own install dialog when the browser offers one; otherwise it goes to the steps on the site page. */
-function instBig(){ let installed=false; try{ installed=!!(navigator.standalone||(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)); }catch(_){}
-  if(installed||window.claude||window.__installed||!/^https?:$/.test(location.protocol)) return ''; try{ if(window.top!==window.self||localStorage.getItem('thepatch.installDismissed')) return ''; }catch(_){ return ''; }
-  return `<div class="instbig" style="margin:14px 0"><style>body:has(.instbig) #installPill{display:none!important}</style><button type="button" data-install-big style="display:block;width:100%;box-sizing:border-box;min-height:64px;padding:14px 18px;font:inherit;font-size:1.12rem;font-weight:800;letter-spacing:.02em;border:2px solid currentColor;border-radius:14px;background:transparent;color:inherit;cursor:pointer">↓ ${L('Install The Patch','Installer La Patch')}</button><p style="margin:6px 0 0;text-align:center;font-size:.85rem;opacity:.72">${L('Home-screen icon · full screen · works offline','Icône d’accueil · plein écran · fonctionne hors ligne')}</p></div>`; }
+/* can this copy be installed from here? Not when it already is, inside Claude or a frame, or opened as a file */
+function canInstall(){ let installed=false; try{ installed=!!(navigator.standalone||(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)); }catch(_){}
+  if(installed||window.claude||window.__installed||!/^https?:$/.test(location.protocol)) return false; try{ return window.top===window.self; }catch(_){ return false; } }
+function instBig(){ if(!canInstall()) return ''; try{ if(localStorage.getItem('thepatch.installDismissed')) return ''; }catch(_){ return ''; }
+  return `<div class="instbig" style="margin:14px 0"><style>body:has(.instbig) #installPill{display:none!important}</style><button type="button" data-install-big style="display:block;width:100%;box-sizing:border-box;min-height:64px;padding:14px 18px;font:inherit;font-size:1.12rem;font-weight:800;letter-spacing:.02em;border:2px solid currentColor;border-radius:14px;background:transparent;color:inherit;cursor:pointer">↓ ${L('Install The Patch','Installer La Patch')}</button><p style="margin:6px 0 0;text-align:center;font-size:.85rem;opacity:.72">${L('Home-screen icon · full screen · works offline','Icône d’accueil · plein écran · fonctionne hors ligne')}</p><p style="margin:0;text-align:center"><button type="button" data-install-no style="min-height:44px;padding:8px 16px;border:0;background:none;color:inherit;font:inherit;font-size:.9rem;text-decoration:underline;text-underline-offset:3px;cursor:pointer">${L('Not now','Pas maintenant')}</button></p></div>`; }
 function iosNote(){ let installed=false; try{ installed=!!(navigator.standalone||(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)); }catch(_){}
   if(!IOS||installed||window.claude||S.iosOk) return '';
   return `<div class="card soft small" id="iosCard"><p style="margin:0 0 8px">${L('On iPhone, Safari can erase your answers if a week of using Safari goes by without you opening this. Add it to your Home Screen to keep them: in Safari, Share ⬆︎ → Add to Home Screen.','Sur iPhone, Safari peut effacer tes réponses si une semaine d’utilisation passe sans que tu ouvres l’app. Ajoute-la à ton écran d’accueil pour les garder : dans Safari, Partager ⬆︎ → Sur l’écran d’accueil.')}</p><button type="button" class="btn ghost sm" id="iosOk">${L('Got it','Compris')}</button></div>`; }
@@ -4185,6 +4197,16 @@ function cleanState(){ const okD=s=>typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.t
 function crashFlagAfterDelete(k){ if(!k||crashKeys().has(k)) return ''; const r=rates()[k]; if(!r||!r.fl||!r.fl.cr) return '';
   if(r.crA){ delete r.fl.cr; delete r.crA; return ''; }
   return L('Deleted. That day’s check-in still says you crashed — change it there if that’s wrong.','Supprimé. Le bilan de cette journée dit encore que tu as crashé — change-le là si ce n’est pas juste.'); }
+/* A crash report saves itself when its read is reached, the way a meal or a symptom report does on Done. The draft remembers its entry (_lid):
+   change an answer, come back to the read, and that entry is updated instead of a second one being added. Chest pain or fainting is never logged as a crash.
+   Deleting the entry (×, or Clear log) turns this off for that draft (_nolog); "Log this crash" still works. */
+function logCrash(){ const R=buildCrash(); if(R.danger) return false; const ans={}; for(const [k2,v2] of Object.entries(S.c)) if(k2[0]!=='_') ans[k2]=Array.isArray(v2)?[...v2]:v2;
+  const dk=S.c._day||dayKey(), i=S.c._lid?S.crashes.findIndex(x=>x&&x.id===S.c._lid):-1, old=i>=0?S.crashes[i]:null;
+  const e={id:old?old.id:Date.now(), d:old?old.d:new Date().toISOString(), day:dk, at:S.c._at||null, answers:ans, ver:VER, when:S.c.cwhen||null, feel:Array.isArray(S.c.cfeel)?[...S.c.cfeel]:[], top:R.top, second:R.second, conf:R.conf};
+  if(old) S.crashes[i]=e; else S.crashes.push(e);
+  if(old&&crashDay(old)!==dk) crashFlagAfterDelete(crashDay(old));   /* the report moved to another day: the old day's ⚡ goes if nothing else holds it */
+  { const rr=rates()[dk]||(rates()[dk]={}); rr.fl=rr.fl||{}; if(!rr.fl.cr){ rr.fl.cr=true; rr.crA=true; } } /* v1.2.25: the check-in agrees with the log; "Which is right?" only if ⚡ is unticked later */
+  pruneCrashes(); S.c._logged=e.id; S.c._lid=e.id; return true; }
 /* a year of crash reports, not the last 30 */
 function pruneCrashes(){ const cut=keyAdd(dayKey(),-365); S.crashes=(S.crashes||[]).filter(x=>{ const k=crashDay(x); return !k||k>=cut; }).slice(-500); }
 /* the bring-back days count only where the log (or the check-in, for coffee and drinks) shows it was back */
@@ -4214,9 +4236,10 @@ function weekCard(P){ const SF=SAFE(); const bought=P.add.filter(x=>x.cost>0).ma
   rows.push(`<li><b>${L('Add:','Ajouter :')}</b> ${add}</li>`);
   return `<div class="card patch"><h3><span class="tag teal">${L('This week','Cette semaine')}</span></h3><ul class="wk">${rows.join('')}</ul><p class="small muted" style="margin:0">${L('The why, the foods and the rest are in the full patch, further down.','Le pourquoi, les aliments et le reste sont dans la patch au complet, plus bas.')}</p></div>`; }
 /* one card for the notes: each opens from its bold first line; lines that must never be folded stay in the open */
-function notesCard(P){ if(!P.notes.length && !P.always.length) return '';
+function notesCard(P){ const notes=P.notes.filter(s=>s!==P.minorNote);   /* the under-18 notice has its own card at the top of the plan */
+  if(!notes.length && !P.always.length) return '';
   const split=s=>{ const i=s.indexOf('</b>'); return (s.startsWith('<b>')&&i>0)?[s.slice(0,i+4), s.slice(i+4).trim()]:[s,'']; };
-  const items=P.notes.map(s=>{ const [hd,rest]=split(s); return rest?`<details class="note"><summary>${hd}</summary><p style="margin:2px 0 10px">${rest}</p></details>`:`<p style="margin:8px 0">${hd}</p>`; }).join('');
+  const items=notes.map(s=>{ const [hd,rest]=split(s); return rest?`<details class="note"><summary>${hd}</summary><p style="margin:2px 0 10px">${rest}</p></details>`:`<p style="margin:8px 0">${hd}</p>`; }).join('');
   return `<div class="card soft"><div class="eyebrow">${L('Because of what you told us','Selon ce que tu nous as dit')}</div>${items}${P.always.map(s=>`<p style="margin:10px 0 0">${s}</p>`).join('')}</div>`; }
 /* day 4: the check the Add card promises; week 4: the redo. Only shown when the person opens the app — nothing reminds them. */
 function dayCheck(P,where){ if(!S.started) return ''; const day=Math.floor((Date.now()-new Date(S.started).getTime())/86400000)+1;
@@ -4248,7 +4271,9 @@ function vPatch(){
   }
   /* v1.2.48: a new patch reads top-down; once the week has started, what's live — the weight plan, a test, your path — comes first */
   const live=planLive(); { const sg=pathSig(); if(S.planSig!==sg){ S.planSig=sg; save(); } }
-  h+=started?stops+bookCard()+live+head:head+stops+bookCard();
+  /* under 18: said first and in full, not folded among the notes further down. The plan below is already the adapted one (no doses, no alcohol advice, no weight plan). */
+  const minorCard=P.minorNote?`<div class="card soft" id="minorNote"><p style="margin:0">${P.minorNote}</p></div>`:'';
+  h+=started?stops+minorCard+bookCard()+live+head:head+stops+minorCard+bookCard();
   h+=mirrorHTML();
   h+=dayCheck(P,'patch');
   { const o=oneThing(P); h+=`<div class="card one"><div class="eyebrow">${L('If you do one thing this week','Si tu fais une seule chose cette semaine')}</div><p class="big">${o.t}</p><p class="small muted" style="margin:0">${o.w} ${L('The rest is below, for when you come back.','Le reste est plus bas, pour quand tu reviendras.')}</p></div>`; }
@@ -4383,17 +4408,17 @@ function bind(){
     save(); render(); };
   if($('home')) $('home').onclick=()=>{ S.mode='home'; save(); render(); };
   if($('next')) $('next').onclick=()=>{ const n=$('next').dataset.none;
-    if(view()==='cq'){ if(n){ const q=CQ.find(x=>x.id===n); S.c[n]=(q&&q.multi)?[$('next').dataset.nonev]:$('next').dataset.nonev; } S.cstep++; }
+    let logged=false;
+    if(view()==='cq'){ if(n){ const q=CQ.find(x=>x.id===n); S.c[n]=(q&&q.multi)?[$('next').dataset.nonev]:$('next').dataset.nonev; } S.cstep++; if(S.cstep>cqList().length&&!S.c._logged&&!S.c._nolog) logged=logCrash(); }
     else if(view()==='tq'){ if(n) S.tank.p[n]=['none']; tqAdvance(); }
     else { if(n){ S.a[n]=['none']; if(n==='cut') syncKeep(); } S.step++; }
-    save(); render(); };
+    save(); render(); if(logged) toast(L('Logged','Au journal')); };
   if($('urgentAck')) $('urgentAck').onclick=()=>{ S.urgentAck=true; save(); render(true); };
   if($('startWeek')) $('startWeek').onclick=()=>{ S.started=new Date().toISOString(); S.checkins=[]; save(); render(true); toast(L('Week started','Semaine commencée')); };
-  if($('logCrash')) $('logCrash').onclick=()=>{ const R=buildCrash(); const id=Date.now(); const ans={}; for(const [k2,v2] of Object.entries(S.c)) if(k2[0]!=='_') ans[k2]=Array.isArray(v2)?[...v2]:v2; S.crashes.push({id, d:new Date().toISOString(), day:S.c._day||dayKey(), at:S.c._at||null, answers:ans, ver:VER, when:S.c.cwhen||null, feel:Array.isArray(S.c.cfeel)?[...S.c.cfeel]:[], top:R.top, second:R.second, conf:R.conf}); { const dk=S.c._day||dayKey(); const rr=rates()[dk]||(rates()[dk]={}); rr.fl=rr.fl||{}; if(!rr.fl.cr){ rr.fl.cr=true; rr.crA=true; } } /* v1.2.25: the check-in agrees with the log; "Which is right?" only if ⚡ is unticked later */
-    pruneCrashes(); S.c._logged=id; save(); render(true); toast(L('Logged','Au journal')); };
+  if($('logCrash')) $('logCrash').onclick=()=>{ delete S.c._nolog; if(!logCrash()) return; save(); render(true); toast(L('Logged','Au journal')); };
   if($('newCrash')) $('newCrash').onclick=()=>{ S.c={_st:Date.now()}; S.cstep=1; save(); render(); };
-  if($('clearLog')) $('clearLog').onclick=function(){ if(!this.dataset.sure){ this.dataset.sure='1'; this.textContent=L('Tap again to clear the crash log','Appuie encore pour vider le journal'); return; } const ks=[...new Set(S.crashes.map(crashDay).filter(Boolean))]; S.crashes=[]; delete S.c._logged; let note=''; for(const k of ks){ const n=crashFlagAfterDelete(k); if(n) note=n; } save(); render(true); toast(note?L('Log cleared. Some check-ins still say you crashed — change them there if that’s wrong.','Journal vidé. Certains bilans disent encore que tu as crashé — change-les là si ce n’est pas juste.'):L('Log cleared','Journal vidé')); };
-  document.querySelectorAll('[data-delcrash]').forEach(b=>{ b.onclick=()=>{ const i=+b.dataset.delcrash; const x=S.crashes[i]; const isCurrent = S.c._logged===true ? i===S.crashes.length-1 : (x&&x.id===S.c._logged); S.crashes.splice(i,1); if(isCurrent||!S.crashes.length) delete S.c._logged; const left=x?crashFlagAfterDelete(crashDay(x)):''; save(); render(true); toast(left||L('Deleted','Supprimé')); }; });
+  if($('clearLog')) $('clearLog').onclick=function(){ if(!this.dataset.sure){ this.dataset.sure='1'; this.textContent=L('Tap again to clear the crash log','Appuie encore pour vider le journal'); return; } const ks=[...new Set(S.crashes.map(crashDay).filter(Boolean))]; S.crashes=[]; delete S.c._logged; delete S.c._lid; S.c._nolog=true; let note=''; for(const k of ks){ const n=crashFlagAfterDelete(k); if(n) note=n; } save(); render(true); toast(note?L('Log cleared. Some check-ins still say you crashed — change them there if that’s wrong.','Journal vidé. Certains bilans disent encore que tu as crashé — change-les là si ce n’est pas juste.'):L('Log cleared','Journal vidé')); };
+  document.querySelectorAll('[data-delcrash]').forEach(b=>{ b.onclick=()=>{ const i=+b.dataset.delcrash; const x=S.crashes[i]; const isCurrent = S.c._logged===true ? i===S.crashes.length-1 : (x&&x.id===S.c._logged); const mine=isCurrent||(x&&x.id===S.c._lid); S.crashes.splice(i,1); if(isCurrent||!S.crashes.length) delete S.c._logged; if(mine){ delete S.c._lid; S.c._nolog=true; } const left=x?crashFlagAfterDelete(crashDay(x)):''; save(); render(true); toast(left||L('Deleted','Supprimé')); }; });
   bindFoods(); bindRest(); bind127(); bind128(); bind129(); bind130(); bind132();
   if($('foodQ')) $('foodQ').onblur=()=>{ qBlurAt=Date.now(); };
   if($('foodQ')) $('foodQ').oninput=(e)=>{ foodQ=e.target.value; const fl=$('foodList'); if(fl){ fl.innerHTML=foodsHTML(editMap(),S.tank.grp); bindFoods(); } document.querySelectorAll('.fgrp').forEach(g=>{ g.hidden=!!foodQ.trim(); }); };
@@ -4452,7 +4477,7 @@ let refocus=null; let NAV={};
 /* backups: inside Claude the page can't download directly — it asks the platform (the viewer confirms). Opened as a plain file, a normal download works. Last resort: copy the text. */
 async function backupData(){
   const data=JSON.stringify({app:'the-patch',ver:VER,saved:new Date().toISOString(),state:S});
-  const filename='the-patch-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  const filename='the-patch-backup-'+dayKey()+'.json';
   let dl=null; try{ dl=(window.claude&&typeof window.claude.use==='function')?await window.claude.use('downloads'):null; }catch(e){ dl=null; }
   if(dl){ try{ await dl.save({filename,data}); toast(L('Backup saved','Sauvegarde enregistrée')); return; }
     catch(e){ if(e&&e.code==='rate_limited'){ toast(L('Try again in a moment','Réessaie dans un instant')); return; } } }
@@ -4569,7 +4594,7 @@ function openMenu(opener){
     ['about',L('About & privacy','À propos et confidentialité')]
   ];
   const any=Object.keys(S.a).length||S.crashes.length||S.cstep||S.tstep;
-  showSheet(`<div class="handle"></div><h3 id="sheetTitle">${L('Menu','Menu')}</h3><div class="menu">${items.map(([k,l])=>`<button type="button" data-mn="${k}">${l}</button>`).join('')}<button type="button" id="mnLock">${S.lock?L('Change or remove the PIN','Changer ou enlever le NIP'):L('Lock with a PIN','Verrouiller avec un NIP')}</button><button type="button" id="mnBackup">${L('Back up my data (a file)','Sauvegarder mes données (un fichier)')}</button><button type="button" id="mnRestore">${L('Restore from a backup','Restaurer une sauvegarde')}</button><button type="button" id="mnShare">${shareOn()?L('Day summary for other v3ktor.org apps on this phone: on','Résumé du jour pour les autres applis v3ktor.org sur ce téléphone\u00a0: activé'):L('Day summary for other v3ktor.org apps on this phone: off','Résumé du jour pour les autres applis v3ktor.org sur ce téléphone\u00a0: désactivé')}</button>${any?`<button type="button" class="danger" id="mnErase">${L('Erase my answers','Effacer mes réponses')}</button>`:''}</div><p class="small muted" style="margin:12px 0 0">v${VER} · ${L('sources checked','sources vérifiées le')} ${P2(CHECKED)} · ${L('pharmacist review: not yet','révision par un pharmacien : pas encore')}</p><div class="row" style="margin-top:12px"><button class="btn sm" id="closeSheet">${L('Close','Fermer')}</button></div>`, opener);
+  showSheet(`<div class="handle"></div><h3 id="sheetTitle">${L('Menu','Menu')}</h3><div class="menu">${items.map(([k,l])=>`<button type="button" data-mn="${k}">${l}</button>`).join('')}<button type="button" id="mnLock">${S.lock?L('Change or remove the PIN','Changer ou enlever le NIP'):L('Lock with a PIN','Verrouiller avec un NIP')}</button>${canInstall()?`<button type="button" data-install-big>${L('Install on this phone','Installer sur ce téléphone')}</button>`:''}<button type="button" id="mnBackup">${L('Back up my data (a file)','Sauvegarder mes données (un fichier)')}</button><button type="button" id="mnRestore">${L('Restore from a backup','Restaurer une sauvegarde')}</button><button type="button" id="mnShare">${shareOn()?L('Day summary for other v3ktor.org apps on this phone: on','Résumé du jour pour les autres applis v3ktor.org sur ce téléphone\u00a0: activé'):L('Day summary for other v3ktor.org apps on this phone: off','Résumé du jour pour les autres applis v3ktor.org sur ce téléphone\u00a0: désactivé')}</button>${any?`<button type="button" class="danger" id="mnErase">${L('Erase my answers','Effacer mes réponses')}</button>`:''}</div><p class="small muted" style="margin:12px 0 0">v${VER} · ${L('sources checked','sources vérifiées le')} ${P2(CHECKED)} · ${L('pharmacist review: not yet','révision par un pharmacien : pas encore')}</p><div class="row" style="margin-top:12px"><button class="btn sm" id="closeSheet">${L('Close','Fermer')}</button></div>`, opener);
   sheet.querySelectorAll('[data-mn]').forEach(b=>{ b.onclick=()=>{ const k=b.dataset.mn;
     if(k==='gloss'){ openGlossary(null); return; }
     if(k==='about'){ openAbout(); return; }
@@ -4604,6 +4629,13 @@ function closeSheet(noFocus){
   const o=sheetOpener; sheetOpener=null;
   if(noFocus!==true && o && document.body.contains(o)){ try{ o.focus({preventScroll:true}); }catch(e){} }
 }
+/* The phone's Back button, or the back gesture, goes one step back in the app instead of leaving it: an open sheet closes, a question or a report
+   goes back the way its own ← button does, any other screen goes to Report. On Report (and on the lock screen) Back leaves, as before. */
+function navBack(){ if(isLocked()) return false;
+  if(sheet.classList.contains('on')){ closeSheet(); return true; }
+  const b=document.getElementById('back'); if(b&&!bar.classList.contains('hidden')){ b.click(); return true; }
+  if(view()!=='start'){ S.mode='home'; save(); render(); return true; }
+  return false; }
 /* the dimmed background never scrolls the page behind it */
 sheetBg.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
 sheetBg.onclick=closeSheet;
@@ -4622,6 +4654,11 @@ document.addEventListener('keydown',e=>{
 try{ if(!S.sumMig){ shareDays(true); S.sumMig=true; } }catch(e){}
 bootView();
 render();
+/* one extra history entry stands in for "inside the app": Back pops it, navBack() decides, and it is put back unless the app should be left.
+   Not inside a frame or inside Claude, where the history belongs to the page around the app. */
+try{ if(window.top===window.self&&!window.claude){ const mark=()=>{ try{ if(!(history.state&&history.state.tp)) history.pushState({tp:1},''); }catch(e){} };
+  mark(); window.addEventListener('popstate',()=>{ if(navBack()) mark(); else history.back(); });
+  window.addEventListener('pageshow',e=>{ if(e.persisted) mark(); }); } }catch(e){}
 </script>
 <script>
 /* installed-app layer (website build only) */
@@ -4647,6 +4684,9 @@ render();
     if(ev){ go(); return; } if(!/Android/i.test(navigator.userAgent)){ steps(); return; } if(t.disabled) return;
     /* on Android the browser's offer can arrive a moment after the page: wait up to 2.5 seconds before going to the steps */
     t.disabled=true; var n=0, iv=setInterval(function(){ n++; if(ev){ clearInterval(iv); t.disabled=false; go(); } else if(n>=10){ clearInterval(iv); steps(); } },250); });
+  /* "Not now" under the big button: the button and the black bar stay away from then on; Menu → Install on this phone is still there */
+  document.addEventListener('click',function(e){ var t=e.target&&e.target.closest?e.target.closest('[data-install-no]'):null; if(!t) return; e.preventDefault();
+    try{ localStorage.setItem(KEY,'1'); }catch(x){} var b=document.getElementById('installPill'); if(b) b.remove(); document.querySelectorAll('.instbig').forEach(function(x){ x.remove(); }); });
   window.addEventListener('appinstalled',function(){ window.__installed=true; var b=document.getElementById('installPill'); if(b) b.remove(); document.querySelectorAll('.instbig').forEach(function(x){ x.remove(); }); });
 })();
 </script>
