@@ -5,7 +5,7 @@ Tired, crashing, running on coffee or energy drinks? Three minutes of questions,
 - **The page:** https://v3ktor.org/patch/
 - **The app:** https://v3ktor.org/patch/app/ (it installs on a phone and works offline)
 
-**Also in this repository:** [Sollum](sollum/) (https://v3ktor.org/sollum/), the pivot, under the same license. Also here: [Food Trial Log](gut/) (https://v3ktor.org/gut/), which finds the food behind loose stools by cutting foods and bringing them back one at a time. It is one file, `gut/app/index.html`, under the same license. A French copy is at [gut/fr/](gut/fr/) (https://v3ktor.org/gut/fr/); the two are separate apps and keep separate logs. v3ktor.org is V3KTOR // Mapping the Self:
+**Also in this repository:** [Sollum](sollum/) (https://v3ktor.org/sollum/), the pivot, under the same license. Also here: [Food Trial Log](gut/) (https://v3ktor.org/gut/), which finds the food behind loose stools by cutting foods and bringing them back one at a time. It is one file, `gut/app/index.html`, under the same license. A French copy is at [gut/fr/](gut/fr/) (https://v3ktor.org/gut/fr/); the two are separate apps and keep separate logs. And [Threshold Log](threshold/) (https://v3ktor.org/threshold/), step two after the Food Trial Log: it shows what you reported after each amount of fat, carbs, lactose, fibre and histamine. It is one file for both languages, `threshold/app/index.html`, under the same license. v3ktor.org is V3KTOR // Mapping the Self:
 - **Food Trial Log:** the gut. Data: stools, meals, symptoms.
 - **The Patch:** the body. Data: meals, energy, sleep, caffeine, alcohol, crashes and symptoms.
 - **Sollum:** the pivot. Data: word choices, hesitations, and the incidents you report.
@@ -33,6 +33,7 @@ The Patch is education, not medical, pharmacist or dietitian advice.
 - **`patch/app/`** also holds the web-app manifest, the icons and the offline service worker (`sw.js`).
 - **`patch/index.html`** is the website page. `patch/README.txt` explains how to host the folder.
 - The repository root only holds GitHub Pages files and redirects for v3ktor.org.
+- **`tests/`** holds the tests, and `node tests/run.js` runs them. They also run on every pull request. See [tests/README.md](tests/README.md).
 
 ## License
 **Copyright (C) 2026 Tobie David.**

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<!--
+    Threshold Log — the website page (English and French in one file).
+    Copyright (C) 2026  Tobie David
+    SPDX-License-Identifier: AGPL-3.0-or-later — see LICENSE at https://github.com/tobiedavid/v3ktor.org
+-->
+<html lang="en-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Threshold Log — what you reported after a food, at each amount</title>
+<meta name="description" content="Report what you eat and what you feel. The app counts, and shows what you reported after each amount of fat, carbs, lactose, fibre and histamine. Free and private: your log stays on your phone.">
+<meta name="theme-color" content="#c8481f">
+<link rel="canonical" href="https://v3ktor.org/threshold/">
+<link rel="icon" type="image/png" sizes="32x32" href="app/icons/favicon-32.png">
+<link rel="apple-touch-icon" href="app/icons/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://v3ktor.org/threshold/">
+<meta property="og:title" content="Threshold Log">
+<meta property="og:description" content="See what you reported after a food, at each amount.">
+<meta property="og:image" content="https://v3ktor.org/threshold/app/icons/icon-512.png">
+<style>
+:root{--bg:#f7f4ee;--card:#fff;--ink:#1c1b19;--muted:#6b665d;--line:#e6e0d4;--accent:#c8481f;--teal:#0f6b6b;--frame:#1c1b19}
+@media (prefers-color-scheme:dark){:root{--bg:#15161a;--card:#1e2026;--ink:#ececea;--muted:#a19d95;--line:#2d3038;--accent:#e3633a;--teal:#5fb3b3;--frame:#3a3d47}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+h1,h2{font-family:ui-serif,Georgia,'Times New Roman',serif;line-height:1.12;font-weight:800;margin:0}
+h1{font-size:clamp(2rem,6.4vw,3.1rem);letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:clamp(1.5rem,3.6vw,1.9rem);margin-bottom:.7em}
+h3{font-size:1.12rem;line-height:1.3;margin:0 0 .45em}
+p,ul,ol{margin:0 0 .9em}
+ul,ol{padding-left:1.25em}
+li{margin-bottom:.4em}
+li:last-child,p:last-child,ul:last-child,ol:last-child{margin-bottom:0}
+a{color:var(--teal);text-underline-offset:3px}
+:focus-visible{outline:3px solid var(--teal);outline-offset:3px;border-radius:6px}
+[hidden]{display:none!important}
+.wrap{max-width:1000px;margin:0 auto;padding:0 20px}
+.text{max-width:660px}
+.small{font-size:.92rem;color:var(--muted)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 0}
+.brand{display:flex;align-items:center;gap:12px;font:800 1.2rem ui-serif,Georgia,'Times New Roman',serif;color:var(--ink);text-decoration:none}
+.brand img{width:40px;height:40px;border-radius:10px;display:block}
+.lang{font:inherit;font-weight:700;font-size:.95rem;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:8px 16px;background:var(--card);cursor:pointer;min-height:44px}
+.hero{display:grid;gap:32px;padding:26px 0 46px}
+.hero .sub{font-size:1.25rem;margin:.6em 0 0}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin:26px 0 12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:56px;padding:14px 26px;border-radius:14px;border:2px solid var(--accent);background:var(--accent);color:#fff;font-weight:800;font-size:1.1rem;text-decoration:none}
+.btn.ghost{background:transparent;border-color:var(--ink);color:var(--ink)}
+@media (prefers-color-scheme:dark){.btn:not(.ghost){color:#1a0c06}}   /* the orange is lighter in dark mode: dark ink on it, as in the app */
+.shot{margin:0;justify-self:center;width:min(100%,300px)}
+.shot img{display:block;width:100%;height:auto;border:8px solid var(--frame);border-radius:30px;background:#f7f4ee;box-shadow:0 18px 40px rgba(28,27,25,.16)}
+.shot figcaption{margin-top:12px;text-align:center;font-size:.92rem;color:var(--muted)}
+section{padding:42px 0;border-top:1px solid var(--line)}
+.cards{display:grid;gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.shots{display:grid;gap:30px;justify-items:center}
+.facts{list-style:none;padding:0}
+.facts li{padding:0 0 0 16px;border-left:3px solid var(--line);margin-bottom:16px}
+.steps{padding-left:1.3em}
+.door{padding-left:1.4em}
+.foot{padding:34px 0 60px;border-top:1px solid var(--line)}
+.foot h2{font-size:1.2rem;margin-bottom:.5em}
+.inst{display:block;width:100%;box-sizing:border-box;min-height:64px;padding:14px 18px;font:inherit;font-size:1.12rem;font-weight:800;letter-spacing:.02em;border:2px solid currentColor;border-radius:14px;background:transparent;color:inherit;cursor:pointer}
+@media (min-width:760px){
+  .hero{grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);align-items:center;gap:48px;padding:44px 0 64px}
+  .cards.two{grid-template-columns:1fr 1fr}
+  .shots{grid-template-columns:1fr 1fr 1fr;gap:24px;align-items:start}
+  section{padding:56px 0}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+<link rel="manifest" href="app/manifest.webmanifest">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="./"><img src="app/icons/icon-192.png" alt="" width="40" height="40">Threshold Log</a>
+    <button type="button" class="lang" id="langBtn" lang="fr">Français</button>
+  </header>
+
+  <!-- ======================= English ======================= -->
+  <main data-l="en" lang="en-CA">
+  <div class="hero">
+    <div>
+      <h1>See what you reported after a food, at each amount.</h1>
+      <p class="sub">Fat, carbs, lactose, fibre, histamine. Your amounts, your reports.</p>
+      <div class="cta">
+        <a class="btn" href="app/">Open the app</a>
+        <a class="btn ghost" href="#install">Install on your phone</a>
+      </div>
+      <p class="small">Free. No account, no ads. Your log stays on your phone.</p>
+    </div>
+    <figure class="shot">
+      <img src="img/bars-en.webp" alt="The Threshold screen: one bar each for fat, complex carbs, sugars, lactose, fibre and histamine, in steps from zero to the person’s highest amount, each step coloured by how often an effect was reported after it" width="780" height="1400">
+      <figcaption>Each bar runs from zero to your own highest amount.</figcaption>
+    </figure>
+  </div>
+
+  <section>
+    <h2>How it works</h2>
+    <div class="cards two">
+      <div class="card"><h3>Report a meal.</h3><ul><li>Pick the foods and the portions, in halves.</li><li>The app carries 205 foods, most with Health Canada’s numbers.</li><li>A food that isn’t there goes in from its label.</li></ul></div>
+      <div class="card"><h3>Report an effect.</h3><ul><li>Physical or psychological, with its time. One tap each.</li><li>Gut discomfort, headache, joint pain, poor sleep, low energy, or your own words.</li><li>On a day with none, tap <b>No effects today</b>.</li></ul></div>
+      <div class="card"><h3>Read the bars.</h3><ul><li>A bar each for fat, complex carbs, sugars, lactose, fibre and histamine.</li><li>Every step is an amount you ate. Its colour is how often an effect was reported after it.</li><li>After a meal, or over a day.</li></ul></div>
+      <div class="card"><h3>You draw the conclusion.</h3><ul><li>The app counts. It doesn’t say what a count means.</li><li>It doesn’t tell you what to eat.</li><li>Every reading carries the same line: your own report, not advice.</li></ul></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Three screens</h2>
+    <div class="shots">
+      <figure class="shot">
+        <img src="img/home-en.webp" alt="The Home screen: buttons for Meal and Effect, a ring showing the day’s fat, protein, carbs, lactose and fibre in grams with estimated histamine in the middle, and a red bar counting the effects reported" loading="lazy" width="780" height="1400">
+        <figcaption><b>Home.</b> What went in, and what you reported: the last 4 hours, today, the week or the month.</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="img/nutrition-en.webp" alt="The Nutrition screen: a day’s protein, fibre, vitamins and minerals, each beside Health Canada’s reference amount" loading="lazy" width="780" height="1400">
+        <figcaption><b>Nutrition.</b> A day of your eating beside Health Canada’s reference amounts.</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="img/step-en.webp" alt="One step of the lactose bar, opened: 6 meals, effects after 6, the effects by kind, how often luck alone gives that split, and the foods the lactose came from" loading="lazy" width="780" height="1400">
+        <figcaption><b>A step, opened.</b> The numbers behind its colour, and how often luck alone gives them.</figcaption>
+      </figure>
+    </div>
+    <p class="small" style="text-align:center;margin-top:22px">Screens from the app, with a made-up person’s six weeks.</p>
+  </section>
+
+  <section>
+    <h2>Step two, after the Food Trial Log</h2>
+    <div class="text">
+      <p>The <a href="../gut/">Food Trial Log</a> finds the foods your gut rejects. It answers yes or no, one food at a time.</p>
+      <p>The Threshold Log looks at the amount. A food can sit well at one portion and not at three, and what a food holds matters: its fat, its lactose, its fibre.</p>
+      <p>If you used the Food Trial Log, bring in your list, the foods it rejected, and what those have in common. The Threshold Log works without it too.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>What the numbers are</h2>
+    <ul class="facts text">
+      <li><b>Food values</b> come from Health Canada’s Canadian Nutrient File, 2015.</li>
+      <li><b>Histamine is an estimate.</b> It is a serving’s weight times the average for its food type in a 2011 table from the European Food Safety Authority. The amount in your own piece can be many times more or less, so read it as a count of histamine food. <a href="https://doi.org/10.2903/j.efsa.2011.2393">EFSA Journal 2011;9(10):2393</a>.</li>
+      <li><b>The luck number</b> says how often chance alone gives a split at least as uneven as yours. It is Fisher’s exact test.</li>
+      <li><b>A bar can’t tell apart</b> two things eaten together. And what you expect can shape what you feel and report.</li>
+      <li><b>Reference amounts</b> come from Health Canada’s Dietary Reference Intakes and are shown for comparison only. The app doesn’t endorse them or advise on them. Health Canada has no connection with this app. This doesn’t replace a dietitian.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Before you start</h2>
+    <div class="text">
+      <p>The app opens on five statements. Tapping <b>Enter</b> means you agree with them:</p>
+      <ol class="door">
+        <li>I am 18 or older.</li>
+        <li>This is my own experiment and my own log. It isn’t medical or dietitian advice, and what I do with it is my decision.</li>
+        <li>The app shows what I report. It doesn’t check whether anything is serious. If something worries me, I get care.</li>
+        <li>I won’t eat a food I’m allergic to, or change a medicine or a diet that a doctor or dietitian gave me, to test something.</li>
+        <li>I don’t have an eating disorder and I’m not recovering from one.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="install">
+    <h2>Install it on your phone</h2>
+    <div class="text">
+      <p>The app gets its own icon on your phone and opens without a connection. There is no store and no account.</p>
+      <div class="instBox" hidden style="margin:6px 0 18px"><button type="button" class="inst instBtn">↓ Install Threshold Log</button><p class="instNote" hidden style="margin:8px 0 0;font-size:.92rem">This browser didn’t offer a one-tap install. Follow the steps for your phone below.</p></div>
+      <p>The quick way: <a href="app/">open the app</a> and tap <b>Install Threshold Log</b> on the first screen, or <b>Install</b> on the black bar at the bottom. If neither is there, follow the steps for your phone.</p>
+    </div>
+    <div class="cards two" style="margin:22px 0">
+      <div class="card"><h3>iPhone</h3>
+<ol class="steps">
+<li>Open the app in <b>Safari</b>.</li>
+<li>Tap <b>⋯</b> beside the address bar, then <b>Share</b>. No <b>⋯</b>? Tap the Share button.</li>
+<li>Scroll down the list and tap <b>Add to Home Screen</b>.</li>
+<li>Tap <b>Add</b>.</li>
+</ol>
+<p style="margin-top:.9em"><b>On an iPhone, install before you start.</b> The installed app does not see the entries made in Safari, or the Food Trial Log’s data: that comes in with its backup file.</p></div>
+      <div class="card"><h3>Android</h3>
+<ol class="steps">
+<li>Open the app in <b>Chrome</b>.</li>
+<li>Tap the <b>⋮</b> menu at the top right.</li>
+<li>Tap <b>Add to Home screen</b>. On some phones it says <b>Install app</b>.</li>
+<li>Tap <b>Install</b>.</li>
+</ol></div>
+    </div>
+    <p class="text">From then on, open the app from its icon. Your log lives on your phone only, so back it up from the app’s menu. English and French are in the same app: switch at the top of any screen.</p>
+  </section>
+  </main>
+
+  <!-- ======================= Français ======================= -->
+  <main data-l="fr" lang="fr-CA" hidden>
+  <div class="hero">
+    <div>
+      <h1>Vois ce que tu as noté après un aliment, à chaque quantité.</h1>
+      <p class="sub">Gras, glucides, lactose, fibres, histamine. Tes quantités, tes relevés.</p>
+      <div class="cta">
+        <a class="btn" href="app/">Ouvrir l’app</a>
+        <a class="btn ghost" href="#installer">L’installer sur ton téléphone</a>
+      </div>
+      <p class="small">Gratuit. Pas de compte, pas de publicité. Ton journal reste sur ton téléphone.</p>
+    </div>
+    <figure class="shot">
+      <img src="img/bars-fr.webp" alt="L’écran Seuil&nbsp;: une barre pour le gras, les glucides complexes, les sucres, le lactose, les fibres et l’histamine, en paliers de zéro à la quantité la plus élevée de la personne, chaque palier coloré selon la fréquence des effets notés après" width="780" height="1400">
+      <figcaption>Chaque barre va de zéro à ta propre quantité la plus élevée.</figcaption>
+    </figure>
+  </div>
+
+  <section>
+    <h2>Comment ça marche</h2>
+    <div class="cards two">
+      <div class="card"><h3>Note un repas.</h3><ul><li>Choisis les aliments et les portions, par demies.</li><li>L’app contient 205 aliments, la plupart avec les chiffres de Santé Canada.</li><li>Un aliment qui n’y est pas s’ajoute selon son étiquette.</li></ul></div>
+      <div class="card"><h3>Note un effet.</h3><ul><li>Physique ou psychologique, avec son heure. Un appui chacun.</li><li>Inconfort au ventre, mal de tête, douleur aux articulations, mauvais sommeil, peu d’énergie, ou tes propres mots.</li><li>Une journée sans effet, appuie sur <b>Aucun effet aujourd’hui</b>.</li></ul></div>
+      <div class="card"><h3>Lis les barres.</h3><ul><li>Une barre pour le gras, les glucides complexes, les sucres, le lactose, les fibres et l’histamine.</li><li>Chaque palier est une quantité que tu as mangée. Sa couleur dit à quelle fréquence un effet a été noté après.</li><li>Après un repas, ou sur une journée.</li></ul></div>
+      <div class="card"><h3>C’est toi qui conclus.</h3><ul><li>L’app compte. Elle ne dit pas ce qu’un compte veut dire.</li><li>Elle ne te dit pas quoi manger.</li><li>Chaque relevé porte la même ligne&nbsp;: ton propre relevé, pas un conseil.</li></ul></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Trois écrans</h2>
+    <div class="shots">
+      <figure class="shot">
+        <img src="img/home-fr.webp" alt="L’écran d’accueil&nbsp;: les boutons Repas et Effet, un anneau qui montre le gras, les protéines, les glucides, le lactose et les fibres de la journée en grammes avec l’histamine estimée au milieu, et une barre rouge qui compte les effets notés" loading="lazy" width="780" height="1400">
+        <figcaption><b>Accueil.</b> Ce qui est entré, et ce que tu as noté&nbsp;: les 4 dernières heures, aujourd’hui, la semaine ou le mois.</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="img/nutrition-fr.webp" alt="L’écran Nutrition&nbsp;: les protéines, les fibres, les vitamines et les minéraux d’une journée, chacun à côté de la quantité de référence de Santé Canada" loading="lazy" width="780" height="1400">
+        <figcaption><b>Nutrition.</b> Une journée de ce que tu manges à côté des quantités de référence de Santé Canada.</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="img/step-fr.webp" alt="Un palier de la barre du lactose, ouvert&nbsp;: 6 repas, effets après 6, les effets par sorte, à quelle fréquence le hasard seul donne cet écart, et les aliments d’où vient le lactose" loading="lazy" width="780" height="1400">
+        <figcaption><b>Un palier, ouvert.</b> Les chiffres derrière sa couleur, et à quelle fréquence le hasard seul les donne.</figcaption>
+      </figure>
+    </div>
+    <p class="small" style="text-align:center;margin-top:22px">Des écrans tirés de l’app, avec les six semaines d’une personne inventée.</p>
+  </section>
+
+  <section>
+    <h2>La deuxième étape, après le Food Trial Log</h2>
+    <div class="text">
+      <p>Le <a href="../gut/fr/">Food Trial Log</a> trouve les aliments que ton ventre rejette. Il répond par oui ou par non, un aliment à la fois.</p>
+      <p>Le Threshold Log regarde la quantité. Un aliment peut bien passer à une portion et pas à trois, et ce qu’un aliment contient compte&nbsp;: son gras, son lactose, ses fibres.</p>
+      <p>Si tu as utilisé le Food Trial Log, amène ta liste, les aliments qu’il a rejetés, et ce qu’ils ont en commun. Le Threshold Log fonctionne aussi sans lui.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>D’où viennent les chiffres</h2>
+    <ul class="facts text">
+      <li><b>Les valeurs nutritives</b> viennent du Fichier canadien sur les éléments nutritifs de Santé Canada, 2015.</li>
+      <li><b>L’histamine est une estimation.</b> C’est le poids d’une portion multiplié par la moyenne de son type d’aliment dans un tableau de 2011 de l’Autorité européenne de sécurité des aliments. La quantité dans ton propre morceau peut être plusieurs fois plus grande ou plus petite, alors lis-la comme un compte d’aliments à histamine. <a href="https://doi.org/10.2903/j.efsa.2011.2393">EFSA Journal 2011;9(10):2393</a>.</li>
+      <li><b>Le chiffre du hasard</b> dit à quelle fréquence le hasard seul donne un écart au moins aussi inégal que le tien. C’est le test exact de Fisher.</li>
+      <li><b>Une barre ne peut pas départager</b> deux choses mangées ensemble. Et ce à quoi tu t’attends peut influencer ce que tu ressens et ce que tu notes.</li>
+      <li><b>Les quantités de référence</b> viennent des Apports nutritionnels de référence de Santé Canada et sont montrées pour comparaison seulement. L’app ne les endosse pas et ne donne pas de conseil à leur sujet. Santé Canada n’a aucun lien avec cette app. Ça ne remplace pas une diététiste.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Avant de commencer</h2>
+    <div class="text">
+      <p>L’app s’ouvre sur cinq énoncés. Appuyer sur <b>Entrer</b> signifie que tu les acceptes&nbsp;:</p>
+      <ol class="door">
+        <li>J’ai 18 ans ou plus.</li>
+        <li>C’est ma propre expérience et mon propre journal. Ce n’est pas un avis médical ou de diététiste, et je décide quoi en faire.</li>
+        <li>L’app montre ce que je note. Elle ne vérifie pas si quelque chose est grave. Si quelque chose m’inquiète, je vais chercher des soins.</li>
+        <li>Je ne mangerai pas un aliment auquel je suis allergique, et je ne changerai pas un médicament ou un régime donné par un médecin ou une diététiste, pour tester quelque chose.</li>
+        <li>Je n’ai pas de trouble alimentaire et je ne suis pas en rétablissement d’un trouble alimentaire.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="installer">
+    <h2>Installe-la sur ton téléphone</h2>
+    <div class="text">
+      <p>L’app a sa propre icône sur ton téléphone et s’ouvre sans connexion. Pas de boutique d’applications, pas de compte.</p>
+      <div class="instBox" hidden style="margin:6px 0 18px"><button type="button" class="inst instBtn">↓ Installer Threshold Log</button><p class="instNote" hidden style="margin:8px 0 0;font-size:.92rem">Ce navigateur n’a pas offert l’installation en un appui. Suis les étapes pour ton téléphone ci-dessous.</p></div>
+      <p>Le plus rapide&nbsp;: <a href="app/">ouvre l’app</a> et appuie sur <b>Installer Threshold Log</b> au premier écran, ou sur <b>Installer</b> dans la barre noire en bas. Si ni l’un ni l’autre n’est là, suis les étapes pour ton téléphone.</p>
+    </div>
+    <div class="cards two" style="margin:22px 0">
+      <div class="card"><h3>iPhone</h3>
+<ol class="steps">
+<li>Ouvre l’app dans <b>Safari</b>.</li>
+<li>Appuie sur <b>⋯</b> à côté de la barre d’adresse, puis sur <b>Partager</b>. Pas de <b>⋯</b>? Appuie sur le bouton Partager.</li>
+<li>Descends dans la liste et choisis <b>Sur l’écran d’accueil</b>.</li>
+<li>Appuie sur <b>Ajouter</b>.</li>
+</ol>
+<p style="margin-top:.9em"><b>Sur un iPhone, installe avant de commencer.</b> L’app installée ne voit pas les entrées faites dans Safari, ni les données du Food Trial Log&nbsp;: celles-là arrivent par son fichier de sauvegarde.</p></div>
+      <div class="card"><h3>Android</h3>
+<ol class="steps">
+<li>Ouvre l’app dans <b>Chrome</b>.</li>
+<li>Appuie sur le menu <b>⋮</b> en haut à droite.</li>
+<li>Appuie sur <b>Ajouter à l’écran d’accueil</b>. Sur certains téléphones, c’est écrit <b>Installer l’application</b>.</li>
+<li>Appuie sur <b>Installer</b>.</li>
+</ol></div>
+    </div>
+    <p class="text">À partir de là, ouvre l’app par son icône. Ton journal est seulement sur ton téléphone, alors sauvegarde-le à partir du menu de l’app. Le français et l’anglais sont dans la même app&nbsp;: change de langue en haut de n’importe quel écran.</p>
+  </section>
+  </main>
+
+  <footer class="foot">
+    <div data-l="en" lang="en-CA">
+      <h2>Free software</h2>
+      <p class="text">Made by Tobie and Claude. Free version at v3ktor.org/threshold. © 2026 Tobie David.</p>
+      <p class="small text">Free software under the GNU Affero General Public License, version 3 or later, with two extra terms. Source code and license: <a href="https://github.com/tobiedavid/v3ktor.org">github.com/tobiedavid/v3ktor.org</a>. Provided as-is, without warranty. Food values: Canadian Nutrient File, Health Canada, 2015, licensed under the Open Government Licence – Canada; blanks filled from the USDA’s SR28. Histamine estimates from the averages in EFSA Journal 2011;9(10):2393, Table 10. None of these bodies has any connection with this app. Look, food list and reference amounts come from <a href="../patch/">The Patch</a> and the <a href="../gut/">Food Trial Log</a>. <a href="../">The V3KTOR Project</a>.</p>
+    </div>
+    <div data-l="fr" lang="fr-CA" hidden>
+      <h2>Logiciel libre</h2>
+      <p class="text">Créé par Tobie et Claude. Version gratuite à v3ktor.org/threshold. © 2026 Tobie David.</p>
+      <p class="small text">Logiciel libre sous la licence publique générale GNU Affero, version 3 ou ultérieure, avec deux conditions de plus. Code source et licence&nbsp;: <a href="https://github.com/tobiedavid/v3ktor.org">github.com/tobiedavid/v3ktor.org</a>. Fourni tel quel, sans garantie. Valeurs nutritives&nbsp;: Fichier canadien sur les éléments nutritifs, Santé Canada, 2015, sous la Licence du gouvernement ouvert – Canada; les blancs sont comblés à partir du SR28 de l’USDA. Estimations d’histamine tirées des moyennes de l’EFSA Journal 2011;9(10):2393, tableau 10. Aucun de ces organismes n’a de lien avec cette app. Apparence, liste d’aliments et quantités de référence tirées de <a href="../patch/">The Patch</a> et du <a href="../gut/fr/">Food Trial Log</a>. <a href="../">Le projet V3KTOR</a>.</p>
+    </div>
+  </footer>
+</div>
+<script>
+/* One page, two languages. English is in the page as it loads, so it reads without JavaScript. The choice is the one the front page keeps. */
+(function(){ var KEY='v3ktor-lang', btn=document.getElementById('langBtn'), meta=document.querySelector('meta[name="description"]');
+  var T={en:{title:'Threshold Log — what you reported after a food, at each amount',desc:meta.getAttribute('content'),other:'Français',otherLang:'fr'},
+         fr:{title:'Threshold Log — ce que tu as noté après un aliment, à chaque quantité',desc:'Note ce que tu manges et ce que tu ressens. L’app compte, et montre ce que tu as noté après chaque quantité de gras, de glucides, de lactose, de fibres et d’histamine. Gratuit et privé\u00a0: ton journal reste sur ton téléphone.',other:'English',otherLang:'en'}};
+  function show(l){ if(l!=='fr') l='en'; document.documentElement.lang=l==='fr'?'fr-CA':'en-CA';
+    var all=document.querySelectorAll('[data-l]'); for(var i=0;i<all.length;i++) all[i].hidden=all[i].getAttribute('data-l')!==l;
+    document.title=T[l].title; meta.setAttribute('content',T[l].desc); btn.textContent=T[l].other; btn.setAttribute('lang',T[l].otherLang); btn.setAttribute('data-to',T[l].otherLang); }
+  var l=null; try{ l=localStorage.getItem(KEY); }catch(e){}
+  if(l!=='fr'&&l!=='en') l=(navigator.language||'en').toLowerCase().indexOf('fr')===0?'fr':'en';
+  show(l);
+  btn.addEventListener('click',function(){ var to=btn.getAttribute('data-to'); try{ localStorage.setItem(KEY,to); }catch(e){} show(to); });
+})();
+/* The big Install button. It opens the phone's own install dialog when the browser offers one here. Otherwise it opens the app, where the same button is on the first screen; if that did not work either, it points to the steps. iPhone has no install dialog, so the button stays hidden there. */
+(function(){ var boxes=document.querySelectorAll('.instBox'), btns=document.querySelectorAll('.instBtn'), notes=document.querySelectorAll('.instNote'); if(!boxes.length) return;
+  var ua=navigator.userAgent||'', ios=/iP(hone|ad|od)/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1), ev=null, alone=false;
+  try{ alone=navigator.standalone===true||matchMedia('(display-mode: standalone)').matches; }catch(e){}
+  if(ios||alone) return;
+  function each(list,fn){ for(var i=0;i<list.length;i++) fn(list[i]); }
+  window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); ev=e; each(boxes,function(b){ b.hidden=false; }); });
+  window.addEventListener('appinstalled',function(){ ev=null; each(boxes,function(b){ b.hidden=true; }); });
+  if(/Android/i.test(ua)) each(boxes,function(b){ b.hidden=false; });
+  function fire(){ var p=ev; ev=null; p.prompt(); }
+  each(btns,function(btn){ btn.addEventListener('click',function(){ if(ev){ fire(); return; }
+    var tried=false; try{ tried=sessionStorage.getItem('v3k.inst.tried')==='1'; }catch(e){}
+    each(btns,function(b){ b.disabled=true; }); var n=0, iv=setInterval(function(){ n++;
+      if(ev){ clearInterval(iv); each(btns,function(b){ b.disabled=false; }); fire(); }
+      else if(n>=10){ clearInterval(iv); each(btns,function(b){ b.disabled=false; });
+        if(tried){ each(notes,function(x){ x.hidden=false; }); } else { try{ sessionStorage.setItem('v3k.inst.tried','1'); }catch(e){} location.href='app/'; } }
+    },250); }); });
+})();
+</script>
+</body>
+</html>
