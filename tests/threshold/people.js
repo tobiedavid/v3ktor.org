@@ -37,12 +37,13 @@ function steady() {
   plan.push({ k: 'script', at: T(25, 16, 0), do: 'moveEffect', from: T(25, 15, 0), to: T(25, 14, 10) });         // changes an effect's time
   plan.push({ k: 'script', at: T(30, 19, 30), do: 'conclusions', bar: 'fib', food: OAT, text: 'Half a packet is where it starts for me.' });
   plan.push({ k: 'script', at: T(33, 16, 0), do: 'removeMeal', target: T(33, 15, 30) });                         // removes a meal from History
+  closeFirstOpenDay(plan, N, T, dayKey, roll, new Set());
   return { name: 'steady', lang: 'en', roll, now, start: T(0, 6, 0), gut: 'gut-after-two-trials.json', T, dayKey,
     labels: [{ n: BROTH, s: '1 cup (250 ml)', kcal: 40, fat: 0.5, carb: 0.5, fib: 0, sug: null, prot: 9, lact: 0, h: false }], listAdd: [BROTH],
     plan: plan.filter(a => (a.logAt || a.at || a.t) <= now).sort((x, y) => (x.logAt || x.at || x.t) - (y.logAt || y.at || y.t)) };
 }
 
-// ---------- a varied eater, who starts here without the Food Trial Log (French, day starts at midnight, clocks go back on November 1) ----------
+// ---------- a varied eater, who starts here without the Food Trial Log (French, day starts at midnight) ----------
 function varied(table) {
   const R = rng(20261004), N = 42, roll = 0, T = (i, h, mi) => new Date(2026, 9, 4 + i, h, mi || 0).getTime(), now = T(41, 20, 30), plan = [], KOMB = 'Kombucha';
   const labels = [{ n: KOMB, s: '1 bouteille (355 ml)', kcal: 50, fat: 0, carb: 12, fib: 0, sug: 10, prot: 0, lact: 0, h: true }];
@@ -81,9 +82,17 @@ function varied(table) {
   for (let i = 0; i < N; i++) { const draw = [c(), c()]; if (skipped.has(i)) continue; const k = dayKey(i);
     const has = plan.some(a => a.k === 'fx' && a.t <= T(i, 22, 0) && a.codes.concat((a.own || []).map(() => 'own')).some(code => (code === 'sleep' ? dayPlus(dayOf(a.t, roll), -1) : dayOf(a.t, roll)) === k));
     if (!has && draw[0] < 0.88) plan.push({ k: 'none', at: T(i, 22, 0), day: k, from: 'today' }); }
-  plan.push({ k: 'script', at: T(20, 12, 0), do: 'closeOldest' });                                                // closes the oldest day left open, from History
+  closeFirstOpenDay(plan, N, T, dayKey, roll, skipped);
   return { name: 'varied', lang: 'fr', roll, now, start: T(0, 6, 0), gut: null, T, dayKey, labels, listAdd: [],
     plan: plan.filter(a => (a.logAt || a.at || a.t) <= now).sort((x, y) => (x.logAt || x.at || x.t) - (y.logAt || y.at || y.t)) };
+}
+
+// three days after the first day a person left open, they close it from History ("No effects that day")
+function closeFirstOpenDay(plan, N, T, dayKey, roll, skipped) {
+  const belongsTo = a => a.codes.concat((a.own || []).map(() => 'own')).map(code => code === 'sleep' ? dayPlus(dayOf(a.t, roll), -1) : dayOf(a.t, roll));
+  for (let i = 0; i < N - 4; i++) { const k = dayKey(i), at = T(i + 3, 12, 5); if (skipped.has(i) || skipped.has(i + 3)) continue;
+    if (plan.some(a => (a.k === 'none' && a.day === k) || (a.k === 'fx' && a.t <= at && belongsTo(a).includes(k)))) continue;
+    plan.push({ k: 'script', at, do: 'closeOldest' }); return; }
 }
 
 // a food a person added from its label, in the shape of a table row

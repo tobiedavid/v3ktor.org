@@ -4,7 +4,7 @@
 // with an old save that still carries retired food numbers, and with files that are not a Food Trial Log save.
 //   node tests/threshold/import.test.js      (needs Playwright with Chromium)
 'use strict';
-process.env.TZ = 'America/Edmonton';
+const { ZONE } = require('../lib/zone.js');
 const fs = require('fs'), path = require('path'), { chromium } = require('playwright'), { serve } = require('../lib/serve.js'), { engine } = require('./state.js');
 const ROOT = path.join(__dirname, '..', '..'), FIX = path.join(__dirname, '..', 'fixtures'), E = engine();
 let pass = 0, fail = 0;
@@ -15,7 +15,7 @@ const lastTime = s => s.ev.reduce((m, e) => Math.max(m, +e.t || 0), 0);
 
 (async () => {
   const srv = await serve(ROOT), base = srv.url, browser = await chromium.launch();
-  const fresh = async (store, now) => { const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'en-CA', timezoneId: 'America/Edmonton', reducedMotion: 'reduce', serviceWorkers: 'block' }), page = await ctx.newPage(), errors = [];
+  const fresh = async (store, now) => { const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'en-CA', timezoneId: ZONE, reducedMotion: 'reduce', serviceWorkers: 'block' }), page = await ctx.newPage(), errors = [];
     page.on('pageerror', e => errors.push(e.message)); if (now) await page.clock.setFixedTime(now);
     await page.addInitScript(s => { if (!sessionStorage.getItem('seeded')) { for (const k of Object.keys(s)) localStorage.setItem(k, s[k]); sessionStorage.setItem('seeded', '1'); } }, store || {}); return { ctx, page, errors }; };
   const enter = async page => { await page.goto(base + '/threshold/app/'); await page.waitForSelector('[data-act=enter]'); await page.click('[data-act=enter]'); await page.click('[data-act=tab][data-v=nut]'); };

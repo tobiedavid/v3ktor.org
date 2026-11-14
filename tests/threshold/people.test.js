@@ -1,10 +1,10 @@
 // Threshold Log: two made-up people use the app for six weeks, through the screen, one tap at a time, with the clock moved for them.
-// A steady eater who came from the Food Trial Log (English, day starts at 4 a.m.) and a varied eater who starts here (French, the
-// clocks go back in the middle). At the end every count on screen is checked against an independent recount of what they did.
+// A steady eater who came from the Food Trial Log (English, day starts at 4 a.m.) and a varied eater who starts here (French, day
+// starts at midnight). At the end every count on screen is checked against an independent recount of what they did.
 //   node tests/threshold/people.test.js            (needs Playwright with Chromium)
 //   node tests/threshold/people.test.js --save DIR  also writes each person's saved data to DIR, for making the pictures
 'use strict';
-process.env.TZ = 'America/Edmonton';           // the same zone the browser is given below, so both sides read a time the same way
+const { ZONE } = require('../lib/zone.js');     // one fixed-offset zone for Node and for the browser, so both read a clock time the same way
 const fs = require('fs'), path = require('path'), { chromium } = require('playwright');
 const { serve } = require('../lib/serve.js'), O = require('./oracle.js'), P = require('./people.js');
 const ROOT = path.join(__dirname, '..', '..'), FIX = path.join(__dirname, '..', 'fixtures');
@@ -21,7 +21,7 @@ const TN = [['prot', 0], ['fib', 0], ['fe', 1], ['mg', 0], ['k', 0], ['b1', 2], 
 
 async function play(browser, base, person, table) {
   const fr = person.lang === 'fr', roll = person.roll, N = name => `[${person.name}] ${name}`;
-  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: fr ? 'fr-CA' : 'en-CA', timezoneId: 'America/Edmonton', reducedMotion: 'reduce' });
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: fr ? 'fr-CA' : 'en-CA', timezoneId: ZONE, reducedMotion: 'reduce' });
   const page = await ctx.newPage(), errors = [], outside = [];
   page.on('pageerror', e => errors.push('script error: ' + e.message)); page.on('console', m => { if (m.type() === 'error' && !/sw\.js|service worker|404/i.test(m.text())) errors.push('console: ' + m.text()); });
   page.on('request', r => { if (!r.url().startsWith(base)) outside.push(r.url()); });
@@ -80,8 +80,9 @@ async function play(browser, base, person, table) {
       ok(N('a conclusion shows under its bar once the sheet closes'), (await page.locator(`#bar-${a.bar}`).innerText()).includes(a.text));
       await page.fill('#tQ', nameOf(a.food)); await page.click(`#tqRows [data-act=foodrd][data-v="${keyOf(a.food)}"]`); await page.fill('#cIn', a.text); await page.click('#sheet [data-act=close]'); await page.click('[data-act=tab][data-v=home]'); }
     else if (a.do === 'removeMeal') { await page.click('[data-act=menu]'); await page.click('#sheet [data-act=hist]'); await page.click(`#app [data-act=entry][data-v="${await idAt('meal', a.target)}"]`); await page.click('#sheet [data-act=del]'); await page.click('#bar [data-act=back]'); }
-    else if (a.do === 'closeOldest') { await page.click('[data-act=menu]'); await page.click('#sheet [data-act=hist]'); const open = page.locator('#app [data-act=none]'), n = await open.count();
-      if (n) { same(N('the oldest open day in History is the one the recount expects'), await open.nth(n - 1).getAttribute('data-v'), a.day); await open.nth(n - 1).click(); } await page.click('#bar [data-act=back]'); }
+    else if (a.do === 'closeOldest') { await page.click('[data-act=menu]'); await page.click('#sheet [data-act=hist]');       // the oldest day before today that History offers to close
+      const days = (await page.locator('#app [data-act=none]').evaluateAll(els => els.map(e => e.dataset.v))).filter(k => k < O.dayOf(a.at, roll)).sort(), oldest = days[0] || null;
+      same(N('the oldest open day in History is the one the recount expects'), oldest, a.day); if (oldest) await page.click(`#app [data-act=none][data-v="${oldest}"]`); await page.click('#bar [data-act=back]'); }
   }
   const want = P.expected(person, table);          // worked out before the first tap: what the app should hold at the end
   let lastDay = null, done = 0;

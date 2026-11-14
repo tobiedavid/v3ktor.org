@@ -2,7 +2,7 @@
 // undoing the report puts the food back, and so does changing the report to a formed stool. English and French.
 //   node tests/gut/one-food.test.js      (needs Playwright with Chromium)
 'use strict';
-process.env.TZ = 'America/Edmonton';
+const { ZONE } = require('../lib/zone.js');
 const fs = require('fs'), path = require('path'), { chromium } = require('playwright'), { serve } = require('../lib/serve.js');
 const ROOT = path.join(__dirname, '..', '..'), FIX = path.join(__dirname, '..', 'fixtures');
 let pass = 0, fail = 0; const same = (name, got, want) => { if (JSON.stringify(got) === JSON.stringify(want)) pass++; else { fail++; console.log('FAIL ' + name + '\n     got  ' + JSON.stringify(got) + '\n     want ' + JSON.stringify(want)); } };
@@ -11,7 +11,7 @@ let pass = 0, fail = 0; const same = (name, got, want) => { if (JSON.stringify(g
   const srv = await serve(ROOT), browser = await chromium.launch();
   try { for (const [lang, url, file] of [['en', '/gut/app/', 'gut-day-9.json'], ['fr', '/gut/fr/app/', 'gut-fr-day-9.json']]) {
     const fx = JSON.parse(fs.readFileSync(path.join(FIX, file), 'utf8')), T = `[${lang}] `;
-    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: lang === 'fr' ? 'fr-CA' : 'en-CA', timezoneId: 'America/Edmonton', reducedMotion: 'reduce', serviceWorkers: 'block' }), page = await ctx.newPage(), errors = [];
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: lang === 'fr' ? 'fr-CA' : 'en-CA', timezoneId: ZONE, reducedMotion: 'reduce', serviceWorkers: 'block' }), page = await ctx.newPage(), errors = [];
     page.on('pageerror', e => errors.push(e.message));
     await page.clock.setFixedTime(new Date(2026, 9, 29, 8, 0)); await page.addInitScript(([k, v]) => { if (!sessionStorage.getItem('seeded')) { localStorage.setItem(k, v); sessionStorage.setItem('seeded', '1'); } }, [fx.key, JSON.stringify(fx.state)]);
     await page.goto(srv.url + url); await page.waitForSelector('#topbar');

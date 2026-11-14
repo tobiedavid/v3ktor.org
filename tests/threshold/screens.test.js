@@ -3,7 +3,7 @@
 // the door, a day turning over while the app sits open, and what happens when the saved data can't be read.
 //   node tests/threshold/screens.test.js      (needs Playwright with Chromium)
 'use strict';
-process.env.TZ = 'America/Edmonton';
+const { ZONE } = require('../lib/zone.js');
 const fs = require('fs'), path = require('path'), { chromium } = require('playwright');
 const { serve } = require('../lib/serve.js'), O = require('./oracle.js'), P = require('./people.js'), { build } = require('./state.js');
 const ROOT = path.join(__dirname, '..', '..'), KEY = 'v3k.threshold.v1';
@@ -22,7 +22,7 @@ const OTHER_LANG = { en: word(['repas', 'effets?', 'aliments?', 'journée', 'auj
 const BROKEN = /undefined|NaN|\[object|(?<![\p{L}])null(?![\p{L}])/u;
 
 async function open(browser, base, o) {
-  const ctx = await browser.newContext({ viewport: { width: o.width || 390, height: 760 }, locale: o.lang === 'fr' ? 'fr-CA' : 'en-CA', timezoneId: 'America/Edmonton', reducedMotion: 'reduce', serviceWorkers: o.sw ? 'allow' : 'block' });
+  const ctx = await browser.newContext({ viewport: { width: o.width || 390, height: 760 }, locale: o.lang === 'fr' ? 'fr-CA' : 'en-CA', timezoneId: o.zone || ZONE, reducedMotion: 'reduce', serviceWorkers: o.sw ? 'allow' : 'block' });
   if (o.clip) await ctx.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: base });
   const page = await ctx.newPage(), errors = [], outside = [];
   page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); }); page.on('request', r => { if (!r.url().startsWith(base)) outside.push(r.url()); });
@@ -122,6 +122,19 @@ async function open(browser, base, o) {
       await page.click('[data-act=tab][data-v=nut]'); ok('[new day] the first tap after the day turns is not taken', (await page.locator('#toast').innerText()).includes('A new day has started') && (await page.locator('[data-act=tab][data-v=home]').getAttribute('aria-selected')) === 'true');
       await page.click('.mb.meal'); await page.waitForSelector('#mQ'); same('[new day] the next tap is, and the meal screen opens on the new day', await page.evaluate(() => V.day), person.dayKey(day + 1)); await page.click('#bar [data-act=back]'); same('[new day] nothing was saved by the tap that was not taken', await nones(), before);
       same('[new day] no error', A.errors, []); await A.ctx.close(); }
+
+    // ================= clock changes, checked inside the browser alone, in three zones that have them =================
+    for (const zone of ['America/New_York', 'Europe/Paris', 'Australia/Sydney']) { const A = await open(browser, base, { lang: 'en', zone, now: new Date(Date.UTC(2026, 5, 1, 12)).getTime() }), page = A.page;
+      const r = await page.evaluate(() => { const bad = [], two = n => (n < 10 ? '0' : '') + n; let short = 0, long = 0;
+        for (const roll of [0, 4]) { S.roll = roll; for (let i = 0; i < 366; i++) { const d = new Date(2026, 0, 1 + i), k = d.getFullYear() + '-' + two(d.getMonth() + 1) + '-' + two(d.getDate()), next = TLE.keyAdd(k, 1), a = TLE.dayStart(k, roll), b = TLE.dayStart(next, roll), len = Math.round((b - a) / 36e5);
+            if (len === 23) short++; if (len === 25) long++;
+            const nd = new Date(2026, 0, 2 + i), nk = nd.getFullYear() + '-' + two(nd.getMonth() + 1) + '-' + two(nd.getDate());
+            if (next !== nk) bad.push(k + ' +1 gave ' + next); if (TLE.keyAdd(next, -1) !== k) bad.push(next + ' -1');
+            if (TLE.dayKey(a, roll) !== k) bad.push(k + ' its first moment'); if (TLE.dayKey(b - 1, roll) !== k) bad.push(k + ' its last moment'); if (TLE.dayKey(b, roll) !== next) bad.push(k + ' the moment after');
+            for (const hm of ['00:10', '03:59', '04:00', '12:00', '23:50']) { const t = atTime(k, hm); if (TLE.dayKey(t, roll) !== k) bad.push(k + ' ' + hm + ' at day start ' + roll); } } }
+        return { bad: bad.slice(0, 6), short, long }; });
+      same(`[clock, ${zone}] every day of 2026 keeps its own entries, whatever hour the day starts at and whatever the clock does`, r.bad, []);
+      ok(`[clock, ${zone}] the year did hold a short day and a long day to test on`, r.short >= 1 && r.long >= 1, JSON.stringify(r)); same(`[clock, ${zone}] no error`, A.errors, []); await A.ctx.close(); }
 
     // ================= small rules of the entry screens =================
     { const now = new Date(2026, 10, 14, 15, 0).getTime(), A = await open(browser, base, { now, lang: 'en' }), page = A.page; await page.click('[data-act=enter]');
