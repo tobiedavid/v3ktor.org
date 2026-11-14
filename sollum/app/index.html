@@ -168,7 +168,7 @@ html.locked,html.locked body{overflow:hidden}
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" tabindex="-1" aria-hidden="true"></div>
 <script>
 'use strict';
-const VER='0.6.8';
+const VER='0.6.9';
 /* ---------- the pool: ten twin duels, two per level; replaced by ./words.json when the site serves one ---------- */
 let POOL_VERSION='2026-11-08b';
 let POOL=[
@@ -344,7 +344,7 @@ en:{
  fbLabel:'Your message',fbSend:'Send by email',fbShare:'Share another way',fbEmpty:'Type something first.',fbCopied:x=>`Copied — paste it in an email to ${x}.`,
  incSub:n=>n?`${n} reported · what happened, when, and the hours before`:'What happened, when, and the hours before. No judgement.',histSub:n=>`${n} day${n===1?'':'s'} · your normal, the readings, the incidents`,
  crisis:'<b>Not a doctor.</b> Thinking about ending your life: call or text 9-8-8. Emergency: 911.',storage:'This browser’s storage isn’t encrypted: anyone who can unlock the phone can read it.',
- about:'Part of the experiment with The Patch (body) and V3KTOR (feeling). True Color Foundation. Not a diagnosis of anything.',
+ about:'For adults, 18 or older. Part of the experiment with The Patch (body) and V3KTOR (feeling). True Color Foundation. Not a diagnosis of anything.',
  // setup
  q1:'Is there something you’d like to stop, or keep an eye on?',q1hint:'Several is fine. “Nothing” is a complete answer.',
  curious:'Nothing — I’m just curious',otherWord:'What is it, in a word or two?',
@@ -432,7 +432,7 @@ fr:{
  fbLabel:'Ton message',fbSend:'Envoyer par courriel',fbShare:'Partager autrement',fbEmpty:'Écris quelque chose d’abord.',fbCopied:x=>`Copié — colle-le dans un courriel à ${x}.`,
  incSub:n=>n?`${n} signalé${n>1?'s':''} · ce qui s’est passé, quand, et les heures d’avant`:'Ce qui s’est passé, quand, et les heures d’avant. Pas de jugement.',histSub:n=>`${n} journée${n>1?'s':''} · ta normale, les lectures, les incidents`,
  crisis:`<b>Pas un médecin.</b> Tu penses à mettre fin à tes jours${NB}: appelle ou texte le 9-8-8. Urgence${NB}: 911.`,storage:'La mémoire de ce navigateur n’est pas chiffrée${NB}: quiconque peut déverrouiller le téléphone peut la lire.'.replace('${NB}',NB),
- about:'Fait partie de l’expérience avec La Patch (le corps) et V3KTOR (le ressenti). True Color Foundation. Ce n’est le diagnostic de rien.',
+ about:'Pour les adultes, 18 ans ou plus. Fait partie de l’expérience avec La Patch (le corps) et V3KTOR (le ressenti). True Color Foundation. Ce n’est le diagnostic de rien.',
  q1:'Y a-t-il quelque chose que tu voudrais arrêter, ou garder à l’œil?',q1hint:'Plusieurs, c’est correct. «${NB}Rien${NB}» est une réponse complète.'.replace(/\$\{NB\}/g,NB),
  curious:'Rien — simple curiosité',otherWord:'C’est quoi, en un mot ou deux?',
  q1b:'Le mot pour ça, dans tes choix',q1bHint:'Il sera à l’écran quelques fois par session. Un mot de remplacement que personne d’autre ne reconnaîtrait, c’est correct — ou laisse-le de côté.',useIt:'L’utiliser',leaveOut:'Le laisser de côté',
