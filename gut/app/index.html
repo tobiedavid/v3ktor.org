@@ -374,6 +374,7 @@ p.goalfor{font-size:.85rem}
 .eyebrow .tag{font-size:.7rem;vertical-align:middle;margin-left:4px;letter-spacing:.06em}
 h2 .tag{font-size:.7rem;vertical-align:middle;margin-left:4px;font-family:system-ui,sans-serif}
 ul.evs{list-style:none;padding:0;margin:.4em 0}ul.evs li{padding:7px 0;border-bottom:1px solid var(--line)}ul.evs li:last-child{border-bottom:0}
+ul.evs li::after{content:"";display:block;clear:both}   /* a row holds its own link: when the text filled the line, the link dropped into the row below */
 .evc{float:right;display:inline-flex;gap:10px}
 .lnk{background:none;border:0;padding:4px 0;font:inherit;font-size:.9rem;font-weight:700;color:var(--teal);cursor:pointer;text-decoration:underline;text-underline-offset:3px;min-height:32px}
 p.note{background:var(--teal-soft);border-radius:12px;padding:8px 12px;margin:-4px 0 6px}
