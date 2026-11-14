@@ -1,6 +1,68 @@
-<!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="0; url=https://v3ktor.app/">
-<script>location.replace('https://v3ktor.app' + location.pathname + location.search + location.hash);</script>
-<title>V3KTOR</title></head>
-<body style="background:#050508;color:#c8c4b8;font-family:monospace"><p>V3KTOR lives at <a style="color:#C9980A" href="https://v3ktor.app/">v3ktor.app</a>.</p></body></html>
+<!doctype html>
+<!--
+  v3ktor.org — page not found. Served by GitHub Pages for any address that does not exist.
+  Copyright (C) 2026  Tobie David
+  SPDX-License-Identifier: AGPL-3.0-or-later — see LICENSE at https://github.com/tobiedavid/v3ktor.org
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="light dark">
+<title>Page not found · V3KTOR</title>
+<style>
+  :root { --paper: #f4f6f8; --ink: #14202b; --muted: #55626f; --line: #d3dae1; --brass: #a8791f; --blue: #24527a; }
+  @media (prefers-color-scheme: dark) { :root { --paper: #14202b; --ink: #e9eef2; --muted: #9fb0bf; --line: #2c3b49; --brass: #d9a441; --blue: #8fc1e8; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+  main { width: min(100% - 40px, 620px); margin: 0 auto; padding: 56px 0 72px; }
+  .brand { font-weight: 800; letter-spacing: .14em; text-decoration: none; color: var(--ink); }
+  h1 { font-size: clamp(30px, 7vw, 44px); line-height: 1.1; letter-spacing: -.02em; margin: 40px 0 12px; }
+  h2 { font-size: 20px; margin: 40px 0 8px; }
+  p { margin: 0 0 14px; color: var(--muted); }
+  ul { list-style: none; margin: 18px 0 0; padding: 0; border-top: 1px solid var(--line); }
+  li { border-bottom: 1px solid var(--line); }
+  li a { display: block; padding: 14px 0; font-weight: 650; text-decoration: none; color: var(--ink); }
+  li a span { display: block; font-weight: 400; font-size: 15px; color: var(--muted); }
+  li a:hover { color: var(--blue); }
+  a { color: var(--blue); text-underline-offset: 3px; }
+  :focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; border-radius: 4px; }
+  .moved { margin-top: 28px; padding: 14px 16px; border-left: 3px solid var(--brass); }
+</style>
+</head>
+<body>
+<main>
+  <a class="brand" href="/">V3KTOR</a>
+
+  <h1>Page not found</h1>
+  <p>That address isn’t on v3ktor.org. The four tools are here:</p>
+  <ul>
+    <li><a href="/gut/">Food Trial Log<span>Which foods set my gut off?</span></a></li>
+    <li><a href="/patch/">The Patch<span>Why do I keep crashing?</span></a></li>
+    <li><a href="/sollum/">Sollum<span>Where does my vicious circle start?</span></a></li>
+    <li><a href="https://v3ktor.app/">V3KTOR™ Instrument<span>What do I keep reacting to? Opens on v3ktor.app.</span></a></li>
+  </ul>
+  <p class="moved">Followed an old link to the V3KTOR Instrument? It moved to v3ktor.app. <a id="moved-en" href="https://v3ktor.app/">Try the same address there</a>.</p>
+
+  <div lang="fr">
+    <h2>Page introuvable</h2>
+    <p>Cette adresse n’existe pas sur v3ktor.org. Les quatre outils sont ici :</p>
+    <ul>
+      <li><a href="/gut/fr/">Journal d’essai alimentaire<span>Quels aliments dérangent mon ventre?</span></a></li>
+      <li><a href="/patch/">La Patch<span>Pourquoi est-ce que je tombe toujours à plat?</span></a></li>
+      <li><a href="/sollum/">Sollum<span>Où commence mon cercle vicieux?</span></a></li>
+      <li><a href="https://v3ktor.app/">Instrument V3KTOR™<span>À quoi est-ce que je réagis, encore et encore? S’ouvre sur v3ktor.app.</span></a></li>
+    </ul>
+    <p class="moved">Vous avez suivi un ancien lien vers l’instrument V3KTOR? Il a déménagé sur v3ktor.app. <a id="moved-fr" href="https://v3ktor.app/">Essayer la même adresse là-bas</a>.</p>
+  </div>
+</main>
+<script>
+/* Old links to the instrument used v3ktor.org paths. Offer the same path on v3ktor.app, but let the visitor choose: no automatic redirect. */
+(function () {
+  var to = 'https://v3ktor.app' + location.pathname + location.search + location.hash;
+  ['moved-en', 'moved-fr'].forEach(function (id) { var a = document.getElementById(id); if (a) a.setAttribute('href', to); });
+})();
+</script>
+</body>
+</html>

@@ -10,7 +10,7 @@ Sollum asks you to pick between pairs of words, a quarter-second apart, and keep
 
 - **The page:** https://v3ktor.org/sollum/ (what it does and what it's based on)
 - **The app:** https://v3ktor.org/sollum/app/ (it installs on a phone and works offline)
-- **Free, private, bilingual (English and French).** No account, no ads, no server.
+- **Free, private, bilingual (English and French).** No account, no ads, no server of its own.
   - Everything stays in the phone's browser storage.
   - Nothing is sent unless you write something in "Improve the app" and send it yourself.
 

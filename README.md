@@ -21,7 +21,7 @@ Tired, crashing, running on coffee or energy drinks? Three minutes of questions,
 - **History** compares your own days: what comes before the bad ones, the hours before, your tests and your blood results.
 - **The glossary:** any underlined word opens an entry that says what the term means, how sure the evidence is, and the sources.
 
-There's no account, no ads and no server. Everything stays in the phone's browser storage, and backups are files you save yourself.
+There's no account, no ads, and no server of its own: the site is static files on GitHub Pages. Everything stays in the phone's browser storage, and backups are files you save yourself.
 
 ## Not medical advice
 The Patch is education, not medical, pharmacist or dietitian advice.
