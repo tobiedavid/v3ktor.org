@@ -1,4 +1,4 @@
-# Threshold Log data, step 2 of 2: build the app's food table.
+# Threshold Log data, step 2 of 3: build the app's food table.
 #
 #   python3 -I build_data.py <tables.json from dump_tables.js> <folder with Health Canada's CSV files> <out.json>
 #
