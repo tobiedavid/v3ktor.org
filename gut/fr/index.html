@@ -51,6 +51,7 @@ a{color:var(--teal);text-underline-offset:3px}
 .cta{display:flex;flex-wrap:wrap;gap:12px;margin:26px 0 12px}
 .btn{display:inline-flex;align-items:center;justify-content:center;min-height:56px;padding:14px 26px;border-radius:14px;border:2px solid var(--accent);background:var(--accent);color:#fff;font-weight:800;font-size:1.1rem;text-decoration:none}
 .btn.ghost{background:transparent;border-color:var(--ink);color:var(--ink)}
+@media (prefers-color-scheme:dark){.btn:not(.ghost){color:#1a0c06}}   /* the orange is lighter in dark mode: white on it was 3.4 to 1; dark ink, as in the app */
 .shot{margin:0;justify-self:center;width:min(100%,300px)}
 .shot img{display:block;width:100%;height:auto;border:8px solid var(--frame);border-radius:30px;background:#f7f4ee;box-shadow:0 18px 40px rgba(28,27,25,.16)}
 .shot figcaption{margin-top:12px;text-align:center;font-size:.92rem;color:var(--muted)}
@@ -132,7 +133,7 @@ section{padding:42px 0;border-top:1px solid var(--line)}
   </section>
 
   <section>
-    <h2>Y a-t-il de la recherche derrière ça ?</h2>
+    <h2>Y a-t-il de la recherche derrière ça?</h2>
     <ul class="research text">
       <li>Dans une étude suédoise auprès de personnes ayant un côlon irritable, 84 sur 100 ont dit qu’au moins un aliment déclenchait leurs symptômes. <a href="https://doi.org/10.1038/ajg.2013.105">Böhn et coll., 2013</a>.</li>
       <li>Dans un essai de 2024 auprès de 294 personnes, changer l’alimentation a aidé 7 à 8 personnes sur 10. Les médicaments en ont aidé environ 6 sur 10. <a href="https://doi.org/10.1016/S2468-1253(24)00045-1">Nybacka et coll., 2024</a>.</li>
@@ -145,7 +146,7 @@ section{padding:42px 0;border-top:1px solid var(--line)}
     <h2>Avant de commencer</h2>
     <div class="cards text">
       <div class="card flag"><p><b>Du sang dans les selles, des selles noires, un évanouissement, une douleur à la poitrine ou de la difficulté à respirer :</b> va chercher des soins maintenant. L’application a un bouton <b>Ça ne va pas</b> sur chaque écran.</p></div>
-      <div class="card"><p><b>Selles molles depuis des semaines ? Demande à ton médecin un test sanguin pour la maladie cœliaque avant de commencer.</b> Il ne fonctionne que si tu manges encore du blé, et la liste de départ n’en contient pas.</p></div>
+      <div class="card"><p><b>Selles molles depuis des semaines? Demande à ton médecin un test sanguin pour la maladie cœliaque avant de commencer.</b> Il ne fonctionne que si tu manges encore du blé, et la liste de départ n’en contient pas.</p></div>
       <div class="card"><p>C’est un journal, pas un avis médical ou de diététiste, et c’est toi qui décides quoi en faire. Il est fait pour les adultes. Si tu es enceinte, si tu allaites, ou si tu vis avec la maladie de Crohn, une colite, la maladie cœliaque ou un trouble alimentaire, parle à ton médecin ou à un diététiste avant d’éliminer des aliments.</p></div>
     </div>
   </section>
@@ -154,14 +155,14 @@ section{padding:42px 0;border-top:1px solid var(--line)}
     <h2>Installe-la sur ton téléphone</h2>
     <div class="text">
       <p>L’application a sa propre icône sur ton téléphone et s’ouvre sans connexion. Pas de boutique d’applications, pas de compte.</p>
-      <div id="instBox" hidden style="margin:6px 0 18px"><button type="button" id="instBtn" style="display:block;width:100%;box-sizing:border-box;min-height:64px;padding:14px 18px;font:inherit;font-size:1.12rem;font-weight:800;letter-spacing:.02em;border:2px solid currentColor;border-radius:14px;background:transparent;color:inherit;cursor:pointer">↓ Installer le Journal d’essai alimentaire</button><p id="instNote" hidden style="margin:8px 0 0;font-size:.92rem">Ce navigateur n’a pas offert l’installation en un geste. Suis les étapes pour ton téléphone plus bas.</p></div>
-      <p>Le plus rapide : <a href="app/">ouvre l’application</a> et appuie sur <b>Installer le Journal d’essai alimentaire</b> au premier écran, ou sur <b>Installer</b> dans la barre noire en bas. Si tu ne vois ni l’un ni l’autre, suis les étapes pour ton téléphone.</p>
+      <div id="instBox" hidden style="margin:6px 0 18px"><button type="button" id="instBtn" style="display:block;width:100%;box-sizing:border-box;min-height:64px;padding:14px 18px;font:inherit;font-size:1.12rem;font-weight:800;letter-spacing:.02em;border:2px solid currentColor;border-radius:14px;background:transparent;color:inherit;cursor:pointer">↓ Installer Food Trial Log</button><p id="instNote" hidden style="margin:8px 0 0;font-size:.92rem">Ce navigateur n’a pas offert l’installation en un geste. Suis les étapes pour ton téléphone plus bas.</p></div>
+      <p>Le plus rapide : <a href="app/">ouvre l’application</a> et appuie sur <b>Installer Food Trial Log</b> au premier écran, ou sur <b>Installer</b> dans la barre noire en bas. Si tu ne vois ni l’un ni l’autre, suis les étapes pour ton téléphone.</p>
     </div>
     <div class="cards two" style="margin:22px 0">
       <div class="card"><h3>iPhone</h3>
 <ol class="steps">
 <li>Ouvre l’application dans <b>Safari</b>.</li>
-<li>Appuie sur <b>⋯</b> à côté de la barre d’adresse, puis sur <b>Partager</b>. Pas de <b>⋯</b> ? Appuie sur le bouton Partager.</li>
+<li>Appuie sur <b>⋯</b> à côté de la barre d’adresse, puis sur <b>Partager</b>. Pas de <b>⋯</b>? Appuie sur le bouton Partager.</li>
 <li>Descends dans la liste et choisis <b>Sur l’écran d’accueil</b>.</li>
 <li>Appuie sur <b>Ajouter</b>.</li>
 </ol>
@@ -181,7 +182,7 @@ section{padding:42px 0;border-top:1px solid var(--line)}
   <footer class="foot">
     <h2>Logiciel libre</h2>
     <p class="text">Créé par Tobie et Claude. Version gratuite à v3ktor.org/gut. © 2026 Tobie David.</p>
-    <p class="small text">Logiciel libre sous la licence publique générale GNU Affero, version 3 ou ultérieure, avec deux conditions supplémentaires. Code source et licence : <a href="https://github.com/tobiedavid/v3ktor.org">github.com/tobiedavid/v3ktor.org</a>. Fourni tel quel, sans garantie. Valeurs nutritives : Fichier canadien sur les éléments nutritifs, Santé Canada, 2015, sous la Licence du gouvernement ouvert – Canada; les blancs sont comblés à partir du SR28 de l’USDA. L’apparence, la liste d’aliments et les besoins en nutriments viennent de <a href="../../patch/">The Patch</a>.</p>
+    <p class="small text">Logiciel libre sous la licence publique générale GNU Affero, version 3 ou ultérieure, avec deux conditions supplémentaires. Code source et licence : <a href="https://github.com/tobiedavid/v3ktor.org">github.com/tobiedavid/v3ktor.org</a>. Fourni tel quel, sans garantie. Valeurs nutritives : Fichier canadien sur les éléments nutritifs, Santé Canada, 2015, sous la Licence du gouvernement ouvert – Canada; les blancs sont comblés à partir du SR28 de l’USDA. L’apparence, la liste d’aliments et les besoins en nutriments viennent de <a href="../../patch/">The Patch</a>. Fait partie du <a href="/?lang=fr">projet V3KTOR™</a>.</p>
   </footer>
 </div>
 <script>

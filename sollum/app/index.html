@@ -75,6 +75,10 @@ h3{font-size:1.1rem;font-weight:700;margin:0 0 6px}
 .top .lang button{border:0;background:transparent;color:var(--mute);font:inherit;font-size:.875rem;font-weight:700;padding:6px 14px;cursor:pointer;min-height:44px;min-width:44px;border-radius:0}
 .top .lang button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 .top span{display:flex;align-items:center;gap:6px}
+/* 0.6.11: on the result screen the bar holds the date and the language switch; the day's answers sit on their own line under it,
+   so the switch is never pushed off the edge */
+.top .rdate{display:block;flex:1 1 0;min-width:0} .top .lang{flex:none}
+.rchips{margin:10px 0 0;color:var(--mute);font-size:.9rem;line-height:1.4}
 .eyebrow,.sect{text-transform:uppercase;letter-spacing:.08em;font-size:.8rem;font-weight:700;color:var(--mute);margin:22px 0 8px}
 .pairq{text-align:center;color:var(--mute);margin:26px 0 12px;font-weight:600}
 .pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:1;align-content:center}
@@ -88,7 +92,7 @@ h3{font-size:1.1rem;font-weight:700;margin:0 0 6px}
 .box.bad{border-color:var(--warn);background:var(--warn-soft)}
 .box.ok{border-left:5px solid var(--teal)}
 .box.soft{background:var(--teal-soft);border-color:transparent;box-shadow:none}
-.box.note{background:var(--ink);color:var(--bg);border:0}
+.box.note{background:var(--ink);color:var(--bg);border:0;overflow-wrap:break-word}
 .box.note .small,.box.note .sub{color:var(--bg);opacity:.75}
 .box.note a{color:var(--bg)}
 .box.note .btn.sm{background:var(--acc);color:#fff}.box.note .btn.sm.sec{background:var(--bg);color:var(--ink);border:0}
@@ -168,7 +172,7 @@ html.locked,html.locked body{overflow:hidden}
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" tabindex="-1" aria-hidden="true"></div>
 <script>
 'use strict';
-const VER='0.6.10';
+const VER='0.6.11';
 /* ---------- the pool: ten twin duels, two per level; replaced by ./words.json when the site serves one ---------- */
 let POOL_VERSION='2026-11-08b';
 let POOL=[
@@ -276,7 +280,7 @@ const NB=' ';
 const I18N={
 en:{
  gloss:'whole',tagline:'See what moves your priorities — before the scale tips.',
- instBig:'Install Sollum',instSub:'Home-screen icon · full screen · works offline',
+ instBig:'Install Sollum',instSub:'Home-screen icon · full screen · works offline',instMenu:'Install on this phone',
  start:'Test',calendar:'History',settings:'Settings',back:'Back',home:'Home',done:'Done',skip:'Skip',next:'Next',save:'Save',cancel:'Cancel',undo:'‹ Undo',
  days:n=>`${n} day${n===1?'':'s'} tested so far`,firstLine:'About two minutes of taps.',morning:'Best taken before the first coffee.',
  pickQ:'Which one matters more?',round:(r,n)=>`Round ${r} of ${n}`,
@@ -364,7 +368,7 @@ en:{
 },
 fr:{
  gloss:'entier',tagline:'Vois ce qui fait bouger tes priorités — avant que la balance bascule.',
- instBig:'Installer Sollum',instSub:'Icône d’accueil · plein écran · fonctionne hors ligne',
+ instBig:'Installer Sollum',instSub:'Icône d’accueil · plein écran · fonctionne hors ligne',instMenu:'Installer sur ce téléphone',
  start:'Faire le test',calendar:'Historique',settings:'Réglages',back:'Retour',home:'Accueil',done:'Terminé',skip:'Passer',next:'Suivant',save:'Enregistrer',cancel:'Annuler',undo:'‹ Annuler',
  days:n=>`${n} journée${n>1?'s':''} testée${n>1?'s':''} jusqu’ici`,firstLine:'Environ deux minutes de touches.',morning:'À faire de préférence avant le premier café.',
  pickQ:'Lequel compte le plus?',round:(r,n)=>`Tour ${r} sur ${n}`,
@@ -451,7 +455,9 @@ fr:{
 
 /* ---------- storage ---------- */
 const KEY='sollum.v1', SHARED='v3k.days.v1', PATCH_KEY='thepatch.v1';
-function defaults(){return {sollum_version:VER,pool_version:POOL_VERSION,lang:(navigator.language||'').toLowerCase().startsWith('fr')?'fr':'en',province:'other',
+/* 0.6.11: on a first run, the language chosen on the v3ktor.org front page, if there is one; otherwise the phone's */
+function firstLang(){let fp=null;try{fp=localStorage.getItem('v3ktor-lang')}catch(e){}return (fp==='fr'||fp==='en')?fp:((navigator.language||'').toLowerCase().startsWith('fr')?'fr':'en')}
+function defaults(){return {sollum_version:VER,pool_version:POOL_VERSION,lang:firstLang(),province:'other',
  setup:{done:false,goals:[],other:'',watch:null,note:'',contact:null},sessions:[],slips:[],connect:{patch:false,v3k:false},patch_paste:null,connect_asked:false}}
 let store=load();
 function load(){try{const raw=localStorage.getItem(KEY);if(raw){const o=Object.assign(defaults(),JSON.parse(raw));
@@ -824,9 +830,11 @@ function langSw(){return `<span class="lang"><button type="button" data-act="set
 function setupTop(){return `<div class="top"><button data-act="setupBack">‹ ${t('back')}</button><span>${langSw()}</span></div>`}
 function topbar(backTo){return `<div class="top"><button type="button" class="menuBtn" data-act="menu" aria-haspopup="dialog" aria-label="${esc(t('menu'))}"><span aria-hidden="true">☰</span></button><button type="button" class="ttl" data-act="go" data-arg="home">Sollum<span class="b">.</span></button>${backTo&&backTo!=='home'?`<button type="button" data-act="go" data-arg="${backTo}">‹ ${t('back')}</button>`:''}<span class="sp"></span>${langSw()}</div>${saveFail?`<div class="box bad" role="alert"><b>${t('saveFail')}</b></div>`:''}`}
 /* a big Install button on Home, like V3KTOR's (v0.6.7): the phone's own install dialog when the browser offers one, the steps on the site page otherwise */
-function instBig(){let inst=false;try{inst=!!(navigator.standalone||matchMedia('(display-mode: standalone)').matches)||window.top!==window.self}catch(e){inst=true}
- if(inst||window.__installed||!/^https?:$/.test(location.protocol))return '';
- return `<div class="instbig" style="margin:16px 0"><button type="button" data-install-big style="display:block;width:100%;box-sizing:border-box;min-height:64px;padding:14px 18px;font:inherit;font-size:1.12rem;font-weight:800;letter-spacing:.02em;border:2px solid currentColor;border-radius:14px;background:transparent;color:inherit;cursor:pointer">↓ ${t('instBig')}</button><p style="margin:6px 0 0;text-align:center;font-size:.85rem;opacity:.72">${t('instSub')}</p></div>`}
+/* 0.6.11: "Not now" under the button hides it for good (sollum.installDismissed); Menu → Install on this phone stays */
+function canInstall(){let inst=false;try{inst=!!(navigator.standalone||matchMedia('(display-mode: standalone)').matches)||window.top!==window.self}catch(e){inst=true}
+ return !(inst||window.__installed||!/^https?:$/.test(location.protocol))}
+function instBig(){if(!canInstall())return '';try{if(localStorage.getItem('sollum.installDismissed'))return ''}catch(e){}
+ return `<div class="instbig" style="margin:16px 0"><button type="button" data-install-big style="display:block;width:100%;box-sizing:border-box;min-height:64px;padding:14px 18px;font:inherit;font-size:1.12rem;font-weight:800;letter-spacing:.02em;border:2px solid currentColor;border-radius:14px;background:transparent;color:inherit;cursor:pointer">↓ ${t('instBig')}</button><p style="margin:6px 0 0;text-align:center;font-size:.85rem;opacity:.72">${t('instSub')}</p><p style="margin:0;text-align:center"><button type="button" data-act="instNo" style="min-height:44px;padding:8px 16px;border:0;background:none;color:inherit;font:inherit;font-size:.9rem;text-decoration:underline;text-underline-offset:3px;cursor:pointer">${t('notNow')}</button></p></div>`}
 function vHome(){
  const n=firstPerDay(store.sessions.filter(s=>s.pool===POOL_VERSION)).length;const pd=patchData();
  const today=sessDay();const pre=patchChips(today);const links=pre?linksOf(pre):[];
@@ -851,20 +859,20 @@ function vSetup(){
  if(st===0){
   const opts=[`<span class="chip ${tmp.goals.length===0&&tmp.curious?'on':''}" data-act="goalCurious">${t('curious')}</span>`].concat(GOALS.map(g=>`<span class="chip ${tmp.goals.includes(g.id)?'on':''}" data-act="goalTog" data-arg="${g.id}">${esc(store.lang==='fr'?g.fr:g.en)}</span>`));
   return (store.setup.done?topbar('settings'):`<div class="top"><span>Sollum</span>${langSw()}</div>`)+`<h2 style="margin-top:30px">${t('q1')}</h2><p class="small">${t('q1hint')}</p><div class="chips big">${opts.join('')}</div>
-  ${tmp.goals.includes('other')?`<label class="lb">${t('otherWord')}</label><input type="text" id="otherWord" value="${esc(tmp.other)}" maxlength="40">`:''}
+  ${tmp.goals.includes('other')?`<label class="lb" for="otherWord">${t('otherWord')}</label><input type="text" id="otherWord" value="${esc(tmp.other)}" maxlength="40">`:''}
   <button class="btn" style="margin-top:22px" data-act="setupNext" ${(tmp.goals.length||tmp.curious)?'':'disabled'}>${t('next')}</button>`;
  }
  if(st===1){
-  return setupTop()+`<h2 style="margin-top:30px">${t('q1b')}</h2><p class="small">${t('q1bHint')}</p><input type="text" id="watchWord" value="${esc(tmp.watchLabel)}" maxlength="30">
+  return setupTop()+`<h2 style="margin-top:30px">${t('q1b')}</h2><p class="small">${t('q1bHint')}</p><input type="text" id="watchWord" aria-label="${esc(t('q1b'))}" value="${esc(tmp.watchLabel)}" maxlength="30">
   <div class="row" style="margin-top:18px"><button class="btn" data-act="watchUse">${t('useIt')}</button><button class="btn sec" data-act="watchSkip">${t('leaveOut')}</button></div>`;
  }
  if(st===2){
-  return setupTop()+`<h2 style="margin-top:30px">${t('q2')}</h2><p class="small">${t('q2hint')}</p><textarea id="noteBox" maxlength="600">${esc(tmp.note)}</textarea>
+  return setupTop()+`<h2 style="margin-top:30px">${t('q2')}</h2><p class="small">${t('q2hint')}</p><textarea id="noteBox" aria-label="${esc(t('q2'))}" maxlength="600">${esc(tmp.note)}</textarea>
   <div class="row" style="margin-top:18px"><button class="btn" data-act="noteNext">${t('next')}</button><button class="btn ghost" data-act="noteSkip">${t('skip')}</button></div>`;
  }
  return setupTop()+`<h2 style="margin-top:30px">${t('q3')}</h2><p class="small">${t('q3hint')}</p>
-  <label class="lb">${t('name')}</label><input type="text" id="cName" value="${esc(tmp.cName)}" maxlength="40"><label class="lb">${t('phone')}</label><input type="tel" id="cPhone" value="${esc(tmp.cPhone)}" maxlength="24">
-  <label class="lb">${t('province')}</label>${provSelect('provSel')}<div class="small" style="margin-top:4px">${t('provWhy')}</div>
+  <label class="lb" for="cName">${t('name')}</label><input type="text" id="cName" value="${esc(tmp.cName)}" maxlength="40"><label class="lb" for="cPhone">${t('phone')}</label><input type="tel" id="cPhone" value="${esc(tmp.cPhone)}" maxlength="24">
+  <label class="lb" for="provSel">${t('province')}</label>${provSelect('provSel')}<div class="small" style="margin-top:4px">${t('provWhy')}</div>
   <div class="row" style="margin-top:18px"><button class="btn" data-act="contactDone">${t('done')}</button><button class="btn ghost" data-act="contactSkip">${t('skip')}</button></div>`;
 }
 function vPair(){
@@ -912,7 +920,7 @@ function vResult(){
    +`<button class="btn sec" data-act="toggleOrder">${ui.showOrder?t('hideOrder'):t('showOrder')}</button>${ui.showOrder?orderList(sess,r.order):''}`;
  }
  const offer=!store.connect_asked&&!store.connect.patch?`<div class="box"><h3>${t('connectTitle')}</h3><p class="small" style="margin:0 0 6px">${t('connectLead')}</p><button class="btn sm" data-act="go" data-arg="connect">${t('connect')}</button><button class="btn sm sec" data-act="connectDone">${t('notNow')}</button></div>`:'';
- return `<div class="top"><span>${sess.date}${sess.chips?' · '+chipsLine(sess.chips):''}</span>${langSw()}</div>${main}
+ return `<div class="top"><span class="rdate">${sess.date}</span>${langSw()}</div>${sess.chips?`<p class="rchips">${chipsLine(sess.chips)}</p>`:''}${main}
  ${sess.rounds<ROUNDS_MAX?`<p class="small">${t('softMiddle')}</p><button class="btn ghost" data-act="keep">${t('keep')}</button>`:''}${offer}
  <button class="btn ghost" data-act="copyAI">${t('copyAI')}</button>${store.slips.length?`<label class="small" style="display:block;text-align:center"><input type="checkbox" id="aiAmounts" ${ui.aiAmounts?'checked':''}> ${t('aiAmounts')}</label>`:''}
  ${ui.msg?`<div class="msg">${esc(ui.msg)}</div>${ui.msg===t('copyFail')?`<textarea class="mono" readonly>${esc(aiText())}</textarea>`:''}`:''}
@@ -920,9 +928,9 @@ function vResult(){
 }
 function connectRows(){
  const live=patchLiveCount();const pasted=store.patch_paste?Object.keys(store.patch_paste.days).length:0;const st=live!=null?t('patchFound',live):pasted?t('patchPasted',pasted):t('patchNone');
- return `<div class="sw"><div><div>${t('patchName')}</div><div class="st">${st}</div></div><button class="tog ${store.connect.patch?'on':''}" data-act="togPatch" aria-pressed="${store.connect.patch}"><i></i></button></div>
- <div class="sw"><div><div>${t('v3kName')}</div><div class="st">${t('v3kSoon')}</div></div><button class="tog" disabled><i></i></button></div>
- ${live==null?`<div class="sect">${t('pasteTitle')}</div><p class="small">${t('pasteHint')}</p><textarea class="mono" id="pasteBox" placeholder="{ &quot;app&quot;: &quot;the-patch&quot;, … }">${esc(ui.pasteText)}</textarea><button class="btn sec" data-act="usePaste">${t('paste')}</button>`:''}`;
+ return `<div class="sw"><div><div>${t('patchName')}</div><div class="st">${st}</div></div><button class="tog ${store.connect.patch?'on':''}" data-act="togPatch" aria-label="${esc(t('patchName'))}" aria-pressed="${store.connect.patch}"><i></i></button></div>
+ <div class="sw"><div><div>${t('v3kName')}</div><div class="st">${t('v3kSoon')}</div></div><button class="tog" aria-label="${esc(t('v3kName'))}" aria-pressed="false" disabled><i></i></button></div>
+ ${live==null?`<div class="sect">${t('pasteTitle')}</div><p class="small">${t('pasteHint')}</p><textarea class="mono" id="pasteBox" aria-label="${esc(t('pasteTitle'))}" placeholder="{ &quot;app&quot;: &quot;the-patch&quot;, … }">${esc(ui.pasteText)}</textarea><button class="btn sec" data-act="usePaste">${t('paste')}</button>`:''}`;
 }
 function vConnect(){return topbar('result')+`<h2>${t('connectTitle')}</h2><p class="small">${t('connectLead')}</p>${connectRows()}${ui.msg?`<div class="msg">${esc(ui.msg)}</div>`:''}<button class="btn" data-act="connectDone">${t('done')}</button>`}
 function vSlip(){
@@ -931,8 +939,8 @@ function vSlip(){
  return topbar('home')+`<h2>${t('slipTitle')}</h2>
  <div class="sect">${t('slipWhat')}</div><div class="chips">${goals.map(g=>{const G=GOALS.find(x=>x.id===g);const lab=g==='other'&&store.setup.other?store.setup.other:(store.lang==='fr'?G.fr:G.en);return `<span class="chip ${s.goal===g?'on':''}" data-act="slipGoal" data-arg="${g}">${esc(lab)}</span>`}).join('')}</div>
  <div class="sect">${t('slipWhen')}</div><div class="chips"><span class="chip ${s.date===today?'on':''}" data-act="slipDay" data-arg="${today}">${t('today')}</span><span class="chip ${s.date===shiftDay(today,-1)?'on':''}" data-act="slipDay" data-arg="${shiftDay(today,-1)}">${t('yesterday')}</span></div>
- <div class="row"><div style="flex:1"><label class="lb">${t('slipStart')}</label><input type="time" id="slipStart" value="${esc(s.start||'')}"></div><div style="flex:1"><label class="lb">${t('slipEnd')}</label><input type="time" id="slipEnd" value="${esc(s.end||'')}"></div></div>
- <div class="sect">${t('slipCost')}</div><div class="row"><input type="number" id="slipN" inputmode="decimal" step="any" value="${s.n!=null?esc(s.n):''}" style="flex:1"><select id="slipUnit" style="flex:1">${Object.keys(u).map(k=>`<option value="${k}" ${s.unit===k?'selected':''}>${esc(u[k])}</option>`).join('')}</select></div>
+ <div class="row"><div style="flex:1"><label class="lb" for="slipStart">${t('slipStart')}</label><input type="time" id="slipStart" value="${esc(s.start||'')}"></div><div style="flex:1"><label class="lb" for="slipEnd">${t('slipEnd')}</label><input type="time" id="slipEnd" value="${esc(s.end||'')}"></div></div>
+ <div class="sect">${t('slipCost')}</div><div class="row"><input type="number" id="slipN" inputmode="decimal" step="any" min="0" aria-label="${esc(t('slipCost'))}" value="${s.n!=null?esc(s.n):''}" style="flex:1"><select id="slipUnit" aria-label="${esc(t('unit'))}" style="flex:1">${Object.keys(u).map(k=>`<option value="${k}" ${s.unit===k?'selected':''}>${esc(u[k])}</option>`).join('')}</select></div>
  ${helpHTML(goals)}
  <div class="row" style="margin-top:18px"><button class="btn" data-act="slipSave" ${s.goal?'':'disabled'}>${t('save')}</button><button class="btn sec" data-act="go" data-arg="home">${t('cancel')}</button></div>`;
 }
@@ -1028,17 +1036,17 @@ function vCalendar(){
   return `<div class="day"><div><b>${s.date}</b> <span class="small">${chipsLine(s.chips)}${s.links&&s.links.length?` · ${s.links.length} ${L('links','maillons')}`:''}</span></div><div>${esc(top3)}</div>${marks.length?`<div class="small">${marks.join(' · ')}</div>`:''}</div>`}).join(''):`<p class="small">${t('noSessions')}</p>`;
  return topbar('home')+`<h2>${t('calTitle')}</h2>${contrastHTML(contrastOf(store.sessions,activeWords()))}${slipsCardHTML()}${list}`;
 }
-function provSelect(id){return `<select id="${id}">${PROVS.map(p=>`<option value="${p[0]}" ${store.province===p[0]?'selected':''}>${esc(store.lang==='fr'?p[2]:p[1])}</option>`).join('')}</select>`}
+function provSelect(id){return `<select id="${id}" aria-label="${esc(t('province'))}">${PROVS.map(p=>`<option value="${p[0]}" ${store.province===p[0]?'selected':''}>${esc(store.lang==='fr'?p[2]:p[1])}</option>`).join('')}</select>`}
 function vSettings(){
  const su=store.setup;const gl=su.goals.map(g=>{const G=GOALS.find(x=>x.id===g);return g==='other'&&su.other?su.other:(G?(store.lang==='fr'?G.fr:G.en):g)}).join(', ')||t('curious');
  return topbar('home')+`<h2>${t('setTitle')}</h2>
  <div class="sect">${t('language')}</div><div class="chips"><span class="chip ${store.lang==='en'?'on':''}" data-act="setLang" data-arg="en">English</span><span class="chip ${store.lang==='fr'?'on':''}" data-act="setLang" data-arg="fr">Français</span></div>
  <div class="sect">${t('province')}</div>${provSelect('provSel')}
  <div class="sect">${t('watching')}</div><div class="sw"><div><div>${esc(gl)}</div>${su.watch?`<div class="st">${esc(su.watch[store.lang]||su.watch.en)}</div>`:''}</div><button class="btn sm sec" data-act="setupStart">${t('changeWatch')}</button></div>
- ${hasGoals()?`<div class="sect">${t('noteSet')}</div><textarea id="noteEdit" maxlength="600">${esc(su.note||'')}</textarea><div class="sect">${t('contactSet')}</div><div class="row"><input type="text" id="cNameEdit" placeholder="${t('name')}" value="${esc(su.contact?su.contact.name:'')}"><input type="tel" id="cPhoneEdit" placeholder="${t('phone')}" value="${esc(su.contact?su.contact.phone:'')}"></div><button class="btn sm sec" data-act="saveNote">${t('save')}</button>`:''}
+ ${hasGoals()?`<div class="sect">${t('noteSet')}</div><textarea id="noteEdit" aria-label="${esc(t('noteSet'))}" maxlength="600">${esc(su.note||'')}</textarea><div class="sect">${t('contactSet')}</div><div class="row"><input type="text" id="cNameEdit" aria-label="${esc(t('name'))}" placeholder="${t('name')}" value="${esc(su.contact?su.contact.name:'')}"><input type="tel" id="cPhoneEdit" aria-label="${esc(t('phone'))}" placeholder="${t('phone')}" value="${esc(su.contact?su.contact.phone:'')}"></div><button class="btn sm sec" data-act="saveNote">${t('save')}</button>`:''}
  <div class="sect">${t('connectTitle')}</div><p class="small">${t('connectLead')}</p>${connectRows()}
  <div class="sect">${t('exportData')}</div><button class="btn sec" data-act="export">${t('exportData')}</button>
- ${ui.exportText?`<p class="small">${t('exportHint')}</p><textarea class="mono" readonly id="exp">${esc(ui.exportText)}</textarea><div class="row"><button class="btn sec" data-act="copyExport">${t('copy')}</button><button class="btn sec" data-act="download">${t('download')}</button></div>`:''}
+ ${ui.exportText?`<p class="small">${t('exportHint')}</p><textarea class="mono" readonly id="exp" aria-label="${esc(t('exportData'))}">${esc(ui.exportText)}</textarea><div class="row"><button class="btn sec" data-act="copyExport">${t('copy')}</button><button class="btn sec" data-act="download">${t('download')}</button></div>`:''}
  <label class="btn sec" for="fRestore">${t('restore')}</label><input type="file" id="fRestore" accept=".json,application/json" style="display:none">
  <button class="btn danger" data-act="reset">${ui.resetArmed?t('resetAgain'):t('reset')}</button>
  ${ui.msg?`<div class="msg">${esc(ui.msg)}</div>`:''}
@@ -1056,6 +1064,19 @@ function showSheet(html,opener){if(!sheet.classList.contains('on'))sheetOpener=o
  sheet.scrollTop=0;try{sheet.focus({preventScroll:true})}catch(e){}}
 function closeSheet(noFocus){if(!sheet.classList.contains('on'))return;sheet.classList.remove('on');sheetBg.classList.remove('on');sheet.setAttribute('aria-hidden','true');document.documentElement.classList.remove('locked');const o=sheetOpener;sheetOpener=null;if(noFocus!==true&&o&&document.body.contains(o)){try{o.focus({preventScroll:true})}catch(e){}}}
 sheetBg.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});sheetBg.onclick=()=>closeSheet();
+/* 0.6.11: the phone's Back button, or the back gesture, steps back inside the app instead of leaving it. An open sheet closes. During a test it takes
+   back the last tap, like Undo (before the first tap it goes Home; with nothing left to take back it stays put, so a test in progress isn't dropped by
+   accident — "‹ Home" still leaves it). A finished test waiting for the day's answers stays where it is. Setup goes back a step. Any other screen goes
+   back the way its own ‹ button does, or Home. On Home, Back leaves the app, as before. */
+function navBack(){
+ if(sheet.classList.contains('on')){closeSheet();return true}
+ if(view==='home')return false;
+ if(view==='pair'){if(S&&S.current&&!S.paused){const k=S.taps[S.taps.length-1],can=k==='goal'?S.round===1:!!(S.choices.length&&S.choices[S.choices.length-1].round===S.round);
+   if(can)undo();else if(!S.taps.length)act('abandon')}return true}
+ if(view==='chips')return true;
+ if(view==='setup'){if(ui.setupStep>0)act('setupBack');else act('go',store.setup.done?'settings':'home');return true}
+ if(view==='connect'){act('go',(S&&S.result)?'result':'home');return true}
+ act('go','home');return true}
 document.addEventListener('keydown',e=>{if(!sheet.classList.contains('on'))return;if(e.key==='Escape'){e.preventDefault();closeSheet();return}
  if(e.key==='Tab'){const f=[...sheet.querySelectorAll('button,a[href],input,select,textarea,[tabindex="0"]')].filter(x=>!x.disabled&&x.offsetParent!==null);if(!f.length)return;
   const first=f[0],last=f[f.length-1];if(e.shiftKey&&(document.activeElement===first||document.activeElement===sheet)){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}});
@@ -1063,7 +1084,7 @@ function openMenu(){
  const items=[['go','home',t('home')],['start','',t('start')]];
  if(hasGoals())items.push(['go','slip',t('slipBtn')]);
  items.push(['go','pattern',t('patTitle')],['go','calendar',t('calendar')],['how','',t('howTitle')],['go','settings',t('settings')],['feedback','',t('improve')],['about','',t('aboutTitle')]);
- showSheet(`<div class="handle"></div><h3 id="sheetTitle">${t('menu')}</h3><div class="menu">${items.map(([a,arg,l])=>`<button type="button" data-act="${a}" data-arg="${arg}">${esc(l)}</button>`).join('')}</div><p class="small" style="margin:12px 0 0">Sollum v${VER} · ${L('help lines','lignes d’aide')} ${t('helpChecked',HELP_CHECKED)}</p><div class="row" style="margin-top:12px"><button type="button" class="btn sm sec" id="closeSheet">${t('close')}</button></div>`);
+ showSheet(`<div class="handle"></div><h3 id="sheetTitle">${t('menu')}</h3><div class="menu">${items.map(([a,arg,l])=>`<button type="button" data-act="${a}" data-arg="${arg}">${esc(l)}</button>`).join('')}${canInstall()?`<button type="button" data-install-big>${esc(t('instMenu'))}</button>`:''}</div><p class="small" style="margin:12px 0 0">Sollum v${VER} · ${L('help lines','lignes d’aide')} ${t('helpChecked',HELP_CHECKED)}</p><div class="row" style="margin-top:12px"><button type="button" class="btn sm sec" id="closeSheet">${t('close')}</button></div>`);
 }
 function openHow(){showSheet(`<div class="handle"></div><h3 id="sheetTitle">${t('howTitle')}</h3>${t('howBody')}<div class="row" style="margin-top:12px"><button type="button" class="btn sm sec" id="closeSheet">${t('close')}</button></div>`)}
 function openAbout(){showSheet(`<div class="handle"></div><h3 id="sheetTitle">${t('aboutTitle')}</h3>${t('aboutBody')}<p class="small">Sollum v${VER} · ${L('words','mots')} ${POOL_VERSION} · ${L('help lines','lignes d’aide')} ${t('helpChecked',HELP_CHECKED)}</p><div class="row" style="margin-top:12px"><button type="button" class="btn sm" data-act="feedback">${t('improve')}</button><button type="button" class="btn sm sec" id="closeSheet">${t('close')}</button></div>`)}
@@ -1097,6 +1118,7 @@ function act(a,arg){
  switch(a){
   case 'go':ui.msg='';ui.exportText='';if(arg==='home')S=null;if(arg==='result'&&!(S&&S.result)){view='home';render();break}if(arg==='slip'){ui.slip={goal:store.setup.goals.length===1?store.setup.goals[0]:null,date:sessDay(),start:'',end:'',n:null,unit:'money'}}view=arg;render();break;
   case 'lang':store.lang=store.lang==='fr'?'en':'fr';save();render();break;
+  case 'instNo':try{localStorage.setItem('sollum.installDismissed','1')}catch(e){}render();break;
   case 'menu':openMenu();break;
   case 'patStep':pat.step=Math.max(0,Math.min(PAT_STEPS.length-1,+arg));render();break;
   case 'patAdd':pat.extra=Math.min(6,pat.extra+1);render();break;
@@ -1137,7 +1159,7 @@ function act(a,arg){
   case 'usePaste':usePaste(ui.pasteText||'');break;
   case 'slipGoal':ui.slip.goal=arg;render();break;
   case 'slipDay':ui.slip.date=arg;render();break;
-  case 'slipSave':{const s=ui.slip;if(!s.goal)break;const rec={id:uid(),date:s.date,goal:s.goal,start:s.start||null,end:s.end||null,cost:(s.n!=null&&!isNaN(s.n))?{n:s.n,unit:s.unit||'other'}:null,t:Date.now()};store.slips.push(rec);save();
+  case 'slipSave':{const s=ui.slip;if(!s.goal)break;const rec={id:uid(),date:s.date,goal:s.goal,start:s.start||null,end:s.end||null,cost:(s.n!=null&&!isNaN(s.n))?{n:Math.abs(s.n),unit:s.unit||'other'}:null,t:Date.now()};store.slips.push(rec);save();   /* 0.6.11: what it cost is an amount, so a minus sign is dropped */
    // the day's session, if any, now carries the slip flag in the shared table
    const ds=store.sessions.filter(x=>x.date===rec.date);ds.forEach(writeShared);ui.slipSaved=rec;view='slipdone';render();break}
   case 'export':ui.exportText=exportJSON();ui.msg='';render();break;
@@ -1160,6 +1182,10 @@ function act(a,arg){
  }).catch(()=>{});
 })();
 render();
+/* one extra history entry stands in for "inside the app": Back pops it, navBack() decides, and it is put back unless the app should be left. Not inside a frame. */
+try{if(window.top===window.self){const mark=()=>{try{if(!(history.state&&history.state.so))history.pushState({so:1},'')}catch(e){}};
+ mark();window.addEventListener('popstate',()=>{if(navBack())mark();else history.back()});
+ window.addEventListener('pageshow',e=>{if(e.persisted)mark()})}}catch(e){}
 </script>
 <script>/* offline: only on https (v3ktor.org) or localhost — a file opened from the phone just runs */
 if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){navigator.serviceWorker.register('sw.js').catch(function(){})}
