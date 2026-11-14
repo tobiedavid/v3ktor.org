@@ -7,6 +7,7 @@
 <html lang="en" class="l-en">
 <head>
 <meta charset="utf-8">
+<meta name="color-scheme" content="light dark">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sollum — see your priorities move</title>
 <meta name="description" content="Pick between pairs of words. See how your priorities move with sleep, caffeine, sugar and alcohol, and where the chain starts. Free, private, bilingual.">
@@ -74,6 +75,20 @@ section>p,section>.small,section>.how-list{max-width:46em}
 .quote{font-family:ui-serif,Georgia,serif;font-size:1.25rem;line-height:1.45;border-left:4px solid var(--accent);padding:4px 0 4px 16px;margin:0 0 1em}
 footer{padding:28px 0 50px;color:var(--muted);font-size:.9rem;border-top:1px solid var(--line)}
 kbd{font:600 .85em system-ui;background:var(--chip);border-radius:6px;padding:1px 6px}
+/* dark mode: same palette as the Food Trial Log page */
+@media (prefers-color-scheme:dark){
+:root{--bg:#15161a;--card:#1e2026;--ink:#ececea;--muted:#a19d95;--line:#2d3038;--accent:#e3633a;--teal:#5fb3b3;--chip:#2a2c33;--warn-soft:#3a1f1c;--warn:#ff7b6e}
+.lead{color:var(--ink)}
+.lang button[aria-pressed="true"],.steps li::before{color:var(--bg)}
+.btn.primary{color:#fff}
+.phone,.shots img{border-color:#3a3d47}
+.card{box-shadow:none;border:1px solid var(--line)}
+.g-l{color:#10201f}
+.flag{border-color:#6b3530}
+.flow [fill="#f1ede4"]{fill:#2a2c33;stroke:#3a3d47}
+.flow [fill="#e6f2f1"]{fill:#16302f;stroke:#5fb3b3}
+.flow [fill="#fbe9e2"]{fill:#3a2218;stroke:#e3633a}
+}
 </style>
 <link rel="manifest" href="app/manifest.webmanifest">
 </head>

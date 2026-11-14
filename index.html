@@ -29,9 +29,6 @@
       --night: #14202b;
       --night-text: #e9eef2;
       --night-muted: #9fb0bf;
-      --dot-off: #2c3b49;
-      --dot-sleep: #6fa8d6;
-      --dot-crash: #d9a441;
       --rail: 22px;            /* x-centre of the plumb line inside .shell */
       --gutter: 80px;          /* text starts this far right of the shell edge */
       --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -81,17 +78,14 @@
     .bob svg { position: absolute; left: calc(var(--rail) - 12px); top: -30px; width: 24px; height: 34px; }
     .bob p { margin: 0; color: var(--muted); max-width: 30em; }
 
-    /* ---------- the one thing we show: a made-up fortnight ---------- */
+    /* ---------- the one thing we show: two real screens from the apps ---------- */
     .show { background: var(--night); color: var(--night-text); padding: clamp(60px, 8vw, 100px) 0; }
     .show h2 { margin: 0 0 18px; font-size: clamp(30px, 4.4vw, 48px); line-height: 1.1; font-weight: 680; letter-spacing: -.025em; max-width: 14em; text-wrap: balance; }
     .show-lede { margin: 0 0 44px; max-width: 34em; color: var(--night-muted); }
-    .fortnight { display: grid; grid-template-columns: minmax(150px, 210px) repeat(14, minmax(0, 1fr)); gap: 12px 6px; align-items: center; max-width: 860px; }
-    .fortnight .lab { font-size: 15px; line-height: 1.3; padding-right: 14px; }
-    .fortnight .day { font-size: 12px; color: var(--night-muted); text-align: center; }
-    .dot { justify-self: center; width: min(100%, 26px); aspect-ratio: 1; border-radius: 50%; background: var(--dot-off); }
-    .dot.s { background: var(--dot-sleep); }
-    .dot.c { background: var(--dot-crash); }
-    .week-gap { margin-left: 10px; }
+    .shots { display: grid; grid-template-columns: repeat(2, minmax(0, 280px)); gap: 28px; justify-content: start; }
+    .shots figure { margin: 0; }
+    .shots img { display: block; width: 100%; height: auto; aspect-ratio: 39 / 56; object-fit: cover; object-position: top; border: 8px solid #2c3b49; border-radius: 28px; background: #f7f4ee; }
+    .shots figcaption { margin-top: 12px; font-size: 14px; color: var(--night-muted); }
     .show-note { margin: 34px 0 0; max-width: 36em; font-size: 15px; color: var(--night-muted); }
     .show-note b { color: var(--night-text); font-weight: 650; }
 
@@ -128,10 +122,8 @@
       .lang { gap: 14px; }
       .q-icon { left: calc(var(--rail) - var(--gutter) - 17px); top: 0; width: 34px; height: 34px; }
       .q-icon svg { width: 18px; height: 18px; }
-      .fortnight { grid-template-columns: repeat(14, minmax(0, 1fr)); gap: 8px 3px; }
-      .fortnight .lab { grid-column: 1 / -1; padding: 10px 0 0; }
-      .fortnight .lab.blank { display: none; }
-      .week-gap { margin-left: 0; }
+      .shots { gap: 14px; }
+      .shots img { border-width: 5px; border-radius: 18px; }
       .steps { grid-template-columns: 1fr; gap: 20px; }
       .facts { grid-template-columns: 1fr; padding: 22px 20px; }
     }
@@ -197,21 +189,18 @@
       <h2 id="show-title" data-i18n="show.title">One bad day tells you nothing. Fourteen might.</h2>
       <p class="show-lede" data-i18n="show.lede">These tools keep the record so you can look across days. They don’t tell you what it means.</p>
 
-      <div class="fortnight" role="img" aria-label="Invented example: two weeks of dots. Short nights fall on days 2, 5, 9, 12 and 13. Afternoon crashes fall on days 2, 5, 6, 9 and 12." data-i18n-label="show.alt">
-        <span class="lab blank"></span>
-        <span class="day">M</span><span class="day">T</span><span class="day">W</span><span class="day">T</span><span class="day">F</span><span class="day">S</span><span class="day">S</span>
-        <span class="day week-gap">M</span><span class="day">T</span><span class="day">W</span><span class="day">T</span><span class="day">F</span><span class="day">S</span><span class="day">S</span>
-
-        <span class="lab" data-i18n="show.row1">Slept under 6 hours</span>
-        <i class="dot"></i><i class="dot s"></i><i class="dot"></i><i class="dot"></i><i class="dot s"></i><i class="dot"></i><i class="dot"></i>
-        <i class="dot week-gap"></i><i class="dot s"></i><i class="dot"></i><i class="dot"></i><i class="dot s"></i><i class="dot s"></i><i class="dot"></i>
-
-        <span class="lab" data-i18n="show.row2">Crashed after lunch</span>
-        <i class="dot"></i><i class="dot c"></i><i class="dot"></i><i class="dot"></i><i class="dot c"></i><i class="dot c"></i><i class="dot"></i>
-        <i class="dot week-gap"></i><i class="dot c"></i><i class="dot"></i><i class="dot"></i><i class="dot c"></i><i class="dot"></i><i class="dot"></i>
+      <div class="shots">
+        <figure>
+          <img src="/patch/img/hist-en.webp" data-src-en="/patch/img/hist-en.webp" data-src-fr="/patch/img/hist-fr.webp" alt="The Patch, History: cheese came with a crash on 5 of the 6 days it was eaten, and on 1 of the 24 days without it" data-i18n-alt="show.alt1" width="780" height="1560" loading="lazy">
+          <figcaption data-i18n="show.cap1">The Patch: what comes before your bad days.</figcaption>
+        </figure>
+        <figure>
+          <img src="/sollum/img/circle-en.webp" data-src-en="/sollum/img/circle-en.webp" data-src-fr="/sollum/img/circle-fr.webp" alt="Sollum, the circle: four hours of sleep, caffeine, sugar with no meal, alcohol, gambling, crash" data-i18n-alt="show.alt2" width="780" height="1560" loading="lazy">
+          <figcaption data-i18n="show.cap2">Sollum: the circle, link by link.</figcaption>
+        </figure>
       </div>
 
-      <p class="show-note"><b data-i18n="show.note1">An invented example, not real data.</b> <span data-i18n="show.note2">Four of the five crashes land on a short night. That’s a clue worth testing, not proof of a cause.</span></p>
+      <p class="show-note"><b data-i18n="show.note1">Screens from the apps, filled with example data.</b> <span data-i18n="show.note2">A lead like the one on the left is a clue worth testing, not proof of a cause.</span></p>
     </div>
   </section>
 
@@ -232,7 +221,7 @@
         </ul>
         <div>
           <p><strong data-i18n="care.bold">Not medical advice.</strong> <span data-i18n="care.text">These tools support personal observation. They cannot confirm a diagnosis or replace medical care. Seek professional advice for persistent, severe or concerning symptoms.</span></p>
-          <p data-i18n="privacy">Your entries are intended to stay in local browser storage. Clearing browser data or changing devices can erase them; keep an exported backup where the tool offers one.</p>
+          <p data-i18n="privacy">Food Trial Log, The Patch and Sollum keep your entries in your browser’s storage, on your own device. There is no account, and nothing you enter is sent anywhere. Clearing browser data or changing devices erases them, so keep a backup where the tool offers one.</p>
         </div>
       </div>
     </div>
@@ -282,11 +271,12 @@
     'bob': 'Choisissez-en un. Aucun ordre à suivre, et pas besoin d’utiliser les quatre.',
     'show.title': 'Une mauvaise journée ne dit rien. Quatorze, peut-être.',
     'show.lede': 'Ces outils gardent la trace pour que vous puissiez comparer les journées. Ils ne vous disent pas ce que ça veut dire.',
-    'show.alt': 'Exemple inventé : deux semaines de points. Les nuits courtes tombent les jours 2, 5, 9, 12 et 13. Les coups de barre tombent les jours 2, 5, 6, 9 et 12.',
-    'show.row1': 'Moins de 6 h de sommeil',
-    'show.row2': 'Coup de barre après le dîner',
-    'show.note1': 'Un exemple inventé, pas de vraies données.',
-    'show.note2': 'Quatre des cinq coups de barre tombent après une nuit courte. C’est une piste à vérifier, pas la preuve d’une cause.',
+    'show.alt1': 'La Patch, Historique : le fromage est venu avec un crash 5 des 6 jours où il a été mangé, et 1 des 24 jours sans',
+    'show.alt2': 'Sollum, le cercle : quatre heures de sommeil, caféine, sucre sans repas, alcool, jeu, crash',
+    'show.cap1': 'La Patch : ce qui précède vos mauvaises journées.',
+    'show.cap2': 'Sollum : le cercle, un maillon à la fois.',
+    'show.note1': 'Des écrans tirés des applications, avec des données d’exemple.',
+    'show.note2': 'Une piste comme celle de gauche mérite d’être vérifiée; ce n’est pas la preuve d’une cause.',
     'how.title': 'Comment ça fonctionne',
     'how.1': 'Remarquer', 'how.1t': 'Notez ce qui s’est passé, et quand.',
     'how.2': 'Comparer', 'how.2t': 'Regardez d’une journée ou d’une séance à l’autre ce qui se répète, et ce qui ne se répète pas.',
@@ -294,21 +284,21 @@
     'fact.free': 'Gratuit', 'fact.account': 'Sans compte', 'fact.source': 'Code source ouvert',
     'care.bold': 'Ceci n’est pas un avis médical.',
     'care.text': 'Ces outils servent à l’observation personnelle. Ils ne permettent pas de confirmer un diagnostic ni de remplacer des soins. Consultez un professionnel pour des symptômes persistants, graves ou inquiétants.',
-    'privacy': 'Vos données sont conçues pour rester dans le stockage local du navigateur. Effacer les données du navigateur ou changer d’appareil peut les faire disparaître. Conservez une sauvegarde exportée lorsque l’outil le permet.',
+    'privacy': 'Le Journal d’essai alimentaire, La Patch et Sollum gardent vos données dans le stockage du navigateur, sur votre propre appareil. Il n’y a pas de compte, et rien de ce que vous entrez n’est envoyé ailleurs. Effacer les données du navigateur ou changer d’appareil les fait disparaître : conservez une sauvegarde lorsque l’outil le permet.',
     'foot.by': 'Créé par Tobie David, True Color Foundation',
     'foot.tm': 'Demande de marque de commerce V3KTOR™ en instance.',
     'foot.label': 'Liens du projet',
     'foot.source': 'Code source', 'foot.license': 'Licence GNU AGPL-3.0'
   };
-  var days = { en: ['M','T','W','T','F','S','S'], fr: ['L','M','M','J','V','S','D'] };
 
   // English lives in the HTML so the page works without JavaScript.
   var nodes = Array.prototype.slice.call(document.querySelectorAll('[data-i18n]'));
   var labels = Array.prototype.slice.call(document.querySelectorAll('[data-i18n-label]'));
-  var dayNodes = Array.prototype.slice.call(document.querySelectorAll('.fortnight .day'));
+  var alts = Array.prototype.slice.call(document.querySelectorAll('[data-i18n-alt]'));
   var english = {};
   nodes.forEach(function (el) { english[el.getAttribute('data-i18n')] = el.textContent; });
   labels.forEach(function (el) { english[el.getAttribute('data-i18n-label')] = el.getAttribute('aria-label'); });
+  alts.forEach(function (el) { english[el.getAttribute('data-i18n-alt')] = el.getAttribute('alt'); });
   var meta = document.querySelector('meta[name="description"]');
   var metaEn = meta.getAttribute('content');
   function t(lang, k) { return lang === 'fr' && Object.prototype.hasOwnProperty.call(fr, k) ? fr[k] : english[k]; }
@@ -318,7 +308,8 @@
     document.documentElement.lang = lang;
     nodes.forEach(function (el) { el.textContent = t(lang, el.getAttribute('data-i18n')); });
     labels.forEach(function (el) { el.setAttribute('aria-label', t(lang, el.getAttribute('data-i18n-label'))); });
-    dayNodes.forEach(function (el, i) { el.textContent = days[lang][i % 7]; });
+    alts.forEach(function (el) { el.setAttribute('alt', t(lang, el.getAttribute('data-i18n-alt'))); });
+    document.querySelectorAll('[data-src-en]').forEach(function (img) { img.setAttribute('src', img.getAttribute('data-src-' + lang)); });
     document.querySelectorAll('[data-href-en]').forEach(function (a) { a.setAttribute('href', a.getAttribute('data-href-' + lang)); });
     document.querySelectorAll('[data-set-lang]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-set-lang') === lang)); });
     document.title = lang === 'fr' ? 'V3KTOR — Cartographier le soi' : 'V3KTOR — Mapping the Self';
