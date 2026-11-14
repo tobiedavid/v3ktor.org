@@ -670,7 +670,7 @@ return {H,WIN,STEPS,BAR_DAYS,BUCKETS,SLICES,MICRO,dayKey,keyAdd,dayStart,fxDay,a
 if(typeof module!=='undefined') module.exports=TLE;
 /* ENGINE:END */
 /* ===================== APP: the screens. Data in, data out: the app reports what was entered and never interprets it. ===================== */
-const VER='0.1.0', CONSENT=1, KEY='v3k.threshold.v1', GUTKEYS=['v3k.gut.v1','v3k.gut.fr.v1'];   /* the Food Trial Log keeps its English and its French copy apart */
+const VER='0.1.1', CONSENT=1, KEY='v3k.threshold.v1', GUTKEYS=['v3k.gut.v1','v3k.gut.fr.v1'];   /* the Food Trial Log keeps its English and its French copy apart */
 const E=TLE, H=36e5;
 const FRAMED=(()=>{ try{ return window.self!==window.top; }catch(e){ return true; } })();
 const STANDALONE=(()=>{ try{ return !!(navigator.standalone||matchMedia('(display-mode: standalone)').matches); }catch(e){ return false; } })();
