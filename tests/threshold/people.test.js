@@ -6,7 +6,7 @@
 'use strict';
 const { ZONE } = require('../lib/zone.js');     // one fixed-offset zone for Node and for the browser, so both read a clock time the same way
 const fs = require('fs'), path = require('path'), { chromium } = require('playwright');
-const { serve } = require('../lib/serve.js'), O = require('./oracle.js'), P = require('./people.js');
+const { serve } = require('../lib/serve.js'), { decode } = require('../lib/png.js'), O = require('./oracle.js'), P = require('./people.js');
 const ROOT = path.join(__dirname, '..', '..'), FIX = path.join(__dirname, '..', 'fixtures');
 const saveDir = process.argv.includes('--save') ? process.argv[process.argv.indexOf('--save') + 1] : null;
 
@@ -106,13 +106,22 @@ async function play(browser, base, person, table) {
   }
   // ...and the same numbers as they are drawn
   await page.click('[data-act=tab][data-v=thr]');
+  const tone = await page.evaluate(() => { const rgb = v => { const e = document.createElement('i'); e.style.background = `var(${v})`; document.body.appendChild(e); const c = getComputedStyle(e).backgroundColor.match(/\d+/g).slice(0, 3).map(Number); e.remove(); return c; }; return { g: rgb('--fx0'), r: rgb('--fx3'), card: rgb('--card') }; });
+  ok(N('the two colours of a step are a green and a red'), tone.g[1] > tone.g[0] + 60 && tone.g[1] > tone.g[2] + 60 && tone.r[0] > tone.r[1] + 60 && tone.r[0] > tone.r[2] + 60, JSON.stringify(tone));
   for (const mode of ['meal', 'day']) { await page.click(`[data-act=tmode][data-v=${mode}]`);
     for (const b of BARS) { const c = R.cells(b, mode), labels = await page.locator(`#bar-${b} .stepsrow .step`).evaluateAll(els => els.map(e => e.getAttribute('aria-label')));
       const read = l => { const m = /(\d+) [^\d,]+, [^\d]*?(\d+)$/.exec(l); return m ? [+m[1], +m[2]] : [0, 0]; }, cells = c.n ? [c.zero].concat(c.steps) : [];
       same(N(`${b}, ${mode}: the steps on screen`), c.n && c.steps.length ? labels.map(read) : labels.slice(0, 1).map(read), c.n && c.steps.length ? cells.map(s => [s.n, s.k]) : c.n ? [[c.zero.n, c.zero.k]] : [[0, 0]]);
-      const drawn = await page.locator(`#bar-${b} .stepsrow .step`).evaluateAll(els => els.map(e => ({ none: e.classList.contains('none'), pale: e.classList.contains('pale'), mark: e.classList.contains('mk'), s: ['s0', 's1', 's2', 's3'].find(x => e.classList.contains(x)) || null })));
-      const paint = s => ({ none: !s.n, pale: s.n > 0 && s.n < 5, mark: s.k > 0, s: !s.n ? null : s.k === 0 ? 's0' : s.k / s.n < 0.5 ? 's1' : s.k < s.n ? 's2' : 's3' });
-      if (c.n && c.steps.length) same(N(`${b}, ${mode}: colour, pale and mark of every step`), drawn, cells.map(paint)); } }
+      // two colours and no others: green (g), red (r), both (m, with the red share), or an empty outline (none)
+      const drawn = await page.locator(`#bar-${b} .stepsrow .step`).evaluateAll(els => els.map(e => [['none', 'g', 'r', 'm'].filter(x => e.classList.contains(x)).join(' '), e.style.getPropertyValue('--p')]));
+      const share = s => Math.round(s.k / s.n * 100), paint = s => !s.n ? ['none', ''] : !s.k ? ['g', ''] : s.k === s.n ? ['r', ''] : ['m', share(s) + '%'];
+      if (c.n && c.steps.length) { same(N(`${b}, ${mode}: green, red or both for every step`), drawn, cells.map(paint));
+        // ...and the picture itself, one column of pixels down the middle of each step: red from the bottom, in the share of its entries
+        const row = page.locator(`#bar-${b} .stepsrow`), png = decode(await row.screenshot()), mid = await row.locator('.step').evaluateAll(els => { const o = els[0].parentElement.getBoundingClientRect(); return els.map(e => { const r = e.getBoundingClientRect(); return Math.round(r.left - o.left + r.width / 2); }); });
+        const far = (a, t) => (a[0] - t[0]) ** 2 + (a[1] - t[1]) ** 2 + (a[2] - t[2]) ** 2, H = 44;
+        const seen = mid.map(x => { let r = 0, g = 0, lowG = -1, highR = png.h; for (let y = 0; y < png.h; y++) { const a = png.at(x, y), dr = far(a, tone.r), dg = far(a, tone.g), dc = far(a, tone.card); if (dr < dg && dr < dc) { r++; highR = Math.min(highR, y); } else if (dg < dr && dg < dc) { g++; lowG = y; } } return [r, g, lowG < highR]; });
+        const want = cells.map(s => { if (!s.n) return [0, 0]; if (!s.k) return [0, H]; if (s.k === s.n) return [H, 0]; const e = Math.min(H - 5, Math.max(5, share(s) / 100 * H)); return [e - 1, H - e - 1]; });      // each colour keeps 5 pixels; 2 go to the line between them
+        ok(N(`${b}, ${mode}: in the picture, each step holds red and green in the share of its entries, red at the bottom`), seen.length === want.length && seen.every((s, i) => Math.abs(s[0] - want[i][0]) <= 1.5 && Math.abs(s[1] - want[i][1]) <= 1.5 && s[2]), 'pixels of red and green ' + JSON.stringify(seen.map(s => s.slice(0, 2))) + '\n     recount ' + JSON.stringify(want)); } } }
   // one step's sheet, and the luck number, by brute force
   { const c = R.cells('lact', 'meal'), B = await page.evaluate(() => { const B = TLE.bar(IX(), 'lact', 'meal'); return { zero: B.zero, steps: B.steps }; }), all = [c.zero].concat(c.steps);
     let i = all.findIndex((s, j) => j > 0 && s.k > 0), code = i > 0 ? Object.keys(all[i].fx)[0] : null;

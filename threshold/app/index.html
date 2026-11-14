@@ -59,11 +59,12 @@
 :root{--bg:#f7f4ee;--card:#fff;--ink:#1c1b19;--muted:#6b665d;--line:#e6e0d4;--accent:#c8481f;--teal:#0f6b6b;--teal-soft:#e3f0ef;--warn:#b3261e;--warn-soft:#fbe9e7;--chip:#f1ede4;--chip-on:#1c1b19;--shadow:0 1px 2px rgba(0,0,0,.05),0 6px 20px -10px rgba(0,0,0,.15);
   /* the ring's slices: a fixed order, checked for colour-blind separation on this card colour. Grey is "kind not listed". */
   --s-fat:#2a78d6;--s-prot:#eb6834;--s-cplx:#1baf7a;--s-lact:#eda100;--s-sugo:#e87ba4;--s-fib:#008300;--s-alc:#6250d6;--s-unk:#9a968c;
-  /* a step of a bar: nothing reported, some, most, every time. And the Effects bar. */
-  --fx0:#1fa64a;--fx1:#c99a1a;--fx2:#e07b2e;--fx3:#d23b2a}
+  /* a step of a bar has two colours: green for its entries with no effect reported, red for its entries with one. Red is the Effects bar too.
+     The pair is checked for colour-blind separation on this card colour, so a step needs no other mark. */
+  --fx0:#2caa4e;--fx3:#b3261e}
 @media (prefers-color-scheme:dark){:root{--bg:#15161a;--card:#1e2026;--ink:#ececea;--muted:#a19d95;--line:#2d3038;--accent:#e3633a;--teal:#5fb3b3;--teal-soft:#1c2c2c;--warn:#ff7b6e;--warn-soft:#3a1f1c;--chip:#2a2d35;--chip-on:#ececea;--shadow:0 1px 2px rgba(0,0,0,.4),0 6px 20px -10px rgba(0,0,0,.6);
   --s-fat:#3987e5;--s-prot:#d95926;--s-cplx:#199e70;--s-lact:#c98500;--s-sugo:#d55181;--s-fib:#0ca30c;--s-alc:#9085e9;--s-unk:#7d7a73;
-  --fx0:#34d468;--fx1:#d9b13f;--fx2:#f08c45;--fx3:#ff5a45}}
+  --fx0:#30ad51;--fx3:#c8331a}}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:17px;line-height:1.5;-webkit-text-size-adjust:100%}
 body{padding-bottom:calc(env(safe-area-inset-bottom) + 90px)}
@@ -177,8 +178,8 @@ html.noinst .inst,html.noinst #installPill,html.locked #installPill{display:none
 @media (max-width:340px){.topbar .in{gap:2px;padding:8px 6px} .tb.ttl{font-size:.9rem;padding:6px 2px} .tb.ttl .t2{display:none} .tb{padding:8px 6px} .bar{padding-left:10px;padding-right:10px} #bar .in{gap:6px} #bar .in .btn{padding:9px 10px}}
 
 /* ---- Threshold Log's own pieces ---- */
-.none{display:block;margin:0 auto 10px;text-align:center}
-.none[aria-pressed="true"]{color:var(--ink);text-decoration:none}
+.lnk.none{display:block;margin:0 auto 10px;text-align:center}
+.lnk.none[aria-pressed="true"]{color:var(--ink);text-decoration:none}
 /* the ring and the Effects bar, side by side: what went in, what came out */
 .io{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}
 .ring{position:relative;width:148px;height:148px;margin:0 auto}
@@ -210,15 +211,16 @@ html.noinst .inst,html.noinst #installPill,html.locked #installPill{display:none
 .modes button{flex:1 1 0;min-width:0;white-space:normal;line-height:1.15}
 /* a threshold bar: equal steps from zero to the person's highest amount */
 .tbar{margin:0 0 14px}
-.tbar .hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:.92rem;margin-bottom:4px}
-.tbar .hd b{font-weight:700} .tbar .hd span{color:var(--muted);font-size:.84rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbar .hd{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:0 8px;font-size:.92rem;margin-bottom:4px}
+.tbar .hd b{font-weight:700} .tbar .hd span{color:var(--muted);font-size:.84rem;font-variant-numeric:tabular-nums;white-space:nowrap;margin-left:auto}
 .stepsrow{display:flex;gap:2px}
 .step{flex:1;height:44px;border:0;border-radius:4px;padding:0;cursor:pointer;position:relative;background:var(--chip)}
 .step.none{background:transparent;box-shadow:inset 0 0 0 1px var(--line);cursor:default}
-.step.s0{background:var(--fx0)} .step.s1{background:var(--fx1)} .step.s2{background:var(--fx2)} .step.s3{background:var(--fx3)}
-.step.pale{opacity:.42}
-/* a step with effects carries a mark as well as its colour: red and green are the pair colour-blind eyes confuse most */
-.step.mk::after{content:"";position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:var(--card);box-shadow:0 0 0 2px rgba(0,0,0,.35)}
+.step.g{background:var(--fx0)} .step.r{background:var(--fx3)}
+/* a step with both: red rises from the bottom by the share of its entries with an effect (--p), green above, a thin line of the card between.
+   Each colour keeps at least 5px, so one entry among many still shows. */
+.step.m{background:linear-gradient(to top,var(--fx3) var(--p),var(--fx0) var(--p))}
+@supports (width:clamp(1px,2%,3px)){.step.m{--e:clamp(5px,var(--p),calc(100% - 5px));background:linear-gradient(to top,var(--fx3) calc(var(--e) - 1px),var(--card) calc(var(--e) - 1px),var(--card) calc(var(--e) + 1px),var(--fx0) calc(var(--e) + 1px))}}
 .legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.82rem;color:var(--muted);margin:6px 0 0} .legend span{white-space:nowrap}
 .legend i{display:inline-block;width:14px;height:10px;border-radius:2px;vertical-align:-1px;margin-right:5px;position:relative}
 .legend i.none{box-shadow:inset 0 0 0 1px var(--line)}
@@ -244,8 +246,7 @@ ol.inst{margin:4px 0 14px;padding-left:1.4em} ol.inst li{margin:0 0 9px} .ico{di
 .step.zero{flex:0 0 9%;margin-right:4px}
 span.step{display:block}
 .scale{display:flex;justify-content:space-between;font-size:.75rem;line-height:1.2;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums}
-.legend i.s0{background:var(--fx0)} .legend i.s1{background:var(--fx1)} .legend i.s2{background:var(--fx2)} .legend i.s3{background:var(--fx3)} .legend i.pale{opacity:.42}
-.legend i.mk::after{content:"";position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;background:var(--card)}
+.legend i.g{background:var(--fx0)} .legend i.r{background:var(--fx3)}
 /* one food's own bar: a cell for each amount eaten in a day */
 .fbar{display:flex;gap:2px;margin:12px 0 2px} .fbar>div{flex:1;min-width:0;text-align:center} .fbar .step{height:32px;cursor:default} .fbar small{font-size:.75rem;color:var(--muted)}
 .fxt[aria-pressed="true"]{font-weight:700;text-decoration-style:solid}
@@ -488,7 +489,7 @@ const DATA=[
    A reading is a count of what the person reported, set beside an amount. The app reports; it never interprets.
    Entries (S.ev):  {k:'meal', t, items:[{key,q}]}   {k:'fx', t, c}   {k:'none', t, d}   (t = milliseconds, d = a day key) */
 const TLE=(function(){
-const H=36e5, WIN=4*H, SOLID=5, STEPS=8, BAR_DAYS=7, UNK_MAX=2, ZEPS=0.005;
+const H=36e5, WIN=4*H, STEPS=8, BAR_DAYS=7, UNK_MAX=2, ZEPS=0.005;
 const p2=n=>(n<10?'0':'')+n;
 /* a day starts at the person's own hour (the Food Trial Log's setting), so a 1 a.m. snack belongs to the evening before */
 function dayKey(t,roll){ const d=new Date(t); if(d.getHours()<(roll||0)) d.setDate(d.getDate()-1); return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate()); }
@@ -556,8 +557,8 @@ function steps(units){ let max=0; for(const u of units) if(u.x>max) max=u.x;
   /* "none of it" has a cell of its own, before the steps: a meal with no lactose is not a meal with a little */
   const zero={i:-1,lo:0,hi:0,n:0,k:0,fx:{},ids:[]};
   const put=(s,u)=>{ s.n++; s.ids.push(u.id); if(u.fx.length){ s.k++; for(const c of new Set(u.fx)) s.fx[c]=(s.fx[c]||0)+1; } };
-  /* rule 8: pale first, solid later. A step shows from its first entry, and is solid from five. */
-  const fin=s=>{ s.share=s.n?s.k/s.n:null; s.pale=s.n>0&&s.n<SOLID; };
+  /* rule 8: a step shows from its first entry. Its share is the part of its entries an effect was reported after. */
+  const fin=s=>{ s.share=s.n?s.k/s.n:null; };
   if(!(max>ZEPS)){ for(const u of units) put(zero,u); fin(zero); return {w:0,max:0,steps:[],zero,n:units.length}; }
   const w=stepWidth(max), n=Math.max(1,Math.min(STEPS,Math.ceil(max/w-1e-9))), st=[];
   for(let i=0;i<n;i++) st.push({i,lo:i*w,hi:(i+1)*w,n:0,k:0,fx:{},ids:[]});
@@ -589,7 +590,7 @@ function foodReading(I,key,mine){ const rows={}, without={n:0,fx:{}}; let times=
     if(d.fx.some(e=>e.c==='sleep')) put(r.night,'sleep');
     if(nx) for(const c of new Set(nx.fx.filter(e=>e.c!=='sleep').map(e=>e.c))) put(r.next,c);
     if(seen.size) r.k++; for(const c of seen) r.any[c]=(r.any[c]||0)+1; }
-  const list=Object.values(rows).sort((a,b)=>a.q-b.q); for(const r of list) r.pale=r.n<SOLID;
+  const list=Object.values(rows).sort((a,b)=>a.q-b.q);
   return {key,times,clean,rows:list,without}; }
 function foodLuck(R,row,c){ return luck(row.any[c]||0,row.n-(row.any[c]||0),R.without.fx[c]||0,R.without.n-(R.without.fx[c]||0)); }
 
@@ -664,7 +665,7 @@ function common(outKeys,listKeys,food){ const cnt=(keys)=>{ const c={}; let n=0;
   const typ=[['lact',f=>amounts(f,1).lact],['fat',f=>f.fat],['sug',f=>f.sug==null?null:amounts(f,1).sug],['fib',f=>f.fib]].map(([k,fn])=>({k,o:med(outKeys,fn),l:med(listKeys,fn)})).filter(r=>r.o!=null&&r.l!=null);
   return {rows:rows.slice(0,5),typ,on:O.n,ln:L.n}; }
 
-return {H,WIN,SOLID,STEPS,BAR_DAYS,BUCKETS,SLICES,MICRO,dayKey,keyAdd,dayStart,fxDay,amounts,addInto,mealAmounts,ZERO,index,usable,mealUnits,dayUnits,stepWidth,steps,bar,luck,stepRest,stepLuck,foodReading,foodLuck,went,came,cameMax,reportedDays,pie,reference,gutBase,importGut,common};
+return {H,WIN,STEPS,BAR_DAYS,BUCKETS,SLICES,MICRO,dayKey,keyAdd,dayStart,fxDay,amounts,addInto,mealAmounts,ZERO,index,usable,mealUnits,dayUnits,stepWidth,steps,bar,luck,stepRest,stepLuck,foodReading,foodLuck,went,came,cameMax,reportedDays,pie,reference,gutBase,importGut,common};
 })();
 if(typeof module!=='undefined') module.exports=TLE;
 /* ENGINE:END */
@@ -953,9 +954,11 @@ function rnum(x,w){ const d=w>=1?(Math.abs(w%1)>1e-9?1:0):(Math.round(w*100)%10?
 const unitWord=(mode,n)=>mode==='day'?L(n===1?'day':'days',n===1?'jour':'jours'):L(n===1?'meal':'meals','repas');
 function stepRange(B,s){ const u=BARN[B.b][2]; return s.i<0?U(0,u,0):s.i===0?L('up to ','jusqu’à ')+rnum(s.hi,B.w)+'\u00a0'+u:rnum(s.lo,B.w)+L(' to ',' à ')+rnum(s.hi,B.w)+'\u00a0'+u; }
 function stepCount(B,s){ return B.mode==='day'?L(`${s.n} ${unitWord('day',s.n)}, effects reported for ${s.k}`,`${s.n} ${unitWord('day',s.n)}, effets notés pour ${s.k}`):L(`${s.n} ${unitWord('meal',s.n)}, effects after ${s.k}`,`${s.n} repas, effets après ${s.k}`); }
-const shareCls=(k,n)=>{ const sh=k/n; return sh===0?'s0':sh<0.5?'s1':sh<1?'s2':'s3'; };
-function stepHTML(B,s){ const z=s.i<0?'zero ':'', lab=stepRange(B,s)+COL()+(s.n?stepCount(B,s):L('never eaten','jamais mangé'));
-  return s.n?`<button type="button" class="step ${z}${shareCls(s.k,s.n)}${s.pale?' pale':''}${s.k?' mk':''}" data-act="step" data-k="${B.b}" data-v="${s.i}" aria-label="${esc(lab)}" title="${esc(lab)}"></button>`
+/* a step's paint, in two colours: green (g) when no effect was reported after any of its n entries, red (r) when one was after every entry,
+   and both (m) between, with red taking the share of the k entries an effect was reported after */
+const stepPaint=(k,n)=>k===0?['g','']:k===n?['r','']:['m',` style="--p:${Math.round(k/n*100)}%"`];
+function stepHTML(B,s){ const z=s.i<0?'zero ':'', lab=stepRange(B,s)+COL()+(s.n?stepCount(B,s):L('never eaten','jamais mangé')), [pc,ps]=s.n?stepPaint(s.k,s.n):[];
+  return s.n?`<button type="button" class="step ${z}${pc}"${ps} data-act="step" data-k="${B.b}" data-v="${s.i}" aria-label="${esc(lab)}" title="${esc(lab)}"></button>`
     :`<span class="step ${z}none" role="img" aria-label="${esc(lab)}" title="${esc(lab)}"></span>`; }
 const leftWhy=b=>b==='fib'?L('a fibre supplement with no figure, or a food with no numbers','un supplément de fibres sans chiffre, ou un aliment sans chiffres'):b==='hist'?L('a histamine food with no figure, or a food with no numbers','un aliment à histamine sans chiffre, ou un aliment sans chiffres'):b==='cplx'||b==='sug'?L('carbs of a kind not listed, or a food with no numbers','des glucides de sorte non indiquée, ou un aliment sans chiffres'):L('a food with no numbers','un aliment sans chiffres');
 function barHTML(B){ const [en,fr,u]=BARN[B.b], n=B.n, c=(S.concl[B.b]||'').trim(), why=leftWhy(B.b);
@@ -973,7 +976,8 @@ function vThr(){ const I=IX(), mode=S.tmode, bars=E.BUCKETS.map(b=>E.bar(I,b,mod
   return `<div class="gtabs seg toptabs modes" role="group" aria-label="${L('Reading','Lecture')}"><button type="button" data-act="tmode" data-v="meal" aria-pressed="${mode==='meal'}">${L('After a meal','Après un repas')}</button><button type="button" data-act="tmode" data-v="day" aria-pressed="${mode==='day'}">${L('Over a day','Sur une journée')}</button></div>
   <p class="small muted" style="margin:0 0 10px">${mode==='meal'?L('The amount in one meal, and the effects you reported in the 4 hours after it.','La quantité dans un repas, et les effets que tu as notés dans les 4 heures suivantes.'):L('The total for a day, and the effects you reported that day, that night and the next day.','Le total d’une journée, et les effets que tu as notés ce jour-là, cette nuit-là et le lendemain.')}</p>
   <div class="card">${rd?'':`<p class="small" style="margin:0 0 12px">${L('Nothing to draw yet. The bars are drawn from complete days: a meal, and either an effect or a tap on “No effects today”.','Rien à tracer encore. Les barres sont tracées à partir des journées complètes\u00a0: un repas, et soit un effet, soit un appui sur «\u00a0Aucun effet aujourd’hui\u00a0».')}</p>`}${bars.map(barHTML).join('')}
-  <p class="legend"><span>${L('Effects reported after','Effets notés après')}${COL()}</span><span><i class="s0"></i>${L('none','aucun')}</span><span><i class="s1 mk"></i>${L('under half','moins de la moitié')}</span><span><i class="s2 mk"></i>${L('half or more','la moitié ou plus')}</span><span><i class="s3 mk"></i>${L('all','tous')}</span><span><i class="s0 pale"></i>${L('under 5 entries','moins de 5 entrées')}</span><span><i class="none"></i>${L('never eaten','jamais mangé')}</span></p>
+  <p class="legend"><span><i class="g"></i>${L('no effect reported','aucun effet noté')}</span><span><i class="r"></i>${L('an effect reported','un effet noté')}</span><span><i class="none"></i>${L('never eaten','jamais mangé')}</span></p>
+  <p class="small muted" style="margin:6px 0 0">${L('The more red in a step, the more often an effect was reported.','Plus un palier est rouge, plus souvent un effet a été noté.')}</p>
   <p class="mine">${L('Tap a step for its numbers.','Appuie sur un palier pour ses chiffres.')} ${MINE()}</p></div>
   <h3 style="margin-top:18px">${L('One food','Un aliment')}</h3>
   <div class="fsearch"><label class="vh" for="tQ">${L('Look up a food','Chercher un aliment')}</label><input type="search" id="tQ" class="sel" data-in="tq" value="${esc(UI.tq||'')}" placeholder="${L('Look up a food','Chercher un aliment')}" autocomplete="off"></div>
@@ -996,7 +1000,7 @@ function stepSheet(keep){ const u=UI.st, B=E.bar(IX(),u.b,S.tmode), s=u.i<0?B.ze
     luck=`<p class="small" style="margin:8px 0 0" id="luckLine"><b>${esc(cap(fxName(u.c)))}</b>${COL()}${L(`${pre} ${y} of ${s.n} ${uw(s.n)} in this step`,`${pre} ${y} ${uw(y)} sur ${s.n} dans ce palier`)}${r.n?L(`, and ${pre} ${r.y} of ${r.n} in the rest of the bar.`,`, et ${pre} ${r.y} sur ${r.n} dans le reste de la barre.`):'.'} ${luckTxt(E.stepLuck(B,u.i,u.c))}</p>`; }
   showSheet(`<h3 id="sheetTitle">${L(en,fr)} · ${stepRange(B,s)}</h3>
   <p class="small muted" style="margin:0 0 8px">${B.mode==='meal'?L('After a meal: effects reported in the 4 hours after it.','Après un repas\u00a0: effets notés dans les 4 heures suivantes.'):L('Over a day: effects reported that day, that night and the next day.','Sur une journée\u00a0: effets notés ce jour-là, cette nuit-là et le lendemain.')}</p>
-  <p style="margin:0"><b>${cap(stepCount(B,s))}</b></p>${s.pale?`<p class="small muted" style="margin:2px 0 0">${L(`Under 5 ${uw(2)}: drawn pale.`,`Moins de 5 ${uw(2)}\u00a0: tracé pâle.`)}</p>`:''}
+  <p style="margin:0"><b>${cap(stepCount(B,s))}</b></p>
   ${kinds.length?`<ul class="evs">${kinds.map(([c,n])=>`<li><button type="button" class="fxt" data-act="stfx" data-v="${esc(c)}" aria-pressed="${u.c===c}">${esc(fxName(c))}</button> · ${n}</li>`).join('')}</ul>${luck||`<p class="small muted" style="margin:0">${L('Tap an effect to see how often luck alone gives its split.','Appuie sur un effet pour voir à quelle fréquence le hasard seul donne son écart.')}</p>`}`:''}
   ${from.length?`<p class="small" style="margin:14px 0 0"><b>${L('The foods it came from','Les aliments d’où ça vient')}</b></p><ul class="evs">${from.map(a=>`<li><button type="button" class="lnk" data-act="foodrd" data-v="${esc(a.key)}">${esc(fname(food(a.key)))}</button> · ${a.u.size} ${uw(a.u.size)} · ${U(a.x,un,a.x<1?2:a.x<10?1:0)}</li>`).join('')}</ul>`:''}
   ${conclHTML(u.b)}`,keep); }
@@ -1024,7 +1028,7 @@ function foodSheet(keep){ const u=UI.fr, key=u.key, f=food(key), I=IX(), R=E.foo
   <p class="small">${holdsTxt(f)}</p>
   ${R.times?`<p style="margin:0"><b>${L(`Reported on ${R.times} complete ${dw(R.times)}.`,`Noté ${R.times} ${R.times>1?'journées complètes':'journée complète'}.`)}</b></p>
     ${S.list.length?`<p class="small muted" style="margin:2px 0 0">${L(`On ${R.clean} of them, everything else you ate was on your list.`,`Pour ${R.clean} d’entre elles, tout le reste de ce que tu as mangé était sur ta liste.`)}</p>`:''}
-    <div class="fbar">${R.rows.map(r=>`<div><span class="step ${shareCls(r.k,r.n)}${r.pale?' pale':''}${r.k?' mk':''}" role="img" aria-label="${qtxt(r.q)} ×${COL()}${r.n} ${dw(r.n)}, ${L(`effects reported for ${r.k}`,`effets notés pour ${r.k}`)}"></span><small>${qtxt(r.q)}\u00a0×</small></div>`).join('')}</div>
+    <div class="fbar">${R.rows.map(r=>{ const [pc,ps]=stepPaint(r.k,r.n); return `<div><span class="step ${pc}"${ps} role="img" aria-label="${qtxt(r.q)} ×${COL()}${r.n} ${dw(r.n)}, ${L(`effects reported for ${r.k}`,`effets notés pour ${r.k}`)}"></span><small>${qtxt(r.q)}\u00a0×</small></div>`; }).join('')}</div>
     <ul class="rd">${rows}</ul>
     <p class="small" style="margin:8px 0 0">${L('Complete days without it','Journées complètes sans cet aliment')}${COL()}<b>${R.without.n}</b>${wo.length?' · '+wo.map(([c,n])=>esc(fxLow(c))+'\u00a0'+n).join(' · '):''}</p>
     <p class="small muted" style="margin:6px 0 0">${L('Only effects reported after the food count on the same day. Tap an effect to see how often luck alone gives its split.','Le même jour, seuls les effets notés après l’aliment comptent. Appuie sur un effet pour voir à quelle fréquence le hasard seul donne son écart.')}</p>`
@@ -1139,7 +1143,7 @@ function helpSheet(){ const H2=(en,fr,ten,tfr)=>`<p class="small"><b>${L(en,fr)}
   +H2('The ring.','L’anneau.','What you reported eating in the period, by weight: fat, protein, complex carbs, lactose, other sugars and fibre. The key under it has the grams. “Carbs, kind not listed” are the carbs of foods whose sugars Health Canada doesn’t list.','Ce que tu as noté avoir mangé pendant la période, selon le poids\u00a0: gras, protéines, glucides complexes, lactose, autres sucres et fibres. La légende en dessous donne les grammes. Les «\u00a0glucides, sorte non indiquée\u00a0» sont les glucides des aliments dont Santé Canada n’indique pas les sucres.')
   +H2('Histamine, estimated.','Histamine, estimée.','The number in the middle of the ring. It’s the weight of each serving times the average for its food type in a 2011 European table. The amount in your own piece can be many times more or less: one kind of cheese has measured from under 5 to over 1,000 mg per kg. Read it as a count of histamine food.','Le chiffre au milieu de l’anneau. C’est le poids de chaque portion multiplié par la moyenne de son type d’aliment dans un tableau européen de 2011. La quantité dans ton propre morceau peut être plusieurs fois plus grande ou plus petite\u00a0: une même sorte de fromage a déjà mesuré de moins de 5 à plus de 1\u00a0000 mg par kg. Lis-le comme un compte d’aliments à histamine.')
   +H2('The Effects bar.','La barre des effets.','How many effects you reported in the period. It fills against your own highest count for a period of the same length, and it draws after 7 complete days.','Combien d’effets tu as notés pendant la période. Elle se remplit par rapport à ton propre compte le plus élevé pour une période de même durée, et elle se trace après 7 journées complètes.')
-  +H2('The Threshold bars.','Les barres de seuil.','Each bar runs from zero to your own highest amount, in equal steps. The small first cell is “none of it”. Green: no effect was reported after any entry in that step. Red: after every entry. Yellow and orange: after some. A step with effects carries a dot. A pale step has under 5 entries. An outlined step is an amount you never ate. “After a meal” reads one meal and the 4 hours after it. “Over a day” reads the total for a day with that day, that night and the next day. Poor sleep counts for the night before the morning you report it.','Chaque barre va de zéro à ta propre quantité la plus élevée, en paliers égaux. La petite première case, c’est «\u00a0aucun\u00a0». Vert\u00a0: aucun effet n’a été noté après les entrées de ce palier. Rouge\u00a0: après chacune. Jaune et orange\u00a0: après certaines. Un palier avec des effets porte un point. Un palier pâle a moins de 5 entrées. Un palier vide, avec un contour seulement, est une quantité que tu n’as jamais mangée. «\u00a0Après un repas\u00a0» lit un repas et les 4 heures suivantes. «\u00a0Sur une journée\u00a0» lit le total d’une journée avec ce jour-là, cette nuit-là et le lendemain. Un mauvais sommeil compte pour la nuit qui précède le matin où tu le notes.')
+  +H2('The Threshold bars.','Les barres de seuil.','Each bar runs from zero to your own highest amount, in equal steps. The small first cell is “none of it”. There are two colours. Green is for entries with no effect reported after them. Red is for entries with one. A step that has both shows both, with red at the bottom: the more red, the more often an effect was reported after that amount. An outlined step is an amount you never ate. “After a meal” reads one meal and the 4 hours after it. “Over a day” reads the total for a day with that day, that night and the next day. Poor sleep counts for the night before the morning you report it.','Chaque barre va de zéro à ta propre quantité la plus élevée, en paliers égaux. La petite première case, c’est «\u00a0aucun\u00a0». Il y a deux couleurs. Le vert est pour les entrées sans effet noté après. Le rouge est pour celles qui en ont un. Un palier qui a les deux montre les deux, le rouge en bas\u00a0: plus il y a de rouge, plus souvent un effet a été noté après cette quantité. Un palier vide, avec un contour seulement, est une quantité que tu n’as jamais mangée. «\u00a0Après un repas\u00a0» lit un repas et les 4 heures suivantes. «\u00a0Sur une journée\u00a0» lit le total d’une journée avec ce jour-là, cette nuit-là et le lendemain. Un mauvais sommeil compte pour la nuit qui précède le matin où tu le notes.')
   +H2('The luck number.','Le chiffre du hasard.','Tap a step, then an effect. The app sets that step beside the rest of its bar and says how often luck alone would give a split at least that uneven. It’s Fisher’s exact test, the one The Patch uses. The more steps and effects you look at, the more often one of them looks uneven by luck alone.','Appuie sur un palier, puis sur un effet. L’app met ce palier à côté du reste de sa barre et dit à quelle fréquence le hasard seul donnerait un écart au moins aussi inégal. C’est le test exact de Fisher, celui qu’utilise The Patch. Plus tu regardes de paliers et d’effets, plus souvent l’un d’eux paraît inégal par le seul hasard.')
   +H2('What a bar can’t tell apart.','Ce qu’une barre ne peut pas départager.','Things eaten together. If your high-fat meals were also your high-histamine meals, both bars take the same colours. And what you expect can shape what you feel and report.','Les choses mangées ensemble. Si tes repas riches en gras étaient aussi tes repas riches en histamine, les deux barres prennent les mêmes couleurs. Et ce à quoi tu t’attends peut influencer ce que tu ressens et ce que tu notes.')
   +H2('One food.','Un aliment.','On the Threshold tab, look up a food to see what you reported on the days you ate it, by the amount eaten that day, and on the days without it.','Dans l’onglet Seuil, cherche un aliment pour voir ce que tu as noté les jours où tu en as mangé, selon la quantité mangée ce jour-là, et les jours sans cet aliment.')
