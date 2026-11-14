@@ -17,7 +17,7 @@
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
   main { width: min(100% - 40px, 620px); margin: 0 auto; padding: 56px 0 72px; }
-  .brand { font-weight: 800; letter-spacing: .14em; text-decoration: none; color: var(--ink); }
+  .brand { display: inline-block; padding: 12px 0; margin: -12px 0; font-weight: 800; letter-spacing: .14em; text-decoration: none; color: var(--ink); }
   h1 { font-size: clamp(30px, 7vw, 44px); line-height: 1.1; letter-spacing: -.02em; margin: 40px 0 12px; }
   h2 { font-size: 20px; margin: 40px 0 8px; }
   p { margin: 0 0 14px; color: var(--muted); }
@@ -35,6 +35,7 @@
 <main>
   <a class="brand" href="/">V3KTOR</a>
 
+  <div lang="en" id="en">
   <h1>Page not found</h1>
   <p>That address isn’t on v3ktor.org. The four tools are here:</p>
   <ul>
@@ -44,15 +45,16 @@
     <li><a href="https://v3ktor.app/">V3KTOR™ Instrument<span>What do I keep reacting to? Opens on v3ktor.app.</span></a></li>
   </ul>
   <p class="moved">Followed an old link to the V3KTOR Instrument? It moved to v3ktor.app. <a id="moved-en" href="https://v3ktor.app/">Try the same address there</a>.</p>
+  </div>
 
-  <div lang="fr">
+  <div lang="fr" id="fr">
     <h2>Page introuvable</h2>
     <p>Cette adresse n’existe pas sur v3ktor.org. Les quatre outils sont ici :</p>
     <ul>
-      <li><a href="/gut/fr/">Journal d’essai alimentaire<span>Quels aliments dérangent mon ventre?</span></a></li>
-      <li><a href="/patch/">La Patch<span>Pourquoi est-ce que je tombe toujours à plat?</span></a></li>
+      <li><a href="/gut/fr/">Food Trial Log<span>Quels aliments dérangent mon ventre?</span></a></li>
+      <li><a href="/patch/">La Patch<span>Pourquoi est&#8209;ce que je tombe toujours à plat?</span></a></li>
       <li><a href="/sollum/">Sollum<span>Où commence mon cercle vicieux?</span></a></li>
-      <li><a href="https://v3ktor.app/">Instrument V3KTOR™<span>À quoi est-ce que je réagis, encore et encore? S’ouvre sur v3ktor.app.</span></a></li>
+      <li><a href="https://v3ktor.app/">Instrument V3KTOR™<span>À quoi est&#8209;ce que je réagis, encore et encore? S’ouvre sur v3ktor.app.</span></a></li>
     </ul>
     <p class="moved">Vous avez suivi un ancien lien vers l’instrument V3KTOR? Il a déménagé sur v3ktor.app. <a id="moved-fr" href="https://v3ktor.app/">Essayer la même adresse là-bas</a>.</p>
   </div>
@@ -62,6 +64,20 @@
 (function () {
   var to = 'https://v3ktor.app' + location.pathname + location.search + location.hash;
   ['moved-en', 'moved-fr'].forEach(function (id) { var a = document.getElementById(id); if (a) a.setAttribute('href', to); });
+})();
+/* French first for a visitor who reads French: the language chosen on the front page, or else the browser's. Both languages stay on the page.
+   The block that comes first carries the page's main heading. */
+(function () {
+  var fr = false;
+  try { var s = localStorage.getItem('v3ktor-lang'); fr = s === 'fr' || (s !== 'en' && (navigator.language || '').toLowerCase().indexOf('fr') === 0); }
+  catch (e) { fr = (navigator.language || '').toLowerCase().indexOf('fr') === 0; }
+  var en = document.getElementById('en'), f = document.getElementById('fr');
+  if (!en || !f) return;
+  function retag(block, tag) { var h = block.querySelector('h1, h2'); if (!h || h.tagName.toLowerCase() === tag) return; var n = document.createElement(tag); n.innerHTML = h.innerHTML; h.parentNode.replaceChild(n, h); }
+  if (fr) {
+    en.parentNode.insertBefore(f, en); retag(f, 'h1'); retag(en, 'h2');
+    document.documentElement.lang = 'fr'; document.title = 'Page introuvable · V3KTOR';
+  }
 })();
 </script>
 </body>
