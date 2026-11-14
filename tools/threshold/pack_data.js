@@ -6,7 +6,7 @@ const fs = require('fs'), path = require('path');
 const APP = path.join(__dirname, '..', '..', 'threshold', 'app', 'index.html'), d = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
 // one food to a line: [number, name EN, name FR, serving EN, serving FR, group, the Food Trial Log's groups, grams, kcal, protein, fat, carbohydrate,
 //   sugars (-1 = not listed), fibre, lactose, alcohol, histamine in mg (-2 = not a histamine food, -1 = no figure), [19 vitamins and minerals], the values with no figure]
-const rows = d.foods.map(f => JSON.stringify([f.id, f.n[0], f.n[1], f.s[0], f.s[1], f.grp, f.b.join(' '), f.g, f.kcal, f.prot, f.fat, f.carb, f.sug == null ? -1 : f.sug, f.fib, f.lact, f.alc, f.b.includes('hist') ? (f.hist == null ? -1 : f.hist) : -2, f.m].concat(f.x ? [f.x.join(' ')] : [])));
+const rows = d.foods.map(f => JSON.stringify([f.id, f.n[0], f.n[1], f.s[0], f.s[1], f.grp, f.b.join(' '), f.g, f.kcal, f.prot, f.fat, f.carb, f.sug == null ? -1 : f.sug, f.fib, f.lact, f.alc, f.b.includes('hist') ? (f.hist == null ? -1 : f.hist) : -2, f.m].concat(f.c && Object.keys(f.c).length ? [f.x ? f.x.join(' ') : '', f.c] : f.x ? [f.x.join(' ')] : [])));
 const table = 'const DATA=[\n' + rows.join(',\n') + '\n];\n';
 const html = fs.readFileSync(APP, 'utf8'), a = html.indexOf('const DATA=['), b = html.indexOf('/* DATA:END */');
 if (a < 0 || b < 0) { console.error('DATA markers not found in ' + APP); process.exit(1); }

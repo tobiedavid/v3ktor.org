@@ -111,6 +111,25 @@ eq('nothing to compare with', E.luck(3, 0, 0, 0), null);
   eq('the none cell is read against all the steps', E.stepRest(B, -1, 'head'), { y: 2, n: 3 });
   near('2 of 3 against 1 of 3', E.stepLuck(B, B.steps.length - 1, 'head'), 0.5, 1e-9); }
 
+// ---- the data view: the meals or days an effect was reported for, beside all the others. Nothing is averaged. ----
+{ const F2 = { a: { kcal: 100, fat: 10, prot: 5, carb: 0, fib: 0, sug: 0, lact: 0, alc: 0, c: { caf: 50, ox: 1 } }, b: { kcal: 50, fat: 2, prot: 1, carb: 0, fib: 0, sug: 0, lact: 0, alc: 10, h: true, hist: 1.5 } };
+  const S = { roll: 0, ev: [ meal('2026-11-10', '12:00', [['a', 1]]), fx('2026-11-10', '13:00', 'head'),
+    meal('2026-11-11', '12:00', [['a', 2], ['b', 1]]), none('2026-11-11'),
+    meal('2026-11-12', '12:00', [['b', 3]]), fx('2026-11-12', '13:00', 'gut'),
+    meal('2026-11-13', '12:00', [['a', 1]]), none('2026-11-13') ] };
+  const I = E.index(S, k => F2[k], NOW);
+  eq('a food carries its compounds, times the portions', [E.amounts(F2.a, 2).caf, E.amounts(F2.a, 2).ox], [100, 2]);
+  // over a day, an effect counts for its own day and for the day before it: Nov 10, 11 and 12 are "with", Nov 13 is "without"
+  eq('grams: how many on each side, and the lowest and highest', E.line(I, 'fat', 'day'), { b: 'fat', hit: { n: 3, ate: 3, lo: 6, hi: 22 }, rest: { n: 1, ate: 1, lo: 10, hi: 10 }, left: 0, n: 4 });
+  eq('milligrams: a day with none of it sets the lowest at zero', [E.line(I, 'caf', 'day').hit, E.line(I, 'caf', 'day').rest], [{ n: 3, ate: 2, lo: 0, hi: 100 }, { n: 1, ate: 1, lo: 50, hi: 50 }]);
+  eq('portions: how many held any', [E.line(I, 'ox', 'day').hit.ate, E.line(I, 'ox', 'day').hit.n, E.line(I, 'ox', 'day').rest.ate, E.line(I, 'ox', 'day').rest.n], [2, 3, 1, 1]);
+  eq('one effect picked: only that effect puts a day on the "with" side', [E.line(I, 'fat', 'day', ['head']).hit.n, E.line(I, 'fat', 'day', ['head']).rest.n], [1, 3]);
+  eq('after a meal: the 4 hours after it', [E.line(I, 'fat', 'meal').hit, E.line(I, 'fat', 'meal').rest], [{ n: 2, ate: 2, lo: 6, hi: 10 }, { n: 2, ate: 2, lo: 10, hi: 22 }]);
+  eq('every line of every family is there', E.table(I, 'day').map(f => [f.f, f.rows.length]), E.FAMS.map(f => [f[0], f[1].length]));
+  eq('eaten together: 3 or more aged or fermented portions, and alcohol with one', E.together(I, 'day'), { nHit: 3, nRest: 1, three: { hit: 1, rest: 0 }, both: { hit: 2, rest: 0 } });
+  eq('a line opened with one effect picked counts only that effect', (() => { const B = E.bar(I, 'fat', 'day', ['gut']); return [B.n, [B.zero].concat(B.steps).reduce((t, s) => t + s.k, 0)]; })(), [4, 2]);
+  eq('a caffeine pill has no figure, so its meal sits out of the caffeine line', E.usable(E.amounts({ kcal: 0, fat: 0, prot: 0, carb: 0, fib: 0, x: ['caf'] }, 1), 'caf'), false); }
+
 // ---- rules 2, 4 and 7: one food ----
 { const S = { roll: 0, ev: [
     meal('2026-11-14', '12:00', [['icecr', 1], ['steak', 1]]), fx('2026-11-14', '09:00', 'naus'), fx('2026-11-14', '15:00', 'head'), fx('2026-11-15', '07:00', 'sleep'), fx('2026-11-15', '10:00', 'lowen'),

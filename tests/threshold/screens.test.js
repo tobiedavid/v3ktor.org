@@ -65,14 +65,15 @@ async function open(browser, base, o) {
         ok(T + name + ': every control has a name', !r.nameless.length, r.nameless.join(' | ')); };
       const tap = sel => page.click(sel), shut = () => page.click('#sheet [data-act=close]');
       for (const per of ['h4', 'today', 'week', 'month']) { await tap(`[data-act=per][data-v=${per}]`); await visit('Home, ' + per); }
-      await tap('.fxbar'); await visit('effects sheet'); await shut(); await tap('.ring .mid'); await visit('histamine sheet'); await shut();
+      await tap('.fxbar'); await visit('effects sheet'); await shut(); { const oc = page.locator('#app [data-act=comps]'); if (await oc.count()) { await oc.click(); await visit('other compounds'); const cp = page.locator('#sheet [data-act=comp]'); if (await cp.count()) { await cp.first().click(); await visit('a compound'); const hi = page.locator('#sheet [data-act=histinfo]'); if (await hi.count()) { await hi.click(); await visit('histamine sheet'); } } await shut(); } }
       await tap('.mb.meal'); await visit('meal'); for (const g of ['recent', 'dairy', 'sup', 'proc', 'label']) { const b = page.locator(`#mTabs [data-act=mgrp][data-v=${g}]`); if (await b.count()) { await b.click(); await visit('meal, ' + g); } }
       await page.fill('#mQ', 'zzzz'); await visit('meal, a search with no match'); await page.fill('#mQ', lang === 'fr' ? 'lait' : 'milk'); await tap('#mRows .stp.plus'); await visit('meal, a search with a pick'); await tap('#bar [data-act=back]');
       await tap('.mb.fx'); await visit('effect, physical'); await tap('#sheet [data-act=fxtab][data-v=psy]'); await visit('effect, psychological'); await shut();
       await tap('[data-act=tab][data-v=nut]'); for (const per of ['today', 'week', 'month']) { await tap(`[data-act=nper][data-v=${per}]`); await visit('Nutrition, ' + per); } await tap('details.note summary'); await visit('Nutrition, the reference questions');
       if (B.gut) { await tap('[data-act=impread]'); await visit('import, confirm'); await shut(); const rej = page.locator('#app [data-act=foodrd]'); if (await rej.count()) { await rej.first().click(); await visit('one food, rejected in the Food Trial Log'); await shut(); } }
       await tap('[data-act=tab][data-v=thr]'); for (const mode of ['meal', 'day']) { await tap(`[data-act=tmode][data-v=${mode}]`); await visit('Threshold, ' + mode);
-        const st = page.locator('button.step:is(.r,.m)'); if (await st.count()) { await st.last().click(); const f = page.locator('#sheet [data-act=stfx]'); if (await f.count()) await f.first().click(); await visit('a step, ' + mode); await shut(); } }
+        const fx = page.locator('.fxpick [data-act=tfx]'); if (await fx.count() > 1) { await fx.nth(1).click(); await visit('Threshold, ' + mode + ', one effect'); await fx.first().click(); }
+        const ln = page.locator('#app [data-act=rowsheet][data-k=lact]'); if (await ln.count()) { await ln.click(); const st = page.locator('#sheet [data-act=rstep]'); if (await st.count()) await st.last().click(); await visit('a line, ' + mode); await shut(); } }
       const chip = page.locator('#tqRows [data-act=foodrd]'); if (await chip.count()) { await chip.first().click(); const f = page.locator('#sheet [data-act=frfx]'); if (await f.count()) await f.first().click(); await visit('one food'); await shut(); }
       await page.fill('#tQ', lang === 'fr' ? 'pain' : 'bread'); await visit('Threshold, a food search'); await page.fill('#tQ', 'zzzz'); await visit('Threshold, a food search with no match'); await page.fill('#tQ', '');
       await tap('#topbar [data-act=ai]'); await visit('Ask AI, this month'); await tap('#sheet [data-act=aiscope][data-v=all]'); await visit('Ask AI, everything'); await shut();
@@ -113,7 +114,7 @@ async function open(browser, base, o) {
         same('[offline] the cache carries the app’s own name', await page.evaluate(() => caches.keys()), [named]);
         ok('[offline] that name holds the app’s version', new RegExp('^thresholdlog-' + ver.replace(/\./g, '\\.') + '-[0-9a-f]{8}$').test(named), named + ', version ' + ver); }
       await A.ctx.setOffline(true); await page.reload(); await page.waitForSelector('.mb.meal'); same('[offline] the app opens with no connection, with the data', (await A.S()).ev.length, B.state.ev.length);
-      await page.click('[data-act=tab][data-v=thr]'); ok('[offline] the bars draw', (await page.locator('.tbar button.step').count()) > 10);
+      await page.click('[data-act=tab][data-v=thr]'); ok('[offline] the lists show', (await page.locator('#app table.rws tbody tr').count()) > 5);
       await page.goto(base + '/threshold/app/?r=meal'); await page.waitForSelector('#mQ'); ok('[offline] the home-screen shortcut for a meal opens the meal screen', true);
       await page.goto(base + '/threshold/app/?r=fx'); await page.waitForSelector('#sheet.on [data-act=fxdone]'); ok('[offline] the shortcut for an effect opens the effect sheet', true);
       same('[offline] no error', A.errors.filter(e => !/ERR_INTERNET_DISCONNECTED|Failed to load resource/.test(e)), []); await A.ctx.close(); }

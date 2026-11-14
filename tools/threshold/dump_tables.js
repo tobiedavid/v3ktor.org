@@ -1,4 +1,4 @@
-// Threshold Log data, step 1 of 2: copy the food tables out of The Patch and the Food Trial Log (English and French) as JSON.
+// Threshold Log data, step 1 of 3: copy the food tables out of The Patch and the Food Trial Log (English and French) as JSON.
 // Usage: node dump_tables.js <repo root> <out.json>
 const fs=require('fs'); const [,, repo, out]=process.argv;
 function arr(src,name){ const i=src.indexOf('const '+name+'=')+('const '+name+'=').length; let d=0,j=i,inS=null;

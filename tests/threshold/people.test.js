@@ -6,7 +6,7 @@
 'use strict';
 const { ZONE } = require('../lib/zone.js');     // one fixed-offset zone for Node and for the browser, so both read a clock time the same way
 const fs = require('fs'), path = require('path'), { chromium } = require('playwright');
-const { serve } = require('../lib/serve.js'), { decode } = require('../lib/png.js'), O = require('./oracle.js'), P = require('./people.js');
+const { serve } = require('../lib/serve.js'), O = require('./oracle.js'), P = require('./people.js');
 const ROOT = path.join(__dirname, '..', '..'), FIX = path.join(__dirname, '..', 'fixtures');
 const saveDir = process.argv.includes('--save') ? process.argv[process.argv.indexOf('--save') + 1] : null;
 
@@ -76,8 +76,8 @@ async function play(browser, base, person, table) {
       await page.click('#toast [data-act=undo]'); same(N('and Undo brings it back'), await idAt('fx', a.at), id);
       await page.click(`#app [data-act=entry][data-v="${id}"]`); await page.click('#sheet [data-act=del]'); }
     else if (a.do === 'moveEffect') { await page.click(`#app [data-act=entry][data-v="${await idAt('fx', a.from)}"]`); await page.fill('#enAt', hm(a.to)); await page.click('#sheet [data-act=ensave]'); }
-    else if (a.do === 'conclusions') { await page.click('[data-act=tab][data-v=thr]'); await page.click(`#bar-${a.bar} button.step`); await page.fill('#cIn', a.text); await page.click('#sheet [data-act=close]');
-      ok(N('a conclusion shows under its bar once the sheet closes'), (await page.locator(`#bar-${a.bar}`).innerText()).includes(a.text));
+    else if (a.do === 'conclusions') { await page.click('[data-act=tab][data-v=thr]'); await page.click(`#app [data-act=rowsheet][data-k=${a.bar}]`); await page.fill('#cIn', a.text); await page.click('#sheet [data-act=close]');
+      await page.click(`#app [data-act=rowsheet][data-k=${a.bar}]`); ok(N('a conclusion is on its line when the sheet opens again'), (await page.inputValue('#cIn')) === a.text); await page.click('#sheet [data-act=close]');
       await page.fill('#tQ', nameOf(a.food)); await page.click(`#tqRows [data-act=foodrd][data-v="${keyOf(a.food)}"]`); await page.fill('#cIn', a.text); await page.click('#sheet [data-act=close]'); await page.click('[data-act=tab][data-v=home]'); }
     else if (a.do === 'removeMeal') { await page.click('[data-act=menu]'); await page.click('#sheet [data-act=hist]'); await page.click(`#app [data-act=entry][data-v="${await idAt('meal', a.target)}"]`); await page.click('#sheet [data-act=del]'); await page.click('#bar [data-act=back]'); }
     else if (a.do === 'closeOldest') { await page.click('[data-act=menu]'); await page.click('#sheet [data-act=hist]');       // the oldest day before today that History offers to close
@@ -104,46 +104,54 @@ async function play(browser, base, person, table) {
     const c = R.cells(b, mode), B = await page.evaluate(([b, m]) => { const B = TLE.bar(IX(), b, m), cut = s => ({ n: s.n, k: s.k, fx: s.fx }); return { zero: cut(B.zero), steps: B.steps.map(cut), width: B.w, top: B.max, left: B.left, n: B.n }; }, [b, mode]);
     same(N(`${b}, ${mode}: every step's entries, entries with effects and effects by kind`), B, c);
   }
-  // ...and the same numbers as they are drawn
+  // ...and the same counts as the lists show them: for any effect, then for the effect reported most often
   await page.click('[data-act=tab][data-v=thr]');
-  const tone = await page.evaluate(() => { const rgb = v => { const e = document.createElement('i'); e.style.background = `var(${v})`; document.body.appendChild(e); const c = getComputedStyle(e).backgroundColor.match(/\d+/g).slice(0, 3).map(Number); e.remove(); return c; }; return { g: rgb('--fx0'), r: rgb('--fx3'), card: rgb('--card') }; });
-  ok(N('the two colours of a step are a green and a red'), tone.g[1] > tone.g[0] + 60 && tone.g[1] > tone.g[2] + 60 && tone.r[0] > tone.r[1] + 60 && tone.r[0] > tone.r[2] + 60, JSON.stringify(tone));
-  for (const mode of ['meal', 'day']) { await page.click(`[data-act=tmode][data-v=${mode}]`);
-    for (const b of BARS) { const c = R.cells(b, mode), labels = await page.locator(`#bar-${b} .stepsrow .step`).evaluateAll(els => els.map(e => e.getAttribute('aria-label')));
-      const read = l => { const m = /(\d+) [^\d,]+, [^\d]*?(\d+)$/.exec(l); return m ? [+m[1], +m[2]] : [0, 0]; }, cells = c.n ? [c.zero].concat(c.steps) : [];
-      same(N(`${b}, ${mode}: the steps on screen`), c.n && c.steps.length ? labels.map(read) : labels.slice(0, 1).map(read), c.n && c.steps.length ? cells.map(s => [s.n, s.k]) : c.n ? [[c.zero.n, c.zero.k]] : [[0, 0]]);
-      // two colours and no others: green (g), red (r), both (m, with the red share), or an empty outline (none)
-      const drawn = await page.locator(`#bar-${b} .stepsrow .step`).evaluateAll(els => els.map(e => [['none', 'g', 'r', 'm'].filter(x => e.classList.contains(x)).join(' '), e.style.getPropertyValue('--p')]));
-      const share = s => Math.round(s.k / s.n * 100), paint = s => !s.n ? ['none', ''] : !s.k ? ['g', ''] : s.k === s.n ? ['r', ''] : ['m', share(s) + '%'];
-      if (c.n && c.steps.length) { same(N(`${b}, ${mode}: green, red or both for every step`), drawn, cells.map(paint));
-        // ...and the picture itself, one column of pixels down the middle of each step: red from the bottom, in the share of its entries
-        const row = page.locator(`#bar-${b} .stepsrow`), png = decode(await row.screenshot()), mid = await row.locator('.step').evaluateAll(els => { const o = els[0].parentElement.getBoundingClientRect(); return els.map(e => { const r = e.getBoundingClientRect(); return Math.round(r.left - o.left + r.width / 2); }); });
-        const far = (a, t) => (a[0] - t[0]) ** 2 + (a[1] - t[1]) ** 2 + (a[2] - t[2]) ** 2, H = 44;
-        const seen = mid.map(x => { let r = 0, g = 0, lowG = -1, highR = png.h; for (let y = 0; y < png.h; y++) { const a = png.at(x, y), dr = far(a, tone.r), dg = far(a, tone.g), dc = far(a, tone.card); if (dr < dg && dr < dc) { r++; highR = Math.min(highR, y); } else if (dg < dr && dg < dc) { g++; lowG = y; } } return [r, g, lowG < highR]; });
-        const want = cells.map(s => { if (!s.n) return [0, 0]; if (!s.k) return [0, H]; if (s.k === s.n) return [H, 0]; const e = Math.min(H - 5, Math.max(5, share(s) / 100 * H)); return [e - 1, H - e - 1]; });      // each colour keeps 5 pixels; 2 go to the line between them
-        ok(N(`${b}, ${mode}: in the picture, each step holds red and green in the share of its entries, red at the bottom`), seen.length === want.length && seen.every((s, i) => Math.abs(s[0] - want[i][0]) <= 1.5 && Math.abs(s[1] - want[i][1]) <= 1.5 && s[2]), 'pixels of red and green ' + JSON.stringify(seen.map(s => s.slice(0, 2))) + '\n     recount ' + JSON.stringify(want)); } } }
-  // one step's sheet, and the luck number, by brute force
-  { const c = R.cells('lact', 'meal'), B = await page.evaluate(() => { const B = TLE.bar(IX(), 'lact', 'meal'); return { zero: B.zero, steps: B.steps }; }), all = [c.zero].concat(c.steps);
-    let i = all.findIndex((s, j) => j > 0 && s.k > 0), code = i > 0 ? Object.keys(all[i].fx)[0] : null;
-    if (code) { const s = all[i], y = s.fx[code], rest = all.filter((_, j) => j !== i), ry = rest.reduce((t, x) => t + (x.fx[code] || 0), 0), rn = rest.reduce((t, x) => t + x.n, 0);
-      const p = await page.evaluate(([i, c]) => TLE.stepLuck(TLE.bar(IX(), 'lact', 'meal'), i, c), [i - 1, code]), q = O.luck(y, s.n - y, ry, rn - ry);
+  const KEYS = ['fat', 'cplx', 'sug', 'lact', 'fib', 'alc', 'caf', 'hist', 'tyr', 'ox', 'nit', 'ga', 'cap', 'fru', 'gos', 'sorb', 'mann', 'fruc', 'sulph', 'nitr', 'swt', 'glu', 'pur', 'theo'], BASE = KEYS.slice(0, 5);
+  const PORTIONS = ['tyr', 'ox', 'ga', 'cap', 'fru', 'gos', 'sorb', 'mann', 'fruc', 'sulph', 'nitr', 'swt', 'glu', 'pur'];
+  const tally = want.filter(e => e.k === 'fx').reduce((o, e) => (o[e.c] = (o[e.c] || 0) + 1, o), {}), most = Object.keys(tally).sort((x, y) => tally[y] - tally[x] || x.localeCompare(y))[0];
+  const dec = x => x < 1 ? 2 : x < 10 ? 1 : 0, near = (shown, real) => Math.abs(shown - real) <= 0.5 * Math.pow(10, -dec(real)) + 1e-9;
+  for (const mode of ['meal', 'day']) for (const pick of most ? [[], [most]] : [[]]) {
+    await page.click(`[data-act=tmode][data-v=${mode}]`); await page.click('.fxpick [data-act=tfx][data-v=""]'); if (pick.length) await page.click(`.fxpick [data-act=tfx][data-v="${pick[0]}"]`);
+    const tag = `${mode}, ${pick.length ? pick[0] : 'any effect'}`;
+    const shown = await page.locator('#app table.rws:not(#fam-tog) tbody tr').evaluateAll(trs => trs.map(tr => [tr.querySelector('[data-act=rowsheet]').dataset.k, tr.cells[1].textContent, tr.cells[2].textContent]));
+    const lines = KEYS.map(k => [k, R.sides(k, mode, pick)]).filter(([k, s]) => BASE.includes(k) || s.hit.ate + s.rest.ate > 0);
+    same(N(`${tag}: the lines shown`), shown.map(r => r[0]).sort(), lines.map(r => r[0]).sort());
+    for (const [k, s] of lines) { const row = shown.find(r => r[0] === k); if (!row) continue;
+      [[row[1], s.hit], [row[2], s.rest]].forEach(([txt, side], j) => { const nums = (txt.match(/\d[\d.,  ]*\d|\d/g) || []).map(num), name = N(`${tag}: ${k}, ${j ? 'without' : 'with'}`);
+        if (!side.n) same(name, txt.trim(), '–');
+        else if (PORTIONS.includes(k)) same(name, nums, [side.ate, side.n]);                                  // how many held any, of how many
+        else ok(name, nums.length > 0 && near(nums[0], side.lo) && near(nums[nums.length - 1], side.hi), `screen "${txt}", recount ${side.lo} to ${side.hi}`); }); }   // the lowest and the highest, never an average
+    const G = R.together(mode, pick), cell = (x, n) => n ? [x, n] : [], tog = await page.locator('#fam-tog tbody tr').evaluateAll(trs => trs.map(tr => [tr.cells[1].textContent, tr.cells[2].textContent].map(t => (t.match(/\d+/g) || []).map(Number))));
+    same(N(`${tag}: eaten together`), tog, G.three.hit + G.three.rest + G.both.hit + G.both.rest > 0 ? [[cell(G.three.hit, G.nHit), cell(G.three.rest, G.nRest)], [cell(G.both.hit, G.nHit), cell(G.both.rest, G.nRest)]] : []);
+    // one line, opened: every amount, with how many sat on each side
+    for (const k of ['lact', 'glu']) { if (!shown.find(r => r[0] === k)) continue; const c = R.cells(k, mode, pick), all = [c.zero].concat(c.steps).filter(x => x.n > 0);
+      await page.click(`#app [data-act=rowsheet][data-k=${k}]`); const got = await page.locator('#rowSteps tbody tr').evaluateAll(trs => trs.map(tr => [+tr.cells[1].textContent, +tr.cells[2].textContent]));
+      same(N(`${tag}: ${k}, every amount with and without`), got, all.map(x => [x.k, x.n - x.k])); await page.click('#sheet [data-act=close]'); } }
+  // the luck number for one amount, by brute force
+  { const c = R.cells('lact', 'meal', []), all = [c.zero].concat(c.steps), i = all.findIndex((x, j) => j > 0 && x.k > 0);
+    if (i > 0) { const x = all[i], K = all.reduce((t, y) => t + y.k, 0), M = all.reduce((t, y) => t + y.n, 0), q = O.luck(x.k, x.n - x.k, K - x.k, (M - x.n) - (K - x.k));
+      const p = await page.evaluate(([k, n, K, M]) => TLE.luck(k, n - k, K - k, (M - n) - (K - k)), [x.k, x.n, K, M]);
       ok(N('the luck number matches a brute-force count'), Math.abs(p - q) < 1e-9, `app ${p}, brute force ${q}`);
-      await page.click('[data-act=tmode][data-v=meal]'); await page.click(`#bar-lact button.step[data-v="${i - 1}"]`); await page.click(`#sheet [data-act=stfx][data-v="${code}"]`);
-      const line = await page.locator('#luckLine').innerText(); ok(N('the step sheet states both counts'), line.includes(String(y)) && line.includes(String(s.n)) && line.includes(String(ry)) && line.includes(String(rn)), line);
+      await page.click('[data-act=tmode][data-v=meal]'); await page.click('.fxpick [data-act=tfx][data-v=""]'); await page.click('#app [data-act=rowsheet][data-k=lact]'); await page.click(`#sheet [data-act=rstep][data-v="${i - 1}"]`);
+      const line = await page.locator('#luckLine').innerText(); ok(N('the opened amount states its counts on both sides'), [x.k, K, x.n - x.k, M - K].every(v => line.includes(String(v))), line);
       ok(N('every reading says whose it is'), (await page.locator('#sheet').innerText()).includes(fr ? 'Ton propre relevé. Pas un conseil.' : 'Your own report. Not advice.')); await page.click('#sheet [data-act=close]'); } }
 
   // ---- Home: the ring, its key, the middle, and the Effects bar, over each period ----
   await page.click('[data-act=tab][data-v=home]');
-  const SL = { fat: 'fat', prot: 'prot', cplx: 'complex', lact: 'lactose', sugo: 'otherSugars', fib: 'fibre', unk: 'carbsUnlisted', alc: 'alcohol' };
+  const SL = { fat: 'fat', prot: 'prot', cplx: 'complex', lact: 'lactose', sugo: 'otherSugars', fib: 'fibre', unk: 'carbsUnlisted' };
+  const OTHERS = ['tyr', 'ox', 'nit', 'ga', 'cap', 'fru', 'gos', 'sorb', 'mann', 'fruc', 'sulph', 'nitr', 'swt', 'glu', 'pur', 'theo'];
   for (const per of ['h4', 'today', 'week', 'month']) { await page.click(`[data-act=per][data-v=${per}]`); const w = R.period(per);
     same(N(`Home, ${per}: effects`), +(await page.locator('.fxbar b').innerText()), w.effects);
-    const key = await page.locator('.key .keyrow').evaluateAll(els => els.map(e => [getComputedStyle(e.querySelector('.sw')).backgroundColor, e.querySelector('.am').textContent]));
+    const key = await page.locator('#app .card ul.key').first().locator('.keyrow').evaluateAll(els => els.map(e => [getComputedStyle(e.querySelector('.sw')).backgroundColor, e.querySelector('.am').textContent]));
     const colours = await page.evaluate(ks => { const o = {}; for (const k of ks) { const i = document.createElement('i'); i.style.background = `var(--s-${k})`; document.body.appendChild(i); o[getComputedStyle(i).backgroundColor] = k; i.remove(); } return o; }, Object.keys(SL));
     const wantKey = Object.keys(SL).filter(k => w.am[SL[k]] >= 0.05);
     same(N(`Home, ${per}: the slices in the key`), key.map(r => colours[r[0]]), wantKey);
     key.forEach((r, i) => { const v = w.am[SL[wantKey[i]]]; if (v !== undefined) close(N(`Home, ${per}: ${wantKey[i]} in grams`), num(r[1]), v, v < 10 ? 1 : 0); });
     const pcts = (await page.locator('.ring svg').getAttribute('aria-label')).match(/\d+(?=\s*%)/g) || []; if (wantKey.length) same(N(`Home, ${per}: the slices add up to 100`), pcts.reduce((t, x) => t + +x, 0), 100);
-    const mid = await page.locator('.ring .mid b').innerText(); close(N(`Home, ${per}: histamine in the middle`), num(mid), w.am.hist, w.am.hist < 1 ? 2 : w.am.hist < 10 ? 1 : 0);
+    const grams = Object.values(SL).reduce((t, k) => t + w.am[k], 0), mid = await page.locator('.ring .mid b').innerText(); close(N(`Home, ${per}: the grams in the middle`), num(mid), grams, 0);
+    if (grams >= 0.05) { close(N(`Home, ${per}: alcohol`), num(await page.locator('#app [data-act=comp][data-v=alc] .am').innerText()), w.am.alcohol, w.am.alcohol < 1 ? 2 : w.am.alcohol < 10 ? 1 : 0);
+      const caf = w.am.also.caf || 0; close(N(`Home, ${per}: caffeine`), num(await page.locator('#app [data-act=comp][data-v=caf] .am').innerText()), caf, caf < 1 ? 2 : caf < 10 ? 1 : 0);
+      same(N(`Home, ${per}: how many other compounds`), parseInt(await page.locator('#app .cmore .muted').innerText(), 10), OTHERS.filter(k => (w.am.also[k] || 0) > 0.005).length + (w.am.histPortions > 0 ? 1 : 0)); }
     const fill = await page.locator('.fxbar .trk i').evaluate(e => parseFloat(e.style.height)), top = R.busiest(per);
     same(N(`Home, ${per}: the Effects bar against the person's own highest (${top})`), fill, top ? Math.round(Math.min(1, w.effects / top) * 100) : 0); }
   await page.click('[data-act=per][data-v=today]');
