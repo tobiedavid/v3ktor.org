@@ -1,0 +1,29 @@
+# Runs the tests on every pull request, and on every change to main.
+# The first step needs nothing but Node. The second installs the browser that the screen tests drive.
+name: Tests
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Reading rules, repair cases and cache names
+        run: node tests/run.js --no-browser
+      - name: Install the browser
+        run: |
+          npm install --no-save --no-package-lock playwright@1.63.0
+          npx playwright install --with-deps chromium
+      - name: Every screen, both languages, and the six-week walkthroughs
+        run: node tests/run.js --browser
