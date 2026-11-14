@@ -1067,7 +1067,7 @@ function openMenu(){
 }
 function openHow(){showSheet(`<div class="handle"></div><h3 id="sheetTitle">${t('howTitle')}</h3>${t('howBody')}<div class="row" style="margin-top:12px"><button type="button" class="btn sm sec" id="closeSheet">${t('close')}</button></div>`)}
 function openAbout(){showSheet(`<div class="handle"></div><h3 id="sheetTitle">${t('aboutTitle')}</h3>${t('aboutBody')}<p class="small">Sollum v${VER} · ${L('words','mots')} ${POOL_VERSION} · ${L('help lines','lignes d’aide')} ${t('helpChecked',HELP_CHECKED)}</p><div class="row" style="margin-top:12px"><button type="button" class="btn sm" data-act="feedback">${t('improve')}</button><button type="button" class="btn sm sec" id="closeSheet">${t('close')}</button></div>`)}
-const FEEDBACK_TO='tobiedavid@hotmail.com';let fbDraft='';
+const FEEDBACK_TO='hello@v3ktor.app';let fbDraft='';
 function fbMsg(){return (fbDraft||'').trim()+'\n\n— Sollum v'+VER+' ('+String(store.lang||'en').toUpperCase()+')'}
 function openFeedback(){showSheet(`<div class="handle"></div><h3 id="sheetTitle">${t('improve')}</h3><p class="small">${t('fbLead',FEEDBACK_TO)}</p><textarea id="fbText" style="min-height:120px" aria-label="${esc(t('fbLabel'))}">${esc(fbDraft)}</textarea><div class="row" style="margin-top:10px;flex-wrap:wrap"><button type="button" class="btn sm" data-act="feedbackSend">${t('fbSend')}</button>${navigator.share?`<button type="button" class="btn sm sec" data-act="feedbackShare">${t('fbShare')}</button>`:''}<button type="button" class="btn sm sec" data-act="feedbackCopy">${t('copy')}</button><button type="button" class="btn sm sec" id="closeSheet">${t('close')}</button></div><div class="small" id="fbNote"></div>`)}
 function fbNote(x){const n=document.getElementById('fbNote');if(n)n.textContent=x}

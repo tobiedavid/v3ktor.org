@@ -494,7 +494,7 @@ const VER='1.2.61'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
 /* v1.2.57 (8 Nov 2026): from two AI reviews, checked: bleeding while pregnant is a red card, not an iron leak; the celiac test
    joins the first blood draw when stools are loose or unpredictable; the thiamine line is clear for someone pregnant. */
 /* v1.2.58 (8 Nov 2026): public. "For family first" leaves the first screen; "Tell Tobie" becomes "Improve the app", by email to
-   tobiedavid@hotmail.com, with the share sheet and copy as fallbacks. */
+   hello@v3ktor.app, with the share sheet and copy as fallbacks. */
 /* v1.2.59 (8 Nov 2026): a day summary for other v3ktor.org apps on this phone (Sollum first): sleep, caffeine, sugar, meals, drinks,
    crashes — counts and times, never the answers or the food list — under one shared local key, next to the app's own storage.
    Nothing leaves the phone. Off in the menu; erasing the app clears it. The summaries also ride along in the backup (S.sum). */
@@ -4011,7 +4011,7 @@ function monthCard(){ if(!S.done||S.learnDone) return ''; const t0=S.since||S.ma
 function learnPatCard(){ if(!S.learn) return ''; return `<div class="card soft"><div class="eyebrow">${L('What you learned','Ce que tu as appris')} · ${esc(labDate(S.learn.day))}</div><p class="small" style="margin:0">“${esc(S.learn.text)}”</p></div>`; }
 /* v1.2.58: Improve the app. Recommendations go by email to the maker (his ask); the share sheet and the clipboard are the fallbacks.
    Only what the person types leaves the phone — never their answers or their log. */
-const FEEDBACK_TO='tobiedavid@hotmail.com';
+const FEEDBACK_TO='hello@v3ktor.app';
 function openTobie(opener,pre){ if(pre!=null) tobieDraft=pre;
   showSheet(`<div class="handle"></div><h3 id="sheetTitle">${L('Improve the app','Améliorer l’app')}</h3><p class="small">${L(`Recommendations, what bugs you, what’s confusing, what helped. It goes to <b>${FEEDBACK_TO}</b>. Only what you type here is sent — your answers and your log stay on this phone.`,`Des recommandations, ce qui t’agace, ce qui est mêlant, ce qui a aidé. Ça s’en va à <b>${FEEDBACK_TO}</b>. Seul ce que tu écris ici est envoyé — tes réponses et ton journal restent sur ce téléphone.`)}</p><textarea id="tobieText" class="out" style="min-height:120px" aria-label="${L('Your message','Ton message')}">${esc(tobieDraft)}</textarea><div class="row" style="margin-top:10px"><button type="button" class="btn sm" id="tobieSend">${L('Send by email','Envoyer par courriel')}</button>${navigator.share?`<button type="button" class="btn ghost sm" id="tobieShare">${L('Share another way','Partager autrement')}</button>`:''}<button type="button" class="btn ghost sm" id="tobieCopy">${L('Copy','Copier')}</button><button type="button" class="btn ghost sm" id="closeSheet">${L('Close','Fermer')}</button></div>`, opener);
   const ta=document.getElementById('tobieText'); if(ta) ta.oninput=()=>{ tobieDraft=ta.value; };
