@@ -724,7 +724,7 @@ function num(x,d){ if(x==null||!isFinite(x)) return '?'; if(d==null) d=Math.abs(
 const U=(x,u,d)=>num(x,d)+'\u00a0'+u;                                    /* a number and its unit never split across lines */
 const qtxt=q=>{ const w=Math.floor(q), h=q-w>=0.25; return (w||!h?String(w):'')+(h?'½':''); };
 function dLabel(k){ const T=today(); if(k===T) return L('Today','Aujourd’hui'); if(k===kAdd(T,-1)) return L('Yesterday','Hier'); const [y,m,d]=k.split('-').map(Number); const s=new Date(y,m-1,d).toLocaleDateString(LOC(),{weekday:'long',month:'long',day:'numeric'}); return s.charAt(0).toUpperCase()+s.slice(1); }
-function atTime(day,at){ const [y,m,d]=day.split('-').map(Number), [h,mi]=(at||'12:00').split(':').map(Number); let t=new Date(y,m-1,d,h,mi).getTime(); if(h<(S.roll||0)) t+=24*H; return t; }   /* 1 a.m. on a day that starts at 4 is the next calendar morning */
+function atTime(day,at){ const [y,m,d]=day.split('-').map(Number), [h,mi]=(at||'12:00').split(':').map(Number); return new Date(y,m-1,d+(h<(S.roll||0)?1:0),h,mi).getTime(); }   /* 1 a.m. on a day that starts at 4 is the next calendar morning: the next date on the calendar, not 24 hours on, so a clock change in between can't move it */
 const uid=p=>p+now().toString(36)+Math.random().toString(36).slice(2,6);
 function IX(){ return IXM||(IXM=E.index(S,food,now())); }
 const mine=()=>new Set(S.list);
