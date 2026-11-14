@@ -149,6 +149,7 @@ textarea.out{width:100%;min-height:140px;border:1px solid var(--line);border-rad
 .hand{border:2px solid var(--ink);border-radius:12px;padding:12px 14px;font-size:.95rem;line-height:1.45}
 .hand div{margin:2px 0}
 .chip.ack{width:100%;font-size:0.875rem;line-height:1.35;margin-top:12px;padding:10px 14px;opacity:.85}
+.chip.ack,.chip.ack[aria-pressed="true"]{cursor:default;background:transparent;color:var(--muted);border-color:var(--line);box-shadow:none;opacity:1;margin-bottom:10px}
 .card.gate{border:2px solid var(--accent)}
 .btn[aria-disabled="true"]{opacity:.45}
 .doors{display:grid;gap:12px;margin-top:14px}
@@ -330,7 +331,8 @@ div.tlr{cursor:default}
 .mirror{background:var(--teal-soft);border-radius:14px;padding:12px 14px;margin:0 0 12px}
 ul.pay{padding-left:18px} ul.pay li{margin:.2em 0}
 #bar .in .btn{white-space:nowrap;flex:none}
-#bar .in > span.small{flex:1;min-width:0;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#bar .in > span.small{flex:1;min-width:0;text-align:center;line-height:1.2;overflow-wrap:break-word}
+@media (max-width:340px){.bar{padding-left:10px;padding-right:10px} #bar .in{gap:6px} #bar .in .btn{padding:9px 10px} #bar .in > span.small{font-size:.8rem}}
 /* v1.2.30 */
 .tagline{font-size:1.2rem;font-weight:700;line-height:1.3;margin:6px 0 10px}
 .card.hint,[data-payoffcard]{position:relative;cursor:pointer}
@@ -338,6 +340,7 @@ ul.pay{padding-left:18px} ul.pay li{margin:.2em 0}
 .card .x{position:absolute;top:2px;right:2px;width:44px;height:44px;border:0;background:transparent;color:var(--muted);font-size:1.5rem;line-height:1;cursor:pointer;border-radius:22px}
 .card .x:focus-visible{outline:3px solid var(--accent)}
 .chip.alarm{border-color:var(--warn)} .chip.alarm[aria-pressed="true"]{background:var(--warn);border-color:var(--warn);color:#fff}
+@media (prefers-color-scheme:dark){.chip.alarm[aria-pressed="true"]{color:#1c0d0b}}   /* a selected warning sign was white on coral */
 .labgrid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px} @media(min-width:520px){.labgrid{grid-template-columns:1fr 1fr}}
 .labgrid label.lab{display:flex;flex-direction:column;gap:4px;font-size:.95rem} .labgrid label.lab span{font-weight:600}
 .labform input.sel{min-height:44px} .labform input[type=date]{max-width:220px}
@@ -357,6 +360,7 @@ p.goalfor{font-size:.85rem}
 @media (max-width:380px){.tb.sos{padding:6px 8px;font-size:.8125rem} .tb.ttl{font-size:1rem} .topbar .in{gap:4px;padding:8px 10px}}
 .topbar .tb.ttl{min-width:0;overflow:hidden;text-overflow:ellipsis} .topbar .tb.sos{flex:none;margin-left:6px}
 @media (max-width:380px){.topbar .tb.ttl{font-size:.9rem} .topbar .tb.sos{font-size:.75rem;padding:6px 7px}}
+@media (max-width:340px){.topbar .in{gap:2px;padding:8px 6px} .topbar .tb.ttl{font-size:.84rem;padding:6px 2px} .topbar .tb.sos{margin-left:2px;padding:6px 5px}}
 .bar.hidden{display:none}
 .btn[disabled]{opacity:.45;cursor:default}
 .gtabs button[disabled]{opacity:.45;cursor:default}
@@ -377,7 +381,7 @@ p.note{background:var(--teal-soft);border-radius:12px;padding:8px 12px;margin:-4
 .sel.wide{width:100%;margin:8px 0;min-height:44px;box-sizing:border-box}
 .eyebrow.warn{color:var(--warn)}
 .from{color:var(--teal);font-weight:600}
-.toast.live{pointer-events:auto}.toast .undo{background:none;border:0;color:inherit;font:inherit;font-weight:800;text-decoration:underline;padding:0 0 0 8px;cursor:pointer}
+.toast.live{pointer-events:auto}.toast .undo{background:none;border:0;color:inherit;font:inherit;font-weight:800;text-decoration:underline;padding:12px 10px;margin:-12px -8px -12px 0;min-width:44px;min-height:44px;cursor:pointer}
 details.note summary{cursor:pointer;padding:8px 0;min-height:44px}
 .toptabs{flex-wrap:nowrap}.toptabs button{flex:1 1 auto;white-space:nowrap;padding:6px 10px}
 .mealhd .row{flex-wrap:wrap}
@@ -386,6 +390,8 @@ body:has(.bar:not(.hidden)) #installPill,body:has(.instbig) #installPill{display
 #installPill{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));z-index:20;display:flex;gap:6px;align-items:center;width:max-content;max-width:calc(100vw - 24px);box-sizing:border-box;background:var(--ink);color:var(--bg);border-radius:22px;padding:6px 6px 6px 16px;box-shadow:0 6px 20px -8px rgba(0,0,0,.45);font-weight:600;font-size:.94rem;line-height:1.25}
 #installPill button{border:0;font:inherit;cursor:pointer;min-height:42px;flex:none} #installPill .ipy{background:var(--accent);color:#fff;border-radius:999px;padding:9px 16px} #installPill .ipn{background:transparent;color:inherit;padding:8px 10px}
 .bar{z-index:25}
+.chip[aria-pressed="true"] .muted{color:inherit;opacity:.8}
+@media (prefers-color-scheme:dark){#installPill .ipy{color:#1a0c06}}
 .steps{margin:4px 0 14px;padding-left:1.4em} .steps li{margin:0 0 9px} .ico{display:inline-block;vertical-align:-4px}
 .sheet a:not(.btn),.wrap p a{color:var(--teal);text-underline-offset:3px}
 /* v1.2.0 */
@@ -644,7 +650,7 @@ const UA=navigator.userAgent||'', IOS=/iPad|iPhone|iPod/.test(UA)||(navigator.pl
   STANDALONE=(()=>{ try{ return navigator.standalone===true||matchMedia('(display-mode: standalone)').matches; }catch(e){ return false; } })(),
   SHARE='<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M7 11H5v10h14V11h-2"/></svg>';
 if(FRAMED||STANDALONE) document.documentElement.classList.add('noinst');
-const VER='1.4.8', RULES=5, CONSENT=3, KEY='v3k.gut.v1', H=36e5;
+const VER='1.4.9', RULES=5, CONSENT=3, KEY='v3k.gut.v1', H=36e5;
 const BK={alc:[4,'Alcohol'],caf:[4,'Caffeine and coffee'],proc:[4,'Processed or packaged food'],swt:[4,'Sugar-free sweeteners'],sup:[4,'Supplements and protein powder'],dairy:[3,'Dairy'],fat:[3,'Fatty or fried food'],sugar:[3,'Sugar and fructose'],rawsea:[3,'Raw shellfish'],gluten:[2,'Wheat, barley and rye'],fibre:[2,'Bran and high-fibre food'],legume:[2,'Beans and lentils'],onion:[2,'Onion and garlic'],spicy:[2,'Spicy food'],hist:[2,'Histamine-rich food'],veg:[1,'Vegetables, other than the plain ones'],fruit:[1,'Fruit, other than banana'],nuts:[1,'Nuts and seeds']};
 const BKN={caf:'coffee (decaf too), tea, energy drinks, cola',proc:'most have 20 or more ingredients, so one product is one suspect',swt:'sorbitol, xylitol, sugar-free gum and candy',sup:'over-the-counter only. Never stop a prescribed medicine to test it.',sugar:'juice, honey, soft drinks, apples, pears, mango',hist:'aged cheese, cured meat, canned fish, leftovers, wine, fermented food',veg:'plain: peeled potatoes and squash',fruit:'banana is plain',dairy:'all of it when cutting. Coming back: milk proves it fastest; hard cheese has almost no lactose and is worth its own test'};
 /* the Plain tab leads with what people reach for when their gut is off; the rest follow in A to Z */
@@ -765,8 +771,19 @@ function migrate3(o){ const n=Object.assign(S0(),o); n.p=Object.assign(S0().p,o.
   if((n.route==='fast'&&!n.fast)||(n.route==='slow'&&!n.slow)) n.route=null; if(n.slow&&!n.slow.skip) n.slow.skip=[]; if(n.minor) n.route='log';
   for(const k of ['setup','note']) delete n[k]; for(const k of ['region','alg','algNone','algTxt','q','agree','diet','at','cv']) delete n.p[k]; n.ev=n.ev.map(v3ev); n.v=3; return remapMerged(n); }
 /* 1.3.0 had three stages; 1.3.1 has two steps. A trial that already passed the old 7-day hold carries on in step 2. */
-function migrate(o){ if(o&&o.v===4){ const n=Object.assign(S0(),o); n.p=Object.assign(S0().p,o.p||{}); return remapMerged(n); }
-  const n=migrate3(o); if(n.fast&&n.fast.holdAt&&!n.fast.s3At) n.fast.s3At=kAdd(n.fast.holdAt,1); n.v=4; return n; }
+function migrate(o){ if(o&&o.v===4){ const n=Object.assign(S0(),o); n.p=Object.assign(S0().p,o.p||{}); return fixFalls(remapMerged(n)); }
+  const n=migrate3(o); if(n.fast&&n.fast.holdAt&&!n.fast.s3At) n.fast.s3At=kAdd(n.fast.holdAt,1); n.v=4; return fixFalls(n); }
+/* Before 1.4.9 a bad day in step 2 took two foods off the list: the newest, and on the next redraw the one added the day before. Only the newest should go.
+   The other one goes back on the list and is named once on the main screen (n.fixed). Left alone: a food tried again since, because its test decides,
+   and everything while a test is running, so nothing changes in the middle of one. Running it twice changes nothing. */
+function fixFalls(n){ const F=n.fast; if(n.route!=='fast'||!F||!Array.isArray(n.cuts)||(n.tests||[]).some(t=>t&&!t.res)) return n; const by={}, back=[];
+  for(const c of n.cuts) if(c&&c.why==='fall'&&c.d>=F.start) (by[c.d]||(by[c.d]=[])).push(c);
+  /* the newest food is the one added last; with no add on record, the one that came off first */
+  const addAt=c=>Math.max(0,...(n.adds||[]).filter(a=>a&&a.why==='s2'&&a.key===c.key&&a.at<c.at).map(a=>a.at));
+  for(const cs of Object.values(by)){ if(cs.length<2) continue; const keep=cs.slice().sort((p,q)=>addAt(q)-addAt(p)||p.at-q.at)[0];
+    for(const c of cs) if(c!==keep&&!(n.tests||[]).some(t=>t&&t.key===c.key&&t.d1>=c.d)) back.push(c); }
+  if(back.length){ n.cuts=n.cuts.filter(c=>!back.includes(c)); n.fixed=[...(n.fixed||[]),...back.map(c=>({key:c.key,d:c.d}))]; }
+  return n; }
 function save(){ MEMO={}; if(STORE==='bad'||NOSAVE) return; try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){ STORE='none'; } if(!persistAsked){ persistAsked=true; try{ navigator.storage&&navigator.storage.persist&&navigator.storage.persist().catch(()=>{}); }catch(e){} } }
 
 /* ---------- days: a day starts at S.roll o'clock, as in The Patch ---------- */
@@ -829,9 +846,11 @@ function fastInfo(){ const F=S.fast; if(!F||S.route!=='fast') return null; const
   /* suspects: the last two foods stopped in stage 1 on or before the day the good stretch began (foods taken off by a stage 2 bad day are listed after them) */
   const sus=[...new Set(mine.filter(c=>c.why!=='roll'&&c.why!=='fall'&&c.d<=from).slice(-2).reverse().map(c=>c.key))];
   return {F,T,base,marked,plainAt,phase,stage,falls,run,from,day,di,changed,canCut,sus,suggest:canCut&&marked.length?marked[0]:null,swap:canCut&&!marked.length}; }
-/* step 2 to step 1: on a bad day, the newest food added in step 2 (today's, or yesterday's if none today) comes off the list and goes on the "doesn't sit right" list. */
+/* step 2 to step 1: on a bad day, the newest food added in step 2 (today's, or yesterday's if none today) comes off the list and goes on the "doesn't sit right" list.
+   One food per bad day. The fall follows its report: undo, delete or correct the report that made the day bad and the food is back on the list. */
 function fallBack(fi){ if(!fi||S.pause) return false; let ch=false;
-  for(const B of fi.falls){ const y=kAdd(B,-1), a=S.adds.filter(a=>a.why==='s2'&&(a.d===B||a.d===y)&&!S.cuts.some(c=>c.key===a.key&&(c.at>a.at||(c.why==='fall'&&c.d===B)))).sort((p,q)=>q.at-p.at)[0];
+  const n=S.cuts.length; S.cuts=S.cuts.filter(c=>!(c.why==='fall'&&c.d>=fi.F.start&&!dayInfo(c.d).bad&&!S.tests.some(t=>t.key===c.key&&t.d1>=c.d))); if(S.cuts.length!==n) ch=true;
+  for(const B of fi.falls){ if(S.cuts.some(c=>c.why==='fall'&&c.d===B)) continue; const y=kAdd(B,-1), a=S.adds.filter(a=>a.why==='s2'&&(a.d===B||a.d===y)&&!S.cuts.some(c=>c.key===a.key&&(c.at>a.at||(c.why==='fall'&&c.d===B)))).sort((p,q)=>q.at-p.at)[0];
     if(a){ S.cuts.push({key:a.key,d:B,at:Math.max(now(),a.at+1),why:'fall'}); ch=true; } }
   return ch; }
 /* foods that didn't sit right: stopped in step 1, taken off after a bad day in step 2, or reacted when tried again. A food that came back after a good test isn't here. */
@@ -1122,6 +1141,9 @@ const celiac=x=>x?`<p class="small note">Have your stools been loose for more th
 function callLine(tier){ return tier==='911'?`<a class="btn primary" href="tel:911">Call 911</a><p class="small" style="margin:8px 0 0">Outside Canada and the US: your local emergency number. If you have a prescribed epinephrine auto-injector and these signs follow food, use it, then call.</p>`:`<p style="margin:0"><b>Urgent care or your doctor, today.</b></p><p class="small" style="margin:6px 0 0">In Alberta, <a href="tel:811">811 Health Link</a> can tell you where to go.</p>`; }
 function pauseCard(){ const p=S.pause; if(!p) return ''; const why=p.sign?SIGNS[p.sign][1]:WHYP[p.why];
   return `<div class="card flag"><div class="eyebrow">Paused · ${esc(dLabel(p.d))}</div><h3>${p.tier==='911'?'Call 911 now':p.tier==='same'?'Get seen today':'Book a doctor’s visit'}</h3><p><b>${esc(why)}.</b></p>${p.tier!=='doc'?callLine(p.tier):'<p class="small">Show the doctor your summary: History → Summary for my doctor.</p>'}<p class="small">Keep eating only food from your list and keep reporting your stools. Don’t change any foods until you’ve been checked.</p><button type="button" class="btn ghost sm" data-act="checked">I’ve been checked</button><p class="small muted" style="margin:6px 0 0">Tap this once you’ve been seen. It’s your call, and the app saves it with the date.${p.tier==='same'?' After that, the app logs the same sign without pausing for 14 days.':p.tier==='doc'?' After that, this pause won’t come back for 14 days.':''}</p></div>`; }
+/* 1.4.9 put back a food that the old rule took off by mistake (fixFalls): said once, until OK is tapped */
+function fixedCard(){ const bn=baseNow(), fx=[...new Set((S.fixed||[]).map(f=>f.key))].filter(k=>bn.includes(k)); if(!fx.length) return '';
+  return `<div class="card soft"><div class="eyebrow">A mistake, fixed</div><p class="small" style="margin:0 0 8px">A bad day in step 2 takes one food off your list: the newest one. The app also took off the food you added the day before. <b>${and(fx.map(k=>esc(food(k).n)))}</b> ${fx.length>1?'are':'is'} back on your list. If you stopped eating ${fx.length>1?'them':'it'}, you can start again. If a doctor or pharmacist saw your “Foods that upset you” list, tell them.</p><button type="button" class="btn ghost sm" data-act="fixok">OK</button></div>`; }
 function missingCard(){ const T=today(), y=kAdd(T,-1), first=S.ev.length?S.ev[0].d:T; if(y<first||dayInfo(y).logged) return '';
   return `<div class="card soft"><b>No stool reported yesterday.</b> Did you go?<div class="qs" style="margin:8px 0">${[[2,'Formed'],[3,'Mushy'],[4,'Watery'],[1,'Hard']].map(([i,l])=>`<button type="button" class="btn ghost sm" data-act="qsty" data-v="${i}" data-day="${y}">${l}</button>`).join('')}</div><div class="row"><button type="button" class="btn ghost sm" data-act="none" data-day="${y}">No stool yesterday</button><button type="button" class="lnk" data-act="stool" data-day="${y}">More detail</button></div></div>`; }
 function thinCard(){ if(!S.route||S.route==='log'||S.pause) return ''; const T=today(), from=routeStart(S.route)||T; let miss=0, n=0; for(let i=2;i<=7;i++){ const k=kAdd(T,-i); if(k<from) break; n++; if(!dayInfo(k).logged) miss++; } return miss>=2?`<div class="card soft"><b>Some days are missing.</b> Only days you tap count. You can fill them in from History.</div>`:''; }
@@ -1173,7 +1195,7 @@ function guideSlow(si){ const W=si.W, c=si.cur, t=running(), nm=c?cutNm(c.b):'',
   const lb=lookback(), hr=nx&&!isB(nx)?lb.rows.find(r=>r.id===nx):null;
   return one('It comes and goes',nx?`Cut one thing: ${esc(cutNm(nx))} ${MK(cutMk(nx))}`:'Nothing left to cut.',`${last}<p class="small">${hr?`History: it came before <b>${hr.bad} of your ${lb.nb} bad days</b>, and ${hr.calm} of ${lb.nc} good days. Cutting it is how you check.`:'This is the group with the highest mark that you can live without.'} Keep everything else the same, and report every stool.${BKN[nx]?` <span class="muted">${esc(cap(BKN[nx]))}.</span>`:''}</p>${celiac(nx==='gluten')}${nx?`<div class="row"><button type="button" class="btn primary" data-act="slowcut" data-v="${esc(nx)}">Cut it from today</button>${more}</div>`:`<p class="small">Every group has been cut or skipped. Show the summary to your doctor: History → Summary for my doctor.</p>`}`); }
 function vReport(){ const T=today(), di=dayInfo(T), fi=D.fi, si=D.si;
-  let h=pauseCard()+missingCard()+thinCard();
+  let h=pauseCard()+fixedCard()+missingCard()+thinCard();
   h+=`<div class="mainbtns"><button type="button" class="mb crash" data-act="stool"><span class="mi" aria-hidden="true">🚽</span>Stool report</button><button type="button" class="mb meal" data-act="meal"><span class="mi" aria-hidden="true">🍽️</span>Meal or drink</button><button type="button" class="mb sym" data-act="sym"><span class="mi" aria-hidden="true">😣</span>Symptom report</button></div>`;
   FOLD=!S.pause; h+=(fi?guideFast(fi):si?guideSlow(si):`<div class="card soft"><b>${isMinor()?'Log only (under 18).':'Log only.'}</b> Report stools, meals and symptoms. History shows what came before your bad days.${isMinor()?'':` <button type="button" class="lnk" data-act="tab" data-tab="hist">Start a trial</button>`}</div>`); FOLD=false;
   if(!S.pause&&(fi||si)&&di.loose) h+=HINT;
@@ -1326,7 +1348,7 @@ function eraseAll(){ if(STORE==='bad') STORE='ok'; try{ localStorage.removeItem(
 /* ---------- actions: one delegated handler ---------- */
 const openRep=(v,b,x)=>{ const k=(b&&b.dataset.day)||today(); go(Object.assign({v,day:k,at:k===today()?hm(now()):''},x)); };
 const ACT={
-  close:()=>closeSheet(), menu:()=>openMenu(), about:()=>openAbout(), undo:()=>undo(), safety:()=>S.ack?safetySheet():warnSheet(), sign:b=>signDone(b.dataset.v), checked:()=>checked(), summary:()=>summarySheet(), pharm:()=>pharmSheet(), backup:()=>backupData(), restore:()=>openRestore(),
+  close:()=>closeSheet(), menu:()=>openMenu(), about:()=>openAbout(), undo:()=>undo(), fixok:()=>{ S.fixed=null; save(); render(true); }, safety:()=>S.ack?safetySheet():warnSheet(), sign:b=>signDone(b.dataset.v), checked:()=>checked(), summary:()=>summarySheet(), pharm:()=>pharmSheet(), backup:()=>backupData(), restore:()=>openRestore(),
   home:()=>{ closeSheet(); V=null; S.tab='report'; render(); }, back:()=>{ V=V?V.prev||null:null; render(); },
   tab:b=>{ closeSheet(); V=null; S.tab=b.dataset.tab; save(); render(); },
   agree:b=>{ const j=+b.dataset.v, a=S.agree||[]; S.agree=a.includes(j)?a.filter(x=>x!==j):[...a,j]; if((S.minor?[1,2,3]:[0,1,2,3]).every(i=>S.agree.includes(i))){ S.ack=true; S.ackAt=new Date().toISOString(); S.cv=CONSENT; } save(); render(true); },
