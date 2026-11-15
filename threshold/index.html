@@ -8,8 +8,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Threshold Log — what you reported after a food, at each amount</title>
-<meta name="description" content="Report what you eat and what you feel. The app counts, and shows what you reported after each amount of fat, carbs, lactose, fibre and histamine. Free and private: your log stays on your phone.">
+<title>Threshold Log — what you had eaten before a negative effect</title>
+<meta name="description" content="Report your meals and your negative effects. The app counts, and sets the meals an effect came after beside the meals it didn’t: fat, carbs, lactose, fibre and compounds in food. Free and private: your log stays on your phone.">
 <meta name="theme-color" content="#c8481f">
 <link rel="canonical" href="https://v3ktor.org/threshold/">
 <link rel="icon" type="image/png" sizes="32x32" href="app/icons/favicon-32.png">
@@ -84,8 +84,8 @@ section{padding:42px 0;border-top:1px solid var(--line)}
   <main data-l="en" lang="en-CA">
   <div class="hero">
     <div>
-      <h1>See what you reported after a food, at each amount.</h1>
-      <p class="sub">Fat, carbs, lactose, fibre, histamine. Your amounts, your reports.</p>
+      <h1>See what you had eaten before the negative effects you reported.</h1>
+      <p class="sub">Fat, carbs, lactose, fibre, and compounds in food such as histamine, caffeine and gluten. Your meals, your reports.</p>
       <div class="cta">
         <a class="btn" href="app/">Open the app</a>
         <a class="btn ghost" href="#install">Install on your phone</a>
@@ -120,8 +120,8 @@ section{padding:42px 0;border-top:1px solid var(--line)}
         <figcaption><b>Nutrition.</b> A day of your eating beside Health Canada’s reference amounts.</figcaption>
       </figure>
       <figure class="shot">
-        <img src="img/step-en.webp" alt="One line, opened: lactose, every amount with how many meals sat on each side, and for the amount tapped, how often luck alone gives a split that uneven once every amount in the lists is counted" loading="lazy" width="780" height="1560">
-        <figcaption><b>A line, opened.</b> Every amount, and how often luck alone gives its split.</figcaption>
+        <img src="img/step-en.webp" alt="One line, opened: lactose, every amount with how many meals sat on each side, and for the amount tapped, its share of each side and the effects reported" loading="lazy" width="780" height="1560">
+        <figcaption><b>A line, opened.</b> Every amount, with the meals on each side.</figcaption>
       </figure>
     </div>
     <p class="small" style="text-align:center;margin-top:22px">Screens from the app, with a made-up person’s six weeks.</p>
@@ -141,7 +141,7 @@ section{padding:42px 0;border-top:1px solid var(--line)}
     <ul class="facts text">
       <li><b>Food values</b> come from Health Canada’s Canadian Nutrient File, 2015.</li>
       <li><b>Histamine is an estimate.</b> It is a serving’s weight times the average for its food type in a 2011 table from the European Food Safety Authority. The amount in your own piece can be many times more or less, so read it as a count of histamine food. <a href="https://doi.org/10.2903/j.efsa.2011.2393">EFSA Journal 2011;9(10):2393</a>.</li>
-      <li><b>The luck number</b> counts every amount in your lists at once, and every setting of the hours. The app deals each day’s effects to another day, 300 times, and says how often the most uneven split anywhere came out at least as uneven as the one you tapped.</li>
+      <li><b>Luck.</b> The app puts no number on it. It has more room with few entries, several things eaten together, or meals closer together than the hours set. It has less room with more entries, one thing changed at a time, and meals further apart.</li>
       <li><b>A line can’t tell apart</b> two things eaten together. And what you expect can shape what you feel and report.</li>
       <li><b>Reference amounts</b> come from Health Canada’s Dietary Reference Intakes and are shown for comparison only. The app doesn’t endorse them or advise on them. Health Canada has no connection with this app. This doesn’t replace a dietitian.</li>
     </ul>
@@ -193,8 +193,8 @@ section{padding:42px 0;border-top:1px solid var(--line)}
   <main data-l="fr" lang="fr-CA" hidden>
   <div class="hero">
     <div>
-      <h1>Vois ce que tu as noté après un aliment, à chaque quantité.</h1>
-      <p class="sub">Gras, glucides, lactose, fibres, histamine. Tes quantités, tes relevés.</p>
+      <h1>Vois ce que tu avais mangé avant les effets négatifs que tu as notés.</h1>
+      <p class="sub">Gras, glucides, lactose, fibres, et des composés des aliments comme l’histamine, la caféine et le gluten. Tes repas, tes relevés.</p>
       <div class="cta">
         <a class="btn" href="app/">Ouvrir l’app</a>
         <a class="btn ghost" href="#installer">L’installer sur ton téléphone</a>
@@ -229,8 +229,8 @@ section{padding:42px 0;border-top:1px solid var(--line)}
         <figcaption><b>Nutrition.</b> Une journée de ce que tu manges à côté des quantités de référence de Santé Canada.</figcaption>
       </figure>
       <figure class="shot">
-        <img src="img/step-fr.webp" alt="Une ligne, ouverte&nbsp;: le lactose, chaque quantité avec le nombre de repas de chaque côté et, pour la quantité choisie, à quelle fréquence le hasard seul donne un écart aussi inégal quand on compte toutes les quantités des listes" loading="lazy" width="780" height="1560">
-        <figcaption><b>Une ligne, ouverte.</b> Chaque quantité, et à quelle fréquence le hasard seul donne son écart.</figcaption>
+        <img src="img/step-fr.webp" alt="Une ligne, ouverte&nbsp;: le lactose, chaque quantité avec le nombre de repas de chaque côté, et, pour la quantité choisie, sa part de chaque côté et les effets notés" loading="lazy" width="780" height="1560">
+        <figcaption><b>Une ligne, ouverte.</b> Chaque quantité, avec les repas de chaque côté.</figcaption>
       </figure>
     </div>
     <p class="small" style="text-align:center;margin-top:22px">Des écrans tirés de l’app, avec les six semaines d’une personne inventée.</p>
@@ -250,7 +250,7 @@ section{padding:42px 0;border-top:1px solid var(--line)}
     <ul class="facts text">
       <li><b>Les valeurs nutritives</b> viennent du Fichier canadien sur les éléments nutritifs de Santé Canada, 2015.</li>
       <li><b>L’histamine est une estimation.</b> C’est le poids d’une portion multiplié par la moyenne de son type d’aliment dans un tableau de 2011 de l’Autorité européenne de sécurité des aliments. La quantité dans ton propre morceau peut être plusieurs fois plus grande ou plus petite, alors lis-la comme un compte d’aliments à histamine. <a href="https://doi.org/10.2903/j.efsa.2011.2393">EFSA Journal 2011;9(10):2393</a>.</li>
-      <li><b>Le chiffre du hasard</b> compte toutes les quantités de tes listes à la fois, et tous les réglages des heures. L’app redistribue les effets de chaque journée à une autre journée, 300 fois, et dit à quelle fréquence l’écart le plus inégal, où qu’il soit, a été au moins aussi inégal que celui sur lequel tu as appuyé.</li>
+      <li><b>Le hasard.</b> L’app ne met aucun chiffre dessus. Il a plus de place avec peu d’entrées, plusieurs choses mangées ensemble ou des repas plus rapprochés que les heures réglées. Il a moins de place avec plus d’entrées, une seule chose changée à la fois et des repas plus espacés.</li>
       <li><b>Une ligne ne peut pas départager</b> deux choses mangées ensemble. Et ce à quoi tu t’attends peut influencer ce que tu ressens et ce que tu notes.</li>
       <li><b>Les quantités de référence</b> viennent des Apports nutritionnels de référence de Santé Canada et sont montrées pour comparaison seulement. L’app ne les endosse pas et ne donne pas de conseil à leur sujet. Santé Canada n’a aucun lien avec cette app. Ça ne remplace pas une diététiste.</li>
     </ul>
@@ -314,8 +314,8 @@ section{padding:42px 0;border-top:1px solid var(--line)}
 <script>
 /* One page, two languages. English is in the page as it loads, so it reads without JavaScript. The choice is the one the front page keeps. */
 (function(){ var KEY='v3ktor-lang', btn=document.getElementById('langBtn'), meta=document.querySelector('meta[name="description"]');
-  var T={en:{title:'Threshold Log — what you reported after a food, at each amount',desc:meta.getAttribute('content'),other:'Français',otherLang:'fr'},
-         fr:{title:'Threshold Log — ce que tu as noté après un aliment, à chaque quantité',desc:'Note ce que tu manges et ce que tu ressens. L’app compte, et montre ce que tu as noté après chaque quantité de gras, de glucides, de lactose, de fibres et d’histamine. Gratuit et privé\u00a0: ton journal reste sur ton téléphone.',other:'English',otherLang:'en'}};
+  var T={en:{title:'Threshold Log — what you had eaten before a negative effect',desc:meta.getAttribute('content'),other:'Français',otherLang:'fr'},
+         fr:{title:'Threshold Log — ce que tu avais mangé avant un effet négatif',desc:'Note tes repas et tes effets négatifs. L’app compte, et met les repas suivis d’un effet à côté des autres repas\u00a0: gras, glucides, lactose, fibres et composés des aliments. Gratuit et privé\u00a0: ton journal reste sur ton téléphone.',other:'English',otherLang:'en'}};
   function show(l){ if(l!=='fr') l='en'; document.documentElement.lang=l==='fr'?'fr-CA':'en-CA';
     var all=document.querySelectorAll('[data-l]'); for(var i=0;i<all.length;i++) all[i].hidden=all[i].getAttribute('data-l')!==l;
     document.title=T[l].title; meta.setAttribute('content',T[l].desc); btn.textContent=T[l].other; btn.setAttribute('lang',T[l].otherLang); btn.setAttribute('data-to',T[l].otherLang); }

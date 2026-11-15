@@ -101,16 +101,8 @@ eq('step width for a 3 mg range', E.stepWidth(3), 0.5);
   eq('everything is counted once', B.zero.n + B.steps.reduce((t, s) => t + s.n, 0), B.n);
   eq('with no amounts at all, the none cell still holds the entries', E.steps([{ x: 0, fx: ['head'], id: 1 }]).zero.k, 1); }
 
-// ---- rule 9: the luck number ----
-near('5 of 5 against 0 of 5 happens by luck 1 time in 252', E.luck(5, 0, 0, 5), 1 / 252, 1e-9);
-near('no difference is no evidence', E.luck(2, 2, 2, 2), 0.757142857, 1e-6);
-eq('nothing to compare with', E.luck(3, 0, 0, 0), null);
-{ const B = E.steps([{ x: 5, fx: [], id: 1 }, { x: 5, fx: [], id: 2 }, { x: 5, fx: [], id: 3 }, { x: 35, fx: ['head'], id: 4 }, { x: 35, fx: ['head'], id: 5 }, { x: 35, fx: ['head'], id: 6 }]);
-  near('one step against the rest of its bar', E.stepLuck(B, B.steps.length - 1, 'head'), 1 / 20, 1e-9); }
-{ const B = E.steps([{ x: 0, fx: [], id: 1 }, { x: 0, fx: [], id: 2 }, { x: 0, fx: ['head'], id: 3 }, { x: 35, fx: ['head'], id: 4 }, { x: 35, fx: ['head'], id: 5 }, { x: 35, fx: [], id: 6 }]);
-  eq('the rest of the bar includes the none cell', E.stepRest(B, B.steps.length - 1, 'head'), { y: 1, n: 3 });
-  eq('the none cell is read against all the steps', E.stepRest(B, -1, 'head'), { y: 2, n: 3 });
-  near('2 of 3 against 1 of 3', E.stepLuck(B, B.steps.length - 1, 'head'), 0.5, 1e-9); }
+// ---- rule 9: the app puts no number on luck ----
+eq('the reading rules hold nothing that works out a luck number', ['luck', 'stepLuck', 'stepRest', 'foodLuck', 'dealt', 'across', 'DEALS'].filter(k => k in E), []);
 
 // ---- the data view: the meals or days an effect was reported for, beside all the others. Nothing is averaged. ----
 { const F2 = { a: { kcal: 100, fat: 10, prot: 5, carb: 0, fib: 0, sug: 0, lact: 0, alc: 0, c: { caf: 50, ox: 1 } }, b: { kcal: 50, fat: 2, prot: 1, carb: 0, fib: 0, sug: 0, lact: 0, alc: 10, h: true, hist: 1.5 } };
@@ -211,29 +203,5 @@ for (const am of [{ fat: 1, prot: 1, cplx: 1 }, { fat: 33.3, prot: 33.3, cplx: 3
   eq('the slider has eight stops, one hour apart', E.WINS, [1, 2, 3, 4, 5, 6, 7, 8]);
   const quiet = { roll: 0, ev: S.ev.filter(e => e.c !== 'lowen' && e.c !== 'edgy') }, soon = h => E.waiting(E.index(Object.assign({ twin: h }, quiet), food, T(d, '20:00')), 'meal').soon;
   eq('a meal waits until its own hours are over: at 8 p.m. the 5 p.m. meal has settled at 2 hours and is still waiting at 4', [soon(2), soon(4)], [0, 1]); }
-
-// ---- rule 9, across the lists: the luck sentence counts every amount of every line, and every setting of the slider ----
-{ const day2 = i => '2026-10-' + (i < 10 ? '0' + i : i);
-  // 30 days. Milk at breakfast on 10 of them, with gut discomfort an hour later every time. Steak on the other 20, and nothing. Rice every evening.
-  const S = { roll: 0, ev: [] }; for (let i = 1; i <= 30; i++) { const k = day2(i); if (i % 3 === 0) S.ev.push(meal(k, '08:00', [['milk', 1]]), fx(k, '09:00', 'gut')); else S.ev.push(meal(k, '08:00', [['steak', 1]]), none(k)); S.ev.push(meal(k, '18:00', [['rice', 1]])); }
-  const I = E.index(S, food, NOW), D = E.dealt(I, 'meal', [], false), list = Array.from(D);
-  eq('300 deals, the smallest luck number of each, from the smallest up', [D.length, E.DEALS, list.every((x, i) => x > 0 && x <= 1 && (!i || x >= list[i - 1]))], [300, 300, true]);
-  eq('the same log gives the same deals every time', Array.from(E.dealt(I, 'meal', [], false)), list);
-  const B = E.bar(I, 'lact', 'meal'), s = B.steps[B.steps.length - 1], p = E.luck(s.k, s.n - s.k, 10 - s.k, (B.n - s.n) - (10 - s.k));
-  eq('the milk meals: 10 of the 10 with, none of the 50 without', [s.k, s.n, B.n], [10, 10, 60]);
-  eq('no deal comes near a split that clean: less than 1 time in 300', E.across(D, p), 1 / 301);
-  eq('a split with nothing to it is matched by every deal', E.across(D, 1), 1);
-  eq('with nothing dealt, or no luck number, nothing is said', [E.across(null, 0.5), E.across(D, null)], [null, null]);
-  eq('fewer than two complete days: nothing to deal', E.dealt(E.index({ roll: 0, ev: S.ev.slice(0, 3) }, food, NOW), 'meal', [], false), null);
-  eq('two effects picked together have to be together in a deal too: here they never are, so no deal shows a split', Array.from(E.dealt(I, 'meal', ['gut', 'head'], true)).every(x => x === 1), true);
-  eq('...and any of the two is the one that was reported', Array.from(E.dealt(I, 'meal', ['gut', 'head'], false)), Array.from(E.dealt(I, 'meal', ['gut'], false)));
-  eq('poor sleep never counts after a meal, dealt or not', Array.from(E.dealt(E.index({ roll: 0, ev: S.ev.map(e => e.k === 'fx' ? Object.assign({}, e, { c: 'sleep' }) : e) }, food, NOW), 'meal', [], false)).every(x => x === 1), true);
-  const Dd = Array.from(E.dealt(I, 'day', ['gut'], false));
-  eq('over a day: 300 deals as well, the same every time', [Dd.length, Dd.every((x, i) => x > 0 && x <= 1 && (!i || x >= Dd[i - 1])), JSON.stringify(Array.from(E.dealt(I, 'day', ['gut'], false))) === JSON.stringify(Dd)], [300, true, true]);
-  // when every day holds the same effect at the same time, a deal moves nothing: every deal gives the split that is on screen
-  const U = { roll: 0, ev: [] }; for (let i = 1; i <= 12; i++) { const k = day2(i); U.ev.push(meal(k, '08:00', [[i % 2 ? 'milk' : 'steak', 1]]), meal(k, '13:00', [['rice', 1 + i % 3]]), fx(k, '10:00', 'gut')); }
-  const DU = Array.from(E.dealt(E.index(U, food, NOW), 'meal', [], false));
-  eq('days that all hold the same report: every deal is the screen itself', [new Set(DU).size, E.across(DU, DU[0])], [1, 1]);
-  near('...and its most uneven split is the 12 breakfasts against the 12 lunches: 1 chance in 2,704,156', DU[0] * 2704156, 1, 1e-6); }
 
 console.log(fail ? `\n${fail} FAILED, ${pass} passed` : `engine: all ${pass} checks passed`); process.exit(fail ? 1 : 0);

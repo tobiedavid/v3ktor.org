@@ -138,37 +138,26 @@ async function play(browser, base, person, table) {
     for (const k of ['lact', 'glu']) { if (!shown.find(r => r[0] === k)) continue; const c = R.cells(k, mode, pick, all, hours), amounts = [c.zero].concat(c.steps).filter(x => x.n > 0);
       await page.click(`#app [data-act=rowsheet][data-k=${k}]`); const got = await page.locator('#rowSteps tbody tr').evaluateAll(trs => trs.map(tr => [+tr.cells[1].textContent, +tr.cells[2].textContent]));
       same(N(`${tag}: ${k}, every amount with and without`), got, amounts.map(x => [x.k, x.n - x.k])); await page.click('#sheet [data-act=close]'); } }
-  // ---- the luck sentence: every amount of every line, and after a meal every setting of the slider, counted at once ----
-  // The recount deals the days again in its own way (oracle.js). The app's 300 deals have to be the recount's, and the sentence has to say that share.
-  const said = (share, mode) => { const lead = fr ? (mode === 'meal' ? 'En comptant chaque quantité de ces listes et chaque réglage du curseur, le hasard seul donne un écart au moins aussi inégal ' : 'En comptant chaque quantité de ces listes, le hasard seul donne un écart au moins aussi inégal ')
-      : (mode === 'meal' ? 'Counting every amount in these lists and every setting of the slider, luck alone gives a split at least this uneven ' : 'Counting every amount in these lists, luck alone gives a split at least this uneven ');
-    if (share <= 1 / 301 + 1e-12) return lead + (fr ? 'moins de 1 fois sur 300.' : 'less than 1 time in 300.'); if (share >= 0.95) return lead + (fr ? 'presque à tout coup.' : 'nearly every time.');
-    if (share >= 0.095) { const n = Math.round(share * 10); return lead + (fr ? `environ ${n} fois sur 10.` : `about ${n} time${n > 1 ? 's' : ''} in 10.`); }
-    return lead + (fr ? `environ 1 fois sur ${Math.round(1 / share)}.` : `about 1 time in ${Math.round(1 / share)}.`); };
+  // ---- an opened line: every amount pressed states its counts on both sides, and no number is put on luck ----
+  const LUCKY = /luck alone|hasard seul|times? in \d|fois sur \d|1 in \d/i;
+  const note = mode => fr ? (mode === 'meal' ? 'Plus de place pour le hasard : peu d’entrées, plusieurs choses mangées ensemble, des repas plus rapprochés que les heures réglées. Moins de place : plus d’entrées, une seule chose changée à la fois, des repas plus espacés que les heures réglées.' : 'Plus de place pour le hasard : peu de jours, plusieurs choses mangées le même jour. Moins de place : plus de jours, une seule chose changée à la fois.')
+    : (mode === 'meal' ? 'More room for luck: few entries, several things eaten together, meals closer together than the hours set. Less room: more entries, one thing changed at a time, meals further apart than the hours set.' : 'More room for luck: few days, several things eaten on the same day. Less room: more days, one thing changed at a time.');
+  const flatten = t => t.replace(/[\u00a0\u202f]/g, ' ').replace(/\s+/g, ' ').trim();
   for (const [mode, hours, pick] of [['meal', 4, []], ['meal', 8, most ? [most] : []], ['meal', 2, ranked.slice(0, 2)], ['day', 4, most ? [most] : []], ['day', 4, []]]) { const all = pick.length > 1, tag = `${mode}${mode === 'meal' ? ', ' + hours + ' h' : ''}, ${pick.length ? pick.join(' and ') : 'any effect'}`;
     await page.click(`[data-act=tmode][data-v=${mode}]`); if (mode === 'meal') await slide(hours); await page.click('.fxpick [data-act=tfx][data-v=""]'); for (const c of pick) await page.click(`.fxpick [data-act=tfx][data-v="${c}"]`);
-    const mine = R.dealt(mode, pick, all), theirs = await page.evaluate(([m, p, a]) => { const D = TLE.dealt(IX(), m, p, a); return D && Array.from(D); }, [mode, pick, all]);
-    ok(N(`${tag}: the app's 300 deals are the recount's 300, each one's most uneven split`), mine && theirs && mine.length === 300 && theirs.length === 300 && mine.every((x, i) => Math.abs(x - theirs[i]) <= 1e-9 * x), mine && theirs ? 'first that differs: ' + JSON.stringify(mine.map((x, i) => [i, x, theirs[i]]).find(r => Math.abs(r[1] - r[2]) > 1e-9 * r[1])) : 'missing');
-    let pressed = 0; const shares = new Set();
+    let pressed = 0;
     for (const k of ['fat', 'lact']) { if (!(await page.locator(`#app [data-act=rowsheet][data-k=${k}]`).count())) continue; const c = R.cells(k, mode, pick, all, hours), cellsAll = [c.zero].concat(c.steps), K = cellsAll.reduce((t, y) => t + y.k, 0), M = cellsAll.reduce((t, y) => t + y.n, 0);
-      const appShares = await page.evaluate(([m, p, a, cs, K, M]) => { const D = TLE.dealt(IX(), m, p, a); return cs.map(([k, n]) => n ? TLE.across(D, TLE.luck(k, n - k, K - k, (M - n) - (K - k))) : null); }, [mode, pick, all, cellsAll.map(x => [x.k, x.n]), K, M]);
-      same(N(`${tag}: ${k}: for each amount, the share of deals that matched it is the recount's share`), appShares.map(v => v === null ? null : +v.toFixed(12)), cellsAll.map(x => { if (!x.n) return null; const v = R.across(mine, O.luck(x.k, x.n - x.k, K - x.k, (M - x.n) - (K - x.k))); return v === null ? null : +v.toFixed(12); }));
       await page.click(`#app [data-act=rowsheet][data-k=${k}]`);
-      for (let i = 0; i < cellsAll.length; i++) { const x = cellsAll[i]; if (!x.n) continue; const share = R.across(mine, O.luck(x.k, x.n - x.k, K - x.k, (M - x.n) - (K - x.k)));
-        await page.click(`#sheet [data-act=rstep][data-v="${i - 1}"]`); const line = await page.locator('#luckLine').innerText(); pressed++; shares.add(share);
-        ok(N(`${tag}: ${k}, amount ${i}: the sentence says how often the deals matched it`), line.replace(/[\u00a0\u202f]/g, ' ').endsWith(share === null ? (fr ? 'Il n’y a encore rien d’autre pour comparer.' : 'There is nothing else to compare it with yet.') : said(share, mode)), `recount ${share}; screen: ${line}`);
-        ok(N(`${tag}: ${k}, amount ${i}: and states its counts on both sides`), [x.k, K, x.n - x.k, M - K].every(v => line.includes(String(v))), line); }
+      same(N(`${tag}: ${k}: under the amounts, the same words about luck for everyone, both halves`), flatten(await page.locator('#luckNote').innerText()), note(mode));
+      for (let i = 0; i < cellsAll.length; i++) { const x = cellsAll[i]; if (!x.n) continue;
+        await page.click(`#sheet [data-act=rstep][data-v="${i - 1}"]`); const line = flatten(await page.locator('#stepLine').innerText()); pressed++;
+        ok(N(`${tag}: ${k}, amount ${i}: states its counts on both sides`), line.endsWith(fr ? `${x.k} des ${K} avec, ${x.n - x.k} des ${M - K} sans.` : `${x.k} of the ${K} with, ${x.n - x.k} of the ${M - K} without.`), line);
+        ok(N(`${tag}: ${k}, amount ${i}: the sheet puts no number on luck`), !LUCKY.test(flatten(await page.locator('#sheet').innerText())), flatten(await page.locator('#sheet').innerText()).match(LUCKY)); }
+      ok(N(`${tag}: ${k}: every reading says whose it is`), (await page.locator('#sheet').innerText()).includes(fr ? 'Ton propre relevé. Pas un conseil.' : 'Your own report. Not advice.'));
       await page.click('#sheet [data-act=close]'); }
     ok(N(`${tag}: amounts were pressed`), pressed >= 2, pressed); }
   await page.click('[data-act=tmode][data-v=meal]'); await slide(4); await page.click('.fxpick [data-act=tfx][data-v=""]');
-  // the luck number for one amount, by brute force
-  { const c = R.cells('lact', 'meal', []), all = [c.zero].concat(c.steps), i = all.findIndex((x, j) => j > 0 && x.k > 0);
-    if (i > 0) { const x = all[i], K = all.reduce((t, y) => t + y.k, 0), M = all.reduce((t, y) => t + y.n, 0), q = O.luck(x.k, x.n - x.k, K - x.k, (M - x.n) - (K - x.k));
-      const p = await page.evaluate(([k, n, K, M]) => TLE.luck(k, n - k, K - k, (M - n) - (K - k)), [x.k, x.n, K, M]);
-      ok(N('the luck number matches a brute-force count'), Math.abs(p - q) < 1e-9, `app ${p}, brute force ${q}`);
-      await page.click('[data-act=tmode][data-v=meal]'); await page.click('.fxpick [data-act=tfx][data-v=""]'); await page.click('#app [data-act=rowsheet][data-k=lact]'); await page.click(`#sheet [data-act=rstep][data-v="${i - 1}"]`);
-      const line = await page.locator('#luckLine').innerText(); ok(N('the opened amount states its counts on both sides'), [x.k, K, x.n - x.k, M - K].every(v => line.includes(String(v))), line);
-      ok(N('every reading says whose it is'), (await page.locator('#sheet').innerText()).includes(fr ? 'Ton propre relevé. Pas un conseil.' : 'Your own report. Not advice.')); await page.click('#sheet [data-act=close]'); } }
+  same(N('the app holds nothing that works out a luck number'), await page.evaluate(() => ['luck', 'stepLuck', 'foodLuck', 'dealt', 'across'].filter(k => k in TLE).concat(['luckTxt', 'luckOne', 'dealtOf'].filter(k => typeof window[k] === 'function'))), []);
 
   // ---- Home: the ring, its key, the middle, and the Effects bar, over each period ----
   await page.click('[data-act=tab][data-v=home]');
