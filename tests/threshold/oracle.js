@@ -61,6 +61,8 @@ function recount(entries, roll, now) {
   for (const k of keys) days[k].complete = days[k].meals.length > 0 && (days[k].fx.length > 0 || days[k].none);
   const allFx = entries.filter(e => e.k === 'fx');
 
+  // A day is read with its own effects, that night's and the next day's. So it is read once the day after it is over (the start of the day two later has come).
+  const over = k => dayBegins(dayPlus(k, 2), roll) <= now;
   // pick: the effects that count. Empty means any effect.
   // together: with several effects picked, all of them have to be there. Otherwise any one is enough.
   // hours: after a meal, how many hours count. It is the person's own setting on the slider, 4 unless they moved it.
@@ -71,7 +73,7 @@ function recount(entries, roll, now) {
           const fx = keep(allFx.filter(e => e.c !== 'sleep' && e.t >= m.t && e.t <= m.t + span).map(e => e.c));
           if (m.t + span > now && !fx.length) continue;      // its hours are not over and nothing is reported after it yet: its side is not settled
           out.push({ x: amt(m.am), alc: m.am.alcohol, fx, meal: m }); } }
-      else { if (dayBegins(dayPlus(k, 1), roll) > now) continue; if (!canRead(d.total, bar)) { left++; continue; }
+      else { if (!over(k)) continue; if (!canRead(d.total, bar)) { left++; continue; }
         const next = days[dayPlus(k, 1)]; out.push({ x: amt(d.total), alc: d.total.alcohol, fx: keep(d.fx.map(e => e.c).concat(next ? next.fx.filter(e => e.c !== 'sleep').map(e => e.c) : [])), day: k }); } }
     return { list: out, left };
   }
@@ -114,17 +116,20 @@ function recount(entries, roll, now) {
   }
   // one food: the complete days it was eaten on, by the amount eaten that day
   function oneFood(same, onList) {
-    const rows = {}, without = { n: 0, fx: {} }; let times = 0, clean = 0;
+    const rows = {}, without = { n: 0, fx: {} }; let times = 0, clean = 0, waiting = 0;
     for (const k of keys) { const d = days[k]; if (!d.complete) continue; let q = 0, first = null, othersOnList = true;
       for (const m of d.meals) for (const it of m.items) { if (same(it.food)) { q += it.q; if (first === null || m.t < first) first = m.t; } else if (onList && !onList(it.food)) othersOnList = false; }
-      if (!q) { without.n++; for (const c of new Set(d.fx.map(e => e.c))) without.fx[c] = (without.fx[c] || 0) + 1; continue; }
+      if (!over(k)) { if (q) waiting++; continue; }      // the day after it is not over: not read yet
+      const next = days[dayPlus(k, 1)], carried = next ? next.fx.filter(e => e.c !== 'sleep').map(e => e.c) : [];
+      // a day without the food is read over the same span as a day with it: that day, that night and the next day
+      if (!q) { without.n++; for (const c of new Set(d.fx.map(e => e.c).concat(carried))) without.fx[c] = (without.fx[c] || 0) + 1; continue; }
       times++; if (othersOnList) clean++;
       const r = rows[q] || (rows[q] = { q, n: 0, k: 0, same: {}, night: {}, next: {}, any: {} }); r.n++; const seen = new Set(), put = (o, c) => { o[c] = (o[c] || 0) + 1; seen.add(c); };
       for (const c of new Set(d.fx.filter(e => e.c !== 'sleep' && e.t >= first).map(e => e.c))) put(r.same, c);
       if (d.fx.some(e => e.c === 'sleep')) put(r.night, 'sleep');
-      const next = days[dayPlus(k, 1)]; if (next) for (const c of new Set(next.fx.filter(e => e.c !== 'sleep').map(e => e.c))) put(r.next, c);
+      for (const c of new Set(carried)) put(r.next, c);
       if (seen.size) r.k++; for (const c of seen) r.any[c] = (r.any[c] || 0) + 1; }
-    return { times, clean, rows: Object.values(rows).sort((a, b) => a.q - b.q), without };
+    return { times, clean, rows: Object.values(rows).sort((a, b) => a.q - b.q), without, waiting };
   }
   return { days, keys, complete: keys.filter(k => days[k].complete).length, cells, sides, together, period, busiest, oneFood };
 }
