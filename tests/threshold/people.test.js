@@ -192,7 +192,7 @@ async function play(browser, base, person, table) {
   const foods = person.name === 'steady' ? [1414, 1787, 920104, 'Bone broth'] : [109, 61, 4163, 2850, 'Kombucha'];
   const onList = st.list.length ? f => st.list.includes(f.label ? labelKey[f.en] : 'f' + f.id) : null;
   for (const ref of foods) { const key = keyOf(ref), isIt = typeof ref === 'number' ? f => f.id === ref : f => f.label && f.en === ref, w = R.oneFood(isIt, onList);
-    const got = await page.evaluate(k => { const r = TLE.foodReading(IX(), k, S.list.length ? new Set(S.list) : null); return { times: r.times, clean: r.clean, rows: r.rows.map(x => ({ q: x.q, n: x.n, k: x.k, same: x.same, night: x.night, next: x.next, any: x.any })), without: r.without }; }, key);
+    const got = await page.evaluate(k => { const r = TLE.foodReading(IX(), k, S.list.length ? new Set(S.list) : null); return { times: r.times, clean: r.clean, rows: r.rows.map(x => ({ q: x.q, n: x.n, k: x.k, same: x.same, night: x.night, next: x.next, any: x.any })), without: r.without, waiting: r.wait }; }, key);
     same(N(`one food, ${nameOf(ref)}: days, amounts and effects in each row`), got, w); }
   { await page.click('[data-act=tab][data-v=thr]'); const ref = foods[0], w = R.oneFood(f => f.id === ref, onList); await page.fill('#tQ', nameOf(ref)); await page.click(`#tqRows [data-act=foodrd][data-v="f${ref}"]`);
     const txt = await page.locator('#sheet').innerText(); ok(N('one food on screen: its day count'), txt.includes(fr ? `Noté ${w.times} journée` : `Reported on ${w.times} complete day`), txt.slice(0, 300));

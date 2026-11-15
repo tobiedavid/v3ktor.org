@@ -241,6 +241,23 @@ async function open(browser, base, o) {
       const texts = await page.evaluate(() => Object.keys(INFO).map(k => INFO[k].join(' '))); const timed = texts.filter(t => /\b(minutes?|hours?)\b/i.test(t));
       same('[slider] no compound’s sheet gives a time to act', timed, []); await A.ctx.close(); }
 
+    // ================= a day is read once the day after it is over; one food's days with it and without it are read over the same span =================
+    { const D = (d, h, m) => new Date(2026, 10, d, h, m || 0).getTime(), A = await open(browser, base, { lang: 'en', now: D(13, 10) }), page = A.page, flat = t => t.replace(/[  ]/g, ' ').replace(/\s+/g, ' ').trim();
+      await page.click('[data-act=enter]'); await page.waitForSelector('.mb.meal');
+      // the 11th: cheese, and "No effects". The 12th: milk, and a headache two hours later. It is now the 13th, 10 a.m.
+      await page.evaluate(([a, b]) => { S.ev.push({ id: 'd1', k: 'meal', t: a, items: [{ key: 'f109', q: 1 }] }, { id: 'd2', k: 'none', t: a + 36e5, d: TLE.dayKey(a, S.roll) }, { id: 'd3', k: 'meal', t: b, items: [{ key: 'f61', q: 1 }] }, { id: 'd4', k: 'fx', t: b + 72e5, c: 'head' }); IXM = null; render(); }, [D(11, 12), D(12, 12)]);
+      const go = async t => { await page.clock.setFixedTime(t); await page.evaluate(() => { IXM = null; document.dispatchEvent(new Event('visibilitychange')); }); await page.click('[data-act=tab][data-v=thr]'); await page.click('[data-act=tmode][data-v=day]'); };
+      const nums = async () => ((await page.locator('#thrHead').innerText()).match(/\d+/g) || []).map(Number), milk = async () => { await page.fill('#tQ', 'Milk, 2%'); await page.click('#tqRows [data-act=foodrd][data-v="f61"]'); const t = flat(await page.locator('#sheet').innerText()); await page.click('#sheet [data-act=close]'); return t; };
+      await go(D(13, 10));
+      same('[days] on the 13th, the 11th is read (the 12th is over) and it sits with the 12th’s headache', await nums(), [1, 1]);
+      ok('[days] ...and the 12th waits, since the 13th is not over, and the screen says so', flat(await page.locator('#thrWait').innerText()) === '1 day isn’t counted yet: a day is read once the day after it is over.', await page.locator('#thrWait').innerText());
+      { const t = await milk(); ok('[days] the sheet for milk says its day is not counted yet', t.includes('Not reported on a complete day yet.') && t.includes('1 day with it isn’t counted yet: a day is read once the day after it is over.'), t.slice(0, 400)); }
+      await go(D(14, 0, 5));
+      same('[days] five minutes into the 14th, the 12th is read too', [await nums(), await page.locator('#thrWait').count()], [[2, 2], 0]);
+      { const t = await milk(); ok('[days] the sheet for milk: one day with it, and the day without it carries the next day’s headache, as a day with it would', t.includes('Reported on 1 complete day.') && /Complete days without it: 1 · headache 1/.test(t) && !t.includes('counted yet'), t.slice(0, 600));
+        ok('[days] ...and it says both kinds of day are read over the same span', t.includes('Days without it are read over the same span: that day, that night and the next day.'), t.slice(-500)); }
+      same('[days] no error', A.errors, []); await A.ctx.close(); }
+
     // ================= a first meal and effect, entered just now =================
     { const t0 = new Date(2026, 10, 14, 18, 0).getTime(), A = await open(browser, base, { lang: 'en', now: t0 }), page = A.page;
       await page.click('[data-act=enter]'); await page.waitForSelector('.mb.meal');
@@ -254,7 +271,7 @@ async function open(browser, base, o) {
       await refresh(80 * 60000); ok('[new] 80 minutes on, at 1 hour, the second meal has settled on the other side', /in the hour after 1 of 2 meals\./.test(await head()) && (await page.locator('#thrWait').count()) === 0, await head());
       await page.focus('#tWin'); await page.keyboard.press('End'); ok('[new] ...and at 8 hours it is waiting again, since its 8 hours are not over', /its 8 hours aren’t over/.test(await wait()) && /in the 8 hours after 1 of 1 meal\./.test(await head()), (await head()) + ' | ' + (await wait()));
       await page.keyboard.press('Home'); for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowRight'); await refresh(900000);
-      await page.click('[data-act=tmode][data-v=day]'); ok('[new] over a day, today says it is waiting for tomorrow', /Today isn’t counted yet/.test(await wait()), await wait());
+      await page.click('[data-act=tmode][data-v=day]'); ok('[new] over a day, today says it is waiting until the day after it is over', /^1 day isn’t counted yet: a day is read once the day after it is over\.$/.test((await wait()).trim()), await wait());
       await page.clock.setFixedTime(t0 + 5 * 3600e3); await page.evaluate(() => { IXM = null; document.dispatchEvent(new Event('visibilitychange')); }); await page.click('[data-act=tab][data-v=thr]'); await page.click('[data-act=tmode][data-v=meal]');
       ok('[new] once its 4 hours are over with nothing reported, the second meal is on the other side', /after 1 of 2 meals\./.test(await head()), await head());
       same('[new] no error', A.errors, []); await A.ctx.close(); }

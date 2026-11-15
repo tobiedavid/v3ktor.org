@@ -122,7 +122,7 @@ eq('the reading rules hold nothing that works out a luck number', ['luck', 'step
   eq('every line of every family is there', E.table(I, 'day').map(f => [f.f, f.rows.length]), E.FAMS.map(f => [f[0], f[1].length]));
   eq('eaten together: 3 or more aged or fermented portions, and alcohol with one', E.together(I, 'day'), { nHit: 3, nRest: 1, three: { hit: 1, rest: 0 }, both: { hit: 2, rest: 0 } });
   eq('a line opened with one effect picked counts only that effect', (() => { const B = E.bar(I, 'fat', 'day', ['gut']); return [B.n, [B.zero].concat(B.steps).reduce((t, s) => t + s.k, 0)]; })(), [4, 2]);
-  eq('a meal entered just now waits for its 4 hours, and today waits for tomorrow', (() => { const J = E.index(S, k => F2[k], T('2026-11-13', '13:00')); return [E.waiting(J, 'meal'), E.waiting(J, 'day'), E.line(J, 'fat', 'meal').n, E.line(J, 'fat', 'day').n]; })(), [{ soon: 1, open: 0 }, { soon: 1, open: 0 }, 3, 3]);
+  eq('a meal entered just now waits for its 4 hours; today and yesterday wait until the day after each is over', (() => { const J = E.index(S, k => F2[k], T('2026-11-13', '13:00')); return [E.waiting(J, 'meal'), E.waiting(J, 'day'), E.line(J, 'fat', 'meal').n, E.line(J, 'fat', 'day').n]; })(), [{ soon: 1, open: 0 }, { soon: 2, open: 0 }, 3, 2]);
   eq('a meal counts at once when an effect is reported after it, before its 4 hours are over', (() => { const J = E.index({ roll: 0, ev: [meal('2026-11-10', '12:00', [['a', 1]]), fx('2026-11-10', '13:00', 'head')] }, k => F2[k], T('2026-11-10', '13:30')); return [E.line(J, 'fat', 'meal').hit.n, E.line(J, 'fat', 'meal').rest.n, E.waiting(J, 'meal')]; })(), [1, 0, { soon: 0, open: 0 }]);
   eq('...but not for another effect: with gut picked, that meal still waits', (() => { const J = E.index({ roll: 0, ev: [meal('2026-11-10', '12:00', [['a', 1]]), fx('2026-11-10', '13:00', 'head')] }, k => F2[k], T('2026-11-10', '13:30')); return [E.line(J, 'fat', 'meal', ['gut']).n, E.waiting(J, 'meal', ['gut'])]; })(), [0, { soon: 1, open: 0 }]);
   eq('picked together, a meal waits until both are reported after it', (() => { const J = E.index({ roll: 0, ev: [meal('2026-11-10', '12:00', [['a', 1]]), fx('2026-11-10', '13:00', 'head')] }, k => F2[k], T('2026-11-10', '13:30')); return [E.line(J, 'fat', 'meal', ['head', 'gut'], true).n, E.waiting(J, 'meal', ['head', 'gut'], true).soon, E.line(J, 'fat', 'meal', ['head', 'gut'], false).hit.n]; })(), [0, 1, 1]);
@@ -146,6 +146,21 @@ eq('the reading rules hold nothing that works out a luck number', ['luck', 'step
   eq('the days without it stay on screen', [R.without.n, R.without.fx], [2, { lowen: 1, gut: 1 }]);
   eq('how clean it was: days where nothing else was new', R.clean, 2);
   eq('days with any effect that day, that night or the next day, at each amount', R.rows.map(r => r.k), [2, 1]); }
+
+// ---- a day is read once the day after it is over, and a day without a food is read over the same span as a day with it ----
+{ const S = { roll: 0, ev: [
+    meal('2026-11-10', '12:00', [['steak', 1]]), none('2026-11-10'),
+    meal('2026-11-11', '12:00', [['icecr', 1]]), fx('2026-11-11', '18:00', 'head'),
+    meal('2026-11-12', '12:00', [['steak', 1]]), none('2026-11-12'),
+    meal('2026-11-13', '12:00', [['icecr', 1]]), none('2026-11-13') ] };
+  const late = E.index(S, food, NOW), R = E.foodReading(late, 'icecr', null);
+  eq('a day without the food takes the next day’s effects, as a day with it does: the 10th is followed by a headache on the 11th', [R.without.n, R.without.fx], [2, { head: 1 }]);
+  eq('...and the days with it are read as before', [R.times, R.rows.map(r => [r.q, r.n, r.k]), R.rows[0].same, R.rows[0].next, R.wait], [2, [[1, 2, 1]], { head: 1 }, {}, 0]);
+  const mid = E.index(S, food, T('2026-11-14', '10:00')), M = E.foodReading(mid, 'icecr', null);
+  eq('on the 14th the 13th is not read yet, since the 14th is not over: one day with the food waits', [M.times, M.wait, M.without.n], [1, 1, 2]);
+  eq('over a day, the same: three days are read and one waits', [E.bar(mid, 'fat', 'day').n, E.waiting(mid, 'day')], [3, { soon: 1, open: 0 }]);
+  const next = E.index(S, food, T('2026-11-15', '00:01'));
+  eq('one minute into the 15th, the 13th is read', [E.bar(next, 'fat', 'day').n, E.waiting(next, 'day'), E.foodReading(next, 'icecr', null).wait], [4, { soon: 0, open: 0 }, 0]); }
 
 // ---- Home: what went in, what came out ----
 { const S = { roll: 0, ev: [] }; for (let d = 1; d <= 9; d++) { const k = '2026-11-' + (d < 10 ? '0' + d : d); S.ev.push(meal(k, '08:00', [['steak', 1]])); for (let i = 0; i < (d === 5 ? 4 : 1); i++) S.ev.push(fx(k, '1' + i + ':00', 'head')); }
