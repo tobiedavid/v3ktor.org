@@ -72,7 +72,7 @@ async function open(browser, base, o) {
       await tap('[data-act=tab][data-v=nut]'); for (const per of ['today', 'week', 'month']) { await tap(`[data-act=nper][data-v=${per}]`); await visit('Nutrition, ' + per); } await tap('details.note summary'); await visit('Nutrition, the reference questions');
       if (B.gut) { await tap('[data-act=impread]'); await visit('import, confirm'); await shut(); const rej = page.locator('#app [data-act=foodrd]'); if (await rej.count()) { await rej.first().click(); await visit('one food, rejected in the Food Trial Log'); await shut(); } }
       await tap('[data-act=tab][data-v=thr]'); for (const mode of ['meal', 'day']) { await tap(`[data-act=tmode][data-v=${mode}]`); await visit('Threshold, ' + mode);
-        const fx = page.locator('.fxpick [data-act=tfx]'); if (await fx.count() > 1) { await fx.nth(1).click(); await visit('Threshold, ' + mode + ', one effect'); await fx.first().click(); }
+        const fx = page.locator('.fxpick [data-act=tfx]'); if (await fx.count() > 1) { await fx.nth(1).click(); await visit('Threshold, ' + mode + ', one effect'); if (await fx.count() > 2) { await fx.nth(2).click(); await visit('Threshold, ' + mode + ', two effects together'); await tap('#allAny [data-v="0"]'); await visit('Threshold, ' + mode + ', any of two effects'); await tap('#allAny [data-v="1"]'); } await fx.first().click(); }
         const ln = page.locator('#app [data-act=rowsheet][data-k=lact]'); if (await ln.count()) { await ln.click(); const st = page.locator('#sheet [data-act=rstep]'); if (await st.count()) await st.last().click(); await visit('a line, ' + mode); await shut(); } }
       const chip = page.locator('#tqRows [data-act=foodrd]'); if (await chip.count()) { await chip.first().click(); const f = page.locator('#sheet [data-act=frfx]'); if (await f.count()) await f.first().click(); await visit('one food'); await shut(); }
       await page.fill('#tQ', lang === 'fr' ? 'pain' : 'bread'); await visit('Threshold, a food search'); await page.fill('#tQ', 'zzzz'); await visit('Threshold, a food search with no match'); await page.fill('#tQ', '');
@@ -210,6 +210,15 @@ async function open(browser, base, o) {
       await page.clock.setFixedTime(t0 + 5 * 3600e3); await page.evaluate(() => { IXM = null; document.dispatchEvent(new Event('visibilitychange')); }); await page.click('[data-act=tab][data-v=thr]'); await page.click('[data-act=tmode][data-v=meal]');
       ok('[new] once its 4 hours are over with nothing reported, the second meal is on the other side', /after 1 of 2 meals\./.test(await head()), await head());
       same('[new] no error', A.errors, []); await A.ctx.close(); }
+
+    // ================= a line with nothing counted =================
+    { const t0 = new Date(2026, 10, 14, 18, 0).getTime(), A = await open(browser, base, { lang: 'fr', now: t0 }), page = A.page;
+      await page.click('[data-act=enter]'); await page.waitForSelector('.mb.meal');
+      await page.evaluate(t => { S.ev.push({ id: 'g1', k: 'meal', t, items: [{ key: 'f910001', q: 1 }] }, { id: 'g2', k: 'fx', t, c: 'head' }); IXM = null; render(); }, t0);      // a can whose label does not split its carbs
+      await page.click('[data-act=tab][data-v=thr]'); const gone = await page.locator('#thrGone').innerText();
+      ok('[new] a line with nothing counted is not shown as two dashes', (await page.locator('#app [data-act=rowsheet][data-k=cplx]').count()) === 0 && (await page.locator('#app [data-act=rowsheet][data-k=sug]').count()) === 0 && (await page.locator('#app [data-act=rowsheet][data-k=fat]').count()) === 1);
+      ok('[new] it is named under the lists, with what kept its meal out', /glucides complexes, sucres/.test(gone) && /1 repas laissé de côté/.test(gone), gone);
+      same('[new] no error with nothing counted', A.errors, []); await A.ctx.close(); }
 
     // ================= the web page =================
     for (const lang of ['en', 'fr']) { const ctx = await browser.newContext({ viewport: { width: 320, height: 760 }, locale: lang === 'fr' ? 'fr-CA' : 'en-CA', serviceWorkers: 'block' }), page = await ctx.newPage(), errors = []; page.on('pageerror', e => errors.push(e.message));

@@ -108,25 +108,27 @@ async function play(browser, base, person, table) {
   await page.click('[data-act=tab][data-v=thr]');
   const KEYS = ['fat', 'cplx', 'sug', 'lact', 'fib', 'alc', 'caf', 'hist', 'tyr', 'ox', 'nit', 'ga', 'cap', 'fru', 'gos', 'sorb', 'mann', 'fruc', 'sulph', 'nitr', 'swt', 'glu', 'pur', 'theo'], BASE = KEYS.slice(0, 5);
   const PORTIONS = ['tyr', 'ox', 'ga', 'cap', 'fru', 'gos', 'sorb', 'mann', 'fruc', 'sulph', 'nitr', 'swt', 'glu', 'pur'];
-  const tally = want.filter(e => e.k === 'fx').reduce((o, e) => (o[e.c] = (o[e.c] || 0) + 1, o), {}), most = Object.keys(tally).sort((x, y) => tally[y] - tally[x] || x.localeCompare(y))[0];
+  const tally = want.filter(e => e.k === 'fx').reduce((o, e) => (o[e.c] = (o[e.c] || 0) + 1, o), {}), ranked = Object.keys(tally).sort((x, y) => tally[y] - tally[x] || x.localeCompare(y)), most = ranked[0];
+  const picks = [[]].concat(most ? [[most]] : [], ranked.length > 1 ? [ranked.slice(0, 2)] : []);      // any effect, the one reported most, and the two reported most together
   const dec = x => x < 1 ? 2 : x < 10 ? 1 : 0, near = (shown, real) => Math.abs(shown - real) <= 0.5 * Math.pow(10, -dec(real)) + 1e-9;
-  for (const mode of ['meal', 'day']) for (const pick of most ? [[], [most]] : [[]]) {
-    await page.click(`[data-act=tmode][data-v=${mode}]`); await page.click('.fxpick [data-act=tfx][data-v=""]'); if (pick.length) await page.click(`.fxpick [data-act=tfx][data-v="${pick[0]}"]`);
-    const tag = `${mode}, ${pick.length ? pick[0] : 'any effect'}`;
+  for (const mode of ['meal', 'day']) for (const pick of picks) { const all = pick.length > 1;
+    await page.click(`[data-act=tmode][data-v=${mode}]`); await page.click('.fxpick [data-act=tfx][data-v=""]'); for (const c of pick) await page.click(`.fxpick [data-act=tfx][data-v="${c}"]`);
+    if (all) same(N(`${mode}: two effects picked are read together unless the person switches`), await page.locator('#allAny [data-v="1"]').getAttribute('aria-pressed'), 'true');
+    const tag = `${mode}, ${pick.length ? pick.join(' and ') : 'any effect'}`;
     const shown = await page.locator('#app table.rws:not(#fam-tog) tbody tr').evaluateAll(trs => trs.map(tr => [tr.querySelector('[data-act=rowsheet]').dataset.k, tr.cells[1].textContent, tr.cells[2].textContent]));
-    const lines = KEYS.map(k => [k, R.sides(k, mode, pick)]).filter(([k, s]) => BASE.includes(k) || s.hit.ate + s.rest.ate > 0);
+    const lines = KEYS.map(k => [k, R.sides(k, mode, pick, all)]).filter(([k, s]) => BASE.includes(k) ? s.hit.n + s.rest.n > 0 : s.hit.ate + s.rest.ate > 0);      // a line with nothing counted is not shown
     same(N(`${tag}: the lines shown`), shown.map(r => r[0]).sort(), lines.map(r => r[0]).sort());
     for (const [k, s] of lines) { const row = shown.find(r => r[0] === k); if (!row) continue;
       [[row[1], s.hit], [row[2], s.rest]].forEach(([txt, side], j) => { const nums = (txt.match(/\d[\d.,  ]*\d|\d/g) || []).map(num), name = N(`${tag}: ${k}, ${j ? 'without' : 'with'}`);
         if (!side.n) same(name, txt.trim(), '–');
         else if (PORTIONS.includes(k)) same(name, nums, [side.ate, side.n]);                                  // how many held any, of how many
         else ok(name, nums.length > 0 && near(nums[0], side.lo) && near(nums[nums.length - 1], side.hi), `screen "${txt}", recount ${side.lo} to ${side.hi}`); }); }   // the lowest and the highest, never an average
-    const G = R.together(mode, pick), cell = (x, n) => n ? [x, n] : [], tog = await page.locator('#fam-tog tbody tr').evaluateAll(trs => trs.map(tr => [tr.cells[1].textContent, tr.cells[2].textContent].map(t => (t.match(/\d+/g) || []).map(Number))));
+    const G = R.together(mode, pick, all), cell = (x, n) => n ? [x, n] : [], tog = await page.locator('#fam-tog tbody tr').evaluateAll(trs => trs.map(tr => [tr.cells[1].textContent, tr.cells[2].textContent].map(t => (t.match(/\d+/g) || []).map(Number))));
     same(N(`${tag}: eaten together`), tog, G.three.hit + G.three.rest + G.both.hit + G.both.rest > 0 ? [[cell(G.three.hit, G.nHit), cell(G.three.rest, G.nRest)], [cell(G.both.hit, G.nHit), cell(G.both.rest, G.nRest)]] : []);
     // one line, opened: every amount, with how many sat on each side
-    for (const k of ['lact', 'glu']) { if (!shown.find(r => r[0] === k)) continue; const c = R.cells(k, mode, pick), all = [c.zero].concat(c.steps).filter(x => x.n > 0);
+    for (const k of ['lact', 'glu']) { if (!shown.find(r => r[0] === k)) continue; const c = R.cells(k, mode, pick, all), amounts = [c.zero].concat(c.steps).filter(x => x.n > 0);
       await page.click(`#app [data-act=rowsheet][data-k=${k}]`); const got = await page.locator('#rowSteps tbody tr').evaluateAll(trs => trs.map(tr => [+tr.cells[1].textContent, +tr.cells[2].textContent]));
-      same(N(`${tag}: ${k}, every amount with and without`), got, all.map(x => [x.k, x.n - x.k])); await page.click('#sheet [data-act=close]'); } }
+      same(N(`${tag}: ${k}, every amount with and without`), got, amounts.map(x => [x.k, x.n - x.k])); await page.click('#sheet [data-act=close]'); } }
   // the luck number for one amount, by brute force
   { const c = R.cells('lact', 'meal', []), all = [c.zero].concat(c.steps), i = all.findIndex((x, j) => j > 0 && x.k > 0);
     if (i > 0) { const x = all[i], K = all.reduce((t, y) => t + y.k, 0), M = all.reduce((t, y) => t + y.n, 0), q = O.luck(x.k, x.n - x.k, K - x.k, (M - x.n) - (K - x.k));
