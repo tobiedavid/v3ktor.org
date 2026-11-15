@@ -44,7 +44,7 @@ node tools/threshold/pack_data.js data.json --write
 node tools/stamp_cache.js
 ```
 
-`tools/threshold/make_icons.js` draws the icons.
+`tools/threshold/make_icons.js` draws the icons: a plain glass, filled below a mark. It is a threshold drawn as a level and a line, with nothing shown crossing it. (Until November 2026 the icon was the app's old bar, five steps turning dark at the fourth, which the app no longer draws.)
 
 ## The hours after a meal, and luck
 
@@ -65,6 +65,12 @@ The table tags flavourings by the kind of drink, because Health Canada's file ha
 ## Tests
 
 `node tests/run.js`. See [tests/README.md](../tests/README.md). Not tested: a real iPhone.
+
+## The how-to is a separate page
+
+`how-soon/index.html` is the how-to: what published sources say about how soon an effect follows eating or drinking, from minutes to weeks, one source a line, in English and French. It is kept out of the app on purpose. The app counts and gives no time for anything to act, so a copy of the app stays an instrument; the page can be read, corrected or left behind without touching it. The app holds no link to that page and none of its sources, and a test checks that.
+
+Each line was read at its source in November 2026: Mayo Clinic (food allergy; reactive hypoglycemia), Cleveland Clinic (gastrocolic reflex; food coma), Harvard Health (lactose intolerance), the International Classification of Headache Disorders, 3rd edition (8.1.4.1, 8.1.4.2, 8.3.1), the Centers for Disease Control and Prevention (alpha-gal syndrome), Monash University (two blog pages on the timing of FODMAP symptoms), Drake et al., J Clin Sleep Med 2013;9(11):1195, and Jacka et al., BMC Medicine 2017;15:23. It is one source a line, not a review of the research.
 
 ## License
 
