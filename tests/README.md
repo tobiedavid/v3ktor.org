@@ -15,6 +15,8 @@
 
 To run the screen tests on your own machine: `npm install --no-save playwright` and `npx playwright install chromium`, once.
 
+The screens test also reads the how-to page, `threshold/how-soon/`: every time has a source to open, both languages give the same sources, and the app file holds no link to that page.
+
 `fixtures/` holds saved Food Trial Log states from made-up people. `threshold/people.js` is the two people; everything they do is decided by a seeded random number, so every run plays the same six weeks.
 
 Not tested here: a real iPhone. Installing, and bringing the Food Trial Log's lists into an installed app by its backup file, were tested in a desktop browser only.

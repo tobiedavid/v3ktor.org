@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<!--
+    Threshold Log — how soon after eating: what published sources say (English and French in one file).
+    This page is the how-to, kept apart from the instrument. The app itself gives no time for anything to act.
+    Copyright (C) 2026  Tobie David
+    SPDX-License-Identifier: AGPL-3.0-or-later — see LICENSE at https://github.com/tobiedavid/v3ktor.org
+-->
+<html lang="en-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>How soon after eating — what sources say</title>
+<meta name="description" content="How soon after eating or drinking an effect is reported to show, from minutes to weeks, and who says so. The how-to that goes with the Threshold Log, kept apart from the app.">
+<meta name="theme-color" content="#c8481f">
+<link rel="canonical" href="https://v3ktor.org/threshold/how-soon/">
+<link rel="icon" type="image/png" sizes="32x32" href="../app/icons/favicon-32.png">
+<link rel="apple-touch-icon" href="../app/icons/apple-touch-icon.png">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://v3ktor.org/threshold/how-soon/">
+<meta property="og:title" content="How soon after eating">
+<meta property="og:description" content="What published sources say, from minutes to weeks. The how-to that goes with the Threshold Log.">
+<meta property="og:image" content="https://v3ktor.org/threshold/app/icons/icon-512.png">
+<style>
+:root{--bg:#f7f4ee;--card:#fff;--ink:#1c1b19;--muted:#6b665d;--line:#e6e0d4;--accent:#c8481f;--teal:#0f6b6b}
+@media (prefers-color-scheme:dark){:root{--bg:#15161a;--card:#1e2026;--ink:#ececea;--muted:#a19d95;--line:#2d3038;--accent:#e3633a;--teal:#5fb3b3}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+h1,h2{font-family:ui-serif,Georgia,'Times New Roman',serif;line-height:1.12;font-weight:800;margin:0}
+h1{font-size:clamp(1.9rem,6vw,2.8rem);letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:clamp(1.4rem,3.6vw,1.8rem);margin-bottom:.7em}
+p,ul,ol{margin:0 0 .9em}
+ul,ol{padding-left:1.25em}
+li{margin-bottom:.4em}
+li:last-child,p:last-child,ul:last-child,ol:last-child{margin-bottom:0}
+a{color:var(--teal);text-underline-offset:3px}
+:focus-visible{outline:3px solid var(--teal);outline-offset:3px;border-radius:6px}
+[hidden]{display:none!important}
+.wrap{max-width:820px;margin:0 auto;padding:0 20px}
+.text{max-width:660px}
+.small{font-size:.92rem;color:var(--muted)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 0}
+.brand{display:flex;align-items:center;gap:12px;font:800 1.2rem ui-serif,Georgia,'Times New Roman',serif;color:var(--ink);text-decoration:none}
+.brand img{width:40px;height:40px;border-radius:10px;display:block}
+.lang{font:inherit;font-weight:700;font-size:.95rem;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:8px 16px;background:var(--card);cursor:pointer;min-height:44px}
+.hero{padding:22px 0 40px}
+.hero .sub{font-size:1.2rem;margin:.6em 0 0}
+section{padding:38px 0;border-top:1px solid var(--line)}
+/* the list of clocks: the time first, then what it is the time of, then who says so */
+.clocks{list-style:none;padding:0;margin:0;border-top:1px solid var(--line)}
+.clocks li{display:grid;gap:2px 24px;padding:16px 0;margin:0;border-bottom:1px solid var(--line)}
+.clocks .when{font:800 1.12rem/1.25 ui-serif,Georgia,'Times New Roman',serif}
+.clocks .what{margin:0}
+.clocks .who{margin:2px 0 0;font-size:.92rem;color:var(--muted)}
+.urgent{border-left:4px solid var(--accent);padding:2px 0 2px 16px;font-weight:700}
+.back{display:inline-flex;align-items:center;min-height:44px;font-weight:700}
+.foot{padding:34px 0 60px;border-top:1px solid var(--line)}
+.foot h2{font-size:1.2rem;margin-bottom:.5em}
+@media (min-width:700px){
+  .clocks li{grid-template-columns:minmax(0,15rem) minmax(0,1fr)}
+  .clocks .when{grid-row:1 / span 2}
+  section{padding:50px 0}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="../"><img src="../app/icons/icon-192.png" alt="" width="40" height="40">Threshold Log</a>
+    <button type="button" class="lang" id="langBtn" lang="fr">Français</button>
+  </header>
+
+  <!-- ======================= English ======================= -->
+  <main data-l="en" lang="en-CA">
+  <div class="hero">
+    <h1>How soon after eating does an effect show?</h1>
+    <p class="sub text">The Threshold Log counts, and gives no time for anything to act. This page is the how-to, kept apart from the instrument: what published sources say, so you can choose the hours yourself.</p>
+  </div>
+
+  <section>
+    <h2>From the quickest to the slowest</h2>
+    <p class="text">Each line is one source, with the time it gives. The times are for groups of people. Yours can differ.</p>
+    <ul class="clocks">
+      <li><span class="when">A few minutes to 2 hours</span><p class="what">An allergic reaction to a food.</p><p class="who">Mayo Clinic, <a href="https://www.mayoclinic.org/diseases-conditions/food-allergy/symptoms-causes/syc-20355095">Food allergy</a></p></li>
+      <li><span class="when">Within minutes, or about an hour</span><p class="what">The gut’s reflex to a meal arriving: an urge to go. It moves older food along, not the meal just eaten.</p><p class="who">Cleveland Clinic, <a href="https://my.clevelandclinic.org/health/body/gastrocolic-reflex">Gastrocolic reflex</a></p></li>
+      <li><span class="when">About 30 minutes to 2 hours</span><p class="what">Gas after lactose, in a person who doesn’t digest it.</p><p class="who">Harvard Health, <a href="https://www.health.harvard.edu/a_to_z/lactose-intolerance-a-to-z">Lactose intolerance</a></p></li>
+      <li><span class="when">30 minutes to 4 hours</span><p class="what">Sleepiness after a meal. It often peaks after 1 to 2 hours.</p><p class="who">Cleveland Clinic, <a href="https://my.clevelandclinic.org/health/symptoms/food-coma">Food coma</a></p></li>
+      <li><span class="when">Within 3 hours</span><p class="what">A headache after alcohol, the immediate kind.</p><p class="who">International Classification of Headache Disorders, 3rd edition, <a href="https://ichd-3.org/8-headache-attributed-to-a-substance-or-its-withdrawal/8-1-headache-attributed-to-use-of-or-exposure-to-a-substance/8-1-4-alcohol-induced-headache/8-1-4-1-immediate-alcohol-induced-headache/">8.1.4.1</a></p></li>
+      <li><span class="when">Usually within 4 hours</span><p class="what">Low blood sugar after a meal (reactive hypoglycemia): weakness, shakiness, a foggy head.</p><p class="who">Mayo Clinic, <a href="https://www.mayoclinic.org/diseases-conditions/diabetes/expert-answers/reactive-hypoglycemia/faq-20057778">Reactive hypoglycemia</a></p></li>
+      <li><span class="when">Usually 2 to 6 hours</span><p class="what">The symptoms of alpha-gal syndrome, after red meat or dairy.</p><p class="who">Centers for Disease Control and Prevention, <a href="https://www.cdc.gov/alpha-gal-syndrome/signs-symptoms/">Symptoms of alpha-gal syndrome</a></p></li>
+      <li><span class="when">Usually 4 hours or more</span><p class="what">Gut symptoms from fermentable sugars (FODMAPs).</p><p class="who">Monash University, <a href="https://monashfodmap.com/blog/eating-and-ibs-symptoms">Eating and IBS symptoms</a></p></li>
+      <li><span class="when">5 to 12 hours</span><p class="what">A headache after alcohol, the delayed kind.</p><p class="who">International Classification of Headache Disorders, 3rd edition, <a href="https://ichd-3.org/8-headache-attributed-to-a-substance-or-its-withdrawal/8-1-headache-attributed-to-use-of-or-exposure-to-a-substance/8-1-4-alcohol-induced-headache/8-1-4-2-delayed-alcohol-induced-headache/">8.1.4.2</a></p></li>
+      <li><span class="when">Within 24 hours of the last caffeine</span><p class="what">A headache after stopping caffeine, in a person who had more than 200 mg a day for more than 2 weeks.</p><p class="who">International Classification of Headache Disorders, 3rd edition, <a href="https://ichd-3.org/8-headache-attributed-to-a-substance-or-its-withdrawal/8-3-headache-attributed-to-substance-withdrawal/8-3-1-caffeine-withdrawal-headache">8.3.1</a></p></li>
+      <li><span class="when">That night</span><p class="what">Sleep after caffeine. In a study of 12 people, 400 mg taken 6 hours before bed shortened measured sleep by more than an hour.</p><p class="who">Drake and others, <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3805807">J Clin Sleep Med 2013;9(11):1195</a></p></li>
+      <li><span class="when">Weeks</span><p class="what">Mood. The trial read for this page changed how 67 adults with major depression ate for 12 weeks, and measured mood at the end. It gives no time after one meal, and nothing read for this page does.</p><p class="who">Jacka and others, <a href="https://doi.org/10.1186/s12916-017-0791-y">BMC Medicine 2017;15:23</a></p></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>One word, two clocks</h2>
+    <p class="text">Diarrhea within the hour and diarrhea many hours later are not the same event. The quick one is the gut’s reflex to something arriving, and Cleveland Clinic says it moves older food, not what was just eaten. The slow one goes with fermentation: Monash University puts those symptoms at 4 hours or more, and says food takes 12 to 48 hours to travel the whole way.</p>
+    <p class="text">So an effect soon after a meal can belong to an earlier meal. <span class="small">Monash University, <a href="https://monashfodmap.com/blog/timing-of-symptoms/">Timing of symptoms and FODMAPs</a>.</span></p>
+  </section>
+
+  <section>
+    <h2>Reading it with the app</h2>
+    <ul class="text">
+      <li><b>“After a meal”</b> reads the effects reported in the hours after each meal. You set the hours, from 1 to 8.</li>
+      <li><b>A short setting</b> takes in the quick clocks. <b>A long one</b> takes in the slow ones as well, and puts more meals beside each effect.</li>
+      <li><b>“Over a day”</b> reads a day, its night and the next day. Sleep and mood are read there.</li>
+      <li><b>A drink</b> is an entry like a meal.</li>
+    </ul>
+    <p><a class="back" href="../">The Threshold Log</a></p>
+  </section>
+
+  <section>
+    <h2>What this page is not</h2>
+    <p class="urgent text">Trouble breathing, a swelling throat or faintness after eating is an emergency. Call 911 or your local emergency number.</p>
+    <ul class="text">
+      <li>It is not advice and not a diagnosis. An effect that lasts, or that worries you, is a reason to see a doctor.</li>
+      <li>It is not a review of the research. Each line is one source, read in November 2026, and each source speaks for the condition it names, not for every person with that effect.</li>
+      <li>It is not part of the app. The app counts what you report and says nothing about how soon anything acts.</li>
+    </ul>
+  </section>
+  </main>
+
+  <!-- ======================= Français ======================= -->
+  <main data-l="fr" lang="fr-CA" hidden>
+  <div class="hero">
+    <h1>Combien de temps après avoir mangé un effet se montre-t-il?</h1>
+    <p class="sub text">Le Threshold Log compte, et ne donne aucun délai pour quoi que ce soit. Cette page est le mode d’emploi, gardé à part de l’instrument&nbsp;: ce que disent des sources publiées, pour que tu choisisses les heures toi-même.</p>
+  </div>
+
+  <section>
+    <h2>Du plus rapide au plus lent</h2>
+    <p class="text">Chaque ligne est une source, avec le délai qu’elle donne. Les délais valent pour des groupes de personnes. Le tien peut être différent.</p>
+    <ul class="clocks">
+      <li><span class="when">De quelques minutes à 2 heures</span><p class="what">Une réaction allergique à un aliment.</p><p class="who">Mayo Clinic, <a href="https://www.mayoclinic.org/diseases-conditions/food-allergy/symptoms-causes/syc-20355095" hreflang="en">Food allergy</a> (en anglais)</p></li>
+      <li><span class="when">En quelques minutes, ou en une heure environ</span><p class="what">Le réflexe de l’intestin à l’arrivée d’un repas&nbsp;: une envie d’aller à la selle. Il fait avancer des aliments plus anciens, pas le repas qui vient d’être mangé.</p><p class="who">Cleveland Clinic, <a href="https://my.clevelandclinic.org/health/body/gastrocolic-reflex" hreflang="en">Gastrocolic reflex</a> (en anglais)</p></li>
+      <li><span class="when">Environ 30 minutes à 2 heures</span><p class="what">Des gaz après du lactose, chez une personne qui ne le digère pas.</p><p class="who">Harvard Health, <a href="https://www.health.harvard.edu/a_to_z/lactose-intolerance-a-to-z" hreflang="en">Lactose intolerance</a> (en anglais)</p></li>
+      <li><span class="when">De 30 minutes à 4 heures</span><p class="what">La somnolence après un repas. Elle culmine souvent après 1 à 2 heures.</p><p class="who">Cleveland Clinic, <a href="https://my.clevelandclinic.org/health/symptoms/food-coma" hreflang="en">Food coma</a> (en anglais)</p></li>
+      <li><span class="when">Dans les 3 heures</span><p class="what">Un mal de tête après de l’alcool, la forme immédiate.</p><p class="who">Classification internationale des céphalées, 3<sup>e</sup> édition, <a href="https://ichd-3.org/8-headache-attributed-to-a-substance-or-its-withdrawal/8-1-headache-attributed-to-use-of-or-exposure-to-a-substance/8-1-4-alcohol-induced-headache/8-1-4-1-immediate-alcohol-induced-headache/" hreflang="en">8.1.4.1</a> (en anglais)</p></li>
+      <li><span class="when">Le plus souvent dans les 4 heures</span><p class="what">Une baisse du sucre dans le sang après un repas (hypoglycémie réactionnelle)&nbsp;: faiblesse, tremblements, esprit embrumé.</p><p class="who">Mayo Clinic, <a href="https://www.mayoclinic.org/diseases-conditions/diabetes/expert-answers/reactive-hypoglycemia/faq-20057778" hreflang="en">Reactive hypoglycemia</a> (en anglais)</p></li>
+      <li><span class="when">Le plus souvent de 2 à 6 heures</span><p class="what">Les symptômes du syndrome alpha-gal, après de la viande rouge ou des produits laitiers.</p><p class="who">Centers for Disease Control and Prevention, <a href="https://www.cdc.gov/alpha-gal-syndrome/signs-symptoms/" hreflang="en">Symptoms of alpha-gal syndrome</a> (en anglais)</p></li>
+      <li><span class="when">Le plus souvent 4 heures ou plus</span><p class="what">Les symptômes intestinaux liés aux sucres fermentescibles (FODMAP).</p><p class="who">Université Monash, <a href="https://monashfodmap.com/blog/eating-and-ibs-symptoms" hreflang="en">Eating and IBS symptoms</a> (en anglais)</p></li>
+      <li><span class="when">De 5 à 12 heures</span><p class="what">Un mal de tête après de l’alcool, la forme retardée.</p><p class="who">Classification internationale des céphalées, 3<sup>e</sup> édition, <a href="https://ichd-3.org/8-headache-attributed-to-a-substance-or-its-withdrawal/8-1-headache-attributed-to-use-of-or-exposure-to-a-substance/8-1-4-alcohol-induced-headache/8-1-4-2-delayed-alcohol-induced-headache/" hreflang="en">8.1.4.2</a> (en anglais)</p></li>
+      <li><span class="when">Dans les 24 heures après la dernière caféine</span><p class="what">Un mal de tête à l’arrêt de la caféine, chez une personne qui en prenait plus de 200 mg par jour depuis plus de 2 semaines.</p><p class="who">Classification internationale des céphalées, 3<sup>e</sup> édition, <a href="https://ichd-3.org/8-headache-attributed-to-a-substance-or-its-withdrawal/8-3-headache-attributed-to-substance-withdrawal/8-3-1-caffeine-withdrawal-headache" hreflang="en">8.3.1</a> (en anglais)</p></li>
+      <li><span class="when">Cette nuit-là</span><p class="what">Le sommeil après de la caféine. Dans une étude de 12 personnes, 400 mg pris 6 heures avant le coucher ont raccourci le sommeil mesuré de plus d’une heure.</p><p class="who">Drake et coll., <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3805807" hreflang="en">J Clin Sleep Med 2013;9(11):1195</a> (en anglais)</p></li>
+      <li><span class="when">Des semaines</span><p class="what">L’humeur. L’essai lu pour cette page a changé l’alimentation de 67 adultes en dépression majeure pendant 12 semaines, et a mesuré l’humeur à la fin. Il ne donne aucun délai après un repas, et rien de ce qui a été lu pour cette page n’en donne.</p><p class="who">Jacka et coll., <a href="https://doi.org/10.1186/s12916-017-0791-y" hreflang="en">BMC Medicine 2017;15:23</a> (en anglais)</p></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Un mot, deux horloges</h2>
+    <p class="text">Une diarrhée dans l’heure et une diarrhée bien des heures plus tard ne sont pas le même événement. La rapide est le réflexe de l’intestin à ce qui arrive, et Cleveland Clinic dit qu’il fait avancer des aliments plus anciens, pas ce qui vient d’être mangé. La lente va avec la fermentation&nbsp;: l’Université Monash situe ces symptômes à 4 heures ou plus, et dit que les aliments mettent de 12 à 48 heures à faire tout le trajet.</p>
+    <p class="text">Un effet peu après un repas peut donc appartenir à un repas d’avant. <span class="small">Université Monash, <a href="https://monashfodmap.com/blog/timing-of-symptoms/" hreflang="en">Timing of symptoms and FODMAPs</a> (en anglais).</span></p>
+  </section>
+
+  <section>
+    <h2>Le lire avec l’app</h2>
+    <ul class="text">
+      <li><b>«&nbsp;Après un repas&nbsp;»</b> lit les effets notés dans les heures qui suivent chaque repas. Tu règles les heures, de 1 à 8.</li>
+      <li><b>Un réglage court</b> prend les horloges rapides. <b>Un réglage long</b> prend aussi les lentes, et met plus de repas à côté de chaque effet.</li>
+      <li><b>«&nbsp;Sur une journée&nbsp;»</b> lit une journée, sa nuit et le lendemain. Le sommeil et l’humeur se lisent là.</li>
+      <li><b>Une boisson</b> est une entrée comme un repas.</li>
+    </ul>
+    <p><a class="back" href="../">Le Threshold Log</a></p>
+  </section>
+
+  <section>
+    <h2>Ce que cette page n’est pas</h2>
+    <p class="urgent text">De la difficulté à respirer, une gorge qui enfle ou une sensation d’évanouissement après avoir mangé, c’est une urgence. Appelle le 911 ou le numéro d’urgence de ta région.</p>
+    <ul class="text">
+      <li>Ce n’est pas un conseil ni un diagnostic. Un effet qui dure, ou qui t’inquiète, est une raison de voir un médecin.</li>
+      <li>Ce n’est pas une revue de la recherche. Chaque ligne est une source, lue en novembre 2026, et chaque source parle de l’affection qu’elle nomme, pas de toutes les personnes qui ont cet effet.</li>
+      <li>Ce n’est pas une partie de l’app. L’app compte ce que tu notes et ne dit rien du délai de quoi que ce soit.</li>
+    </ul>
+  </section>
+  </main>
+
+  <footer class="foot">
+    <div data-l="en" lang="en-CA">
+      <h2>Free software</h2>
+      <p class="text">Made by Tobie and Claude. Free version at v3ktor.org/threshold. © 2026 Tobie David.</p>
+      <p class="small text">This page is part of the V3KTOR Project, under the GNU Affero General Public License, version 3 or later, with two extra terms. Source and license: <a href="https://github.com/tobiedavid/v3ktor.org">github.com/tobiedavid/v3ktor.org</a>. Provided as-is, without warranty. The sources named here have no connection with this page or with the app. Contact: hello@v3ktor.app.</p>
+    </div>
+    <div data-l="fr" lang="fr-CA" hidden>
+      <h2>Logiciel libre</h2>
+      <p class="text">Créé par Tobie et Claude. Version gratuite à v3ktor.org/threshold. © 2026 Tobie David.</p>
+      <p class="small text">Cette page fait partie du V3KTOR Project, sous la licence publique générale GNU Affero, version 3 ou ultérieure, avec deux conditions de plus. Code source et licence&nbsp;: <a href="https://github.com/tobiedavid/v3ktor.org">github.com/tobiedavid/v3ktor.org</a>. Fournie telle quelle, sans garantie. Les sources nommées ici n’ont aucun lien avec cette page ni avec l’app. Contact&nbsp;: hello@v3ktor.app.</p>
+    </div>
+  </footer>
+</div>
+<script>
+/* One page, two languages. English is in the page as it loads, so it reads without JavaScript. The choice is the one the front page keeps. */
+(function(){ var KEY='v3ktor-lang', btn=document.getElementById('langBtn'), meta=document.querySelector('meta[name="description"]');
+  var T={en:{title:'How soon after eating — what sources say',desc:meta.getAttribute('content'),other:'Français',otherLang:'fr'},
+         fr:{title:'Combien de temps après avoir mangé — ce que disent les sources',desc:'Combien de temps après avoir mangé ou bu un effet se montre, de quelques minutes à des semaines, et qui le dit. Le mode d’emploi qui va avec le Threshold Log, gardé à part de l’app.',other:'English',otherLang:'en'}};
+  function show(l){ if(l!=='fr') l='en'; document.documentElement.lang=l==='fr'?'fr-CA':'en-CA';
+    var all=document.querySelectorAll('[data-l]'); for(var i=0;i<all.length;i++) all[i].hidden=all[i].getAttribute('data-l')!==l;
+    document.title=T[l].title; meta.setAttribute('content',T[l].desc); btn.textContent=T[l].other; btn.setAttribute('lang',T[l].otherLang); btn.setAttribute('data-to',T[l].otherLang); }
+  var l=null; try{ l=localStorage.getItem(KEY); }catch(e){}
+  if(l!=='fr'&&l!=='en') l=(navigator.language||'en').toLowerCase().indexOf('fr')===0?'fr':'en';
+  show(l);
+  btn.addEventListener('click',function(){ var to=btn.getAttribute('data-to'); try{ localStorage.setItem(KEY,to); }catch(e){} show(to); });
+})();
+</script>
+</body>
+</html>

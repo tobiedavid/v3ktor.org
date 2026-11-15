@@ -299,6 +299,24 @@ async function open(browser, base, o) {
       await page.goto(base + '/threshold/app/'); await page.waitForSelector('[data-act=enter]'); same(T + 'and the app then opens in the language picked on the page', await page.evaluate(() => document.documentElement.lang), lang === 'fr' ? 'en-CA' : 'fr-CA');
       same(T + 'no error', errors, []); await ctx.close(); }
 
+    // ================= the how-to page: what sources say about how soon, kept apart from the app =================
+    for (const lang of ['en', 'fr']) { const ctx = await browser.newContext({ viewport: { width: 320, height: 760 }, locale: lang === 'fr' ? 'fr-CA' : 'en-CA', serviceWorkers: 'block' }), page = await ctx.newPage(), errors = []; page.on('pageerror', e => errors.push(e.message));
+      await page.goto(base + '/threshold/'); same(`[how soon, ${lang}] the app’s page links to it`, await page.locator(`main[data-l=${lang}] a[href="how-soon/"]`).count(), 1);
+      await page.goto(base + '/threshold/how-soon/'); await page.waitForSelector('#langBtn'); const T = `[how soon, ${lang}] `, main = page.locator(`main[data-l=${lang}]`), other = page.locator(`main[data-l=${lang === 'fr' ? 'en' : 'fr'}]`);
+      same(T + 'opens in the browser’s language', [await page.evaluate(() => document.documentElement.lang), await main.isVisible(), await other.isVisible()], [lang === 'fr' ? 'fr-CA' : 'en-CA', true, false]);
+      const t = (await main.innerText()) + '\n' + (await page.locator(`footer [data-l=${lang}]`).innerText()), bad = BAN[lang].exec(t.replace(/Food Trial Log|Threshold Log|The Patch/g, '§'));
+      ok(T + 'none of the words the app never uses', !bad, bad && t.slice(Math.max(0, bad.index - 60), bad.index + 40)); ok(T + 'carries the attribution line', t.includes(lang === 'fr' ? 'Créé par Tobie et Claude. Version gratuite à v3ktor.org/threshold.' : 'Made by Tobie and Claude. Free version at v3ktor.org/threshold.'));
+      if (lang === 'fr') { const p1 = /[ \t][:;?!]/.exec(t); ok(T + 'French punctuation', !p1, p1 && t.slice(Math.max(0, p1.index - 40), p1.index + 20)); }
+      const rows = await main.locator('.clocks li').evaluateAll(ls => ls.map(l => ({ when: l.querySelector('.when').textContent.trim(), what: l.querySelector('.what').textContent.trim(), href: (l.querySelector('.who a') || {}).href || '' })));
+      ok(T + 'every time has what it is the time of, and a source to open', rows.length === 12 && rows.every(r => r.when && r.what && /^https:\/\//.test(r.href)), JSON.stringify(rows.filter(r => !(r.when && r.what && /^https:/.test(r.href)))));
+      same(T + 'the two languages give the same sources in the same order', rows.map(r => r.href), await other.locator('.clocks li .who a').evaluateAll(as => as.map(a => a.href)));
+      ok(T + 'it says what to do in an emergency, and that it is not advice', /911/.test(t) && (lang === 'fr' ? /pas un conseil ni un diagnostic/ : /not advice and not a diagnosis/).test(t));
+      same(T + 'nothing runs off a 320-pixel screen', await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true);
+      await page.click('#langBtn'); same(T + 'the language button turns the page', await page.evaluate(() => document.documentElement.lang), lang === 'fr' ? 'en-CA' : 'fr-CA');
+      same(T + 'no error', errors, []); await ctx.close(); }
+    // and the app itself still gives no time: no link to that page and none of its sources
+    { const html = fs.readFileSync(path.join(ROOT, 'threshold/app/index.html'), 'utf8'); ok('[how soon] the app holds no link to the how-to and none of its sources', !/how-soon|ichd-3|monashfodmap|clevelandclinic|mayoclinic/i.test(html)); }
+
     // ================= saved data that can't be read, a changed agreement, storage that is blocked =================
     { const A = await open(browser, base, { lang: 'en', store: { [KEY]: '{"v":1,"ev":[{"k":"meal"' } }), page = A.page;
       ok('[storage] data that can’t be read: the app says so', (await page.locator('#app').innerText()).includes('couldn’t be read')); await page.click('[data-act=enter]'); await page.click('.mb.fx'); await page.click('#sheet [data-act=fxk][data-v=head]'); await page.click('#sheet [data-act=fxdone]');

@@ -14,7 +14,7 @@ const status = url => new Promise(res => http.get(url, r => { r.resume(); res(r.
 
 (async () => {
   const srv = await serve(ROOT), base = srv.url, browser = await chromium.launch(), list = pages(ROOT, []).sort().concat(['/404.html']);
-  ok('the site has the pages it is known to have', ['/', '/gut/', '/gut/app/', '/gut/fr/', '/gut/fr/app/', '/patch/', '/patch/app/', '/sollum/', '/sollum/app/', '/threshold/', '/threshold/app/'].every(p => list.includes(p)), list.join(' '));
+  ok('the site has the pages it is known to have', ['/', '/gut/', '/gut/app/', '/gut/fr/', '/gut/fr/app/', '/patch/', '/patch/app/', '/sollum/', '/sollum/app/', '/threshold/', '/threshold/app/', '/threshold/how-soon/'].every(p => list.includes(p)), list.join(' '));
   try { const links = new Map();
     for (const p of list) for (const lang of ['en-CA', 'fr-CA']) {
       const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: lang, serviceWorkers: 'block' }), page = await ctx.newPage(), errors = [], outside = [], missing = [];
