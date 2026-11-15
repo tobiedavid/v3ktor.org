@@ -63,7 +63,7 @@ async function open(browser, base, o) {
           ok(T + name + ': French punctuation, no plain space before : ; ? !', !p1, p1 && t.slice(Math.max(0, p1.index - 50), p1.index + 20)); ok(T + name + ': French punctuation, a non-breaking space inside « »', !p2, p2 && t.slice(Math.max(0, p2.index - 30), p2.index + 30)); }
         ok(T + name + ': nothing runs off a 320-pixel screen', r.over <= 1 && r.sheetOver <= 1 && !r.wide.length, `page ${r.over}px, sheet ${r.sheetOver}px, ${r.wide.join(' | ')}`);
         ok(T + name + ': every control has a name', !r.nameless.length, r.nameless.join(' | ')); };
-      const tap = sel => page.click(sel), shut = () => page.click('#sheet [data-act=close]');
+      const tap = sel => page.click(sel), shut = () => page.click('#sheet [data-act=close]'), slide = async h => { await page.focus('#tWin'); await page.keyboard.press('Home'); for (let i = 1; i < h; i++) await page.keyboard.press('ArrowRight'); };
       for (const per of ['h4', 'today', 'week', 'month']) { await tap(`[data-act=per][data-v=${per}]`); await visit('Home, ' + per); }
       await tap('.fxbar'); await visit('effects sheet'); await shut(); { const oc = page.locator('#app [data-act=comps]'); if (await oc.count()) { await oc.click(); await visit('other compounds'); const cp = page.locator('#sheet [data-act=comp]'); if (await cp.count()) { await cp.first().click(); await visit('a compound'); const hi = page.locator('#sheet [data-act=histinfo]'); if (await hi.count()) { await hi.click(); await visit('histamine sheet'); } } await shut(); } }
       await tap('.mb.meal'); await visit('meal'); for (const g of ['recent', 'dairy', 'sup', 'proc', 'label']) { const b = page.locator(`#mTabs [data-act=mgrp][data-v=${g}]`); if (await b.count()) { await b.click(); await visit('meal, ' + g); } }
@@ -72,6 +72,7 @@ async function open(browser, base, o) {
       await tap('[data-act=tab][data-v=nut]'); for (const per of ['today', 'week', 'month']) { await tap(`[data-act=nper][data-v=${per}]`); await visit('Nutrition, ' + per); } await tap('details.note summary'); await visit('Nutrition, the reference questions');
       if (B.gut) { await tap('[data-act=impread]'); await visit('import, confirm'); await shut(); const rej = page.locator('#app [data-act=foodrd]'); if (await rej.count()) { await rej.first().click(); await visit('one food, rejected in the Food Trial Log'); await shut(); } }
       await tap('[data-act=tab][data-v=thr]'); for (const mode of ['meal', 'day']) { await tap(`[data-act=tmode][data-v=${mode}]`); await visit('Threshold, ' + mode);
+        if (mode === 'meal') { await slide(1); await visit('Threshold, meal, the slider at 1 hour'); await slide(8); await visit('Threshold, meal, the slider at 8 hours'); }
         const fx = page.locator('.fxpick [data-act=tfx]'); if (await fx.count() > 1) { await fx.nth(1).click(); await visit('Threshold, ' + mode + ', one effect'); if (await fx.count() > 2) { await fx.nth(2).click(); await visit('Threshold, ' + mode + ', two effects together'); await tap('#allAny [data-v="0"]'); await visit('Threshold, ' + mode + ', any of two effects'); await tap('#allAny [data-v="1"]'); } await fx.first().click(); }
         const ln = page.locator('#app [data-act=rowsheet][data-k=lact]'); if (await ln.count()) { await ln.click(); const st = page.locator('#sheet [data-act=rstep]'); if (await st.count()) await st.last().click(); await visit('a line, ' + mode); await shut(); } }
       const chip = page.locator('#tqRows [data-act=foodrd]'); if (await chip.count()) { await chip.first().click(); const f = page.locator('#sheet [data-act=frfx]'); if (await f.count()) await f.first().click(); await visit('one food'); await shut(); }
@@ -82,7 +83,7 @@ async function open(browser, base, o) {
       await tap('#bar [data-act=back]');
       for (const [act, name] of [['list', 'my list'], ['label', 'a food from its label'], ['help', 'how to read the screens'], ['about', 'about'], ['install', 'install'], ['backup', 'backup'], ['restore', 'restore']]) { await tap('[data-act=menu]'); await tap(`#sheet [data-act=${act}]`); await visit(name); if (act === 'list') await tap('#bar [data-act=back]'); else await shut(); }
       if (person.labels.length) { await tap('[data-act=menu]'); await tap('#sheet [data-act=label]'); await tap('#sheet [data-act=lbedit]'); await visit('a label food, opened again'); await shut(); }
-      ok(T + `${seen} screens and sheets visited`, seen >= 40, seen); same(T + 'no script error on any of them', A.errors, []); same(T + 'no request to another site', A.outside, []);
+      ok(T + `${seen} screens and sheets visited`, seen >= 42, seen); same(T + 'no script error on any of them', A.errors, []); same(T + 'no request to another site', A.outside, []);
       await A.ctx.close();
     }
     // the door, in both languages
@@ -198,6 +199,44 @@ async function open(browser, base, o) {
       await page.reload(); await page.waitForSelector('[data-act=enter]'); same('[install] “Not now” is remembered', await page.locator('.instbig').count(), 0);
       await page.click('[data-act=menu]'); await page.click('#sheet [data-act=install]'); ok('[install] the steps are still in the menu', (await page.locator('#sheet ol.inst').count()) >= 1); await A.ctx.close(); }
 
+    // ================= the slider: how many hours after a meal an effect counts =================
+    for (const lang of ['en', 'fr']) { const person = people.varied, B = build(person, table, lang), A = await open(browser, base, { state: B.state, now: person.now, lang }), page = A.page, fr = lang === 'fr', T = `[slider, ${lang}] `;
+      await page.click('[data-act=tab][data-v=thr]'); const head = () => page.locator('#thrHead').innerText(), saved = () => page.evaluate(k => JSON.parse(localStorage.getItem(k)).twin, KEY), meals = async () => (await head()).match(/\d+/g).map(Number);
+      const box = await page.locator('#tWin').boundingBox();
+      same(T + 'it starts at 4 hours, runs from 1 to 8 in steps of one, and is at least 44 pixels high', [await page.inputValue('#tWin'), ...(await page.locator('#tWin').evaluate(e => [e.min, e.max, e.step])), box.height >= 44], ['4', '1', '8', '1', true]);
+      same(T + 'its eight stops are numbered under it', (await page.locator('.twin .ends').innerText()).split(/\s+/).filter(Boolean), ['1', '2', '3', '4', '5', '6', '7', '8']);
+      { const g = await page.evaluate(() => { const r = document.getElementById('tWin').getBoundingClientRect(); return { w: r.width, at: [...document.querySelectorAll('.twin .ends span')].map(x => { const q = x.getBoundingClientRect(); return q.left + q.width / 2 - r.left; }) }; });
+        ok(T + 'each number sits under the thumb at that stop', g.at.every((x, i) => Math.abs(x - (14 + i * (g.w - 28) / 7)) <= 2), JSON.stringify(g)); }
+      ok(T + 'the words beside it say the hours', (await page.locator('.twin label').innerText()).includes(fr ? 'les 4 heures suivantes' : 'the 4 hours after it'));
+      const at4 = await meals();
+      // a drag: the lists follow while the thumb is held, and the setting is saved when it is let go
+      await page.mouse.move(box.x + 14 + 3 * (box.width - 28) / 7, box.y + box.height / 2); await page.mouse.down(); await page.mouse.move(box.x + box.width - 6, box.y + box.height / 2, { steps: 8 });
+      const held = await meals(), heldSaved = await saved(); await page.mouse.up();
+      same(T + 'dragged to the end: 8 hours, read at once', [held[0], await page.inputValue('#tWin')], [8, '8']);
+      ok(T + 'more hours take in more meals with an effect, never fewer', held[1] >= at4[1], `${at4} then ${held}`);
+      same(T + 'the setting is saved when the thumb is let go, not before', [heldSaved === undefined || heldSaved === 4, await saved()], [true, 8]);
+      await page.focus('#tWin'); await page.keyboard.press('ArrowLeft'); same(T + 'an arrow key moves it one hour, and the focus stays on it', [await page.inputValue('#tWin'), (await meals())[0], await page.evaluate(() => document.activeElement.id), await saved()], ['7', 7, 'tWin', 7]);
+      await page.reload(); await page.waitForSelector('.mb.meal'); await page.click('[data-act=tab][data-v=thr]'); same(T + 'the setting is still there when the app is opened again', [await page.inputValue('#tWin'), (await meals())[0]], ['7', 7]);
+      ok(T + 'under the lists’ heading, one line says which side usually has the narrower range', (await page.locator('#thrCard').innerText()).includes(fr ? 'Le côté qui compte le moins de repas a d’habitude l’intervalle le plus étroit.' : 'The side with fewer meals usually has the narrower range.'));
+      await page.click('#app [data-act=rowsheet][data-k=fat]'); await page.locator('#sheet [data-act=rstep]').last().click(); const sheet = (await page.locator('#sheet').innerText()).replace(/[\u00a0\u202f]/g, ' ');
+      ok(T + 'an opened line says the hours it was read at', sheet.includes(fr ? 'effets notés dans les 7 heures suivantes.' : 'effects reported in the 7 hours after it.'), sheet.slice(0, 200));
+      ok(T + 'its luck sentence counts every amount and every setting of the slider', sheet.includes(fr ? 'En comptant chaque quantité de ces listes et chaque réglage du curseur, le hasard seul donne un écart au moins aussi inégal' : 'Counting every amount in these lists and every setting of the slider, luck alone gives a split at least this uneven'));
+      await page.click('#sheet [data-act=close]');
+      await page.click('[data-act=tmode][data-v=day]'); same(T + 'over a day there is no slider', await page.locator('#tWin').count(), 0);
+      ok(T + 'over a day, the line about ranges speaks of days', (await page.locator('#thrCard').innerText()).includes(fr ? 'Le côté qui compte le moins de jours' : 'The side with fewer days'));
+      await page.click('#app [data-act=rowsheet][data-k=fat]'); await page.locator('#sheet [data-act=rstep]').last().click();
+      ok(T + 'over a day, the sentence counts every amount, and names no slider', /(Counting every amount in these lists, luck alone|En comptant chaque quantité de ces listes, le hasard seul)/.test((await page.locator('#luckLine').innerText()).replace(/[\u00a0\u202f]/g, ' ')), await page.locator('#luckLine').innerText()); await page.click('#sheet [data-act=close]');
+      await page.click('#topbar [data-act=ai]'); await page.click('#sheet [data-act=aiscope][data-v=all]'); const ai = await page.locator('#sheet textarea').inputValue();
+      ok(T + 'the text for Ask AI says the hours the tallies were read at, as the person’s own setting', ai.includes(fr ? 'effets notés dans les 7 heures suivantes\u00a0: mon propre réglage, de 1 à 8 heures' : 'effects reported in the 7 hours after it: my own setting, from 1 to 8 hours'), ai.slice(ai.indexOf(fr ? 'COMPTES APRÈS' : 'TALLIES AFTER'), ai.indexOf(fr ? 'COMPTES APRÈS' : 'TALLIES AFTER') + 160));
+      await page.click('#sheet [data-act=close]'); same(T + 'no error', A.errors, []); await A.ctx.close(); }
+    // a saved setting that is not a stop of the slider is read as 4 hours; one that is, is kept
+    for (const [twin, want] of [[9, '4'], [0, '4'], ['6', '4'], [2.5, '4'], [6, '6'], [1, '1']]) { const person = people.steady, B = build(person, table, 'en'), A = await open(browser, base, { state: Object.assign({}, B.state, { twin }), now: person.now, lang: 'en' }), page = A.page;
+      await page.click('[data-act=tab][data-v=thr]'); same(`[slider] saved as ${JSON.stringify(twin)}, shown as ${want}`, [await page.inputValue('#tWin'), A.errors], [want, []]); await A.ctx.close(); }
+    // the app says how many hours count and nothing about how long anything takes to act: no compound's sheet and no help text gives a time
+    { const person = people.varied, B = build(person, table, 'en'), A = await open(browser, base, { state: B.state, now: person.now, lang: 'en' }), page = A.page;
+      const texts = await page.evaluate(() => Object.keys(INFO).map(k => INFO[k].join(' '))); const timed = texts.filter(t => /\b(minutes?|hours?)\b/i.test(t));
+      same('[slider] no compound’s sheet gives a time to act', timed, []); await A.ctx.close(); }
+
     // ================= a first meal and effect, entered just now =================
     { const t0 = new Date(2026, 10, 14, 18, 0).getTime(), A = await open(browser, base, { lang: 'en', now: t0 }), page = A.page;
       await page.click('[data-act=enter]'); await page.waitForSelector('.mb.meal');
@@ -206,6 +245,11 @@ async function open(browser, base, o) {
       ok('[new] a meal with an effect reported after it is in the lists at once', /after 1 of 1 meal\./.test(await head()), await head());
       await page.evaluate(t => { S.ev.push({ id: 'w3', k: 'meal', t: t + 600000, items: [{ key: 'f109', q: 1 }] }); IXM = null; render(); }, t0); await page.clock.setFixedTime(t0 + 900000); await page.evaluate(() => { IXM = null; document.dispatchEvent(new Event('visibilitychange')); }); await page.click('[data-act=tab][data-v=thr]');
       ok('[new] a meal with nothing reported after it waits, and the screen says so', /1 meal isn’t counted yet/.test(await wait()) && /after 1 of 1 meal\./.test(await head()), await wait());
+      const refresh = async ms => { await page.clock.setFixedTime(t0 + ms); await page.evaluate(() => { IXM = null; document.dispatchEvent(new Event('visibilitychange')); }); await page.click('[data-act=tab][data-v=thr]'); };
+      await page.focus('#tWin'); await page.keyboard.press('Home'); ok('[new] with the slider at 1 hour, the meal waits for its hour', /its hour isn’t over/.test(await wait()), await wait());
+      await refresh(80 * 60000); ok('[new] 80 minutes on, at 1 hour, the second meal has settled on the other side', /in the hour after 1 of 2 meals\./.test(await head()) && (await page.locator('#thrWait').count()) === 0, await head());
+      await page.focus('#tWin'); await page.keyboard.press('End'); ok('[new] ...and at 8 hours it is waiting again, since its 8 hours are not over', /its 8 hours aren’t over/.test(await wait()) && /in the 8 hours after 1 of 1 meal\./.test(await head()), (await head()) + ' | ' + (await wait()));
+      await page.keyboard.press('Home'); for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowRight'); await refresh(900000);
       await page.click('[data-act=tmode][data-v=day]'); ok('[new] over a day, today says it is waiting for tomorrow', /Today isn’t counted yet/.test(await wait()), await wait());
       await page.clock.setFixedTime(t0 + 5 * 3600e3); await page.evaluate(() => { IXM = null; document.dispatchEvent(new Event('visibilitychange')); }); await page.click('[data-act=tab][data-v=thr]'); await page.click('[data-act=tmode][data-v=meal]');
       ok('[new] once its 4 hours are over with nothing reported, the second meal is on the other side', /after 1 of 2 meals\./.test(await head()), await head());
