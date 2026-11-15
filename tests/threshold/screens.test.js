@@ -201,12 +201,14 @@ async function open(browser, base, o) {
     // ================= a first meal and effect, entered just now =================
     { const t0 = new Date(2026, 10, 14, 18, 0).getTime(), A = await open(browser, base, { lang: 'en', now: t0 }), page = A.page;
       await page.click('[data-act=enter]'); await page.waitForSelector('.mb.meal');
-      await page.evaluate(t => { S.ev.push({ id: 'w1', k: 'meal', t: t - 60000, items: [{ key: 'f109', q: 2 }] }, { id: 'w2', k: 'fx', t, c: 'head' }); IXM = null; render(); }, t0);
-      await page.click('[data-act=tab][data-v=thr]'); const wait = () => page.locator('#thrWait').innerText();
-      ok('[new] a meal entered just now says it is waiting for its 4 hours', /1 meal isn’t counted yet/.test(await wait()) && (await page.locator('#app table.rws').count()) === 0, await wait());
+      await page.evaluate(t => { S.ev.push({ id: 'w1', k: 'meal', t, items: [{ key: 'f109', q: 2 }] }, { id: 'w2', k: 'fx', t, c: 'head' }); IXM = null; render(); }, t0);
+      await page.click('[data-act=tab][data-v=thr]'); const head = () => page.locator('#thrHead').innerText(), wait = () => page.locator('#thrWait').innerText();
+      ok('[new] a meal with an effect reported after it is in the lists at once', /after 1 of 1 meal\./.test(await head()), await head());
+      await page.evaluate(t => { S.ev.push({ id: 'w3', k: 'meal', t: t + 600000, items: [{ key: 'f109', q: 1 }] }); IXM = null; render(); }, t0); await page.clock.setFixedTime(t0 + 900000); await page.evaluate(() => { IXM = null; document.dispatchEvent(new Event('visibilitychange')); }); await page.click('[data-act=tab][data-v=thr]');
+      ok('[new] a meal with nothing reported after it waits, and the screen says so', /1 meal isn’t counted yet/.test(await wait()) && /after 1 of 1 meal\./.test(await head()), await wait());
       await page.click('[data-act=tmode][data-v=day]'); ok('[new] over a day, today says it is waiting for tomorrow', /Today isn’t counted yet/.test(await wait()), await wait());
-      await page.clock.setFixedTime(t0 + 4 * 3600e3 + 60000); await page.evaluate(() => { IXM = null; document.dispatchEvent(new Event('visibilitychange')); }); await page.click('[data-act=tab][data-v=thr]'); await page.click('[data-act=tmode][data-v=meal]');
-      const head = await page.locator('#thrHead').innerText(); ok('[new] once its 4 hours are over, the meal is in the lists', /after 1 of 1 meal\./.test(head), head);
+      await page.clock.setFixedTime(t0 + 5 * 3600e3); await page.evaluate(() => { IXM = null; document.dispatchEvent(new Event('visibilitychange')); }); await page.click('[data-act=tab][data-v=thr]'); await page.click('[data-act=tmode][data-v=meal]');
+      ok('[new] once its 4 hours are over with nothing reported, the second meal is on the other side', /after 1 of 2 meals\./.test(await head()), await head());
       same('[new] no error', A.errors, []); await A.ctx.close(); }
 
     // ================= the web page =================

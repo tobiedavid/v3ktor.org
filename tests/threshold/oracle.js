@@ -65,8 +65,10 @@ function recount(entries, roll, now) {
   function units(bar, mode, pick) {
     const out = [], field = BARS[bar], amt = am => field ? am[field] : (am.also[bar] || 0), keep = fx => pick && pick.length ? fx.filter(c => pick.includes(c)) : fx; let left = 0;
     for (const k of keys) { const d = days[k]; if (!d.complete) continue;
-      if (mode === 'meal') { for (const m of d.meals) { if (m.t + 4 * HOUR > now) continue; if (!canRead(m.am, bar)) { left++; continue; }
-          out.push({ x: amt(m.am), alc: m.am.alcohol, fx: keep(allFx.filter(e => e.c !== 'sleep' && e.t > m.t && e.t <= m.t + 4 * HOUR).map(e => e.c)) }); } }
+      if (mode === 'meal') { for (const m of d.meals) { if (!canRead(m.am, bar)) { left++; continue; }
+          const fx = keep(allFx.filter(e => e.c !== 'sleep' && e.t >= m.t && e.t <= m.t + 4 * HOUR).map(e => e.c));
+          if (m.t + 4 * HOUR > now && !fx.length) continue;      // its 4 hours are not over and nothing is reported after it yet: its side is not settled
+          out.push({ x: amt(m.am), alc: m.am.alcohol, fx }); } }
       else { if (dayBegins(dayPlus(k, 1), roll) > now) continue; if (!canRead(d.total, bar)) { left++; continue; }
         const next = days[dayPlus(k, 1)]; out.push({ x: amt(d.total), alc: d.total.alcohol, fx: keep(d.fx.map(e => e.c).concat(next ? next.fx.filter(e => e.c !== 'sleep').map(e => e.c) : [])), day: k }); } }
     return { list: out, left };
@@ -116,7 +118,7 @@ function recount(entries, roll, now) {
       if (!q) { without.n++; for (const c of new Set(d.fx.map(e => e.c))) without.fx[c] = (without.fx[c] || 0) + 1; continue; }
       times++; if (othersOnList) clean++;
       const r = rows[q] || (rows[q] = { q, n: 0, k: 0, same: {}, night: {}, next: {}, any: {} }); r.n++; const seen = new Set(), put = (o, c) => { o[c] = (o[c] || 0) + 1; seen.add(c); };
-      for (const c of new Set(d.fx.filter(e => e.c !== 'sleep' && e.t > first).map(e => e.c))) put(r.same, c);
+      for (const c of new Set(d.fx.filter(e => e.c !== 'sleep' && e.t >= first).map(e => e.c))) put(r.same, c);
       if (d.fx.some(e => e.c === 'sleep')) put(r.night, 'sleep');
       const next = days[dayPlus(k, 1)]; if (next) for (const c of new Set(next.fx.filter(e => e.c !== 'sleep').map(e => e.c))) put(r.next, c);
       if (seen.size) r.k++; for (const c of seen) r.any[c] = (r.any[c] || 0) + 1; }

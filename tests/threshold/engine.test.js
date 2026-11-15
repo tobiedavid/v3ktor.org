@@ -68,7 +68,8 @@ eq('a headache belongs to its own day', E.fxDay(fx('2026-11-10', '07:00', 'head'
   eq('a meal with nothing after it', U.units[1].fx, []);
   eq('the 4 hours can run past midnight', U.units[2].fx, ['head']);
   const C = E.mealUnits(I, 'cplx'); eq('carbs of a kind not listed sit out of the complex-carb bar', [C.units.length, C.left.length], [3, 1]);
-  const early = E.mealUnits(E.index(S, food, T('2026-11-05', '09:00')), 'fat'); eq('a meal whose 4 hours have not passed is not read yet', early.units.length, 0); }
+  const early = E.bar(E.index({ roll: 0, ev: [meal('2026-11-05', '08:00', [['steak', 2]]), fx('2026-11-05', '07:30', 'naus')] }, food, T('2026-11-05', '09:00')), 'fat', 'meal');
+  eq('a meal whose 4 hours have not passed, with nothing reported after it, is not read yet', early.n, 0); }
 
 // ---- rule 3, over a day: that day, that night, the next day ----
 { const S = { roll: 0, ev: [
@@ -129,6 +130,9 @@ eq('nothing to compare with', E.luck(3, 0, 0, 0), null);
   eq('eaten together: 3 or more aged or fermented portions, and alcohol with one', E.together(I, 'day'), { nHit: 3, nRest: 1, three: { hit: 1, rest: 0 }, both: { hit: 2, rest: 0 } });
   eq('a line opened with one effect picked counts only that effect', (() => { const B = E.bar(I, 'fat', 'day', ['gut']); return [B.n, [B.zero].concat(B.steps).reduce((t, s) => t + s.k, 0)]; })(), [4, 2]);
   eq('a meal entered just now waits for its 4 hours, and today waits for tomorrow', (() => { const J = E.index(S, k => F2[k], T('2026-11-13', '13:00')); return [E.waiting(J, 'meal'), E.waiting(J, 'day'), E.line(J, 'fat', 'meal').n, E.line(J, 'fat', 'day').n]; })(), [{ soon: 1, open: 0 }, { soon: 1, open: 0 }, 3, 3]);
+  eq('a meal counts at once when an effect is reported after it, before its 4 hours are over', (() => { const J = E.index({ roll: 0, ev: [meal('2026-11-10', '12:00', [['a', 1]]), fx('2026-11-10', '13:00', 'head')] }, k => F2[k], T('2026-11-10', '13:30')); return [E.line(J, 'fat', 'meal').hit.n, E.line(J, 'fat', 'meal').rest.n, E.waiting(J, 'meal')]; })(), [1, 0, { soon: 0, open: 0 }]);
+  eq('...but not for another effect: with gut picked, that meal still waits', (() => { const J = E.index({ roll: 0, ev: [meal('2026-11-10', '12:00', [['a', 1]]), fx('2026-11-10', '13:00', 'head')] }, k => F2[k], T('2026-11-10', '13:30')); return [E.line(J, 'fat', 'meal', ['gut']).n, E.waiting(J, 'meal', ['gut'])]; })(), [0, { soon: 1, open: 0 }]);
+  eq('an effect entered at the meal’s own minute counts as after it', (() => { const J = E.index({ roll: 0, ev: [meal('2026-11-10', '12:00', [['a', 1]]), fx('2026-11-10', '12:00', 'head')] }, k => F2[k], T('2026-11-10', '12:30')); return E.line(J, 'fat', 'meal').hit.n; })(), 1);
   eq('a day left open keeps its meal out, and says so', (() => { const J = E.index({ roll: 0, ev: [meal('2026-11-10', '12:00', [['a', 1]])] }, k => F2[k], NOW); return [E.waiting(J, 'meal'), E.waiting(J, 'day'), E.line(J, 'fat', 'meal').n]; })(), [{ soon: 0, open: 1 }, { soon: 0, open: 1 }, 0]);
   eq('a caffeine pill has no figure, so its meal sits out of the caffeine line', E.usable(E.amounts({ kcal: 0, fat: 0, prot: 0, carb: 0, fib: 0, x: ['caf'] }, 1), 'caf'), false); }
 
