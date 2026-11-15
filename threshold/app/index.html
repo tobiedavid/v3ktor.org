@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-    Threshold Log — see what you reported after a food, at each amount: fat, carbs, lactose, fibre and histamine.
+    Threshold Log — see what you had eaten before the negative effects you reported.
     Phase 2 of The Experiment.
     Copyright (C) 2026  Tobie David
 
@@ -48,7 +48,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Threshold Log</title>
-<meta name="description" content="See what you reported after a food, at each amount. Free and private: everything stays on your phone.">
+<meta name="description" content="See what you had eaten before the negative effects you reported. Free and private: everything stays on your phone.">
 <meta name="theme-color" content="#c8481f">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -486,8 +486,8 @@ const DATA=[
    Entries (S.ev):  {k:'meal', t, items:[{key,q}]}   {k:'fx', t, c}   {k:'none', t, d}   (t = milliseconds, d = a day key) */
 const TLE=(function(){
 const H=36e5, WIN=4*H, STEPS=8, BAR_DAYS=7, UNK_MAX=2, ZEPS=0.005;
-/* after a meal, the person sets how many hours count: one of these, 4 unless they move it. The lists are dealt again DEALS times for the luck sentence. */
-const WINS=[1,2,3,4,5,6,7,8], DEALS=300, SEED=20261114;
+/* after a meal, the person sets how many hours count: one of these, 4 unless they move it */
+const WINS=[1,2,3,4,5,6,7,8];
 const p2=n=>(n<10?'0':'')+n;
 /* a day starts at the person's own hour (the Food Trial Log's setting), so a 1 a.m. snack belongs to the evening before */
 function dayKey(t,roll){ const d=new Date(t); if(d.getHours()<(roll||0)) d.setDate(d.getDate()-1); return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate()); }
@@ -598,61 +598,8 @@ function together(I,mode,sel,all){ const A=bar(I,'histN',mode,sel,all).units, al
   for(const u of A){ const k=u.fx.length?'hit':'rest'; if(k==='hit') nHit++; else nRest++; if(u.x>=3) three[k]++; if(u.x>0&&alc[u.id]>ZEPS) both[k]++; }
   return {nHit,nRest,three,both}; }
 
-/* rule 9: how often luck alone would give a split at least this lopsided. The exact test The Patch already uses. */
-const LF=[0]; for(let i=1;i<=3000;i++) LF[i]=LF[i-1]+Math.log(i);
-const lch=(n,k)=>(k<0||k>n)?-Infinity:LF[n]-LF[k]-LF[n-k];
-function luck(inY,inN,outY,outN){ const wn=inY+inN, on=outY+outN, N=wn+on, K=inY+outY; if(!wn||!on||N>3000) return null;
-  let p=0; for(let x=inY;x<=Math.min(K,wn);x++) p+=Math.exp(lch(K,x)+lch(N-K,wn-x)-lch(N,wn)); return Math.min(1,p); }
-/* the luck number for one effect in one step: that step against the rest of its bar (i = -1 is the "none" cell) */
-function stepRest(B,i,c){ const s=i<0?B.zero:B.steps[i]; let y=0,n=0; for(const o of [B.zero].concat(B.steps)){ if(o===s) continue; y+=o.fx[c]||0; n+=o.n; } return {y,n}; }
-function stepLuck(B,i,c){ const s=i<0?B.zero:B.steps[i], r=stepRest(B,i,c); return luck(s.fx[c]||0,s.n-(s.fx[c]||0),r.y,r.n-r.y); }
-
-/* rule 9, across the lists. One amount's luck number is true for that amount alone, and a person looks at every amount of every line,
-   and after a meal at every setting of the slider. So the same question is asked of all of them at once: each complete day's report
-   (its effects, or its "No effects") is dealt to another complete day, DEALS times, and each time the smallest luck number anywhere is kept.
-   The sentence on screen is how often that smallest number came out at least as small as the one pressed (across).
-   Whole days are dealt, so an effect that counts for two meals, or for two days, still counts for two.
-   The deals come from a fixed seed: the same log gives the same sentence every time. */
-function rnd(a){ return ()=>{ a=(a+0x6D2B79F5)|0; let t=Math.imul(a^(a>>>15),a|1); t^=t+Math.imul(t^(t>>>7),t|61); return ((t^(t>>>14))>>>0)/4294967296; }; }
-const KEYS=[].concat(...FAMS.map(f=>f[1]));
-function dealt(I,mode,sel,all){ const days=I.keys.filter(k=>I.D[k].closed), n=days.length, pick=sel&&sel.length?sel:null, need=all&&pick?pick.length:0;
-  if(n<2||need>30) return null;
-  const at={}; days.forEach((k,i)=>{ at[k]=i; });
-  /* a report is kept as a set of bits: one bit when any picked effect is enough, one bit per picked effect when all of them have to be there */
-  const full=need?Math.pow(2,need)-1:0, mask=c=>{ if(!pick) return 1; const i=pick.indexOf(c); return i<0?0:need?(1<<i):1; }, on=m=>need?m===full:m>0;
-  const memo=new Map(), lk=(k,c,K,N)=>{ const key=((k*3001+c)*3001+K)*3001+N; let v=memo.get(key); if(v===undefined){ v=luck(k,c-k,K-k,(N-c)-(K-k)); memo.set(key,v); } return v; };
-  /* the smallest luck number among the amounts of some lines, given a mark (with or without) for every meal or day */
-  const least=(lines,mk,best)=>{ for(const ln of lines){ const N=ln.all.length; let K=0; for(let i=0;i<N;i++) K+=mk[ln.all[i]]; if(!K||K===N) continue;
-      for(const c of ln.cells){ let k=0; for(let i=0;i<c.length;i++) k+=mk[c[i]]; if(k*N<=K*c.length) continue; const p=lk(k,c.length,K,N); if(p!=null&&p<best) best=p; } } return best; };
-  const cellsOf=(B,ix)=>({all:B.units.map(u=>ix[u.id]),cells:[B.zero].concat(B.steps).filter(s=>s.n>0&&s.n<B.n).map(s=>s.ids.map(id=>ix[id]))});
-  const R=rnd(SEED), P=new Array(n), out=new Float64Array(DEALS);
-  const shuffle=()=>{ for(let i=0;i<n;i++) P[i]=i; for(let a=n-1;a>0;a--){ const b=Math.floor(R()*(a+1)), x=P[a]; P[a]=P[b]; P[b]=x; } };
-  if(mode==='day'){
-    /* each complete day's report: all its effects (poor sleep sits with its night), and those that also count for the day before */
-    const rep=days.map(k=>{ let a=0,b=0; for(const e of I.D[k].fx){ const m=mask(e.c); a|=m; if(e.c!=='sleep') b|=m; } return [a,b]; });
-    /* the day after: another complete day (its report moves with the deal), or a day that isn't (its effects stay where they are) */
-    const nxt=days.map(k=>{ const k2=keyAdd(k,1), j=at[k2]; if(j!=null) return [j,0]; const d=I.D[k2]; let b=0; if(d) for(const e of d.fx) if(e.c!=='sleep') b|=mask(e.c); return [-1,b]; });
-    const lines=[]; for(const b of KEYS){ const B=bar(I,b,'day',sel,all); if(B.n){ const L=cellsOf(B,at); if(L.cells.length) lines.push(L); } }
-    const mk=new Uint8Array(n);
-    for(let t=0;t<DEALS;t++){ shuffle(); for(let i=0;i<n;i++){ const j=nxt[i][0]; mk[i]=on(rep[P[i]][0]|(j<0?nxt[i][1]:rep[P[j]][1]))?1:0; } out[t]=least(lines,mk,1); } }
-  else {
-    const ix={}, mt=[]; for(const k of days) for(const m of I.D[k].meals){ ix[m.e.id]=mt.length; mt.push(m.e.t); }
-    const M=mt.length, S=WINS.length, far=WINS[S-1]*H;
-    /* the lists as they stand at each setting of the slider */
-    const groups=WINS.map(h=>{ const J=Object.assign({},I,{win:h*H}), lines=[]; for(const b of KEYS){ const B=bar(J,b,'meal',sel,all); if(B.n){ const L=cellsOf(B,ix); if(L.cells.length) lines.push(L); } } return lines; });
-    /* every effect that can count after a meal: its time within its day, and the complete day it sits in (-1: a day that isn't complete, so it stays) */
-    const fx=[]; for(const k of I.keys) for(const e of I.D[k].rep){ const m=e.c==='sleep'?0:mask(e.c); if(!m) continue; const j=at[k]; fx.push({t:e.t,m,j:j==null?-1:j,o:e.t-dayStart(k,I.roll)}); }
-    const ds=days.map(k=>dayStart(k,I.roll)), F=fx.length, ft=new Float64Array(F), ord=new Array(F), mks=WINS.map(()=>new Uint8Array(M)), acc=new Array(S);
-    for(let t=0;t<DEALS;t++){ shuffle();
-      for(let i=0;i<F;i++){ const e=fx[i]; ft[i]=e.j<0?e.t:ds[P[e.j]]+e.o; ord[i]=i; } ord.sort((a,b)=>ft[a]-ft[b]);
-      let lo=0;
-      for(let j=0;j<M;j++){ const t0=mt[j]; while(lo<F&&ft[ord[lo]]<t0) lo++; acc.fill(0);
-        for(let q=lo;q<F;q++){ const dl=ft[ord[q]]-t0; if(dl>far) break; let s=0; while(dl>WINS[s]*H) s++; acc[s]|=fx[ord[q]].m; }
-        let m=0; for(let s=0;s<S;s++){ m|=acc[s]; mks[s][j]=on(m)?1:0; } }
-      let best=1; for(let s=0;s<S;s++) best=least(groups[s],mks[s],best); out[t]=best; } }
-  return out.sort(); }
-/* how often, in those deals, the smallest luck number anywhere was at least as small as p. One is added to both counts, so it is never zero. */
-function across(D,p){ if(!D||p==null) return null; const x=p*(1+1e-9); let c=0; while(c<D.length&&D[c]<=x) c++; return (c+1)/(D.length+1); }
+/* rule 9: the app puts no number on luck. One amount's exact test misled a person who looks at a hundred amounts, and a test that counted them all
+   (whole days dealt again) was unfair to a person who tests one thing at a time and blind to what repeats every day. The lists give counts on both sides. */
 
 /* ---------- rules 2, 4 and 7: one food, by the amount eaten that day ----------
    An effect counts only if it was reported after the food. It lands in one of three rows: same day, that night, next day.
@@ -670,7 +617,6 @@ function foodReading(I,key,mine){ const rows={}, without={n:0,fx:{}}; let times=
     if(seen.size) r.k++; for(const c of seen) r.any[c]=(r.any[c]||0)+1; }
   const list=Object.values(rows).sort((a,b)=>a.q-b.q);
   return {key,times,clean,rows:list,without}; }
-function foodLuck(R,row,c){ return luck(row.any[c]||0,row.n-(row.any[c]||0),R.without.fx[c]||0,R.without.n-(R.without.fx[c]||0)); }
 
 /* ---------- Home: what went in and what came out, over one period ---------- */
 const PERIODS={h4:1,today:1,week:7,month:30};
@@ -743,12 +689,12 @@ function common(outKeys,listKeys,food){ const cnt=(keys)=>{ const c={}; let n=0;
   const typ=[['lact',f=>amounts(f,1).lact],['fat',f=>f.fat],['sug',f=>f.sug==null?null:amounts(f,1).sug],['fib',f=>f.fib]].map(([k,fn])=>({k,o:med(outKeys,fn),l:med(listKeys,fn)})).filter(r=>r.o!=null&&r.l!=null);
   return {rows:rows.slice(0,5),typ,on:O.n,ln:L.n}; }
 
-return {H,WIN,WINS,DEALS,dealt,across,STEPS,BAR_DAYS,BUCKETS,COMPS,FAMS,TAGS,line,table,together,waiting,SLICES,MICRO,dayKey,keyAdd,dayStart,fxDay,amounts,addInto,mealAmounts,ZERO,index,usable,mealUnits,dayUnits,stepWidth,steps,bar,luck,stepRest,stepLuck,foodReading,foodLuck,went,came,cameMax,reportedDays,pie,reference,gutBase,importGut,common};
+return {H,WIN,WINS,STEPS,BAR_DAYS,BUCKETS,COMPS,FAMS,TAGS,line,table,together,waiting,SLICES,MICRO,dayKey,keyAdd,dayStart,fxDay,amounts,addInto,mealAmounts,ZERO,index,usable,mealUnits,dayUnits,stepWidth,steps,bar,foodReading,went,came,cameMax,reportedDays,pie,reference,gutBase,importGut,common};
 })();
 if(typeof module!=='undefined') module.exports=TLE;
 /* ENGINE:END */
 /* ===================== APP: the screens. Data in, data out: the app reports what was entered and never interprets it. ===================== */
-const VER='0.3.0', CONSENT=1, KEY='v3k.threshold.v1', GUTKEYS=['v3k.gut.v1','v3k.gut.fr.v1'];   /* the Food Trial Log keeps its English and its French copy apart */
+const VER='0.3.1', CONSENT=1, KEY='v3k.threshold.v1', GUTKEYS=['v3k.gut.v1','v3k.gut.fr.v1'];   /* the Food Trial Log keeps its English and its French copy apart */
 const E=TLE, H=36e5;
 const FRAMED=(()=>{ try{ return window.self!==window.top; }catch(e){ return true; } })();
 const STANDALONE=(()=>{ try{ return !!(navigator.standalone||matchMedia('(display-mode: standalone)').matches); }catch(e){ return false; } })();
@@ -848,8 +794,8 @@ const AGREE=()=>[L('I am 18 or older.','J’ai 18 ans ou plus.'),
 const MINE=()=>L('Your own report. Not advice.','Ton propre relevé. Pas un conseil.');
 function instBig(){ if(FRAMED||STANDALONE) return ''; try{ if(localStorage.getItem(KEY+'.noinst')) return ''; }catch(e){ return ''; }
   return `<div class="instbig inst" style="margin:14px 0"><button type="button" data-act="install">↓ ${L('Install Threshold Log','Installer Threshold Log')}</button><p style="margin:6px 0 0;text-align:center;font-size:.85rem;opacity:.72">${L('Home-screen icon · full screen · works offline','Icône d’accueil · plein écran · fonctionne hors ligne')}</p><p style="margin:0;text-align:center"><button type="button" class="lnk" data-act="instno">${L('Not now','Pas maintenant')}</button></p></div>`; }
-function vDoor(){ return `<p class="tagline">${L('See what you reported after a food, at each amount.','Vois ce que tu as noté après un aliment, à chaque quantité.')}</p>
-  <p>${L('You report what you eat, with portions, and what you feel, with a time. The app counts. It shows where on the scale your reports start, for fat, carbs, lactose, fibre and histamine.','Tu notes ce que tu manges, avec les portions, et ce que tu ressens, avec l’heure. L’app compte. Elle montre où, sur l’échelle, tes relevés commencent, pour le gras, les glucides, le lactose, les fibres et l’histamine.')}</p>
+function vDoor(){ return `<p class="tagline">${L('See what you had eaten before the negative effects you reported.','Vois ce que tu avais mangé avant les effets négatifs que tu as notés.')}</p>
+  <p>${L('Report a meal when you eat, with its portions. Report a negative effect when you have one, with its time: a headache, gut discomfort, low energy. The app counts. Its lists set the meals an effect came after beside the meals it didn’t, for fat, carbs, lactose and fibre, and for compounds in food such as histamine, caffeine and gluten.','Note un repas quand tu manges, avec ses portions. Note un effet négatif quand tu en as un, avec son heure : un mal de tête, un inconfort au ventre, peu d’énergie. L’app compte. Ses listes mettent les repas suivis d’un effet à côté des autres repas, pour le gras, les glucides, le lactose et les fibres, et pour des composés des aliments comme l’histamine, la caféine et le gluten.')}</p>
   <p class="small muted">${L('It is step two, after the <a href="https://v3ktor.org/gut/">Food Trial Log</a>. It works without it too.','C’est la deuxième étape, après le <a href="https://v3ktor.org/gut/fr/">Food Trial Log</a>. Elle fonctionne aussi sans lui.')}</p>
   <div class="card gate"><p class="small" style="margin:0 0 6px"><b>${L('Tapping “Enter” means I agree:','Appuyer sur «\u00a0Entrer\u00a0» signifie que j’accepte\u00a0:')}</b></p><ol class="small" style="margin:0;padding-left:1.3em">${AGREE().map(l=>`<li>${l}</li>`).join('')}</ol>
   <button type="button" class="btn primary" style="width:100%;margin-top:12px" data-act="enter">${L('Enter','Entrer')}</button></div>
@@ -895,7 +841,7 @@ function vHome(){ const I=IX(), T=today(), Y=kAdd(T,-1), d=I.D[T], dy=I.D[Y], ha
   return `<div class="mainbtns"><button type="button" class="mb meal" data-act="meal"><span class="mi" aria-hidden="true">＋</span>${L('Meal','Repas')}</button><button type="button" class="mb fx" data-act="fx"><span class="mi" aria-hidden="true">＋</span>${L('Effect','Effet')}</button></div>
   ${hasFx?'':`<button type="button" class="lnk none" data-act="none" data-v="${T}" aria-pressed="${noneOn}">${noneOn?'✓ '+L('No effects today','Aucun effet aujourd’hui'):L('No effects today','Aucun effet aujourd’hui')}</button>`}
   ${dy&&dy.meals.length&&!dy.closed?`<p class="small muted" style="text-align:center;margin:0 0 8px">${L('Yesterday has meals and no effect.','Hier a des repas et aucun effet.')} <button type="button" class="lnk" data-act="none" data-v="${Y}">${L('No effects yesterday','Aucun effet hier')}</button></p>`:''}
-  ${S.ev.length?'':`<div class="card soft"><p class="small" style="margin:0">${L('<b>How it works.</b> Report a meal when you eat. Report an effect when you feel one. On a day with none, tap “No effects today”. A day with a meal and one of those is complete, and the bars are drawn from complete days.','<b>Comment ça marche.</b> Note un repas quand tu manges. Note un effet quand tu en ressens un. Une journée sans effet, appuie sur «\u00a0Aucun effet aujourd’hui\u00a0». Une journée avec un repas et l’un des deux est complète, et les barres sont tracées à partir des journées complètes.')}</p></div>`}
+  ${S.ev.length?'':`<div class="card soft"><p class="small" style="margin:0">${L('<b>How it works.</b> Report a meal when you eat. Report a negative effect when you have one. On a day with none, tap “No effects today”. A day with a meal and one of those is complete, and the lists count complete days.','<b>Comment ça marche.</b> Note un repas quand tu manges. Note un effet négatif quand tu en as un. Une journée sans effet, appuie sur «\u00a0Aucun effet aujourd’hui\u00a0». Une journée avec un repas et l’un des deux est complète, et les listes comptent les journées complètes.')}</p></div>`}
   <div class="gtabs seg toptabs pers" role="group" aria-label="${L('Period','Période')}">${PERS.map(([k,en,fr,sen,sfr])=>`<button type="button" data-act="per" data-v="${k}" aria-pressed="${S.per===k}"${sen?` aria-label="${L(en,fr)}"`:''}>${sen?L(sen,sfr):L(en,fr)}</button>`).join('')}</div>
   <div class="card"><div class="io">${ringHTML(W.am)}${fxBarHTML(I,S.per)}</div>${keyHTML(W.am)}${E.pie(W.am).tot?compHomeHTML(W.am):''}<p class="mine">${MINE()}</p></div>
   ${entriesHTML(I,S.per)}`; }
@@ -1096,42 +1042,26 @@ function vThr(){ const I=IX(), mode=S.tmode, h=winH(), h1=h===1, hE=h1?'the hour
   <h3 style="margin-top:18px">${L('One food','Un aliment')}</h3>
   <div class="fsearch"><label class="vh" for="tQ">${L('Look up a food','Chercher un aliment')}</label><input type="search" id="tQ" class="sel" data-in="tq" value="${esc(UI.tq||'')}" placeholder="${L('Look up a food','Chercher un aliment')}" autocomplete="off"></div>
   <div id="tqRows">${tqRows()}</div>`; }
-/* the luck sentence of the lists. s is how often luck alone, across every amount of every line (and after a meal, every setting of the slider),
-   gave a split at least as uneven as the one pressed, in the app's 300 deals of the person's own days (E.dealt, E.across). */
-function luckTxt(s,mode){ if(s==null) return L('There is nothing else to compare it with yet.','Il n’y a encore rien d’autre pour comparer.');
-  const lead=mode==='meal'?L('Counting every amount in these lists and every setting of the slider, luck alone gives a split at least this uneven ','En comptant chaque quantité de ces listes et chaque réglage du curseur, le hasard seul donne un écart au moins aussi inégal ')
-    :L('Counting every amount in these lists, luck alone gives a split at least this uneven ','En comptant chaque quantité de ces listes, le hasard seul donne un écart au moins aussi inégal ');
-  if(s<=1/(E.DEALS+1)+1e-12) return lead+L(`less than 1 time in ${E.DEALS}.`,`moins de 1 fois sur ${E.DEALS}.`);
-  if(s>=0.95) return lead+L('nearly every time.','presque à tout coup.');
-  if(s>=0.095){ const n=Math.round(s*10); return lead+L(`about ${n} time${n>1?'s':''} in 10.`,`environ ${n} fois sur 10.`); }
-  return lead+L(`about 1 time in ${Math.round(1/s)}.`,`environ 1 fois sur ${Math.round(1/s)}.`); }
-/* the deals for the lists on screen, kept with the day index: they are worked out once for a reading and a pick of effects, and again when an entry changes */
-function dealtOf(sel,all){ const I=IX(), c=I._deal||(I._deal={}), key=S.tmode+'|'+(all?1:0)+'|'+sel.join(','); return key in c?c[key]:(c[key]=E.dealt(I,S.tmode,sel,all)); }
-/* one food's own sheet: a single amount beside the days without the food */
-function luckOne(p){ if(p==null) return L('There is nothing else to compare it with yet.','Il n’y a encore rien d’autre pour comparer.');
-  const lead=L('Luck alone gives a split at least this uneven ','Le hasard seul donne un écart au moins aussi inégal ');
-  if(p>=0.95) return lead+L('nearly every time.','presque à tout coup.');
-  if(p>=0.095){ const n=Math.round(p*10); return lead+L(`about ${n} time${n>1?'s':''} in 10.`,`environ ${n} fois sur 10.`); }
-  if(p<0.001) return lead+L('less than 1 time in 1,000.','moins de 1 fois sur 1\u00a0000.');
-  const n=Math.round(1/p); return lead+L(`about 1 time in ${n.toLocaleString('en-CA')}.`,`environ 1 fois sur ${n.toLocaleString('fr-CA')}.`); }
+/* luck, said once and the same for everyone: what leaves it more room in a reading, and what leaves it less. The app puts no number on it. */
+function luckNote(mode){ const m=mode==='meal'; return `<p class="small muted" style="margin:12px 0 0" id="luckNote"><b>${L('More room for luck','Plus de place pour le hasard')}</b>${COL()}${m?L('few entries, several things eaten together, meals closer together than the hours set.','peu d’entrées, plusieurs choses mangées ensemble, des repas plus rapprochés que les heures réglées.'):L('few days, several things eaten on the same day.','peu de jours, plusieurs choses mangées le même jour.')} <b>${L('Less room','Moins de place')}</b>${COL()}${m?L('more entries, one thing changed at a time, meals further apart than the hours set.','plus d’entrées, une seule chose changée à la fois, des repas plus espacés que les heures réglées.'):L('more days, one thing changed at a time.','plus de jours, une seule chose changée à la fois.')}</p>`; }
 function conclHTML(k){ return `<label class="small" for="cIn" style="display:block;margin-top:14px"><b>${L('My conclusion','Ma conclusion')}</b></label><input id="cIn" class="sel wide" data-in="concl" data-k="${esc(k)}" value="${esc(S.concl[k]||'')}" maxlength="200" placeholder="${L('In your own words','Dans tes mots')}" autocomplete="off"><p class="mine">${MINE()}</p>`; }
 /* the foods a step's amount came from: for each, the meals or days it was in, and how much of the amount it brought */
 function stepFoods(B,s){ if(s.i<0) return []; const I=IX(), ids=new Set(s.ids), agg={};
   for(const k of I.keys) for(const m of I.D[k].meals){ const unit=B.mode==='day'?k:m.e.id; if(!ids.has(unit)) continue;
     for(const it of m.e.items){ const x=E.amounts(food(it.key),it.q)[B.b]; if(!(x>0)) continue; const a=agg[it.key]||(agg[it.key]={key:it.key,x:0,u:new Set()}); a.x+=x; a.u.add(unit); } }
   return Object.values(agg).sort((a,b)=>b.x-a.x).slice(0,5); }
-/* one line, opened: every amount, with how many meals or days sat on each side. Tap an amount for its luck number and the foods it came from. */
+/* one line, opened: every amount, with how many meals or days sat on each side. Tap an amount for its share of each side and the foods it came from. */
 function rowSheet(keep){ const u=UI.rs, sel=selOf(), al=sel.length>1&&UI.tall!==false, B=E.bar(IX(),u.b,S.tmode,sel,al), all=[B.zero].concat(B.steps).filter(s=>s.n>0), N=B.n, K=all.reduce((t,s)=>t+s.k,0);
   const [en,fr]=BARN[u.b], uw=n=>unitWord(B.mode,n), cur=u.i==null?null:all.find(s=>s.i===u.i)||null; let more='';
-  if(cur){ const p=E.luck(cur.k,cur.n-cur.k,K-cur.k,(N-cur.n)-(K-cur.k)), from=stepFoods(B,cur), kinds=Object.entries(cur.fx).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
-    more=`<p class="small" style="margin:10px 0 0" id="luckLine"><b>${cap(stepRange(B,cur))}</b>${COL()}${L(`${cur.k} of the ${K} with, ${cur.n-cur.k} of the ${N-K} without.`,`${cur.k} des ${K} avec, ${cur.n-cur.k} des ${N-K} sans.`)} ${luckTxt(E.across(dealtOf(sel,al),p),B.mode)}</p>
+  if(cur){ const from=stepFoods(B,cur), kinds=Object.entries(cur.fx).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
+    more=`<p class="small" style="margin:10px 0 0" id="stepLine"><b>${cap(stepRange(B,cur))}</b>${COL()}${L(`${cur.k} of the ${K} with, ${cur.n-cur.k} of the ${N-K} without.`,`${cur.k} des ${K} avec, ${cur.n-cur.k} des ${N-K} sans.`)}</p>
     ${kinds.length?`<p class="small muted" style="margin:6px 0 0">${kinds.map(([c,n])=>esc(fxLow(c))+' '+n).join(' · ')}</p>`:''}
     ${from.length?`<p class="small" style="margin:12px 0 0"><b>${L('The foods it came from','Les aliments d’où ça vient')}</b></p><ul class="evs">${from.map(a=>`<li><button type="button" class="lnk" data-act="foodrd" data-v="${esc(a.key)}">${esc(fname(food(a.key)))}</button> · ${a.u.size} ${uw(a.u.size)} · ${amtTxt(u.b,a.x)}</li>`).join('')}</ul>`:''}`; }
   showSheet(`<h3 id="sheetTitle">${L(en,fr)}</h3>
   <p class="small muted" style="margin:0 0 8px">${B.mode==='meal'?L(`After a meal: effects reported in ${hrsAfter(winH())}.`,'Après un repas : effets notés dans '+hrsAfter(winH())+'.'):L('Over a day: effects reported that day, that night and the next day.','Sur une journée : effets notés ce jour-là, cette nuit-là et le lendemain.')}</p>
   ${N?`<p style="margin:0"><b>${esc(cap(selName(sel,al)))}${COL()}${K} ${L('of','sur')} ${N} ${uw(N)}</b></p>
   <table class="cov rws" id="rowSteps"><thead><tr><th scope="col" style="text-align:left">${L('Amount','Quantité')}</th><th scope="col">${L('With','Avec')}</th><th scope="col">${L('Without','Sans')}</th></tr></thead><tbody>${all.map(s=>`<tr><th scope="row"><button type="button" class="rowb" data-act="rstep" data-v="${s.i}" aria-pressed="${u.i===s.i}">${stepRange(B,s)}</button></th><td>${s.k}</td><td>${s.n-s.k}</td></tr>`).join('')}</tbody></table>
-  ${more||`<p class="small muted" style="margin:0">${L('Tap an amount to see how often luck alone gives its split, and the foods it came from.','Appuie sur une quantité pour voir à quelle fréquence le hasard seul donne son écart, et les aliments d’où elle vient.')}</p>`}`
+  ${more||`<p class="small muted" style="margin:0">${L('Tap an amount to see the foods it came from.','Appuie sur une quantité pour voir les aliments d’où elle vient.')}</p>`}${luckNote(B.mode)}`
     :`<p class="small muted">${L('Nothing counted yet.','Rien de compté encore.')}</p>`}
   ${B.left?`<p class="small muted" style="margin:10px 0 0">${L(`${B.left} ${uw(B.left)} left out`,`${B.left} ${uw(B.left)} laissé${B.left>1?'s':''} de côté`)}${COL()}${leftWhy2(u.b)}.</p>`:''}
   ${INFO[u.b]?`<p style="margin:10px 0 0"><button type="button" class="lnk" data-act="comp" data-v="${u.b}">${L('What it is, and where the figure comes from','Ce que c’est, et d’où vient le chiffre')}</button></p>`:''}
@@ -1180,7 +1110,7 @@ function carriesTxt(f){ const ks=f&&f.c?E.COMPS.filter(k=>f.c[k]):[];
   return ks.length?`<p class="small" style="margin:6px 0 0">${L('It also carries','Il contient aussi')}${COL()}${ks.map(k=>`<button type="button" class="fxt" data-act="comp" data-v="${k}">${L(BARN[k][0],BARN[k][1]).toLowerCase()}</button>${isP(k)?'':' '+amtTxt(k,f.c[k])}`).join(' · ')}.</p>`:''; }
 
 /* ---------- one food: what was reported on the days it was eaten, by the amount eaten that day ---------- */
-function holdsTxt(f){ if(!f||f.none) return L('This food has no numbers. A meal with it stays out of the bars.','Cet aliment n’a pas de chiffres. Un repas qui en contient reste hors des barres.');
+function holdsTxt(f){ if(!f||f.none) return L('This food has no numbers. A meal with it stays out of the lists.','Cet aliment n’a pas de chiffres. Un repas qui en contient reste hors des listes.');
   const a=E.amounts(f,1), P=[U(f.kcal,'kcal',0),L('fat','gras')+' '+U(a.fat,'g'),L('protein','protéines')+' '+U(a.prot,'g')];
   if(f.sug==null) P.push(L('carbs, kind not listed','glucides, sorte non indiquée')+' '+U(a.unk+a.lact,'g'));
   else P.push(L('complex carbs','glucides complexes')+' '+U(a.cplx,'g'),L('sugars','sucres')+' '+U(a.sug,'g')+(a.lact>=0.05?' ('+L('lactose','lactose')+' '+U(a.lact,'g')+')':''));
@@ -1194,7 +1124,7 @@ function foodSheet(keep){ const u=UI.fr, key=u.key, f=food(key), I=IX(), R=E.foo
   const fxs=(obj,q)=>{ const ks=Object.entries(obj).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])); return ks.length?ks.map(([c,n])=>`<button type="button" class="fxt" data-act="frfx" data-k="${q}" data-v="${esc(c)}">${esc(fxLow(c))}</button>\u00a0${n}`).join(' · '):'<span class="muted">–</span>'; };
   const dw=n=>L(n===1?'day':'days',n===1?'jour':'jours');
   const rows=R.rows.map(r=>{ let luck='';
-    if(u.c&&u.q===r.q&&r.any[u.c]!=null){ const wy=R.without.fx[u.c]||0; luck=`<p class="small" style="margin:6px 0 0"><b>${esc(cap(fxName(u.c)))}</b>${COL()}${L(`on ${r.any[u.c]} of ${r.n} ${dw(r.n)} at this amount`,`${r.any[u.c]} ${dw(r.any[u.c])} sur ${r.n} à cette quantité`)}${R.without.n?L(`, and on ${wy} of ${R.without.n} complete ${dw(R.without.n)} without it.`,`, et ${wy} sur ${R.without.n} ${R.without.n>1?'journées complètes':'journée complète'} sans cet aliment.`):'.'} ${luckOne(E.foodLuck(R,r,u.c))}</p>`; }
+    if(u.c&&u.q===r.q&&r.any[u.c]!=null){ const wy=R.without.fx[u.c]||0; luck=`<p class="small" style="margin:6px 0 0"><b>${esc(cap(fxName(u.c)))}</b>${COL()}${L(`on ${r.any[u.c]} of ${r.n} ${dw(r.n)} at this amount`,`${r.any[u.c]} ${dw(r.any[u.c])} sur ${r.n} à cette quantité`)}${R.without.n?L(`, and on ${wy} of ${R.without.n} complete ${dw(R.without.n)} without it.`,`, et ${wy} sur ${R.without.n} ${R.without.n>1?'journées complètes':'journée complète'} sans cet aliment.`):'.'}</p>`; }
     return `<li><div class="q">${qtxt(r.q)}\u00a0×\u00a0${esc(sv||L('serving','portion'))} · ${r.n} ${dw(r.n)} · ${L(`effects reported for ${r.k}`,`effets notés pour ${r.k}`)}</div>
       <div class="ln"><span>${L('Same day','Même jour')}</span><span>${fxs(r.same,r.q)}</span></div><div class="ln"><span>${L('That night','Cette nuit-là')}</span><span>${fxs(r.night,r.q)}</span></div><div class="ln"><span>${L('Next day','Lendemain')}</span><span>${fxs(r.next,r.q)}</span></div>${luck}</li>`; }).join('');
   const wo=Object.entries(R.without.fx).sort((a,b)=>b[1]-a[1]);
@@ -1204,7 +1134,7 @@ function foodSheet(keep){ const u=UI.fr, key=u.key, f=food(key), I=IX(), R=E.foo
     ${S.list.length?`<p class="small muted" style="margin:2px 0 0">${L(`On ${R.clean} of them, everything else you ate was on your list.`,`Pour ${R.clean} d’entre elles, tout le reste de ce que tu as mangé était sur ta liste.`)}</p>`:''}
     <ul class="rd">${rows}</ul>
     <p class="small" style="margin:8px 0 0">${L('Complete days without it','Journées complètes sans cet aliment')}${COL()}<b>${R.without.n}</b>${wo.length?' · '+wo.map(([c,n])=>esc(fxLow(c))+'\u00a0'+n).join(' · '):''}</p>
-    <p class="small muted" style="margin:6px 0 0">${L('Only effects reported after the food count on the same day. Tap an effect to see how often luck alone gives its split.','Le même jour, seuls les effets notés après l’aliment comptent. Appuie sur un effet pour voir à quelle fréquence le hasard seul donne son écart.')}</p>`
+    <p class="small muted" style="margin:6px 0 0">${L('Only effects reported after the food count on the same day. Tap an effect to see its days at that amount beside the days without the food.','Le même jour, seuls les effets notés après l’aliment comptent. Appuie sur un effet pour voir ses jours à cette quantité à côté des jours sans l’aliment.')}</p>${luckNote('day')}`
     :`<p class="small muted">${L('Not reported on a complete day yet.','Pas encore noté dans une journée complète.')}</p>`}
   ${conclHTML('food:'+key)}`,keep); }
 /* ---------- History: every entry, newest first. Tap one to change or remove it. ---------- */
@@ -1257,7 +1187,7 @@ function aiText(scope){ const T=today(), from=scope==='month'?kAdd(T,-29):null, 
   return O.join('\n'); }
 function aiSheet(keep){ const u=UI.ai; u.text=aiText(u.scope);
   showSheet(`<h3 id="sheetTitle">${L('Ask AI','Demander à l’IA')}</h3>
-  <p class="small">${L('This copies your log as text: the tallies behind the bars, your meals with their amounts, and your effects with their times. Paste it into the AI you use and ask your own question. The app writes no question.','Ça copie ton journal en texte\u00a0: les comptes derrière les barres, tes repas avec leurs quantités, et tes effets avec leurs heures. Colle-le dans l’IA que tu utilises et pose ta propre question. L’app n’écrit aucune question.')}</p>
+  <p class="small">${L('This copies your log as text: the tallies behind the lists, your meals with their amounts, and your effects with their times. Paste it into the AI you use and ask your own question. The app writes no question.','Ça copie ton journal en texte\u00a0: les comptes derrière les listes, tes repas avec leurs quantités, et tes effets avec leurs heures. Colle-le dans l’IA que tu utilises et pose ta propre question. L’app n’écrit aucune question.')}</p>
   <p class="small"><b>${L('Once you paste it somewhere, it has left your phone.','Une fois que tu le colles quelque part, il a quitté ton téléphone.')}</b></p>
   <div class="gtabs seg" role="group" aria-label="${L('How much','Quelle part')}"><button type="button" data-act="aiscope" data-v="month" aria-pressed="${u.scope==='month'}">${L('This month','Ce mois-ci')}</button><button type="button" data-act="aiscope" data-v="all" aria-pressed="${u.scope==='all'}">${L('Everything','Tout')}</button></div>
   <div class="row"><button type="button" class="btn primary sm" data-act="aicopy">${L('Copy','Copier')}</button><span class="small muted">${L(`${u.text.length.toLocaleString('en-CA')} characters`,`${u.text.length.toLocaleString('fr-CA')} caractères`)}</span></div>
@@ -1318,7 +1248,7 @@ function helpSheet(){ const H2=(en,fr,ten,tfr)=>`<p class="small"><b>${L(en,fr)}
   +H2('Other compounds.','Autres composés.','What your food carried beyond the ring, in five families: amines, plant compounds, fermentable sugars, added, and other. Milligrams where a source gives a figure, marked ≈ when it is an estimate. Portions where it doesn’t. Tap a name for what it is, how the body clears it and where the figure comes from. A food added from its label carries only what its label says.','Ce que tes aliments contenaient en plus de l’anneau, en cinq familles : amines, composés des plantes, sucres fermentescibles, ajoutés, et autres. En milligrammes quand une source donne un chiffre, avec ≈ quand c’est une estimation. En portions sinon. Appuie sur un nom pour savoir ce que c’est, comment le corps l’élimine et d’où vient le chiffre. Un aliment ajouté selon son étiquette contient seulement ce que dit son étiquette.')
   +H2('The Effects bar.','La barre des effets.','How many effects you reported in the period. It fills against your own highest count for a period of the same length, and it draws after 7 complete days.','Combien d’effets tu as notés pendant la période. Elle se remplit par rapport à ton propre compte le plus élevé pour une période de même durée, et elle se trace après 7 journées complètes.')
   +H2('The Threshold lists.','Les listes de seuil.','Pick an effect, or leave it on “Any effect”. Pick several and choose how they combine: all of them together, or any of them. “With” is the meals or days it was reported for. “Without” is all the others. For an amount in grams or milligrams, each side shows the lowest and the highest, and nothing is averaged. The side with fewer meals or days usually has the narrower range. For a compound counted in portions, each side shows how many held any. Tap a line for every amount, with how many meals or days sat on each side. A meal joins the lists as soon as an effect is reported after it, or once its hours are over with none. A day joins once the next one starts. “After a meal” reads one meal and the hours after it: the slider sets how many, from 1 to 8, and it starts at 4. One effect can fall in the hours after two meals, and then it counts for both. “Over a day” reads the total for a day with that day, that night and the next day. Poor sleep counts for the night before the morning you report it.','Choisis un effet, ou reste sur « Tout effet ». Choisis-en plusieurs et décide comment ils se combinent : tous ensemble, ou n’importe lequel. « Avec », ce sont les repas ou les jours pour lesquels il a été noté. « Sans », ce sont tous les autres. Pour une quantité en grammes ou en milligrammes, chaque côté montre la plus petite et la plus grande, et rien n’est mis en moyenne. Le côté qui compte le moins de repas ou de jours a d’habitude l’intervalle le plus étroit. Pour un composé compté en portions, chaque côté montre combien en contenaient. Appuie sur une ligne pour chaque quantité, avec le nombre de repas ou de jours de chaque côté. Un repas entre dans les listes dès qu’un effet est noté après, ou quand ses heures sont terminées sans effet. Une journée y entre quand la suivante commence. « Après un repas » lit un repas et les heures suivantes : le curseur règle combien, de 1 à 8, et il commence à 4. Un même effet peut tomber dans les heures qui suivent deux repas, et il compte alors pour les deux. « Sur une journée » lit le total d’une journée avec ce jour-là, cette nuit-là et le lendemain. Un mauvais sommeil compte pour la nuit qui précède le matin où tu le notes.')
-  +H2('The luck number.','Le chiffre du hasard.','Tap a line, then an amount. Look at enough amounts and one of them will look uneven by luck alone, so the sentence counts all of them at once: every amount of every line and, after a meal, every setting of the slider. The app deals the effects of each complete day to another complete day, 300 times, and says how often the most uneven split anywhere came out at least as uneven as the one you tapped. The sheet of one food still sets a single amount beside the days without that food (Fisher’s exact test).','Appuie sur une ligne, puis sur une quantité. Quand on regarde assez de quantités, l’une d’elles paraît inégale par le seul hasard, alors la phrase les compte toutes à la fois : chaque quantité de chaque ligne et, après un repas, chaque réglage du curseur. L’app redistribue les effets de chaque journée complète à une autre journée complète, 300 fois, et dit à quelle fréquence l’écart le plus inégal, où qu’il soit, a été au moins aussi inégal que celui sur lequel tu as appuyé. La fiche d’un aliment met encore une seule quantité à côté des jours sans cet aliment (test exact de Fisher).')
+  +H2('Luck.','Le hasard.','The app puts no number on luck. A split between “With” and “Without” can come from luck alone. Luck has more room when there are few entries, when several things are eaten together, and when meals are closer together than the hours set on the slider. It has less room with more entries, with one thing changed at a time, and with meals further apart than the hours set. The same words sit under every opened line.','L’app ne met aucun chiffre sur le hasard. Un écart entre « Avec » et « Sans » peut venir du seul hasard. Le hasard a plus de place quand il y a peu d’entrées, quand plusieurs choses sont mangées ensemble et quand les repas sont plus rapprochés que les heures réglées sur le curseur. Il a moins de place avec plus d’entrées, avec une seule chose changée à la fois et avec des repas plus espacés que les heures réglées. Les mêmes mots se trouvent sous chaque ligne ouverte.')
   +H2('What the lists can’t tell apart.','Ce que les listes ne peuvent pas départager.','Things eaten together. If your high-fat meals were also your aged-cheese meals, both lines show the same split. Histamine and tyramine sit in the same foods, and so do gluten and fructans, so their lines move together. “Eaten together” counts the meals or days with 3 or more portions of aged or fermented foods, and those with alcohol beside one. And what you expect can shape what you feel and report.','Les choses mangées ensemble. Si tes repas riches en gras étaient aussi tes repas de fromage vieilli, les deux lignes montrent le même écart. L’histamine et la tyramine sont dans les mêmes aliments, le gluten et les fructanes aussi, alors leurs lignes bougent ensemble. « Mangés ensemble » compte les repas ou les jours avec 3 portions ou plus d’aliments vieillis ou fermentés, et ceux avec de l’alcool à côté d’un de ces aliments. Et ce à quoi tu t’attends peut influencer ce que tu ressens et ce que tu notes.')
   +H2('One food.','Un aliment.','On the Threshold tab, look up a food to see what you reported on the days you ate it, by the amount eaten that day, and on the days without it.','Dans l’onglet Seuil, cherche un aliment pour voir ce que tu as noté les jours où tu en as mangé, selon la quantité mangée ce jour-là, et les jours sans cet aliment.')
   +H2('Foods with no numbers.','Aliments sans chiffres.','A food typed by name in the Food Trial Log has no amounts, so its meals stay out of the Threshold lists. A food added from its label has amounts and no vitamins or minerals.','Un aliment écrit à la main dans le Food Trial Log n’a pas de quantités, alors ses repas restent hors des listes de l’onglet Seuil. Un aliment ajouté selon son étiquette a des quantités, mais pas de vitamines ni de minéraux.')

@@ -44,13 +44,13 @@ node tools/stamp_cache.js
 
 `tools/threshold/make_icons.js` draws the icons.
 
-## The hours after a meal, and the luck sentence
+## The hours after a meal, and luck
 
 "After a meal" reads a meal beside the effects reported in the hours after it. The person sets how many with a slider, from 1 to 8; it starts at 4. The app gives no time for any food or compound to act.
 
 Windows can overlap. With the slider at 8, an effect at 2 p.m. counts for a 7 a.m. meal and for a noon meal. Nothing picks one of them.
 
-The luck sentence under a tapped amount counts every amount of every line at once and, after a meal, every setting of the slider. The app deals each complete day's effects to another complete day, 300 times, keeps the most uneven split of each deal, and says how often that split was at least as uneven as the one tapped. Whole days are dealt, so an effect that counts for two meals still counts for two. The deals come from a fixed seed, so the same log gives the same sentence every time. The rules of a deal are written out in `tests/threshold/oracle.js`, which follows them in its own code; the tests require the app's 300 deals to equal the recount's.
+The app puts no number on luck. Version 0.2 gave Fisher's exact test for one tapped amount, which misleads a person who looks at a hundred amounts. Version 0.3.0 counted them all by dealing whole days again, which was unfair to a person who tests one thing at a time and blind to anything that repeats every day. Since 0.3.1 an opened line gives its counts on both sides and one fixed statement, the same for everyone: what leaves luck more room (few entries, several things eaten together, meals closer together than the hours set) and what leaves it less.
 
 ## Tests
 
