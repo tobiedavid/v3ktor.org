@@ -201,4 +201,39 @@ for (const am of [{ fat: 1, prot: 1, cplx: 1 }, { fat: 33.3, prot: 33.3, cplx: 3
   eq('in common: counts only', c.rows.map(x => [x.b, x.o, x.on, x.l, x.ln]), [['dairy', 3, 3, 0, 2]]);
   eq('typical serving, rejected against my list', c.typ.find(x => x.k === 'lact'), { k: 'lact', o: 4, l: 0 }); }
 
+// ---- the hours after a meal are the person's own setting, 1 to 8 on the slider, and 4 unless they move it ----
+{ const d = '2026-11-02', S = { roll: 0, ev: [meal(d, '07:00', [['milk', 1]]), meal(d, '12:00', [['steak', 1]]), meal(d, '17:00', [['rice', 1]]), fx(d, '09:00', 'gut'), fx(d, '14:00', 'head'), fx(d, '16:00', 'naus'), fx(d, '18:00', 'lowen'), fx(d, '22:00', 'edgy')] };
+  const at = h => E.mealUnits(E.index(Object.assign({ twin: h }, S), food, NOW), 'fat').units.map(u => u.fx.join('+'));
+  eq('at 8 hours an effect can count for two meals: 2 p.m. for the 7 a.m. meal and for noon, 6 p.m. for noon and for 5 p.m.', at(8), ['gut+head', 'head+naus+lowen', 'lowen+edgy']);
+  eq('at 4 hours: 4 p.m. still counts for noon, 2 p.m. no longer counts for 7 a.m.', at(4), ['gut', 'head+naus', 'lowen']);
+  eq('at 1 hour: from the time on the meal to one hour after it, and no further', at(1), ['', '', 'lowen']);
+  eq('with no setting, or one that is not a stop of the slider, it is 4 hours', [undefined, 0, 9, 2.5, '8'].map(h => E.index(Object.assign({ twin: h }, S), food, NOW).win / E.H), [4, 4, 4, 4, 4]);
+  eq('the slider has eight stops, one hour apart', E.WINS, [1, 2, 3, 4, 5, 6, 7, 8]);
+  const quiet = { roll: 0, ev: S.ev.filter(e => e.c !== 'lowen' && e.c !== 'edgy') }, soon = h => E.waiting(E.index(Object.assign({ twin: h }, quiet), food, T(d, '20:00')), 'meal').soon;
+  eq('a meal waits until its own hours are over: at 8 p.m. the 5 p.m. meal has settled at 2 hours and is still waiting at 4', [soon(2), soon(4)], [0, 1]); }
+
+// ---- rule 9, across the lists: the luck sentence counts every amount of every line, and every setting of the slider ----
+{ const day2 = i => '2026-10-' + (i < 10 ? '0' + i : i);
+  // 30 days. Milk at breakfast on 10 of them, with gut discomfort an hour later every time. Steak on the other 20, and nothing. Rice every evening.
+  const S = { roll: 0, ev: [] }; for (let i = 1; i <= 30; i++) { const k = day2(i); if (i % 3 === 0) S.ev.push(meal(k, '08:00', [['milk', 1]]), fx(k, '09:00', 'gut')); else S.ev.push(meal(k, '08:00', [['steak', 1]]), none(k)); S.ev.push(meal(k, '18:00', [['rice', 1]])); }
+  const I = E.index(S, food, NOW), D = E.dealt(I, 'meal', [], false), list = Array.from(D);
+  eq('300 deals, the smallest luck number of each, from the smallest up', [D.length, E.DEALS, list.every((x, i) => x > 0 && x <= 1 && (!i || x >= list[i - 1]))], [300, 300, true]);
+  eq('the same log gives the same deals every time', Array.from(E.dealt(I, 'meal', [], false)), list);
+  const B = E.bar(I, 'lact', 'meal'), s = B.steps[B.steps.length - 1], p = E.luck(s.k, s.n - s.k, 10 - s.k, (B.n - s.n) - (10 - s.k));
+  eq('the milk meals: 10 of the 10 with, none of the 50 without', [s.k, s.n, B.n], [10, 10, 60]);
+  eq('no deal comes near a split that clean: less than 1 time in 300', E.across(D, p), 1 / 301);
+  eq('a split with nothing to it is matched by every deal', E.across(D, 1), 1);
+  eq('with nothing dealt, or no luck number, nothing is said', [E.across(null, 0.5), E.across(D, null)], [null, null]);
+  eq('fewer than two complete days: nothing to deal', E.dealt(E.index({ roll: 0, ev: S.ev.slice(0, 3) }, food, NOW), 'meal', [], false), null);
+  eq('two effects picked together have to be together in a deal too: here they never are, so no deal shows a split', Array.from(E.dealt(I, 'meal', ['gut', 'head'], true)).every(x => x === 1), true);
+  eq('...and any of the two is the one that was reported', Array.from(E.dealt(I, 'meal', ['gut', 'head'], false)), Array.from(E.dealt(I, 'meal', ['gut'], false)));
+  eq('poor sleep never counts after a meal, dealt or not', Array.from(E.dealt(E.index({ roll: 0, ev: S.ev.map(e => e.k === 'fx' ? Object.assign({}, e, { c: 'sleep' }) : e) }, food, NOW), 'meal', [], false)).every(x => x === 1), true);
+  const Dd = Array.from(E.dealt(I, 'day', ['gut'], false));
+  eq('over a day: 300 deals as well, the same every time', [Dd.length, Dd.every((x, i) => x > 0 && x <= 1 && (!i || x >= Dd[i - 1])), JSON.stringify(Array.from(E.dealt(I, 'day', ['gut'], false))) === JSON.stringify(Dd)], [300, true, true]);
+  // when every day holds the same effect at the same time, a deal moves nothing: every deal gives the split that is on screen
+  const U = { roll: 0, ev: [] }; for (let i = 1; i <= 12; i++) { const k = day2(i); U.ev.push(meal(k, '08:00', [[i % 2 ? 'milk' : 'steak', 1]]), meal(k, '13:00', [['rice', 1 + i % 3]]), fx(k, '10:00', 'gut')); }
+  const DU = Array.from(E.dealt(E.index(U, food, NOW), 'meal', [], false));
+  eq('days that all hold the same report: every deal is the screen itself', [new Set(DU).size, E.across(DU, DU[0])], [1, 1]);
+  near('...and its most uneven split is the 12 breakfasts against the 12 lunches: 1 chance in 2,704,156', DU[0] * 2704156, 1, 1e-6); }
+
 console.log(fail ? `\n${fail} FAILED, ${pass} passed` : `engine: all ${pass} checks passed`); process.exit(fail ? 1 : 0);
