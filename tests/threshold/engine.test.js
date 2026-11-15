@@ -104,6 +104,15 @@ eq('step width for a 3 mg range', E.stepWidth(3), 0.5);
 // ---- rule 9: the app puts no number on luck ----
 eq('the reading rules hold nothing that works out a luck number', ['luck', 'stepLuck', 'stepRest', 'foodLuck', 'dealt', 'across', 'DEALS'].filter(k => k in E), []);
 
+// ---- a drink is an entry like any other: water alone is a meal that holds nothing, and a flavoured one holds a portion of flavouring ----
+{ const Z = { kcal: 0, fat: 0, prot: 0, carb: 0, fib: 0, sug: 0, lact: 0, alc: 0 }, W = { water: Z, fizz: Object.assign({ c: { flav: 1 } }, Z) };
+  const S = { roll: 0, ev: [meal('2026-11-10', '08:00', [['water', 2]]), meal('2026-11-10', '12:00', [['fizz', 1]]), fx('2026-11-10', '12:45', 'gut'), meal('2026-11-11', '12:00', [['fizz', 2]]), none('2026-11-11')] };
+  const I = E.index(S, k => W[k], NOW), fat = E.line(I, 'fat', 'meal'), fl = E.line(I, 'flav', 'meal');
+  // 08:00 water: nothing in its 4 hours. 12:00 flavoured: an effect 45 minutes later. The next day's flavoured: a day with none.
+  eq('water alone sits on a side of every line, with an amount of zero', [fat.n, fat.hit.n, fat.hit.lo, fat.hit.hi, fat.rest.n, fat.rest.lo, fat.rest.hi], [3, 1, 0, 0, 2, 0, 0]);
+  eq('the flavouring line counts the entries that held any, on each side', [fl.hit.ate, fl.hit.n, fl.rest.ate, fl.rest.n], [1, 1, 1, 2]);
+  eq('and it counts portions', [E.amounts(W.fizz, 2).flav, E.amounts(W.water, 2).flav], [2, 0]); }
+
 // ---- the data view: the meals or days an effect was reported for, beside all the others. Nothing is averaged. ----
 { const F2 = { a: { kcal: 100, fat: 10, prot: 5, carb: 0, fib: 0, sug: 0, lact: 0, alc: 0, c: { caf: 50, ox: 1 } }, b: { kcal: 50, fat: 2, prot: 1, carb: 0, fib: 0, sug: 0, lact: 0, alc: 10, h: true, hist: 1.5 } };
   const S = { roll: 0, ev: [ meal('2026-11-10', '12:00', [['a', 1]]), fx('2026-11-10', '13:00', 'head'),
@@ -120,6 +129,7 @@ eq('the reading rules hold nothing that works out a luck number', ['luck', 'step
   eq('two effects picked together: a day needs both', [E.line(I, 'fat', 'day', ['head', 'gut'], true).hit.n, E.line(I, 'fat', 'day', ['head', 'gut'], false).hit.n], [0, 3]);
   eq('after a meal: the 4 hours after it', [E.line(I, 'fat', 'meal').hit, E.line(I, 'fat', 'meal').rest], [{ n: 2, ate: 2, lo: 6, hi: 10 }, { n: 2, ate: 2, lo: 10, hi: 22 }]);
   eq('every line of every family is there', E.table(I, 'day').map(f => [f.f, f.rows.length]), E.FAMS.map(f => [f[0], f[1].length]));
+  eq('flavourings are a line of the “added” family, counted in portions', [E.COMPS.includes('flav'), E.TAGS.includes('flav'), E.FAMS.find(f => f[0] === 'added')[1]], [true, true, ['sulph', 'nitr', 'swt', 'flav']]);
   eq('eaten together: 3 or more aged or fermented portions, and alcohol with one', E.together(I, 'day'), { nHit: 3, nRest: 1, three: { hit: 1, rest: 0 }, both: { hit: 2, rest: 0 } });
   eq('a line opened with one effect picked counts only that effect', (() => { const B = E.bar(I, 'fat', 'day', ['gut']); return [B.n, [B.zero].concat(B.steps).reduce((t, s) => t + s.k, 0)]; })(), [4, 2]);
   eq('a meal entered just now waits for its 4 hours; today and yesterday wait until the day after each is over', (() => { const J = E.index(S, k => F2[k], T('2026-11-13', '13:00')); return [E.waiting(J, 'meal'), E.waiting(J, 'day'), E.line(J, 'fat', 'meal').n, E.line(J, 'fat', 'day').n]; })(), [{ soon: 1, open: 0 }, { soon: 2, open: 0 }, 3, 2]);

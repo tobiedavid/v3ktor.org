@@ -43,7 +43,7 @@ async function play(browser, base, person, table) {
   if (person.gut) { await page.click('[data-act=tab][data-v=nut]'); await page.click('[data-act=impread]'); await page.click('[data-act=impgo]'); await page.click('[data-act=tab][data-v=home]'); }
   for (const l of person.labels) { await page.click('[data-act=menu]'); await page.click('#sheet [data-act=label]');
     for (const [k, v] of [['n', l.n], ['s', l.s], ['kcal', l.kcal], ['fat', l.fat], ['carb', l.carb], ['fib', l.fib], ['sug', l.sug == null ? '' : l.sug], ['prot', l.prot]]) await page.fill(`#sheet [data-in=lb][data-k=${k}]`, fr ? String(v).replace('.', ',') : String(v));   // a French keyboard types a comma
-    if (l.h) await page.click('#sheet [data-act=lbh]'); await page.click('#sheet [data-act=lbsave]'); }
+    if (l.h) await page.click('#sheet [data-act=lbh]'); for (const k of l.t || []) await page.click(`#sheet [data-act=lbt][data-k=${k}]`); await page.click('#sheet [data-act=lbsave]'); }
   for (const c of (await S()).custom) labelKey[c.n] = 'L' + c.id;
   for (const ref of person.listAdd) { await page.click('[data-act=menu]'); await page.click('#sheet [data-act=list]'); await page.fill('#mQ', nameOf(ref)); await page.click(`#mRows [data-act=mq][data-k="${keyOf(ref)}"]`); await page.click('[data-act=mealdone]'); await page.click('[data-act=tab][data-v=home]'); }
 
@@ -106,8 +106,8 @@ async function play(browser, base, person, table) {
   }
   // ...and the same counts as the lists show them: for any effect, then for the effect reported most often
   await page.click('[data-act=tab][data-v=thr]');
-  const KEYS = ['fat', 'cplx', 'sug', 'lact', 'fib', 'alc', 'caf', 'hist', 'tyr', 'ox', 'nit', 'ga', 'cap', 'fru', 'gos', 'sorb', 'mann', 'fruc', 'sulph', 'nitr', 'swt', 'glu', 'pur', 'theo'], BASE = KEYS.slice(0, 5);
-  const PORTIONS = ['tyr', 'ox', 'ga', 'cap', 'fru', 'gos', 'sorb', 'mann', 'fruc', 'sulph', 'nitr', 'swt', 'glu', 'pur'];
+  const KEYS = ['fat', 'cplx', 'sug', 'lact', 'fib', 'alc', 'caf', 'hist', 'tyr', 'ox', 'nit', 'ga', 'cap', 'fru', 'gos', 'sorb', 'mann', 'fruc', 'sulph', 'nitr', 'swt', 'flav', 'glu', 'pur', 'theo'], BASE = KEYS.slice(0, 5);
+  const PORTIONS = ['tyr', 'ox', 'ga', 'cap', 'fru', 'gos', 'sorb', 'mann', 'fruc', 'sulph', 'nitr', 'swt', 'flav', 'glu', 'pur'];
   const tally = want.filter(e => e.k === 'fx').reduce((o, e) => (o[e.c] = (o[e.c] || 0) + 1, o), {}), ranked = Object.keys(tally).sort((x, y) => tally[y] - tally[x] || x.localeCompare(y)), most = ranked[0];
   const picks = [[]].concat(most ? [[most]] : [], ranked.length > 1 ? [ranked.slice(0, 2)] : []);      // any effect, the one reported most, and the two reported most together
   const dec = x => x < 1 ? 2 : x < 10 ? 1 : 0, near = (shown, real) => Math.abs(shown - real) <= 0.5 * Math.pow(10, -dec(real)) + 1e-9;
@@ -162,7 +162,7 @@ async function play(browser, base, person, table) {
   // ---- Home: the ring, its key, the middle, and the Effects bar, over each period ----
   await page.click('[data-act=tab][data-v=home]');
   const SL = { fat: 'fat', prot: 'prot', cplx: 'complex', lact: 'lactose', sugo: 'otherSugars', fib: 'fibre', unk: 'carbsUnlisted' };
-  const OTHERS = ['tyr', 'ox', 'nit', 'ga', 'cap', 'fru', 'gos', 'sorb', 'mann', 'fruc', 'sulph', 'nitr', 'swt', 'glu', 'pur', 'theo'];
+  const OTHERS = ['tyr', 'ox', 'nit', 'ga', 'cap', 'fru', 'gos', 'sorb', 'mann', 'fruc', 'sulph', 'nitr', 'swt', 'flav', 'glu', 'pur', 'theo'];
   for (const per of ['h4', 'today', 'week', 'month']) { await page.click(`[data-act=per][data-v=${per}]`); const w = R.period(per);
     same(N(`Home, ${per}: effects`), +(await page.locator('.fxbar b').innerText()), w.effects);
     const key = await page.locator('#app .card ul.key').first().locator('.keyrow').evaluateAll(els => els.map(e => [getComputedStyle(e.querySelector('.sw')).backgroundColor, e.querySelector('.am').textContent]));

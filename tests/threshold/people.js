@@ -46,12 +46,12 @@ function steady() {
 // ---------- a varied eater, who starts here without the Food Trial Log (French, day starts at midnight) ----------
 function varied(table) {
   const R = rng(20261004), N = 42, roll = 0, T = (i, h, mi) => new Date(2026, 9, 4 + i, h, mi || 0).getTime(), now = T(41, 20, 30), plan = [], KOMB = 'Kombucha';
-  const labels = [{ n: KOMB, s: '1 bouteille (355 ml)', kcal: 50, fat: 0, carb: 12, fib: 0, sug: 10, prot: 0, lact: 0, h: true }];
+  const labels = [{ n: KOMB, s: '1 bouteille (355 ml)', kcal: 50, fat: 0, carb: 12, fib: 0, sug: 10, prot: 0, lact: 0, h: true, t: ['flav'] }];      // its ingredient list names a flavour: ticked on the label form
   const rec = ref => typeof ref === 'number' ? table[ref] : labelRecord(labels.find(l => l.n === ref));
   const breakfasts = [[[3671, 1], [28, 1], [2873, 1], [136, 1]], [[1242, 1.5], [61, 1], [1704, 1]], [[502158, 1], [501819, 1], [1620, 1]], [[130, 2], [5407, 1], [4066, 2], [118, 1]], [[1256, 1], [113, 1.5]]];
   const lunches = [[[501975, 1], [1696, 1]], [[501976, 1], [4407, 1]], [[4962, 2], [5288, 1]], [[4617, 1], [2185, 1], [5288, 1]], [[1055, 1], [4066, 1]], [[4650, 1], [2926, 1]], [[4903, 1], [130, 1]], [[3081, 1], [4067, 2], [2460, 1]]];
   const dinners = [[[4464, 1], [2462, 1], [40, 1]], [[4963, 1], [4066, 1]], [[920004, 1], [4523, 1], [2375, 1]], [[501999, 1]], [[3203, 1], [4067, 2], [2201, 1]], [[2696, 1], [2506, 1], [2850, 2]], [[502357, 1], [1185, 2]], [[5684, 1], [109, 1.5], [4066, 2], [2850, 2]], [[2201, 1], [1185, 2], [2506, 1]]];
-  const snacks = [[[4163, 1]], [[4163, 2]], [[4186, 1]], [[4407, 1]], [[3893, 1]], [[2943, 2]], [[910001, 1]], [[509001, 1]], [[70, 1]], [[KOMB, 1]]];
+  const snacks = [[[4163, 1]], [[4163, 2]], [[4186, 1]], [[4407, 1]], [[3893, 1]], [[2943, 2]], [[910001, 1]], [[509001, 1]], [[70, 1]], [[KOMB, 1]], [[930001, 2]], [[930003, 1]]];      // water and flavoured sparkling water, each entered alone
   const pick = list => list[Math.floor(R() * list.length)], skipped = new Set([17, 29]), meals = [], fx = [], amOf = items => { const a = nothing(); for (const [ref, q] of items) plus(a, holds(rec(ref), q)); return a; };
   const dayOfIdx = t => Math.round((new Date(new Date(t).getFullYear(), new Date(t).getMonth(), new Date(t).getDate()).getTime() - T(0, 0)) / 864e5);   // which of the 42 days a time falls on
   for (let i = 0; i < N; i++) {
@@ -96,7 +96,7 @@ function closeFirstOpenDay(plan, N, T, dayKey, roll, skipped) {
 }
 
 // a food a person added from its label, in the shape of a table row
-function labelRecord(l) { return { label: true, en: l.n, fr: l.n, kcal: l.kcal, prot: l.prot, fat: l.fat, carb: l.carb, sugars: l.sug, fibre: l.fib, lactose: l.lact || 0, alcohol: 0, histFood: !!l.h, hist: null, micro: null, noFigure: [] }; }
+function labelRecord(l) { return { label: true, en: l.n, fr: l.n, kcal: l.kcal, prot: l.prot, fat: l.fat, carb: l.carb, sugars: l.sug, fibre: l.fib, lactose: l.lact || 0, alcohol: 0, histFood: !!l.h, hist: null, micro: null, noFigure: [], carries: Object.fromEntries((l.t || []).map(k => [k, 1])) }; }
 
 // what the app should hold after the plan is played: the same rules a person would expect, written out plainly
 function expected(person, table) {

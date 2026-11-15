@@ -6,7 +6,7 @@ const O = require('./oracle.js'), P = require('./people.js');
 function engine() { const src = fs.readFileSync(O.APP, 'utf8'), a = src.indexOf('/* ENGINE:START */'), b = src.indexOf('/* ENGINE:END */'); const box = { module: { exports: {} } }; vm.runInNewContext(src.slice(a, b) + '\n;module.exports=TLE;', box); return box.module.exports; }
 function build(person, table, lang) {
   const want = P.expected(person, table); let n = 0;
-  const custom = person.labels.map((l, i) => ({ id: 'c' + (i + 1), n: l.n, s: l.s, kcal: l.kcal, fat: l.fat, carb: l.carb, fib: l.fib, sug: l.sug, prot: l.prot, lact: l.lact || 0, h: !!l.h }));
+  const custom = person.labels.map((l, i) => ({ id: 'c' + (i + 1), n: l.n, s: l.s, kcal: l.kcal, fat: l.fat, carb: l.carb, fib: l.fib, sug: l.sug, prot: l.prot, lact: l.lact || 0, h: !!l.h, t: (l.t || []).slice() }));
   const key = ref => typeof ref === 'number' ? 'f' + ref : 'L' + custom.find(c => c.n === ref).id;
   const ev = want.map(e => e.k === 'meal' ? { id: 'm' + (++n), k: 'meal', t: e.t, items: e.items.map(i => ({ key: key(i.ref), q: i.q })) } : e.k === 'fx' ? { id: 'x' + (++n), k: 'fx', t: e.t, c: e.c } : { id: 'n' + (++n), k: 'none', d: e.d, t: O.dayBegins(O.dayPlus(e.d, 1), person.roll) - 60000 }).sort((a, b) => a.t - b.t);
   const own = { phys: [], psy: [] }; for (const a of person.plan) for (const o of a.own || []) if (!own[o.tab].includes(o.word)) own[o.tab].push(o.word);

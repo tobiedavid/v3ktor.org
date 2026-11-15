@@ -67,6 +67,7 @@ async function open(browser, base, o) {
       const tap = sel => page.click(sel), shut = () => page.click('#sheet [data-act=close]'), slide = async h => { await page.focus('#tWin'); await page.keyboard.press('Home'); for (let i = 1; i < h; i++) await page.keyboard.press('ArrowRight'); };
       for (const per of ['h4', 'today', 'week', 'month']) { await tap(`[data-act=per][data-v=${per}]`); await visit('Home, ' + per); }
       await tap('.fxbar'); await visit('effects sheet'); await shut(); { const oc = page.locator('#app [data-act=comps]'); if (await oc.count()) { await oc.click(); await visit('other compounds'); const cp = page.locator('#sheet [data-act=comp]'); if (await cp.count()) { await cp.first().click(); await visit('a compound'); const hi = page.locator('#sheet [data-act=histinfo]'); if (await hi.count()) { await hi.click(); await visit('histamine sheet'); } } await shut(); } }
+      await page.evaluate(() => { UI.cp = 'flav'; compSheet(); }); await visit('the flavourings sheet'); await page.evaluate(() => { UI.lb = {}; labelSheet(); }); await tap('#sheet [data-act=lbflav]'); await visit('the flavourings sheet, from the label form'); await shut();
       await tap('.mb.meal'); await visit('meal'); for (const g of ['recent', 'dairy', 'sup', 'proc', 'label']) { const b = page.locator(`#mTabs [data-act=mgrp][data-v=${g}]`); if (await b.count()) { await b.click(); await visit('meal, ' + g); } }
       await page.fill('#mQ', 'zzzz'); await visit('meal, a search with no match'); await page.fill('#mQ', lang === 'fr' ? 'lait' : 'milk'); await tap('#mRows .stp.plus'); await visit('meal, a search with a pick'); await tap('#bar [data-act=back]');
       await tap('.mb.fx'); await visit('effect, physical'); await tap('#sheet [data-act=fxtab][data-v=psy]'); await visit('effect, psychological'); await shut();
@@ -166,6 +167,16 @@ async function open(browser, base, o) {
       // a label food can be changed, and removed while no meal uses it
       await page.click('[data-act=menu]'); await page.click('#sheet [data-act=label]'); await page.click('#sheet [data-act=lbedit]'); await page.fill('#sheet [data-in=lb][data-k=sug]', '9'); await page.click('#sheet [data-act=lbsave]'); same('[rules] a label food can be changed', (await A.S()).custom[0].sug, 9);
       await page.click('[data-act=menu]'); await page.click('#sheet [data-act=label]'); await page.click('#sheet [data-act=lbedit]'); await page.click('#sheet [data-act=lbdel]'); same('[rules] and removed while no meal uses it', (await A.S()).custom.length, 0);
+      // what a label's ingredient list names: ticked on the form, kept, and carried by the food
+      await page.click('[data-act=menu]'); await page.click('#sheet [data-act=label]'); await page.fill('#sheet [data-in=lb][data-k=n]', 'Fizzy lime'); for (const k of ['fat', 'carb', 'prot']) await page.fill(`#sheet [data-in=lb][data-k=${k}]`, '0');
+      await page.click('#sheet [data-act=lbt][data-k=flav]'); await page.click('#sheet [data-act=lbt][data-k=swt]'); await page.click('#sheet [data-act=lbt][data-k=swt]');
+      await page.click('#sheet [data-act=lbflav]'); same('[rules] the label form opens what a flavouring can hold, with a way back and no link that leaves the form behind', [await page.locator('#sheet [data-act=lbback]').count(), await page.locator('#sheet [data-act=rowsheet], #sheet [data-act=foodrd]').count()], [1, 0]);
+      await page.click('#sheet [data-act=lbback]'); same('[rules] and coming back keeps what was typed and ticked', [await page.inputValue('#sheet [data-in=lb][data-k=n]'), await page.getAttribute('#sheet [data-act=lbt][data-k=flav]', 'aria-pressed'), await page.getAttribute('#sheet [data-act=lbt][data-k=swt]', 'aria-pressed')], ['Fizzy lime', 'true', 'false']);
+      await page.click('#sheet [data-act=lbsave]'); same('[rules] a ticked flavour is saved with the label food, and the food carries it', [(await A.S()).custom.map(c => [c.n, c.t]), await page.evaluate(() => food('L' + S.custom[0].id).c)], [[['Fizzy lime', ['flav']]], { flav: 1 }]);
+      same('[rules] a tick that isn’t one of the four is dropped when the data is read back', await page.evaluate(() => clean({ custom: [{ id: 'c1', n: 'x', t: ['flav', 'bogus', 'flav', 'nitr'] }] }).custom[0].t), ['flav', 'nitr']);
+      await page.click('[data-act=menu]'); await page.click('#sheet [data-act=label]'); await page.click('#sheet [data-act=lbedit]'); same('[rules] opened again, the tick is still there', await page.getAttribute('#sheet [data-act=lbt][data-k=flav]', 'aria-pressed'), 'true'); await page.click('#sheet [data-act=lbdel]');
+      // the search puts the plain name first
+      same('[rules] a search puts the word as the whole name first: Water before Watermelon, the potato before the chips', await page.evaluate(() => [searchFoods('water').slice(0, 2), searchFoods('eau')[0], searchFoods('potato')[0], searchFoods('wat')[0]]), [['f930001', 'f1691'], 'f930001', 'f2506', 'f1691']);
       // an effect for yesterday, from the effect sheet
       await page.click('.mb.fx'); await page.click('#sheet [data-act=fxk][data-v=joint]'); await page.click('#sheet [data-act=fxday]:nth-of-type(2)'); await page.fill('#fxAt', '22:10'); await page.click('#sheet [data-act=fxdone]');
       { const e = (await A.S()).ev.find(x => x.c === 'joint'), d = new Date(e.t); same('[rules] an effect can be set to yesterday, at its time', [d.getDate(), d.getHours(), d.getMinutes()], [13, 22, 10]); }
@@ -275,6 +286,19 @@ async function open(browser, base, o) {
       await page.clock.setFixedTime(t0 + 5 * 3600e3); await page.evaluate(() => { IXM = null; document.dispatchEvent(new Event('visibilitychange')); }); await page.click('[data-act=tab][data-v=thr]'); await page.click('[data-act=tmode][data-v=meal]');
       ok('[new] once its 4 hours are over with nothing reported, the second meal is on the other side', /after 1 of 2 meals\./.test(await head()), await head());
       same('[new] no error', A.errors, []); await A.ctx.close(); }
+
+    // ================= a day with nothing but water =================
+    for (const lang of ['en', 'fr']) { const t0 = new Date(2026, 10, 14, 18, 0).getTime(), A = await open(browser, base, { lang, now: t0 }), page = A.page, fr = lang === 'fr';
+      await page.click('[data-act=enter]'); await page.waitForSelector('.mb.meal');
+      await page.evaluate(t => { S.ev.push({ id: 'w1', k: 'meal', t: t - 2 * 3600e3, items: [{ key: 'f930001', q: 2 }] }, { id: 'w2', k: 'meal', t: t - 3600e3, items: [{ key: 'f930003', q: 1 }] }); IXM = null; render(); }, t0);
+      const home = await page.locator('#app').innerText();
+      ok(`[water, ${lang}] Home doesn’t say no meal was reported when water was`, !/No meal reported|Aucun repas noté/.test(home) && (fr ? /ne contient ni gras/ : /holds no fat/).test(home), home.slice(0, 300));
+      await page.click('#app [data-act=comps]'); ok(`[water, ${lang}] the flavouring of the flavoured one is in reach from Home`, (await page.locator('#sheet [data-act=comp][data-v=flav]').count()) === 1);
+      await page.click('#sheet [data-act=comp][data-v=flav]'); const sheet = await page.locator('#sheet').innerText();
+      ok(`[water, ${lang}] its sheet says what it can hold, what the label leaves out, and that one product says nothing about another`, (fr ? ['Ce qu’il peut contenir', 'Ce que l’étiquette ne dit pas', 'D’un produit à l’autre', 'ne dit rien sur l’autre', 'D’où vient le compte', 'Eau pétillante aromatisée'] : ['What it can hold', 'What the label leaves out', 'One product and another', 'says nothing about another', 'Where the count comes from', 'Sparkling water, flavoured']).every(w => sheet.includes(w)), sheet.slice(0, 200));
+      await page.click('#sheet [data-act=close]');
+      for (const tab of ['nut', 'thr']) { await page.click(`[data-act=tab][data-v=${tab}]`); const t = await page.locator('#app').innerText(); ok(`[water, ${lang}] ${tab}: no broken number`, !/NaN|undefined|Infinity/.test(t)); }
+      same(`[water, ${lang}] no error`, A.errors, []); await A.ctx.close(); }
 
     // ================= a line with nothing counted =================
     { const t0 = new Date(2026, 10, 14, 18, 0).getTime(), A = await open(browser, base, { lang: 'fr', now: t0 }), page = A.page;
