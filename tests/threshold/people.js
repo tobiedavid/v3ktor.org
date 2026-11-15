@@ -67,7 +67,7 @@ function varied(table) {
     let sugars = 0, alcohol = 0;
     for (const m of today) { const am = amOf(m.items); sugars += am.sugars; alcohol += am.alcohol; meals.push(m);
       const u = rng(m.t / MIN | 0), h = am.hist >= 2.5 ? 0.75 : am.hist >= 1 ? 0.3 : 0.03, l = am.lactose >= 12 ? 0.8 : am.lactose >= 4 ? 0.25 : 0.02;
-      if (u() < h) fx.push({ t: m.t + (60 + Math.floor(u() * 140)) * MIN, codes: ['head'], own: u() < 0.3 ? [{ tab: 'psy', word: 'brouillard mental' }] : [] });     // hidden rule: histamine food, headache one to three hours later
+      if (u() < h) fx.push({ t: m.t + (60 + Math.floor(u() * 140)) * MIN, codes: ['head'], own: u() < 0.3 ? [{ tab: 'psy', word: 'confusion' }] : [] });     // hidden rule: histamine food, headache one to three hours later
       if (u() < l) fx.push({ t: m.t + (50 + Math.floor(u() * 120)) * MIN, codes: u() < 0.5 ? ['gut', 'loose'] : ['gut'] });                                           // hidden rule: lactose, gut discomfort
       }
     if (sugars >= 110 && r[0] < 0.6 && i + 1 < N && !skipped.has(i + 1)) fx.push({ t: T(i + 1, 10, 0), codes: ['lowen'] });
