@@ -54,6 +54,12 @@ Windows can overlap. With the slider at 8, an effect at 2 p.m. counts for a 7 a.
 
 The app puts no number on luck. Version 0.2 gave Fisher's exact test for one tapped amount, which misleads a person who looks at a hundred amounts. Version 0.3.0 counted them all by dealing whole days again, which was unfair to a person who tests one thing at a time and blind to anything that repeats every day. Since 0.3.1 an opened line gives its counts on both sides and one fixed statement, the same for everyone: what leaves luck more room (few entries, several things eaten together, meals closer together than the hours set) and what leaves it less.
 
+## Home
+
+Since 0.3.4, Home is the two buttons and today's entries, in order. It has no period choice, no ring and no Effects bar. The ring, with alcohol, caffeine and the other compounds under it, is on the Nutrition tab.
+
+Tapping an effect opens the meals reported in the hours before it, the nearest first, each with how long before. The hours are the ones set on the Threshold slider, so the sheet lists exactly the meals the lists set that effect beside. Earlier meals of the same day that fall outside those hours are named, not listed. Poor sleep is counted with the day before, so it opens that day's meals. Nothing on the sheet says what any of it means.
+
 ## Drinks, and flavourings
 
 A drink is entered like a meal. Since 0.3.3 the table carries water, plain sparkling water and flavoured sparkling water as three entries, so a person can report which one it was. Water alone is a meal that holds nothing: it sits on a side of every line with an amount of zero.

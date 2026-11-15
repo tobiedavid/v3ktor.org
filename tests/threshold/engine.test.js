@@ -172,19 +172,15 @@ eq('the reading rules hold nothing that works out a luck number', ['luck', 'step
   const next = E.index(S, food, T('2026-11-15', '00:01'));
   eq('one minute into the 15th, the 13th is read', [E.bar(next, 'fat', 'day').n, E.waiting(next, 'day'), E.foodReading(next, 'icecr', null).wait], [4, { soon: 0, open: 0 }, 0]); }
 
-// ---- Home: what went in, what came out ----
+// ---- Nutrition: what went in, over today, the week and the month ----
 { const S = { roll: 0, ev: [] }; for (let d = 1; d <= 9; d++) { const k = '2026-11-' + (d < 10 ? '0' + d : d); S.ev.push(meal(k, '08:00', [['steak', 1]])); for (let i = 0; i < (d === 5 ? 4 : 1); i++) S.ev.push(fx(k, '1' + i + ':00', 'head')); }
   S.ev.push(meal('2026-11-10', '08:00', [['milk', 1]]), fx('2026-11-10', '09:00', 'gut'), fx('2026-11-10', '09:30', 'naus'), fx('2026-11-10', '10:00', 'sleep'));
   const now = T('2026-11-10', '11:00'), I = E.index(S, food, now);
   eq('today: what went in', [E.went(I, 'today').am.lact, E.went(I, 'today').meals], [12, 1]);
-  eq('last 4 hours: what went in', E.went(I, 'h4').meals, 1);
   eq('this week: days with meals', E.went(I, 'week').days, 7);
-  eq('today: effects reported today, poor sleep included', E.came(I, 'today').n, 3);
-  eq('by kind', E.came(I, 'today').by, { gut: 1, naus: 1, sleep: 1 });
-  eq('the busiest day so far', E.cameMax(I, 'today'), 4);
-  eq('the busiest 7 days so far', E.cameMax(I, 'week'), 12);
-  eq('the busiest 4 hours so far', E.cameMax(I, 'h4'), 4);
-  eq('reported days, for the 7-day rule', E.reportedDays(I) >= E.BAR_DAYS, true); }
+  eq('the month: every day with a meal', [E.went(I, 'month').days, E.went(I, 'month').meals], [10, 10]);
+  eq('complete days are counted', E.reportedDays(I), 10);
+  eq('the reading rules hold no Effects bar and no "last 4 hours" period', ['came', 'cameMax', 'BAR_DAYS'].filter(k => k in E), []); }
 
 // ---- the pie ----
 { const P = E.pie({ fat: 140, prot: 95, cplx: 55, lact: 0, sugo: 5, fib: 6, unk: 0, alc: 0 });

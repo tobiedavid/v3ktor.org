@@ -98,22 +98,24 @@ function recount(entries, roll, now) {
     for (const x of units('histN', mode, pick, all, hours).list) { const k = x.fx.length ? 'hit' : 'rest'; if (k === 'hit') o.nHit++; else o.nRest++; if (x.x >= 3) o.three[k]++; if (x.x > 0 && x.alc > 0.005) o.both[k]++; }
     return o;
   }
-  // Home: what went in and what was reported, over a period that ends now
+  // Nutrition and Home: what went in and what was reported, over a period that ends today
   function period(per) {
     const am = nothing(); let meals = 0, mealDays = 0, fx = [];
-    if (per === 'h4') { for (const k of keys) for (const m of days[k].meals) if (m.t > now - 4 * HOUR && m.t <= now) { plus(am, m.am); meals++; } fx = allFx.filter(e => e.t > now - 4 * HOUR && e.t <= now); }
-    else { const n = { today: 1, week: 7, month: 30 }[per], T = dayOf(now, roll);
-      for (let i = 0; i < n; i++) { const d = days[dayPlus(T, -i)]; if (!d) continue; if (d.meals.length) { plus(am, d.total); meals += d.meals.length; mealDays++; } fx = fx.concat(d.said); } }
+    const n = { today: 1, week: 7, month: 30 }[per], T = dayOf(now, roll);
+    for (let i = 0; i < n; i++) { const d = days[dayPlus(T, -i)]; if (!d) continue; if (d.meals.length) { plus(am, d.total); meals += d.meals.length; mealDays++; } fx = fx.concat(d.said); }
     const by = {}; for (const e of fx) by[e.c] = (by[e.c] || 0) + 1;
     return { am, meals, mealDays, effects: fx.length, by };
   }
-  // the highest count of effects in any window of the same length, so far
-  function busiest(per) {
-    if (per === 'h4') { const ts = allFx.map(e => e.t).sort((a, b) => a - b); let best = 0; for (let i = 0; i < ts.length; i++) { let c = 0; for (let j = 0; j <= i; j++) if (ts[i] - ts[j] < 4 * HOUR) c++; if (c > best) best = c; } return best; }
-    const n = { today: 1, week: 7, month: 30 }[per], T = dayOf(now, roll); let best = 0; if (!keys.length) return 0;
-    for (let end = keys[0]; end <= T; end = dayPlus(end, 1)) { let c = 0; for (let i = 0; i < n; i++) { const d = days[dayPlus(end, -i)]; if (d) c += d.said.length; } if (c > best) best = c; }
-    return best;
+  // Home: today's meals and effects, in the order they happened
+  function todayList() { const d = days[dayOf(now, roll)]; return d ? d.meals.map(m => ['meal', m.t]).concat(d.said.map(e => ['fx', e.t])).sort((a, b) => a[1] - b[1] || (a[0] < b[0] ? 1 : -1)) : []; }
+  // an effect, opened: the meals in the hours before it, the nearest first. Poor sleep is counted with the day before: that day's meals, in order.
+  const allMeals = keys.reduce((a, k) => a.concat(days[k].meals), []).sort((a, b) => a.t - b.t);
+  function before(e, hours) {
+    if (e.c === 'sleep') { const d = days[dayPlus(dayOf(e.t, roll), -1)]; return d ? d.meals.filter(m => m.t <= e.t).map(m => m.t) : []; }
+    return allMeals.filter(m => m.t <= e.t && m.t >= e.t - hours * HOUR).map(m => m.t).reverse();
   }
+  // and the earlier meals of the same day that fall outside those hours
+  function outside(e, hours) { if (e.c === 'sleep') return []; const k = dayOf(e.t, roll); return allMeals.filter(m => m.t < e.t - hours * HOUR && dayOf(m.t, roll) === k).map(m => m.t); }
   // one food: the complete days it was eaten on, by the amount eaten that day
   function oneFood(same, onList) {
     const rows = {}, without = { n: 0, fx: {} }; let times = 0, clean = 0, waiting = 0;
@@ -131,7 +133,7 @@ function recount(entries, roll, now) {
       if (seen.size) r.k++; for (const c of seen) r.any[c] = (r.any[c] || 0) + 1; }
     return { times, clean, rows: Object.values(rows).sort((a, b) => a.q - b.q), without, waiting };
   }
-  return { days, keys, complete: keys.filter(k => days[k].complete).length, cells, sides, together, period, busiest, oneFood };
+  return { days, keys, complete: keys.filter(k => days[k].complete).length, cells, sides, together, period, todayList, before, outside, effects: allFx.slice().sort((a, b) => a.t - b.t), oneFood };
 }
 
 module.exports = { loadTable, holds, plus, nothing, recount, dayOf, dayPlus, dayBegins, MICRO, APP };

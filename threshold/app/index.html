@@ -179,21 +179,14 @@ html.noinst .inst,html.noinst #installPill,html.locked #installPill{display:none
 /* ---- Threshold Log's own pieces ---- */
 .lnk.none{display:block;margin:0 auto 10px;text-align:center}
 .lnk.none[aria-pressed="true"]{color:var(--ink);text-decoration:none}
-/* the ring and the Effects bar, side by side: what went in, what came out */
-.io{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}
+/* the ring, under Nutrition */
 .ring{position:relative;width:148px;height:148px;margin:0 auto}
 .ring svg{display:block;width:100%;height:100%;transform:rotate(-90deg)}
 .ring circle{fill:none;stroke-width:20}
 .ring .mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 30px;line-height:1.15;border:0;background:none;color:inherit;font:inherit;cursor:pointer;border-radius:50%}
 .ring .mid b{font-size:1.15rem;font-variant-numeric:tabular-nums}
 .ring .mid small{font-size:.72rem;color:var(--muted)}
-.fxbar{display:flex;flex-direction:column;align-items:center;gap:4px;border:0;background:none;color:inherit;font:inherit;cursor:pointer;padding:4px 6px;border-radius:12px;min-width:64px}
-.fxbar .trk{width:26px;height:110px;border-radius:4px;background:var(--chip);border:1px solid var(--line);display:flex;align-items:flex-end;overflow:hidden}
-.fxbar .trk i{display:block;width:100%;background:var(--fx3);border-radius:4px 4px 0 0;min-height:0}
-.fxbar .trk.wait{border-style:dashed;background:transparent}
-.fxbar b{font-size:1.15rem;font-variant-numeric:tabular-nums;line-height:1}
-.fxbar small{font-size:.78rem;color:var(--muted);line-height:1.15;text-align:center}
-.fxbar:focus-visible,.ring .mid:focus-visible,.keyrow:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.ring .mid:focus-visible,.keyrow:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 /* the key carries the amounts, so the ring never has to be read by colour alone */
 .key{display:grid;grid-template-columns:1fr;gap:0 18px;margin:12px 0 0;padding:0;list-style:none}
 @media (min-width:560px){.key{grid-template-columns:1fr 1fr}}
@@ -203,9 +196,6 @@ html.noinst .inst,html.noinst #installPill,html.locked #installPill{display:none
 .key .am{font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap}
 .keyrow{display:flex;align-items:baseline;gap:6px;width:100%;border:0;background:none;color:inherit;font:inherit;font-size:.9rem;text-align:left;padding:5px 0;cursor:pointer;min-height:32px}
 @media (max-width:360px){.ring{width:132px;height:132px}}
-/* the period switch: four short labels on one line, two lines on the narrowest phones */
-.pers button{padding:6px 8px}
-@media (max-width:340px){.pers button{font-size:.8rem;padding:6px 5px}}
 /* the two readings of the Threshold tab: their labels may take two lines on a narrow phone or in a wide font */
 .modes button{flex:1 1 0;min-width:0;white-space:normal;line-height:1.15}
 /* the coverage list: the person's amount beside Health Canada's reference. No colours, no judgement. */
@@ -488,7 +478,7 @@ const DATA=[
    A reading is a count of what the person reported, set beside an amount. The app reports; it never interprets.
    Entries (S.ev):  {k:'meal', t, items:[{key,q}]}   {k:'fx', t, c}   {k:'none', t, d}   (t = milliseconds, d = a day key) */
 const TLE=(function(){
-const H=36e5, WIN=4*H, STEPS=8, BAR_DAYS=7, UNK_MAX=2, ZEPS=0.005;
+const H=36e5, WIN=4*H, STEPS=8, UNK_MAX=2, ZEPS=0.005;
 /* after a meal, the person sets how many hours count: one of these, 4 unless they move it */
 const WINS=[1,2,3,4,5,6,7,8];
 const p2=n=>(n<10?'0':'')+n;
@@ -629,24 +619,11 @@ function foodReading(I,key,mine){ const rows={}, without={n:0,fx:{}}; let times=
   return {key,times,clean,rows:list,without,wait}; }
 
 /* ---------- Home: what went in and what came out, over one period ---------- */
-const PERIODS={h4:1,today:1,week:7,month:30};
-function inPeriod(I,per){ const T=dayKey(I.now,I.roll); if(per==='h4') return null; const n=PERIODS[per], ks=[]; for(let i=n-1;i>=0;i--) ks.push(keyAdd(T,-i)); return ks; }
+const PERIODS={today:1,week:7,month:30};
+function inPeriod(I,per){ const T=dayKey(I.now,I.roll), n=PERIODS[per], ks=[]; for(let i=n-1;i>=0;i--) ks.push(keyAdd(T,-i)); return ks; }
 function went(I,per){ const a=ZERO(); let days=0, meals=0; const ks=inPeriod(I,per);
-  if(!ks){ for(const k of I.keys) for(const m of I.D[k].meals) if(m.e.t>I.now-WIN&&m.e.t<=I.now){ addInto(a,m.am); meals++; } return {am:a,days:meals?1:0,meals}; }
   for(const k of ks){ const d=I.D[k]; if(d&&d.meals.length){ addInto(a,d.tot); days++; meals+=d.meals.length; } }
   return {am:a,days,meals}; }
-function came(I,per){ const ks=inPeriod(I,per), fx=[];
-  if(!ks){ for(const k of I.keys) for(const e of I.D[k].rep) if(e.t>I.now-WIN&&e.t<=I.now) fx.push(e); }
-  else for(const k of ks){ const d=I.D[k]; if(d) fx.push(...d.rep); }   /* Home counts what was reported in the period */
-  const by={}; for(const e of fx) by[e.c]=(by[e.c]||0)+1; return {n:fx.length,by}; }
-/* the Effects bar: the tally against the person's own highest for a period of the same length. It draws after 7 reported days. */
-function cameMax(I,per){ const n=PERIODS[per]; let max=0;
-  if(per==='h4'){ const ts=[]; for(const k of I.keys) for(const e of I.D[k].rep) ts.push(e.t); ts.sort((a,b)=>a-b);
-    for(let i=0,j=0;i<ts.length;i++){ while(ts[i]-ts[j]>=WIN) j++; if(i-j+1>max) max=i-j+1; } return max; }
-  if(!I.keys.length) return 0; const cnt=k=>I.D[k]?I.D[k].rep.length:0;
-  const last=dayKey(I.now,I.roll); let win=[], sum=0;
-  for(let k=I.keys[0];k<=last;k=keyAdd(k,1)){ const c=cnt(k); win.push(c); sum+=c; if(win.length>n) sum-=win.shift(); if(sum>max) max=sum; }
-  return max; }
 function reportedDays(I){ let n=0; for(const k of I.keys) if(I.D[k].closed) n++; return n; }
 
 /* ---------- the pie: by grams, so every slice is a share of one whole ---------- */
@@ -699,18 +676,18 @@ function common(outKeys,listKeys,food){ const cnt=(keys)=>{ const c={}; let n=0;
   const typ=[['lact',f=>amounts(f,1).lact],['fat',f=>f.fat],['sug',f=>f.sug==null?null:amounts(f,1).sug],['fib',f=>f.fib]].map(([k,fn])=>({k,o:med(outKeys,fn),l:med(listKeys,fn)})).filter(r=>r.o!=null&&r.l!=null);
   return {rows:rows.slice(0,5),typ,on:O.n,ln:L.n}; }
 
-return {H,WIN,WINS,STEPS,BAR_DAYS,BUCKETS,COMPS,FAMS,TAGS,line,table,together,waiting,SLICES,MICRO,dayKey,keyAdd,dayStart,fxDay,amounts,addInto,mealAmounts,ZERO,index,usable,mealUnits,dayUnits,stepWidth,steps,bar,foodReading,went,came,cameMax,reportedDays,pie,reference,gutBase,importGut,common};
+return {H,WIN,WINS,STEPS,BUCKETS,COMPS,FAMS,TAGS,line,table,together,waiting,SLICES,MICRO,dayKey,keyAdd,dayStart,fxDay,amounts,addInto,mealAmounts,ZERO,index,usable,mealUnits,dayUnits,stepWidth,steps,bar,foodReading,went,reportedDays,pie,reference,gutBase,importGut,common};
 })();
 if(typeof module!=='undefined') module.exports=TLE;
 /* ENGINE:END */
 /* ===================== APP: the screens. Data in, data out: the app reports what was entered and never interprets it. ===================== */
-const VER='0.3.3', CONSENT=1, KEY='v3k.threshold.v1', GUTKEYS=['v3k.gut.v1','v3k.gut.fr.v1'];   /* the Food Trial Log keeps its English and its French copy apart */
+const VER='0.3.4', CONSENT=1, KEY='v3k.threshold.v1', GUTKEYS=['v3k.gut.v1','v3k.gut.fr.v1'];   /* the Food Trial Log keeps its English and its French copy apart */
 const E=TLE, H=36e5;
 const FRAMED=(()=>{ try{ return window.self!==window.top; }catch(e){ return true; } })();
 const STANDALONE=(()=>{ try{ return !!(navigator.standalone||matchMedia('(display-mode: standalone)').matches); }catch(e){ return false; } })();
 const UA=navigator.userAgent||'', IOS=/iPad|iPhone|iPod/.test(UA)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1), ANDROID=/Android/.test(UA), SAFARI=IOS&&/Safari\//.test(UA)&&!/CriOS|FxiOS|EdgiOS|OPiOS|FBAN|FBAV|Instagram/.test(UA), CHROME=ANDROID&&/Chrome\//.test(UA)&&!/SamsungBrowser|EdgA|OPR\/|Firefox|; wv\)|FBAN|FBAV|Instagram/.test(UA);
 const LBT=['flav','swt','sulph','nitr'];     /* what a label's ingredient list can name: ticked on the label form */
-function S0(){ return {v:1,lang:null,ack:false,ackAt:null,cv:null,roll:0,p:{},list:[],amt:{},imp:null,custom:[],ev:[],own:{phys:[],psy:[]},concl:{},tab:'home',per:'today',nper:'week',tmode:'meal',twin:4,bkAt:null}; }
+function S0(){ return {v:1,lang:null,ack:false,ackAt:null,cv:null,roll:0,p:{},list:[],amt:{},imp:null,custom:[],ev:[],own:{phys:[],psy:[]},concl:{},tab:'home',nper:'week',tmode:'meal',twin:4,bkAt:null}; }
 let S=S0(), STORE='ok', UI={}, V=null, UNDO=null, IXM=null;
 /* saved data, or a backup, read back in: every list is a list again, whatever the file held */
 function clean(o){ const n=Object.assign(S0(),o), arr=x=>Array.isArray(x)?x:[], obj=x=>x&&typeof x==='object'&&!Array.isArray(x)?x:{};
@@ -722,7 +699,7 @@ function clean(o){ const n=Object.assign(S0(),o), arr=x=>Array.isArray(x)?x:[], 
   { const a={}, src=obj(n.amt); for(const k of Object.keys(src)) if(pos(src[k])) a[k]=src[k]; n.amt=a; const c={}, cs=obj(n.concl); for(const k of Object.keys(cs)) if(typeof cs[k]==='string'&&cs[k].trim()) c[k]=cs[k].slice(0,200); n.concl=c; }
   n.own={phys:arr(obj(n.own).phys).filter(w=>typeof w==='string'),psy:arr(obj(n.own).psy).filter(w=>typeof w==='string')};
   n.roll=Math.min(23,Math.max(0,Math.round(+n.roll||0))); { const rows=x=>arr(x).filter(r=>r&&typeof r.key==='string'&&typeof r.d==='string'); n.imp=n.imp&&typeof n.imp==='object'?Object.assign(n.imp,{out:rows(n.imp.out),aside:rows(n.imp.aside),fine:arr(n.imp.fine).filter(k=>typeof k==='string')}):null; }
-  if(!['today','week','month','h4'].includes(n.per)) n.per='today'; if(!['today','week','month'].includes(n.nper)) n.nper='week'; if(n.tmode!=='day') n.tmode='meal'; if(E.WINS.indexOf(n.twin)<0) n.twin=4; n.tab='home'; if(n.cv!==CONSENT) n.ack=false;   /* the five statements changed since this person agreed: ask again */ n.lang=n.lang==='fr'||n.lang==='en'?n.lang:null; return n; }
+  delete n.per; if(!['today','week','month'].includes(n.nper)) n.nper='week'; if(n.tmode!=='day') n.tmode='meal'; if(E.WINS.indexOf(n.twin)<0) n.twin=4; n.tab='home'; if(n.cv!==CONSENT) n.ack=false;   /* the five statements changed since this person agreed: ask again */ n.lang=n.lang==='fr'||n.lang==='en'?n.lang:null; return n; }
 { let raw=null; try{ raw=localStorage.getItem(KEY); }catch(e){ STORE='none'; }
   if(raw){ try{ const o=JSON.parse(raw); if(o&&o.v===1&&Array.isArray(o.ev)) S=clean(o); else STORE='bad'; }catch(e){ STORE='bad'; } } }
 if(!S.lang){ let fp=null; try{ fp=localStorage.getItem('v3ktor-lang'); }catch(e){}   /* the language picked on the v3ktor.org front page, if there is one */
@@ -838,24 +815,20 @@ function keyHTML(am,div,some){ const P=E.pie(am); div=div||1; if(!P.slices.lengt
     return `<li>${TOBAR[s.k]?`<button type="button" class="keyrow" data-act="rowsheet" data-k="${TOBAR[s.k]}">${inner}</button>`:`<span class="keyrow" style="cursor:default">${inner}</span>`}</li>`; }).join('')}</ul>`; }
 
 /* ---------- Home ---------- */
-const PERS=[['h4','Last 4 hours','4 dernières heures','4 h','4 h'],['today','Today','Aujourd’hui'],['week','Week','Semaine'],['month','Month','Mois']];
-function fxBarHTML(I,per){ const c=E.came(I,per), max=E.cameMax(I,per), rd=E.reportedDays(I), draw=rd>=E.BAR_DAYS, pct=draw&&max?Math.round(Math.min(1,c.n/max)*100):0;
-  return `<button type="button" class="fxbar" data-act="fxinfo" aria-label="${L(`Effects: ${c.n}`,`Effets\u00a0: ${c.n}`)}"><span class="trk${draw?'':' wait'}"><i style="height:${pct}%"></i></span><b>${c.n}</b><small>${L('Effects','Effets')}</small></button>`; }
-function entriesHTML(I,per){ const T=today(), rows=[]; let evs;
-  if(per==='h4') evs=S.ev.filter(e=>e.t>I.now-E.WIN&&e.t<=I.now&&e.k!=='none'); else { const n={today:1,week:7,month:30}[per], from=kAdd(T,-(n-1)); evs=S.ev.filter(e=>{ const k=e.k==='none'?e.d:E.dayKey(e.t,S.roll); return k>=from&&k<=T; }); }
-  if(!evs.length) return `<p class="small muted" style="margin:14px 0 0">${L('Nothing reported in this period yet.','Rien de noté pour cette période.')}</p>`;
-  const multi=per==='week'||per==='month', list=multi?evs.slice().reverse().slice(0,40):evs; let last=null, h='';
-  for(const e of list){ const k=e.k==='none'?e.d:E.dayKey(e.t,S.roll); if(multi&&k!==last){ if(last) h+='</ul>'; h+=`<div class="eyebrow" style="margin:14px 0 0">${esc(dLabel(k))}</div><ul class="tl">`; last=k; } else if(!last){ h+='<ul class="tl">'; last=k; }
-    h+=`<li><button type="button" class="tlr" data-act="entry" data-v="${e.id}"><span class="tt">${e.k==='none'?'':hm(e.t)}</span><span class="tx">${e.k==='meal'?mealText(e):e.k==='fx'?`<span class="fxm" aria-hidden="true"></span>${esc(fxName(e.c))}`:`<span class="muted">${L('No effects reported','Aucun effet noté')}</span>`}</span></button></li>`; }
-  return h+'</ul>'+(multi&&evs.length>40?`<p class="small muted">${L('Older entries are in Menu → History.','Les entrées plus anciennes sont dans Menu → Historique.')}</p>`:''); }
-function vHome(){ const I=IX(), T=today(), Y=kAdd(T,-1), d=I.D[T], dy=I.D[Y], hasFx=!!(d&&d.fx.length), noneOn=!!(d&&d.none), W=E.went(I,S.per);
+/* how long before: "40 min before", "2 h 10 before" */
+function gapTxt(ms){ const n=Math.round(ms/6e4); if(n<1) return L('at the same time','au même moment'); const t=n<60?n+' min':Math.floor(n/60)+' h'+(n%60?' '+p2(n%60):''); return L(t+' before',t+' avant'); }
+function vHome(){ const I=IX(), T=today(), Y=kAdd(T,-1), d=I.D[T], dy=I.D[Y], hasFx=!!(d&&d.fx.length), noneOn=!!(d&&d.none);
+  const evs=S.ev.filter(e=>(e.k==='none'?e.d:E.dayKey(e.t,S.roll))===T), nm=evs.filter(e=>e.k==='meal').length, nf=evs.filter(e=>e.k==='fx').length, older=S.ev.length>evs.length;
   return `<div class="mainbtns"><button type="button" class="mb meal" data-act="meal"><span class="mi" aria-hidden="true">＋</span>${L('Meal','Repas')}</button><button type="button" class="mb fx" data-act="fx"><span class="mi" aria-hidden="true">＋</span>${L('Effect','Effet')}</button></div>
   ${hasFx?'':`<button type="button" class="lnk none" data-act="none" data-v="${T}" aria-pressed="${noneOn}">${noneOn?'✓ '+L('No effects today','Aucun effet aujourd’hui'):L('No effects today','Aucun effet aujourd’hui')}</button>`}
   ${dy&&dy.meals.length&&!dy.closed?`<p class="small muted" style="text-align:center;margin:0 0 8px">${L('Yesterday has meals and no effect.','Hier a des repas et aucun effet.')} <button type="button" class="lnk" data-act="none" data-v="${Y}">${L('No effects yesterday','Aucun effet hier')}</button></p>`:''}
   ${S.ev.length?'':`<div class="card soft"><p class="small" style="margin:0">${L('<b>How it works.</b> Report a meal when you eat. Report a negative effect when you have one. On a day with none, tap “No effects today”. A day with a meal and one of those is complete, and the lists count complete days.','<b>Comment ça marche.</b> Note un repas quand tu manges. Note un effet négatif quand tu en as un. Une journée sans effet, appuie sur «\u00a0Aucun effet aujourd’hui\u00a0». Une journée avec un repas et l’un des deux est complète, et les listes comptent les journées complètes.')}</p></div>`}
-  <div class="gtabs seg toptabs pers" role="group" aria-label="${L('Period','Période')}">${PERS.map(([k,en,fr,sen,sfr])=>`<button type="button" data-act="per" data-v="${k}" aria-pressed="${S.per===k}"${sen?` aria-label="${L(en,fr)}"`:''}>${sen?L(sen,sfr):L(en,fr)}</button>`).join('')}</div>
-  <div class="card"><div class="io">${ringHTML(W.am)}${fxBarHTML(I,S.per)}</div>${keyHTML(W.am,1,W.meals>0)}${W.meals?compHomeHTML(W.am):''}<p class="mine">${MINE()}</p></div>
-  ${entriesHTML(I,S.per)}`; }
+  <div class="eyebrow" style="margin:18px 0 0">${L('Today','Aujourd’hui')}</div>
+  ${evs.length?`<ul class="tl" id="todayList">${evs.map(entryRow).join('')}</ul>`:`<p class="small muted" id="todayNone" style="margin:8px 0 0">${L('Nothing reported today yet.','Rien de noté aujourd’hui pour l’instant.')}</p>`}
+  ${nm||nf?`<p class="small muted" id="todayCount" style="margin:14px 0 0;text-align:center">${L(`${nm} meal${nm===1?'':'s'} · ${nf} effect${nf===1?'':'s'}`,`${nm} repas · ${nf} effet${nf>1?'s':''}`)}</p>`:''}
+  ${nm?`<p style="margin:6px 0 0;text-align:center"><button type="button" class="lnk" data-act="tonut">${L('What went in, under Nutrition','Ce qui est entré, dans Nutrition')}</button></p>`:''}
+  ${older?`<p style="margin:6px 0 0;text-align:center"><button type="button" class="lnk" data-act="hist">${L('Earlier days, in History','Les journées d’avant, dans l’Historique')}</button></p>`:''}
+  <p class="mine">${MINE()}</p>`; }
 
 /* ---------- a meal: foods, portions in halves, a time. The same screen edits "my list". ---------- */
 function openMeal(e){ const T=today(); if(e){ const k=E.dayKey(e.t,S.roll), items={}; for(const it of e.items) items[it.key]=it.q; V={v:'meal',mode:'meal',id:e.id,day:k,at:hm(e.t),items,grp:'sel',q:''}; }
@@ -912,25 +885,17 @@ const COL=()=>L(': ','\u00a0: ');
 const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
 function dShort(k){ if(!k) return ''; const [y,m,d]=String(k).slice(0,10).split('-').map(Number); return new Date(y,m-1,d).toLocaleDateString(LOC(),{day:'numeric',month:'short',year:'numeric'}); }
 const PN={today:1,week:7,month:30};
-const perName=per=>{ const r=PERS.find(x=>x[0]===per); return L(r[1],r[2]); };
+const perName=per=>{ const r=NPERS.find(x=>x[0]===per); return L(r[1],r[2]); };
 /* the meals of one period, for the sheets that list what is behind a number */
-function mealsIn(I,per){ const out=[]; if(per==='h4'){ for(const k of I.keys) for(const m of I.D[k].meals) if(m.e.t>I.now-E.WIN&&m.e.t<=I.now) out.push(m); return out; }
-  const T=today(); for(let i=PN[per]-1;i>=0;i--){ const d=I.D[kAdd(T,-i)]; if(d) out.push(...d.meals); } return out; }
+function mealsIn(I,per){ const out=[], T=today(); for(let i=PN[per]-1;i>=0;i--){ const d=I.D[kAdd(T,-i)]; if(d) out.push(...d.meals); } return out; }
 
-/* ---------- Home: what is behind the two numbers ---------- */
-function histamineSheet(){ const I=IX(), per=S.tab==='nut'?S.nper:S.per, rows={}; let mg=0;
+/* ---------- Nutrition: what is behind the histamine line ---------- */
+function histamineSheet(){ const I=IX(), per=S.nper, rows={}; let mg=0;
   for(const m of mealsIn(I,per)) for(const it of m.e.items){ const f=food(it.key); if(!f||f.none||!f.h) continue; const r=rows[it.key]||(rows[it.key]={f,q:0}); r.q+=it.q; if(f.hist!=null) mg+=f.hist*it.q; }
   const list=Object.values(rows).sort((a,b)=>(b.f.hist||0)*b.q-(a.f.hist||0)*a.q);
   showSheet(`<h3 id="sheetTitle">${L('Histamine, estimated','Histamine, estimée')} · ${perName(per)}</h3>
   ${list.length?`<ul class="evs">${list.map(r=>`<li>${qtxt(r.q)}\u00a0×\u00a0${esc(fname(r.f))} · ${r.f.hist!=null?'≈\u00a0'+U(r.f.hist*r.q,'mg',r.f.hist*r.q<1?2:1):L('no figure','sans chiffre')}</li>`).join('')}</ul><p class="small">${L('Total with a figure','Total avec un chiffre')}${COL()}<b>≈\u00a0${U(mg,'mg',mg<1?2:1)}</b></p>`:`<p>${L('No histamine food reported in this period.','Aucun aliment à histamine noté pour cette période.')}</p>`}
   <p class="small muted">${L('How the estimate is made: the weight of a serving, times the average for its food type in a 2011 table from the European Food Safety Authority. The amount in your own piece can be many times more or less. It counts how much histamine food you reported. It is not a measurement.','Comment l’estimation est faite\u00a0: le poids d’une portion, multiplié par la moyenne de son type d’aliment dans un tableau de 2011 de l’Autorité européenne de sécurité des aliments. La quantité dans ton propre morceau peut être plusieurs fois plus grande ou plus petite. Ça compte combien d’aliments à histamine tu as notés. Ce n’est pas une mesure.')}</p><p class="mine">${MINE()}</p>`); }
-function fxSheetInfo(){ const I=IX(), per=S.per, c=E.came(I,per), max=E.cameMax(I,per), rd=E.reportedDays(I), kinds=Object.entries(c.by).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
-  showSheet(`<h3 id="sheetTitle">${L('Effects','Effets')} · ${perName(per)}</h3>
-  <p><b>${L(`${c.n} reported.`,`${c.n} noté${c.n>1?'s':''}.`)}</b></p>
-  ${kinds.length?`<ul class="evs">${kinds.map(([k,n])=>`<li>${esc(fxName(k))} · ${n}</li>`).join('')}</ul>`:''}
-  <p class="small muted">${rd>=E.BAR_DAYS?L(`The bar fills against your own highest count for a period of the same length. So far that is ${max}.`,`La barre se remplit par rapport à ton propre compte le plus élevé pour une période de même durée. Jusqu’ici, c’est ${max}.`):L(`The bar draws after ${E.BAR_DAYS} complete days. You have ${rd}. A day is complete when it has a meal and either an effect or a tap on “No effects today”.`,`La barre se trace après ${E.BAR_DAYS} journées complètes. Tu en as ${rd}. Une journée est complète quand elle a un repas et soit un effet, soit un appui sur «\u00a0Aucun effet aujourd’hui\u00a0».`)}</p><p class="mine">${MINE()}</p>`); }
-
-/* ---------- Nutrition: the same ring, a day's amounts beside Health Canada's reference, and the lists ---------- */
 const NPERS=[['today','Today','Aujourd’hui'],['week','Week','Semaine'],['month','Month','Mois']];
 /* the order, names, units and decimals of The Patch's chart */
 const TN=[['prot','g','Protein','Protéines',0],['fib','g','Fibre','Fibres',0],['fe','mg','Iron','Fer',1],['mg','mg','Magnesium','Magnésium',0],['k','mg','Potassium','Potassium',0],['b1','mg','Thiamine (B1)','Thiamine (B1)',2],['b2','mg','Riboflavin (B2)','Riboflavine (B2)',1],['b3','mg','Niacin (B3)','Niacine (B3)',0],['b6','mg','Vitamin B6','Vitamine B6',1],['b12','mcg','B12','B12',1],['fol','mcg','Folate','Folate',0],['zn','mg','Zinc','Zinc',1],['se','mcg','Selenium','Sélénium',0],['cu','mg','Copper','Cuivre',1],['ca','mg','Calcium','Calcium',0],['c','mg','Vitamin C','Vitamine C',0],['e','IU','Vitamin E','Vitamine E',0],['d','IU','Vitamin D','Vitamine D',0],['va','mcg','Vitamin A','Vitamine A',0],['mn','mg','Manganese','Manganèse',1],['vk','mcg','Vitamin K','Vitamine K',0]];
@@ -969,6 +934,7 @@ function vNut(){ const I=IX(), per=S.nper, W=E.went(I,per), anyMeal=S.ev.some(e=
     <p class="small muted" style="margin:10px 0 0">${L('The file comes from the Food Trial Log: Menu → Back up my data → Download a file. On an iPhone, an installed app doesn’t see another app’s data, so the file is the way.','Le fichier vient du Food Trial Log\u00a0: Menu → Sauvegarder mes données → Télécharger un fichier. Sur un iPhone, une app installée ne voit pas les données d’une autre app, alors il faut passer par le fichier.')}</p>`;
   return `<div class="gtabs seg toptabs" role="group" aria-label="${L('Period','Période')}">${NPERS.map(([k,en,fr])=>`<button type="button" data-act="nper" data-v="${k}" aria-pressed="${per===k}">${L(en,fr)}</button>`).join('')}</div>
   <div class="card">${capn?`<p class="small muted" style="margin:0 0 10px;text-align:center">${capn}</p>`:''}${ringHTML(am,div)}${keyHTML(am,div,has)}${has?`<p class="small muted" style="margin:8px 0 0;text-align:center">${L('Energy','Énergie')}${COL()}${U(am.kcal/div,'kcal',0)}</p>`:''}<p class="mine">${MINE()}</p></div>
+  ${!fromList&&W.meals?`<div class="card" id="compCard"><p class="small muted" style="margin:0;text-align:center">${per==='today'?L('Today, in total.','Aujourd’hui, au total.'):L(`The last ${PN[per]} days, in total.`,`Les ${PN[per]} derniers jours, au total.`)}</p>${compHomeHTML(W.am)}<p class="mine">${MINE()}</p></div>`:''}
   <div class="card"><table class="cov" id="cov"><thead><tr><th scope="col" style="text-align:left">${L('In a day','Dans une journée')}</th><th scope="col">${L('You','Toi')}</th><th scope="col"><span aria-hidden="true">${L('Ref.','Réf.')}</span><span class="vh">${L('Reference','Référence')}</span></th><th scope="col"><span class="vh">${L('Share of the reference','Part de la référence')}</span><span aria-hidden="true">%</span></th></tr></thead><tbody>${rows}</tbody></table>
     ${nn?`<p class="small muted">${L(`${qtxt(nn)} portion${nn>1?'s':''} of a food with no numbers ${nn>1?'are':'is'} not in these amounts.`,`${qtxt(nn)} portion${nn>1?'s':''} d’un aliment sans chiffres ${nn>1?'ne sont':'n’est'} pas dans ces quantités.`)}</p>`:''}
     ${nl?`<p class="small muted">${L(`${qtxt(nl)} portion${nl>1?'s':''} of a food added from its label count${nl>1?'':'s'} for protein and fibre only: a label doesn’t list these vitamins and minerals.`,`${qtxt(nl)} portion${nl>1?'s':''} d’un aliment ajouté selon son étiquette ${nl>1?'comptent':'compte'} pour les protéines et les fibres seulement\u00a0: une étiquette n’indique pas ces vitamines et minéraux.`)}</p>`:''}
@@ -1118,7 +1084,7 @@ function compSheet(back){ const k=UI.cp, inf=INFO[k], I=IX(), n=foodDays(I), foo
   ${back?'':`<p style="margin:6px 0 0"><button type="button" class="lnk" data-act="rowsheet" data-k="${k}">${L('Every amount, beside what you reported','Chaque quantité, à côté de ce que tu as noté')}</button></p>`}
   ${k==='hist'?`<p style="margin:0"><button type="button" class="lnk" data-act="histinfo">${L('The histamine foods in this period','Les aliments à histamine de cette période')}</button></p>`:''}
   <p class="mine">${MINE()}</p>`); }
-function compsSheet(){ const am=E.went(IX(),S.per).am;
+function compsSheet(){ const am=E.went(IX(),S.nper).am;
   const fams=E.FAMS.slice(2).map(([f,ks])=>{ const rows=ks.filter(k=>held(am,k)); return rows.length?`<p class="small" style="margin:12px 0 0"><b>${L(FAMN[f][0],FAMN[f][1])}</b></p><ul class="key" style="margin-top:2px">${rows.map(k=>compRow(k,am)).join('')}</ul>`:''; }).join('');
   showSheet(`<h3 id="sheetTitle">${L('Other compounds','Autres composés')}</h3><p class="small muted" style="margin:-4px 0 0">${L('What the food you reported in this period carried. Tap a name for what it is.','Ce que contenaient les aliments que tu as notés pendant cette période. Appuie sur un nom pour savoir ce que c’est.')}</p>
   ${fams||`<p class="small muted" style="margin:12px 0 0">${L('Nothing in this period.','Rien pendant cette période.')}</p>`}
@@ -1179,8 +1145,17 @@ function entrySheet(keep){ const e=S.ev.find(x=>x.id===UI.en.id); if(!e){ closeS
   if(e.k==='meal') showSheet(`<h3 id="sheetTitle">${L('Meal','Repas')} · ${esc(dLabel(k))}, ${hm(e.t)}</h3>
     <ul class="evs">${e.items.map(it=>{ const f=food(it.key); return `<li>${qtxt(it.q)}\u00a0×\u00a0<button type="button" class="lnk" data-act="foodrd" data-v="${esc(it.key)}">${esc(fname(f))}</button>${fserv(f)?` <span class="small muted">${esc(fserv(f))}</span>`:''}</li>`; }).join('')}</ul>
     <p class="small">${amountsLine(E.mealAmounts(e,food))}</p><div class="row"><button type="button" class="btn sm" data-act="mealedit" data-v="${e.id}">${L('Change','Modifier')}</button>${rm}</div>`,keep);
-  else if(e.k==='fx') showSheet(`<h3 id="sheetTitle">${esc(fxName(e.c))}</h3><p class="small muted">${esc(dLabel(k))}, ${hm(e.t)}</p>
-    <div class="row"><label class="small" for="enAt">${L('Time','Heure')}</label><input type="time" id="enAt" class="sel tm" data-in="enat" value="${esc(UI.en.at)}"><button type="button" class="btn sm" data-act="ensave">${L('Save the time','Enregistrer l’heure')}</button></div><div class="row" style="margin-top:12px">${rm}</div>`,keep);
+  else if(e.k==='fx'){ const h=winH(), W=h*E.H, sleep=e.c==='sleep', dk=E.fxDay(e,S.roll), meals=S.ev.filter(x=>x.k==='meal'&&x.t<=e.t);
+    /* the meals the lists set this effect beside: within the slider's hours before it. Poor sleep is counted with the day before, so it shows that day's meals. */
+    const bef=sleep?meals.filter(x=>E.dayKey(x.t,S.roll)===dk):meals.filter(x=>x.t>=e.t-W).reverse(), out=sleep?[]:meals.filter(x=>x.t<e.t-W&&E.dayKey(x.t,S.roll)===k);
+    const row=x=>`<li><button type="button" class="lnk" data-act="entry" data-v="${x.id}">${hm(x.t)}</button>${sleep?'':' · '+gapTxt(e.t-x.t)}<br>${mealText(x)}</li>`;
+    const outs=out.map(x=>hm(x.t)), outL=outs.length>1?outs.slice(0,-1).join(', ')+L(' and ',' et ')+outs[outs.length-1]:outs[0];
+    showSheet(`<h3 id="sheetTitle">${esc(fxName(e.c))}</h3><p class="small muted" style="margin:-4px 0 12px">${esc(dLabel(k))}, ${hm(e.t)}</p>
+    <p style="margin:0"><b id="befHead">${sleep?L('Counted with the day before','Compté avec la journée d’avant')+COL()+esc(dLabel(dk)):h===1?L('In the hour before','Dans l’heure d’avant'):L(`In the ${h} hours before`,`Dans les ${h} heures d’avant`)}</b></p>
+    ${bef.length?`<ul class="evs" id="befList">${bef.map(row).join('')}</ul>`:`<p class="small muted" id="befNone" style="margin:4px 0 0">${sleep?L('No meal reported that day.','Aucun repas noté ce jour-là.'):L('No meal reported in them.','Aucun repas noté pendant ces heures.')}</p>`}
+    ${sleep?'':`<p class="small muted" id="befNote" style="margin:8px 0 0">${L('The hours are the ones set on the slider in Threshold.','Les heures sont celles réglées sur le curseur de l’onglet Seuil.')}${out.length?' '+(out.length>1?L(`Meals at ${outL} are outside them.`,`Des repas à ${outL} sont en dehors.`):L(`A meal at ${outL} is outside them.`,`Un repas à ${outL} est en dehors.`)):''}</p>`}
+    <p style="margin:12px 0 0"><button type="button" class="lnk" data-act="fxthr" data-v="${esc(e.c)}">${L(`${esc(fxName(e.c))} in Threshold`,`${esc(fxName(e.c))} dans l’onglet Seuil`)}</button></p>
+    <div class="row" style="margin-top:14px"><label class="small" for="enAt">${L('Time','Heure')}</label><input type="time" id="enAt" class="sel tm" data-in="enat" value="${esc(UI.en.at)}"><button type="button" class="btn sm" data-act="ensave">${L('Save the time','Enregistrer l’heure')}</button></div><div class="row" style="margin-top:12px">${rm}</div><p class="mine">${MINE()}</p>`,keep); }
   else showSheet(`<h3 id="sheetTitle">${L('No effects reported','Aucun effet noté')}</h3><p class="small muted">${esc(dLabel(k))}</p><div class="row">${rm}</div>`,keep); }
 
 /* ---------- Ask AI: the log as text, copied. The app writes no question, and sends nothing. ---------- */
@@ -1265,10 +1240,10 @@ function helpSheet(){ const H2=(en,fr,ten,tfr)=>`<p class="small"><b>${L(en,fr)}
   showSheet(`<h3 id="sheetTitle">${L('How to read the screens','Comment lire les écrans')}</h3>`
   +H2('What the app does.','Ce que fait l’app.','You report meals and effects. The app counts them and sets the counts beside the amounts you ate. It doesn’t say what they mean.','Tu notes des repas et des effets. L’app les compte et met les comptes à côté des quantités que tu as mangées. Elle ne dit pas ce qu’ils veulent dire.')
   +H2('A complete day.','Une journée complète.','A day counts once it has a meal and either an effect or a tap on “No effects today”. A day left open stays out of the Threshold lists, so a day you didn’t report on is never read as a day with nothing.','Une journée compte dès qu’elle a un repas et soit un effet, soit un appui sur «\u00a0Aucun effet aujourd’hui\u00a0». Une journée laissée ouverte reste hors des listes de l’onglet Seuil\u00a0: une journée que tu n’as pas notée n’est jamais lue comme une journée sans rien.')
-  +H2('The ring.','L’anneau.','What you reported eating in the period, by weight: fat, protein, complex carbs, lactose, other sugars and fibre. The key under it has the grams, and the middle has their total. Alcohol and caffeine have their own two lines below. “Carbs, kind not listed” are the carbs of foods whose sugars Health Canada doesn’t list.','Ce que tu as noté avoir mangé pendant la période, selon le poids\u00a0: gras, protéines, glucides complexes, lactose, autres sucres et fibres. La légende en dessous donne les grammes, et le milieu donne leur total. L’alcool et la caféine ont leurs deux lignes à eux plus bas. Les «\u00a0glucides, sorte non indiquée\u00a0» sont les glucides des aliments dont Santé Canada n’indique pas les sucres.')
+  +H2('Home.','L’accueil.','Today’s meals and effects, in order. Tap a meal for what it held. Tap an effect for the meals reported in the hours before it: the hours are the ones set on the slider in Threshold. Poor sleep is counted with the day before, so it opens that day’s meals. Earlier days are in Menu → History.','Les repas et les effets d’aujourd’hui, dans l’ordre. Appuie sur un repas pour voir ce qu’il contenait. Appuie sur un effet pour voir les repas notés dans les heures d’avant : ces heures sont celles réglées sur le curseur de l’onglet Seuil. Un mauvais sommeil est compté avec la journée d’avant, alors il ouvre les repas de cette journée-là. Les journées d’avant sont dans Menu → Historique.')
+  +H2('The ring.','L’anneau.','Under Nutrition. What you reported eating in the period, by weight, as a day on average: fat, protein, complex carbs, lactose, other sugars and fibre. The key under it has the grams, and the middle has their total. Alcohol, caffeine and the other compounds are in the card below it, as totals for the period. “Carbs, kind not listed” are the carbs of foods whose sugars Health Canada doesn’t list.','Dans l’onglet Nutrition. Ce que tu as noté avoir mangé pendant la période, selon le poids, pour une journée en moyenne\u00a0: gras, protéines, glucides complexes, lactose, autres sucres et fibres. La légende en dessous donne les grammes, et le milieu donne leur total. L’alcool, la caféine et les autres composés sont dans la carte en dessous, en totaux pour la période. Les «\u00a0glucides, sorte non indiquée\u00a0» sont les glucides des aliments dont Santé Canada n’indique pas les sucres.')
   +H2('Histamine, estimated.','Histamine, estimée.','One of the other compounds. It’s the weight of each serving times the average for its food type in a 2011 European table. The amount in your own piece can be many times more or less: one kind of cheese has measured from under 5 to over 1,000 mg per kg. Read it as a count of histamine food.','Un des autres composés. C’est le poids de chaque portion multiplié par la moyenne de son type d’aliment dans un tableau européen de 2011. La quantité dans ton propre morceau peut être plusieurs fois plus grande ou plus petite\u00a0: une même sorte de fromage a déjà mesuré de moins de 5 à plus de 1\u00a0000 mg par kg. Lis-le comme un compte d’aliments à histamine.')
   +H2('Other compounds.','Autres composés.','What your food carried beyond the ring, in five families: amines, plant compounds, fermentable sugars, added, and other. Milligrams where a source gives a figure, marked ≈ when it is an estimate. Portions where it doesn’t. Tap a name for what it is, how the body clears it and where the figure comes from. A food added from its label carries what you tick on its form.','Ce que tes aliments contenaient en plus de l’anneau, en cinq familles : amines, composés des plantes, sucres fermentescibles, ajoutés, et autres. En milligrammes quand une source donne un chiffre, avec ≈ quand c’est une estimation. En portions sinon. Appuie sur un nom pour savoir ce que c’est, comment le corps l’élimine et d’où vient le chiffre. Un aliment ajouté selon son étiquette contient ce que tu coches dans son formulaire.')
-  +H2('The Effects bar.','La barre des effets.','How many effects you reported in the period. It fills against your own highest count for a period of the same length, and it draws after 7 complete days.','Combien d’effets tu as notés pendant la période. Elle se remplit par rapport à ton propre compte le plus élevé pour une période de même durée, et elle se trace après 7 journées complètes.')
   +H2('The Threshold lists.','Les listes de seuil.','Pick an effect, or leave it on “Any effect”. Pick several and choose how they combine: all of them together, or any of them. “With” is the meals or days it was reported for. “Without” is all the others. For an amount in grams or milligrams, each side shows the lowest and the highest, and nothing is averaged. The side with fewer meals or days usually has the narrower range. For a compound counted in portions, each side shows how many held any. Tap a line for every amount, with how many meals or days sat on each side. A meal joins the lists as soon as an effect is reported after it, or once its hours are over with none. A day joins once the day after it is over, so the next day’s effects are all in. “After a meal” reads one meal and the hours after it: the slider sets how many, from 1 to 8, and it starts at 4. One effect can fall in the hours after two meals, and then it counts for both. “Over a day” reads the total for a day with that day, that night and the next day. Poor sleep counts for the night before the morning you report it.','Choisis un effet, ou reste sur « Tout effet ». Choisis-en plusieurs et décide comment ils se combinent : tous ensemble, ou n’importe lequel. « Avec », ce sont les repas ou les jours pour lesquels il a été noté. « Sans », ce sont tous les autres. Pour une quantité en grammes ou en milligrammes, chaque côté montre la plus petite et la plus grande, et rien n’est mis en moyenne. Le côté qui compte le moins de repas ou de jours a d’habitude l’intervalle le plus étroit. Pour un composé compté en portions, chaque côté montre combien en contenaient. Appuie sur une ligne pour chaque quantité, avec le nombre de repas ou de jours de chaque côté. Un repas entre dans les listes dès qu’un effet est noté après, ou quand ses heures sont terminées sans effet. Une journée y entre quand le lendemain est terminé, pour que les effets du lendemain y soient tous. « Après un repas » lit un repas et les heures suivantes : le curseur règle combien, de 1 à 8, et il commence à 4. Un même effet peut tomber dans les heures qui suivent deux repas, et il compte alors pour les deux. « Sur une journée » lit le total d’une journée avec ce jour-là, cette nuit-là et le lendemain. Un mauvais sommeil compte pour la nuit qui précède le matin où tu le notes.')
   +H2('Luck.','Le hasard.','The app puts no number on luck. A split between “With” and “Without” can come from luck alone. Luck has more room when there are few entries, when several things are eaten together, and when meals are closer together than the hours set on the slider. It has less room with more entries, with one thing changed at a time, and with meals further apart than the hours set. The same words sit under every opened line.','L’app ne met aucun chiffre sur le hasard. Un écart entre « Avec » et « Sans » peut venir du seul hasard. Le hasard a plus de place quand il y a peu d’entrées, quand plusieurs choses sont mangées ensemble et quand les repas sont plus rapprochés que les heures réglées sur le curseur. Il a moins de place avec plus d’entrées, avec une seule chose changée à la fois et avec des repas plus espacés que les heures réglées. Les mêmes mots se trouvent sous chaque ligne ouverte.')
   +H2('What the lists can’t tell apart.','Ce que les listes ne peuvent pas départager.','Things eaten together. If your high-fat meals were also your aged-cheese meals, both lines show the same split. Histamine and tyramine sit in the same foods, and so do gluten and fructans, so their lines move together. “Eaten together” counts the meals or days with 3 or more portions of aged or fermented foods, and those with alcohol beside one. And what you expect can shape what you feel and report.','Les choses mangées ensemble. Si tes repas riches en gras étaient aussi tes repas de fromage vieilli, les deux lignes montrent le même écart. L’histamine et la tyramine sont dans les mêmes aliments, le gluten et les fructanes aussi, alors leurs lignes bougent ensemble. « Mangés ensemble » compte les repas ou les jours avec 3 portions ou plus d’aliments vieillis ou fermentés, et ceux avec de l’alcool à côté d’un de ces aliments. Et ce à quoi tu t’attends peut influencer ce que tu ressens et ce que tu notes.')
@@ -1305,8 +1280,10 @@ const ACT={
   tab:b=>{ closeSheet(); V=null; S.tab=b.dataset.v; render(); },
   lang:b=>{ S.lang=b.dataset.v; closeSheet(); render(true); },
   enter:()=>{ S.ack=true; S.ackAt=new Date().toISOString(); S.cv=CONSENT; S.tab='home'; render(); },
-  per:b=>{ S.per=b.dataset.v; render(true); }, nper:b=>{ S.nper=b.dataset.v; render(true); }, tmode:b=>{ S.tmode=b.dataset.v; render(true); },
-  histinfo:()=>histamineSheet(), fxinfo:()=>fxSheetInfo(),
+  tonut:()=>{ closeSheet(); V=null; S.tab='nut'; S.nper='today'; render(); },
+  fxthr:b=>{ closeSheet(); V=null; UI.tsel=[b.dataset.v]; S.tmode=b.dataset.v==='sleep'?'day':'meal'; S.tab='thr'; render(); },
+  nper:b=>{ S.nper=b.dataset.v; render(true); }, tmode:b=>{ S.tmode=b.dataset.v; render(true); },
+  histinfo:()=>histamineSheet(),
   /* a meal */
   meal:()=>{ closeSheet(); openMeal(null); }, list:()=>{ closeSheet(); openList(); },
   mealedit:b=>{ const e=S.ev.find(x=>x.id===b.dataset.v); if(!e) return; const prev=V&&V.v==='hist'?V:null; closeSheet(); openMeal(e); V.prev=prev; },
