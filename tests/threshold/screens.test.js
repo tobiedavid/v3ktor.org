@@ -378,7 +378,8 @@ async function open(browser, base, o) {
     // ================= French: corrections that must stay =================
     { const html = fs.readFileSync(path.join(ROOT, 'threshold/app/index.html'), 'utf8'), A = await open(browser, base, { lang: 'fr' }), page = A.page;
       await page.click('[data-act=enter]'); await page.waitForSelector('.mb.meal');
-      const gone = ['route rapide', 'écrit à la main', 'pour chaque quantité', 's’entre comme', 'mis en moyenne', 'Composés des plantes', 'composés des plantes', 'à côté d’un de ces aliments'].filter(w => html.includes(w));
+      const gone = ['route rapide', 'écrit à la main', 'pour chaque quantité', 's’entre comme', 'mis en moyenne', 'Composés des plantes', 'composés des plantes', 'à côté d’un de ces aliments',
+        'Amené', 'Amène', 'amène ta liste', 'amène-les', 'Les amener', 'Hier a des repas', 'Ce qui est entré', 'Des comptes seulement', 'noté encore', 'compté encore', 'montrer encore', 'amener encore', '\'jour\':\'jours\''].filter(w => html.includes(w));
       same('[french] wording that said something other than the English is gone', gone, []);
       await page.click('[data-act=menu]'); const items = await page.locator('#sheet button').allInnerTexts(), named = (html.match(/Menu → Restaurer[^.'`<]*?(?= ramène|\.)/g) || []).map(x => x.replace('Menu → ', ''));
       ok('[french] a message that sends to the menu names the menu item as the menu writes it', named.length >= 2 && named.every(n => items.some(t => t.trim() === n)), JSON.stringify([named, items]));
@@ -387,6 +388,8 @@ async function open(browser, base, o) {
       const want = { 1704: '1 moyenne', 1696: '1 moyenne', 1722: '1 moyenne', 1731: '1 moyenne', 2506: '1 moyenne', 2380: '1 moyenne', 2460: '1 moyenne', 2241: '1 moyenne', 2225: '½ moyenne', 4049: '1 grosse', 2501: '2 petites', 2185: '1 format moyen' };
       same('[french] the serving agrees with the food', await page.evaluate(ids => { const o = {}; for (const id of ids) o[id] = FB['f' + id].s[1]; return o; }, Object.keys(want).map(Number)), want);
       same('[french] and their English servings are as they were', await page.evaluate(() => [FB.f1704.s[0], FB.f4049.s[0], FB.f2501.s[0], FB.f2185.s[0]]), ['1 medium', '1 large', '2 small', '1 medium']);
+      same('[french] a day the app counts is « une journée », and what is left out agrees with it', await page.evaluate(() => [unitWord('day', 1), unitWord('day', 3), unitWord('meal', 3), /laissé\$\{mode==='day'\?'e':''\}/.test(vThr.toString()), /laissé\$\{B\.mode==='day'\?'e':''\}/.test(rowSheet.toString())]), ['journée', 'journées', 'repas', true, true]);
+      same('[french] bringing in the Food Trial Log’s lists is « importer »', await page.evaluate(() => { S.tab = 'nut'; render(); return [...document.querySelectorAll('#app p')].some(p => p.textContent.startsWith('Importe ta liste')); }), true);
       same('[french] no error', A.errors, []); await A.ctx.close(); }
 
     // ================= saved data that can't be read, a changed agreement, storage that is blocked =================
