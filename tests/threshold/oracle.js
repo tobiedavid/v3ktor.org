@@ -62,8 +62,9 @@ function recount(entries, roll, now) {
   const allFx = entries.filter(e => e.k === 'fx');
 
   // pick: the effects that count. Empty means any effect.
-  function units(bar, mode, pick) {
-    const out = [], field = BARS[bar], amt = am => field ? am[field] : (am.also[bar] || 0), keep = fx => pick && pick.length ? fx.filter(c => pick.includes(c)) : fx; let left = 0;
+  // together: with several effects picked, all of them have to be there. Otherwise any one is enough.
+  function units(bar, mode, pick, together) {
+    const out = [], field = BARS[bar], amt = am => field ? am[field] : (am.also[bar] || 0), keep = fx => { if (!pick || !pick.length) return fx; const f = fx.filter(c => pick.includes(c)); return together && !pick.every(c => f.includes(c)) ? [] : f; }; let left = 0;
     for (const k of keys) { const d = days[k]; if (!d.complete) continue;
       if (mode === 'meal') { for (const m of d.meals) { if (!canRead(m.am, bar)) { left++; continue; }
           const fx = keep(allFx.filter(e => e.c !== 'sleep' && e.t >= m.t && e.t <= m.t + 4 * HOUR).map(e => e.c));
@@ -73,8 +74,8 @@ function recount(entries, roll, now) {
         const next = days[dayPlus(k, 1)]; out.push({ x: amt(d.total), alc: d.total.alcohol, fx: keep(d.fx.map(e => e.c).concat(next ? next.fx.filter(e => e.c !== 'sleep').map(e => e.c) : [])), day: k }); } }
     return { list: out, left };
   }
-  function cells(bar, mode, pick) {
-    const u = units(bar, mode, pick), tally = () => ({ n: 0, k: 0, fx: {} }), add = (c, x) => { c.n++; if (x.fx.length) { c.k++; for (const f of new Set(x.fx)) c.fx[f] = (c.fx[f] || 0) + 1; } };
+  function cells(bar, mode, pick, all) {
+    const u = units(bar, mode, pick, all), tally = () => ({ n: 0, k: 0, fx: {} }), add = (c, x) => { c.n++; if (x.fx.length) { c.k++; for (const f of new Set(x.fx)) c.fx[f] = (c.fx[f] || 0) + 1; } };
     const zero = tally(), some = u.list.filter(x => x.x > 0.005); for (const x of u.list) if (!(x.x > 0.005)) add(zero, x);
     if (!some.length) return { zero, steps: [], width: 0, top: 0, left: u.left, n: u.list.length };
     const max = Math.max(...some.map(x => x.x)), nice = [0.1, 0.2, 0.25, 0.5, 1, 2, 2.5, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000];
@@ -83,15 +84,15 @@ function recount(entries, roll, now) {
     return { zero, steps, width, top: count * width, left: u.left, n: u.list.length };
   }
   // the two sides of one line: the meals or days the picked effects were reported for, and all the others. Nothing is averaged.
-  function sides(bar, mode, pick) {
-    const u = units(bar, mode, pick), side = () => ({ n: 0, ate: 0, lo: null, hi: null }), hit = side(), rest = side();
+  function sides(bar, mode, pick, all) {
+    const u = units(bar, mode, pick, all), side = () => ({ n: 0, ate: 0, lo: null, hi: null }), hit = side(), rest = side();
     for (const x of u.list) { const s = x.fx.length ? hit : rest; s.n++; if (x.x > 0.005) s.ate++; if (s.lo === null || x.x < s.lo) s.lo = x.x; if (s.hi === null || x.x > s.hi) s.hi = x.x; }
     return { hit, rest, left: u.left };
   }
   // eaten together: 3 or more portions of the aged and fermented foods, and alcohol with one of them
-  function together(mode, pick) {
+  function together(mode, pick, all) {
     const o = { nHit: 0, nRest: 0, three: { hit: 0, rest: 0 }, both: { hit: 0, rest: 0 } };
-    for (const x of units('histN', mode, pick).list) { const k = x.fx.length ? 'hit' : 'rest'; if (k === 'hit') o.nHit++; else o.nRest++; if (x.x >= 3) o.three[k]++; if (x.x > 0 && x.alc > 0.005) o.both[k]++; }
+    for (const x of units('histN', mode, pick, all).list) { const k = x.fx.length ? 'hit' : 'rest'; if (k === 'hit') o.nHit++; else o.nRest++; if (x.x >= 3) o.three[k]++; if (x.x > 0 && x.alc > 0.005) o.both[k]++; }
     return o;
   }
   // Home: what went in and what was reported, over a period that ends now
