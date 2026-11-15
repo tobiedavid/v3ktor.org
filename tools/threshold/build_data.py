@@ -163,6 +163,15 @@ for a in FD:
         else: assert fid in HIST_NONE, ('histamine food with no decision', fid, name); row['hist'] = None; notes['hist_none'].append(name)
     rows.append(row)
 
+# ---------- French servings: the adjective agrees with the food. The Food Trial Log's table has these in the masculine. ----------
+FR_SERVING = {1704: ('1 moyen', '1 moyenne'), 1696: ('1 moyen', '1 moyenne'), 1722: ('1 moyen', '1 moyenne'), 1731: ('1 moyen', '1 moyenne'),      # banane, pomme, orange, poire
+              2506: ('1 moyen', '1 moyenne'), 2380: ('1 moyen', '1 moyenne'), 2460: ('1 moyen', '1 moyenne'), 2241: ('1 moyen', '1 moyenne'),      # pomme de terre, carotte, tomate, patate douce
+              2225: ('½ moyen', '½ moyenne'), 4049: ('1 gros', '1 grosse'), 2501: ('2 petits', '2 petites'),                                       # courgette, tortilla, betteraves
+              2185: ('1 moyen', '1 format moyen')}                                                                                                 # frites: a size, like « 1 format régulier »
+by_id = {r['id']: r for r in rows}
+for fid, (old, new) in FR_SERVING.items():
+    assert by_id[fid]['s'][1] == old, ('the Food Trial Log changed this serving', fid, by_id[fid]['s'][1]); by_id[fid]['s'][1] = new
+
 assert len(rows) == 208, len(rows)
 print('foods:', len(rows), '| from Health Canada:', sum(r['src'] == 'hc' for r in rows), '| from a label or typical value:', sum(r['src'] == 'label' for r in rows), '| supplements:', sum(r['src'] == 'none' for r in rows))
 print('carbohydrate of a kind not listed (%d):' % len(notes['kind_not_listed']), ', '.join(notes['kind_not_listed']))
