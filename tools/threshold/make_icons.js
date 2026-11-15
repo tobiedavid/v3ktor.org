@@ -1,9 +1,12 @@
-// Draws the Threshold Log's icons: the app's own bar, five steps, turning at the fourth, on the family's orange square.
+// Draws the Threshold Log's icons: a plain glass, filled below a mark, on the family's orange square.
+// A threshold drawn as a level and a line, with nothing shown crossing it.
 //   node tools/threshold/make_icons.js        (needs Playwright with Chromium; writes threshold/app/icons/*.png)
 const { chromium } = require('playwright'), path = require('path');
 const OUT = path.join(__dirname, '..', '..', 'threshold', 'app', 'icons'), BG = '#c8481f', CREAM = '#f7f4ee', INK = '#1c1b19';
-// the glyph on a 512 square: five cells, 56 wide, 10 apart; the last two dark, each with the mark a step with effects carries
-const cells = [0, 1, 2, 3, 4].map(i => { const x = 96 + i * 66, dark = i > 2; return `<rect x="${x}" y="148" width="56" height="216" rx="14" fill="${dark ? INK : CREAM}"/>` + (dark ? `<circle cx="${x + 28}" cy="256" r="11" fill="${CREAM}"/>` : ''); }).join('');
+// the glyph on a 512 square: the glass (wider at the top), what it holds, and the mark above that
+const cells = `<path d="M132 130 L166 346 Q171 382 208 382 H304 Q341 382 346 346 L380 130" fill="none" stroke="${CREAM}" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>`
+  + `<path d="M185 262 H327 L317 332 Q314 352 294 352 H218 Q198 352 195 332 Z" fill="${CREAM}"/>`
+  + `<rect x="172" y="190" width="168" height="28" rx="14" fill="${INK}"/>`;
 const svg = (size, { round, scale }) => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 512 512"><rect width="512" height="512" rx="${round ? 104 : 0}" fill="${BG}"/><g transform="translate(256 256) scale(${scale}) translate(-256 -256)">${cells}</g></svg>`;
 (async () => {
   const b = await chromium.launch();

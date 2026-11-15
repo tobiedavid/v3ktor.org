@@ -42,7 +42,7 @@ node tools/threshold/pack_data.js data.json --write
 node tools/stamp_cache.js
 ```
 
-`tools/threshold/make_icons.js` draws the icons.
+`tools/threshold/make_icons.js` draws the icons: a plain glass, filled below a mark. It is a threshold drawn as a level and a line, with nothing shown crossing it. (Until November 2026 the icon was the app's old bar, five steps turning dark at the fourth, which the app no longer draws.)
 
 ## The hours after a meal, and luck
 
