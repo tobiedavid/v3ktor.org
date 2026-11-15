@@ -28,6 +28,13 @@ const status = url => new Promise(res => http.get(url, r => { r.resume(); res(r.
       await ctx.close(); }
     for (const [u, from] of links) { const s = await status(u); ok(`the link to ${u.slice(base.length)} (on ${from}) leads somewhere`, s === 200 || s === 301, 'status ' + s); }
   } catch (e) { fail++; console.log('STOPPED: ' + (e.stack || e)); }
+  // the front page: the five tools, the Threshold Log second, in both languages
+  for (const lang of ['en-CA', 'fr-CA']) { const ctx = await browser.newContext({ viewport: { width: 320, height: 760 }, locale: lang, serviceWorkers: 'block' }), page = await ctx.newPage(); await page.goto(base + '/', { waitUntil: 'load' }); await page.waitForTimeout(200);
+    const list = await page.locator('article.q').evaluateAll(as => as.map(a => [a.querySelector('h2 a').getAttribute('href'), a.querySelector('h2').textContent.trim().length > 8, !!a.querySelector('.q-icon svg')]));
+    ok(`/ (${lang.slice(0, 2)}) lists five tools, each with its question and its icon`, list.length === 5 && list.every(r => r[1] && r[2]), JSON.stringify(list));
+    ok(`/ (${lang.slice(0, 2)}) the Threshold Log is the second`, !!list[1] && list[1][0] === '/threshold/', JSON.stringify(list.map(r => r[0])));
+    const txt = await page.locator('main').innerText(); ok(`/ (${lang.slice(0, 2)}) says five, not four`, lang === 'fr-CA' ? /Cinq outils/.test(txt) && !/Quatre outils|les quatre/.test(txt) : /Five free tools/.test(txt) && !/Four free tools|all four/.test(txt));
+    ok(`/ (${lang.slice(0, 2)}) nothing runs off a 320-pixel screen`, await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)); await ctx.close(); }
   await browser.close(); await srv.close();
   // the offline caches
   let out = ''; try { out = execFileSync(process.execPath, [path.join(ROOT, 'tools', 'stamp_cache.js'), '--check'], { encoding: 'utf8' }); ok('every app’s offline cache carries its file’s name', true); } catch (e) { out = String(e.stdout || e); ok('every app’s offline cache carries its file’s name', false, out); }
