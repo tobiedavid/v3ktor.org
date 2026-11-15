@@ -79,6 +79,21 @@ HIST_CAT = {5407: 'meat', 1859: 'meat', 2943: 'beer', 2835: 'beer', 2850: 'wine_
             3403: 'sauce_other'}
 HIST_NONE = {4650, 4962, 3321, 509003}       # a cold-cut sub, pepperoni pizza, tempeh, the leftovers marker: no category fits, so no figure
 
+# ---------- the Threshold Log's own entries: water, which the Food Trial Log's table doesn't carry ----------
+# id: (Health Canada's food, its name there, grams in the serving). A 355 ml can of sparkling water is taken as 355 g.
+STRAIGHT = {920109: (420, 'Vegetable oil, coconut', 13.6),                       # 1 tbsp of oil is 13.6 g
+            920110: (501828, 'Egg, chicken, white, fresh or frozen, cooked', 33.0),   # the white of one large egg is 33 g
+            930001: (2933, 'Water, municipal', 250.0),
+            930002: (2918, 'Water, mineral, carbonated, bottled', 355.0),
+            930003: (2918, 'Water, mineral, carbonated, bottled', 355.0)}           # the flavouring adds nothing Health Canada's file counts
+MINERALS = ('ca', 'fe', 'mg', 'k', 'zn', 'mn', 'cu', 'se')
+OWN = [(930001, 'Water', 'Eau', '1 glass (250 ml)', '1 verre (250 ml)'),
+       (930002, 'Sparkling water, plain', 'Eau pétillante nature', '1 can (355 ml)', '1 canette (355 ml)'),
+       (930003, 'Sparkling water, flavoured', 'Eau pétillante aromatisée', '1 can (355 ml)', '1 canette (355 ml)')]
+assert not any(a[0] in {o[0] for o in OWN} for a in FD)
+for fid, en, fr, sen, sfr in OWN:
+    FD.append([fid, en, sen, 'drink', 0, '', [0] * len(NK)]); FDfr[fid] = [fid, fr, sfr]
+
 # ---------- build the rows ----------
 rows = []; notes = {'kind_not_listed': [], 'hist_none': [], 'micro_differs': 0, 'blank': []}
 for a in FD:
@@ -120,15 +135,18 @@ for a in FD:
         row['lact'] = round(sum(TF[c]['n']['lact'] * 100 / TF[c]['g'] for c in comps) / len(comps), 2)
         sug = [cnf.get(hc_id(c), {}).get(269) for c in comps]; row['sug'] = round(sum(sug) / len(sug), 2) if all(s is not None for s in sug) else None
         row['src'] = 'hc'
-    elif fid in (920109, 920110):   # coconut oil and egg white: straight from Health Canada's file
-        dbid, g = ((420, 13.6) if fid == 920109 else (501828, 33.0))      # 1 tbsp of oil is 13.6 g; the white of one large egg is 33 g
-        assert cnf_name[dbid] in ('Vegetable oil, coconut', 'Egg, chicken, white, fresh or frozen, cooked'), cnf_name[dbid]
+    elif fid in STRAIGHT:   # coconut oil, egg white and water: straight from Health Canada's file
+        dbid, hcname, g = STRAIGHT[fid]
+        assert cnf_name[dbid] == hcname, cnf_name[dbid]
         mac = per_serving(dbid, g); row['g'] = g
         for key in ('kcal', 'prot', 'fat', 'carb', 'fib'): row[key] = mac.get(key, 0)
         row['sug'] = mac.get('sug'); row['lact'] = mac.get('lact', 0); row['alc'] = 0; row['src'] = 'hc'
         for k in MICRO:
             n, scale = micro_map[k]; micro[k] = round(cnf[dbid].get(n, 0) * g / 100.0 * scale * (1.49 if k == 'e' else 1), 3)   # the Food Trial Log's table keeps vitamin E in IU
         blanks = [k for k in MICRO if micro_map[k][0] not in cnf[dbid]]     # only what Health Canada itself leaves blank for this food
+        if fid in (930002, 930003):   # sparkling water: a mineral water and carbonated tap water differ many times over, so the minerals get no figure
+            for k in MINERALS: micro[k] = 0
+            blanks = [k for k in MICRO if k in MINERALS or k in blanks]
     else:   # the supplements: nothing to count, brands vary
         row.update({'g': 0, 'kcal': 0, 'prot': 0, 'fat': 0, 'carb': 0, 'sug': 0, 'fib': 0, 'lact': 0, 'alc': 0, 'src': 'none'})
     # sugars can't exceed the carbohydrate that isn't fibre (the two are measured differently); lactose can't exceed sugars
@@ -145,13 +163,13 @@ for a in FD:
         else: assert fid in HIST_NONE, ('histamine food with no decision', fid, name); row['hist'] = None; notes['hist_none'].append(name)
     rows.append(row)
 
-assert len(rows) == 205, len(rows)
+assert len(rows) == 208, len(rows)
 print('foods:', len(rows), '| from Health Canada:', sum(r['src'] == 'hc' for r in rows), '| from a label or typical value:', sum(r['src'] == 'label' for r in rows), '| supplements:', sum(r['src'] == 'none' for r in rows))
 print('carbohydrate of a kind not listed (%d):' % len(notes['kind_not_listed']), ', '.join(notes['kind_not_listed']))
 print('histamine foods:', sum('hist' in r['b'] for r in rows), '| with an estimate:', sum(r.get('hist') is not None for r in rows if 'hist' in r['b']), '| no figure:', ', '.join(notes['hist_none']))
 print('vitamin and mineral values that differ between The Patch\'s table and the Food Trial Log\'s (after the vitamin E unit):', notes['micro_differs'])
 print('foods with a value the Food Trial Log has no figure for (%d):' % len(notes['blank']), '; '.join(notes['blank']))
 for r in rows:
-    if r['id'] in (920001, 920002, 920004, 920109, 920110, 109, 3203, 4163):
+    if r['id'] in (920001, 920002, 920004, 920109, 920110, 930001, 930002, 930003, 109, 3203, 4163):
         print('  %-44s %-10s kcal %6s prot %5s fat %5s carb %5s sug %5s fib %4s lact %4s hist %s' % (r['n'][0][:44], r['s'][0][:10], r['kcal'], r['prot'], r['fat'], r['carb'], r['sug'], r['fib'], r['lact'], r.get('hist')))
 json.dump({'micro': MICRO, 'foods': rows}, io.open(out_path, 'w', encoding='utf8'), ensure_ascii=False)

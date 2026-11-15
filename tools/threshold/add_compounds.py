@@ -5,7 +5,9 @@ A number only where a source gives one:
 Portions only (the food is one the source names as carrying it; no per-serving figure entered yet):
   tyramine (the histamine foods, EFSA 2011), oxalates (the Harvard list's High band, 30 mg a serving or more), glycoalkaloids (EFSA 2020: potato foods),
   capsaicin, fructans / galacto-oligosaccharides / sorbitol / mannitol / excess fructose (Monash University), sulphites (Health Canada's list),
-  added nitrites (cured meats), sweeteners and gluten (the Food Trial Log's own tags), purines (Kaneko 2014: beef liver, chicken liver, sardine)."""
+  added nitrites (cured meats), sweeteners and gluten (the Food Trial Log's own tags), purines (Kaneko 2014: beef liver, chicken liver, sardine),
+  flavourings (by the kind of drink, not from a label: colas, energy drinks, the ready-to-drink protein shake, flavoured sparkling water;
+  Health Canada's file has no ingredient lists, so no other food in the table is tagged)."""
 import json, csv, sys
 #   python3 -I add_compounds.py <the table from build_data.py> <folder with Health Canada's CSV files> <tables.json from dump_tables.js>
 P, CNF, TABLES = sys.argv[1:4]; d=json.load(open(P)); F={f['id']:f for f in d['foods']}
@@ -40,6 +42,7 @@ put([2850,2852,2943,2835,1745,1718,2185,501999,2494,2201,2062,2462],'sulph')
 put([5407,1859,1148,1185,5684,4086,501975,4650,4962],'nitr')
 put([f['id'] for f in d['foods'] if 'swt' in f['b']],'swt')
 put([f['id'] for f in d['foods'] if 'gluten' in f['b']],'glu')
+put([5288,2926,502444,930003]+[f['id'] for f in d['foods'] if f['grp']=='energy'],'flav')   # colas, the protein shake, flavoured sparkling water, energy drinks
 put([2657,5335,3203],'pur')                                             # Kaneko's high and very high groups: 200 mg per 100 g or more
 json.dump(d,open(P,'w'),ensure_ascii=False)
 import collections

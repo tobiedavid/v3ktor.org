@@ -43,7 +43,7 @@ async function play(browser, base, person, table) {
   if (person.gut) { await page.click('[data-act=tab][data-v=nut]'); await page.click('[data-act=impread]'); await page.click('[data-act=impgo]'); await page.click('[data-act=tab][data-v=home]'); }
   for (const l of person.labels) { await page.click('[data-act=menu]'); await page.click('#sheet [data-act=label]');
     for (const [k, v] of [['n', l.n], ['s', l.s], ['kcal', l.kcal], ['fat', l.fat], ['carb', l.carb], ['fib', l.fib], ['sug', l.sug == null ? '' : l.sug], ['prot', l.prot]]) await page.fill(`#sheet [data-in=lb][data-k=${k}]`, fr ? String(v).replace('.', ',') : String(v));   // a French keyboard types a comma
-    if (l.h) await page.click('#sheet [data-act=lbh]'); await page.click('#sheet [data-act=lbsave]'); }
+    if (l.h) await page.click('#sheet [data-act=lbh]'); for (const k of l.t || []) await page.click(`#sheet [data-act=lbt][data-k=${k}]`); await page.click('#sheet [data-act=lbsave]'); }
   for (const c of (await S()).custom) labelKey[c.n] = 'L' + c.id;
   for (const ref of person.listAdd) { await page.click('[data-act=menu]'); await page.click('#sheet [data-act=list]'); await page.fill('#mQ', nameOf(ref)); await page.click(`#mRows [data-act=mq][data-k="${keyOf(ref)}"]`); await page.click('[data-act=mealdone]'); await page.click('[data-act=tab][data-v=home]'); }
 
@@ -106,8 +106,8 @@ async function play(browser, base, person, table) {
   }
   // ...and the same counts as the lists show them: for any effect, then for the effect reported most often
   await page.click('[data-act=tab][data-v=thr]');
-  const KEYS = ['fat', 'cplx', 'sug', 'lact', 'fib', 'alc', 'caf', 'hist', 'tyr', 'ox', 'nit', 'ga', 'cap', 'fru', 'gos', 'sorb', 'mann', 'fruc', 'sulph', 'nitr', 'swt', 'glu', 'pur', 'theo'], BASE = KEYS.slice(0, 5);
-  const PORTIONS = ['tyr', 'ox', 'ga', 'cap', 'fru', 'gos', 'sorb', 'mann', 'fruc', 'sulph', 'nitr', 'swt', 'glu', 'pur'];
+  const KEYS = ['fat', 'cplx', 'sug', 'lact', 'fib', 'alc', 'caf', 'hist', 'tyr', 'ox', 'nit', 'ga', 'cap', 'fru', 'gos', 'sorb', 'mann', 'fruc', 'sulph', 'nitr', 'swt', 'flav', 'glu', 'pur', 'theo'], BASE = KEYS.slice(0, 5);
+  const PORTIONS = ['tyr', 'ox', 'ga', 'cap', 'fru', 'gos', 'sorb', 'mann', 'fruc', 'sulph', 'nitr', 'swt', 'flav', 'glu', 'pur'];
   const tally = want.filter(e => e.k === 'fx').reduce((o, e) => (o[e.c] = (o[e.c] || 0) + 1, o), {}), ranked = Object.keys(tally).sort((x, y) => tally[y] - tally[x] || x.localeCompare(y)), most = ranked[0];
   const picks = [[]].concat(most ? [[most]] : [], ranked.length > 1 ? [ranked.slice(0, 2)] : []);      // any effect, the one reported most, and the two reported most together
   const dec = x => x < 1 ? 2 : x < 10 ? 1 : 0, near = (shown, real) => Math.abs(shown - real) <= 0.5 * Math.pow(10, -dec(real)) + 1e-9;
@@ -159,29 +159,41 @@ async function play(browser, base, person, table) {
   await page.click('[data-act=tmode][data-v=meal]'); await slide(4); await page.click('.fxpick [data-act=tfx][data-v=""]');
   same(N('the app holds nothing that works out a luck number'), await page.evaluate(() => ['luck', 'stepLuck', 'foodLuck', 'dealt', 'across'].filter(k => k in TLE).concat(['luckTxt', 'luckOne', 'dealtOf'].filter(k => typeof window[k] === 'function'))), []);
 
-  // ---- Home: the ring, its key, the middle, and the Effects bar, over each period ----
+  // ---- Home: today's entries; and every effect opened, with the meals in the hours before it ----
   await page.click('[data-act=tab][data-v=home]');
+  { const w = R.period('today'), shown = await page.locator('#todayList [data-act=entry]').evaluateAll(bs => bs.map(b => { const e = S.ev.find(x => x.id === b.dataset.v); return [e.k, e.t]; }).filter(r => r[0] !== 'none'));
+    same(N('Home: today’s meals and effects, in order'), shown, R.todayList());
+    if (w.meals || w.effects) same(N('Home: the count under them'), await page.locator('#todayCount').innerText(), fr ? `${w.meals} repas · ${w.effects} effet${w.effects > 1 ? 's' : ''}` : `${w.meals} meal${w.meals === 1 ? '' : 's'} · ${w.effects} effect${w.effects === 1 ? '' : 's'}`);
+    same(N('Home: no ring, no period choice and no Effects bar'), await page.locator('#app .ring, #app [data-act=per], #app .fxbar').count(), 0); }
+  for (const hours of [4, 1, 8]) { await page.evaluate(h => { S.twin = h; save(); }, hours); const wrong = []; let withMeals = 0, withOutside = 0;
+    for (const f of R.effects) { const want = R.before(f, hours), out = R.outside(f, hours);
+      const got = await page.evaluate(([t, c]) => { const e = S.ev.find(x => x.k === 'fx' && x.t === t && x.c === c); UI.en = { id: e.id, at: hm(e.t) }; entrySheet(); const note = document.getElementById('befNote');
+        return { meals: [...document.querySelectorAll('#befList [data-act=entry]')].map(b => S.ev.find(x => x.id === b.dataset.v).t), none: !!document.getElementById('befNone'), note: note ? note.textContent : '' }; }, [f.t, f.c]);
+      const two = n => (n < 10 ? '0' : '') + n, clock = t => { const d = new Date(t); return two(d.getHours()) + ':' + two(d.getMinutes()); };
+      if (JSON.stringify(got.meals) !== JSON.stringify(want) || got.none !== !want.length || !out.every(t => got.note.includes(clock(t))) || (!out.length && /\d\d:\d\d/.test(got.note))) wrong.push({ at: new Date(f.t).toISOString(), c: f.c, got, want, out });
+      if (want.length) withMeals++; if (out.length) withOutside++; }
+    same(N(`every effect opened, slider at ${hours} h: the meals before it, and the ones named as outside (${R.effects.length} effects, ${withMeals} with a meal before, ${withOutside} with one outside)`), wrong.slice(0, 3), []); }
+  await page.evaluate(() => { closeSheet(); S.twin = 4; save(); });
+  ok(N('the effects opened include poor sleep and others'), R.effects.some(e => e.c === 'sleep') && R.effects.some(e => e.c !== 'sleep'));
+
+  // ---- Nutrition: the ring, the compounds, and a day's amounts beside the reference ----
+  await page.click('[data-act=tab][data-v=nut]');
   const SL = { fat: 'fat', prot: 'prot', cplx: 'complex', lact: 'lactose', sugo: 'otherSugars', fib: 'fibre', unk: 'carbsUnlisted' };
-  const OTHERS = ['tyr', 'ox', 'nit', 'ga', 'cap', 'fru', 'gos', 'sorb', 'mann', 'fruc', 'sulph', 'nitr', 'swt', 'glu', 'pur', 'theo'];
-  for (const per of ['h4', 'today', 'week', 'month']) { await page.click(`[data-act=per][data-v=${per}]`); const w = R.period(per);
-    same(N(`Home, ${per}: effects`), +(await page.locator('.fxbar b').innerText()), w.effects);
+  const OTHERS = ['tyr', 'ox', 'nit', 'ga', 'cap', 'fru', 'gos', 'sorb', 'mann', 'fruc', 'sulph', 'nitr', 'swt', 'flav', 'glu', 'pur', 'theo'];
+  for (const per of ['today', 'week', 'month']) { await page.click(`[data-act=nper][data-v=${per}]`); const w = R.period(per), div = Math.max(1, w.mealDays);
+    // the ring, its key and its middle: a day on average
     const key = await page.locator('#app .card ul.key').first().locator('.keyrow').evaluateAll(els => els.map(e => [getComputedStyle(e.querySelector('.sw')).backgroundColor, e.querySelector('.am').textContent]));
     const colours = await page.evaluate(ks => { const o = {}; for (const k of ks) { const i = document.createElement('i'); i.style.background = `var(--s-${k})`; document.body.appendChild(i); o[getComputedStyle(i).backgroundColor] = k; i.remove(); } return o; }, Object.keys(SL));
     const wantKey = Object.keys(SL).filter(k => w.am[SL[k]] >= 0.05);
-    same(N(`Home, ${per}: the slices in the key`), key.map(r => colours[r[0]]), wantKey);
-    key.forEach((r, i) => { const v = w.am[SL[wantKey[i]]]; if (v !== undefined) close(N(`Home, ${per}: ${wantKey[i]} in grams`), num(r[1]), v, v < 10 ? 1 : 0); });
-    const pcts = (await page.locator('.ring svg').getAttribute('aria-label')).match(/\d+(?=\s*%)/g) || []; if (wantKey.length) same(N(`Home, ${per}: the slices add up to 100`), pcts.reduce((t, x) => t + +x, 0), 100);
-    const grams = Object.values(SL).reduce((t, k) => t + w.am[k], 0), mid = await page.locator('.ring .mid b').innerText(); close(N(`Home, ${per}: the grams in the middle`), num(mid), grams, 0);
-    if (grams >= 0.05) { close(N(`Home, ${per}: alcohol`), num(await page.locator('#app [data-act=comp][data-v=alc] .am').innerText()), w.am.alcohol, w.am.alcohol < 1 ? 2 : w.am.alcohol < 10 ? 1 : 0);
-      const caf = w.am.also.caf || 0; close(N(`Home, ${per}: caffeine`), num(await page.locator('#app [data-act=comp][data-v=caf] .am').innerText()), caf, caf < 1 ? 2 : caf < 10 ? 1 : 0);
-      same(N(`Home, ${per}: how many other compounds`), parseInt(await page.locator('#app .cmore .muted').innerText(), 10), OTHERS.filter(k => (w.am.also[k] || 0) > 0.005).length + (w.am.histPortions > 0 ? 1 : 0)); }
-    const fill = await page.locator('.fxbar .trk i').evaluate(e => parseFloat(e.style.height)), top = R.busiest(per);
-    same(N(`Home, ${per}: the Effects bar against the person's own highest (${top})`), fill, top ? Math.round(Math.min(1, w.effects / top) * 100) : 0); }
-  await page.click('[data-act=per][data-v=today]');
-
-  // ---- Nutrition: a day's amounts beside the reference ----
-  await page.click('[data-act=tab][data-v=nut]');
-  for (const per of ['today', 'week', 'month']) { await page.click(`[data-act=nper][data-v=${per}]`); const w = R.period(per), div = Math.max(1, w.mealDays);
+    same(N(`Nutrition, ${per}: the slices in the key`), key.map(r => colours[r[0]]), wantKey);
+    key.forEach((r, i) => { const v = w.am[SL[wantKey[i]]] / div; if (wantKey[i]) close(N(`Nutrition, ${per}: ${wantKey[i]} in grams, a day on average`), num(r[1]), v, v < 10 ? 1 : 0); });
+    const pcts = (await page.locator('.ring svg').getAttribute('aria-label')).match(/\d+(?=\s*%)/g) || []; if (wantKey.length) same(N(`Nutrition, ${per}: the slices add up to 100`), pcts.reduce((t, x) => t + +x, 0), 100);
+    const grams = Object.values(SL).reduce((t, k) => t + w.am[k], 0) / div, mid = await page.locator('.ring .mid b').innerText(); close(N(`Nutrition, ${per}: the grams in the middle`), num(mid), grams, 0);
+    // the compounds under it: totals for the period
+    same(N(`Nutrition, ${per}: the compounds card is there when a meal was reported`), await page.locator('#compCard').count(), w.meals ? 1 : 0);
+    if (w.meals) { close(N(`Nutrition, ${per}: alcohol, in total`), num(await page.locator('#compCard [data-act=comp][data-v=alc] .am').innerText()), w.am.alcohol, w.am.alcohol < 1 ? 2 : w.am.alcohol < 10 ? 1 : 0);
+      const caf = w.am.also.caf || 0; close(N(`Nutrition, ${per}: caffeine, in total`), num(await page.locator('#compCard [data-act=comp][data-v=caf] .am').innerText()), caf, caf < 1 ? 2 : caf < 10 ? 1 : 0);
+      same(N(`Nutrition, ${per}: how many other compounds`), parseInt(await page.locator('#compCard .cmore .muted').innerText(), 10), OTHERS.filter(k => (w.am.also[k] || 0) > 0.005).length + (w.am.histPortions > 0 ? 1 : 0)); }
     const rows = await page.locator('#cov tbody tr').evaluateAll(els => els.map(e => [...e.querySelectorAll('td')].map(td => td.textContent)));
     same(N(`Nutrition, ${per}: 21 lines`), rows.length, 21);
     TN.forEach(([k, d], i) => { const v = (k === 'prot' ? w.am.prot : k === 'fib' ? w.am.fibre : w.am.micro[O.MICRO.indexOf(k)]) / div; if (w.mealDays) close(N(`Nutrition, ${per}: ${k}`), num(rows[i][0]), v, d);

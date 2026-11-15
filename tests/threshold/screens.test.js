@@ -65,8 +65,11 @@ async function open(browser, base, o) {
         ok(T + name + ': nothing runs off a 320-pixel screen', r.over <= 1 && r.sheetOver <= 1 && !r.wide.length, `page ${r.over}px, sheet ${r.sheetOver}px, ${r.wide.join(' | ')}`);
         ok(T + name + ': every control has a name', !r.nameless.length, r.nameless.join(' | ')); };
       const tap = sel => page.click(sel), shut = () => page.click('#sheet [data-act=close]'), slide = async h => { await page.focus('#tWin'); await page.keyboard.press('Home'); for (let i = 1; i < h; i++) await page.keyboard.press('ArrowRight'); };
-      for (const per of ['h4', 'today', 'week', 'month']) { await tap(`[data-act=per][data-v=${per}]`); await visit('Home, ' + per); }
-      await tap('.fxbar'); await visit('effects sheet'); await shut(); { const oc = page.locator('#app [data-act=comps]'); if (await oc.count()) { await oc.click(); await visit('other compounds'); const cp = page.locator('#sheet [data-act=comp]'); if (await cp.count()) { await cp.first().click(); await visit('a compound'); const hi = page.locator('#sheet [data-act=histinfo]'); if (await hi.count()) { await hi.click(); await visit('histamine sheet'); } } await shut(); } }
+      await visit('Home');
+      // an effect, opened: the meals in the slider's hours before it. And a poor sleep, which opens the day before.
+      for (const [name, pick] of [['an effect, opened', 'x => x.k === "fx" && x.c !== "sleep"'], ['a poor sleep, opened', 'x => x.k === "fx" && x.c === "sleep"']]) { const id = await page.evaluate(src => { const e = S.ev.slice().reverse().find(eval(src)); if (!e) return null; UI.en = { id: e.id, at: hm(e.t) }; entrySheet(); return e.id; }, pick); if (id) { await visit(name); await shut(); } }
+      await tap('[data-act=tab][data-v=nut]'); { const oc = page.locator('#app [data-act=comps]'); if (await oc.count()) { await oc.click(); await visit('other compounds'); const cp = page.locator('#sheet [data-act=comp]'); if (await cp.count()) { await cp.first().click(); await visit('a compound'); const hi = page.locator('#sheet [data-act=histinfo]'); if (await hi.count()) { await hi.click(); await visit('histamine sheet'); } } await shut(); } } await tap('[data-act=tab][data-v=home]');
+      await page.evaluate(() => { UI.cp = 'flav'; compSheet(); }); await visit('the flavourings sheet'); await page.evaluate(() => { UI.lb = {}; labelSheet(); }); await tap('#sheet [data-act=lbflav]'); await visit('the flavourings sheet, from the label form'); await shut();
       await tap('.mb.meal'); await visit('meal'); for (const g of ['recent', 'dairy', 'sup', 'proc', 'label']) { const b = page.locator(`#mTabs [data-act=mgrp][data-v=${g}]`); if (await b.count()) { await b.click(); await visit('meal, ' + g); } }
       await page.fill('#mQ', 'zzzz'); await visit('meal, a search with no match'); await page.fill('#mQ', lang === 'fr' ? 'lait' : 'milk'); await tap('#mRows .stp.plus'); await visit('meal, a search with a pick'); await tap('#bar [data-act=back]');
       await tap('.mb.fx'); await visit('effect, physical'); await tap('#sheet [data-act=fxtab][data-v=psy]'); await visit('effect, psychological'); await shut();
@@ -151,7 +154,7 @@ async function open(browser, base, o) {
       await page.click('.mb.meal'); await page.fill('#mQ', 'gouda'); await page.click('#mRows .stp.plus'); await page.fill('#mAt', '18:00'); await page.click('[data-act=mealdone]'); ok('[rules] a meal in the future is not taken', (await toast()).includes('hasn’t happened yet') && (await A.S()).ev.length === 0);
       await page.fill('#mAt', '12:00'); await page.click('#mRows .stp[data-v="-0.5"]'); same('[rules] one tap gives a portion, minus gives a half', await page.evaluate(() => Object.values(V.items)), [0.5]); await page.click('#mRows .stp[data-v="-0.5"]'); same('[rules] minus again takes the food off', await page.evaluate(() => Object.keys(V.items).length), 0);
       ok('[rules] Done waits for a food', await page.locator('[data-act=mealdone]').isDisabled()); await page.click('#mRows .stp.plus'); await page.click('[data-act=mealdone]'); same('[rules] the meal is saved at the time that was set', (await A.S()).ev.map(e => [e.k, new Date(e.t).getHours(), e.items[0].q]), [['meal', 12, 1]]);
-      same('[rules] the Effects bar waits for 7 complete days before it draws', [await page.locator('.fxbar .trk.wait').count(), await page.locator('.fxbar .trk i').evaluate(e => e.style.height)], [1, '0%']);
+      same('[rules] Home lists the meal under Today, with a count and the way to Nutrition', [await page.locator('#todayList li').count(), await page.locator('#todayCount').innerText(), await page.locator('#app [data-act=tonut]').count(), await page.locator('#app [data-act=per], #app .fxbar, #app .ring').count()], [1, '1 meal · 0 effects', 1, 0]);
       await page.click('#app button.none'); same('[rules] “No effects today” closes the day', (await A.S()).ev.filter(e => e.k === 'none').length, 1); same('[rules] and shows as ticked', await page.locator('#app button.none').getAttribute('aria-pressed'), 'true');
       await page.click('#app button.none'); same('[rules] tapping it again takes it back', (await A.S()).ev.filter(e => e.k === 'none').length, 0); await page.click('#toast [data-act=undo]'); same('[rules] and Undo restores it', (await A.S()).ev.filter(e => e.k === 'none').length, 1);
       await page.click('.mb.fx'); await page.fill('#fxOwn', '  Brain   fog '); await page.click('#sheet [data-act=fxadd]'); await page.fill('#fxOwn', 'headache'); await page.click('#sheet [data-act=fxadd]'); await page.fill('#fxOwn', 'brain FOG'); await page.click('#sheet [data-act=fxadd]');
@@ -166,6 +169,16 @@ async function open(browser, base, o) {
       // a label food can be changed, and removed while no meal uses it
       await page.click('[data-act=menu]'); await page.click('#sheet [data-act=label]'); await page.click('#sheet [data-act=lbedit]'); await page.fill('#sheet [data-in=lb][data-k=sug]', '9'); await page.click('#sheet [data-act=lbsave]'); same('[rules] a label food can be changed', (await A.S()).custom[0].sug, 9);
       await page.click('[data-act=menu]'); await page.click('#sheet [data-act=label]'); await page.click('#sheet [data-act=lbedit]'); await page.click('#sheet [data-act=lbdel]'); same('[rules] and removed while no meal uses it', (await A.S()).custom.length, 0);
+      // what a label's ingredient list names: ticked on the form, kept, and carried by the food
+      await page.click('[data-act=menu]'); await page.click('#sheet [data-act=label]'); await page.fill('#sheet [data-in=lb][data-k=n]', 'Fizzy lime'); for (const k of ['fat', 'carb', 'prot']) await page.fill(`#sheet [data-in=lb][data-k=${k}]`, '0');
+      await page.click('#sheet [data-act=lbt][data-k=flav]'); await page.click('#sheet [data-act=lbt][data-k=swt]'); await page.click('#sheet [data-act=lbt][data-k=swt]');
+      await page.click('#sheet [data-act=lbflav]'); same('[rules] the label form opens what a flavouring can hold, with a way back and no link that leaves the form behind', [await page.locator('#sheet [data-act=lbback]').count(), await page.locator('#sheet [data-act=rowsheet], #sheet [data-act=foodrd]').count()], [1, 0]);
+      await page.click('#sheet [data-act=lbback]'); same('[rules] and coming back keeps what was typed and ticked', [await page.inputValue('#sheet [data-in=lb][data-k=n]'), await page.getAttribute('#sheet [data-act=lbt][data-k=flav]', 'aria-pressed'), await page.getAttribute('#sheet [data-act=lbt][data-k=swt]', 'aria-pressed')], ['Fizzy lime', 'true', 'false']);
+      await page.click('#sheet [data-act=lbsave]'); same('[rules] a ticked flavour is saved with the label food, and the food carries it', [(await A.S()).custom.map(c => [c.n, c.t]), await page.evaluate(() => food('L' + S.custom[0].id).c)], [[['Fizzy lime', ['flav']]], { flav: 1 }]);
+      same('[rules] a tick that isn’t one of the four is dropped when the data is read back', await page.evaluate(() => clean({ custom: [{ id: 'c1', n: 'x', t: ['flav', 'bogus', 'flav', 'nitr'] }] }).custom[0].t), ['flav', 'nitr']);
+      await page.click('[data-act=menu]'); await page.click('#sheet [data-act=label]'); await page.click('#sheet [data-act=lbedit]'); same('[rules] opened again, the tick is still there', await page.getAttribute('#sheet [data-act=lbt][data-k=flav]', 'aria-pressed'), 'true'); await page.click('#sheet [data-act=lbdel]');
+      // the search puts the plain name first
+      same('[rules] a search puts the word as the whole name first: Water before Watermelon, the potato before the chips', await page.evaluate(() => [searchFoods('water').slice(0, 2), searchFoods('eau')[0], searchFoods('potato')[0], searchFoods('wat')[0]]), [['f930001', 'f1691'], 'f930001', 'f2506', 'f1691']);
       // an effect for yesterday, from the effect sheet
       await page.click('.mb.fx'); await page.click('#sheet [data-act=fxk][data-v=joint]'); await page.click('#sheet [data-act=fxday]:nth-of-type(2)'); await page.fill('#fxAt', '22:10'); await page.click('#sheet [data-act=fxdone]');
       { const e = (await A.S()).ev.find(x => x.c === 'joint'), d = new Date(e.t); same('[rules] an effect can be set to yesterday, at its time', [d.getDate(), d.getHours(), d.getMinutes()], [13, 22, 10]); }
@@ -275,6 +288,51 @@ async function open(browser, base, o) {
       await page.clock.setFixedTime(t0 + 5 * 3600e3); await page.evaluate(() => { IXM = null; document.dispatchEvent(new Event('visibilitychange')); }); await page.click('[data-act=tab][data-v=thr]'); await page.click('[data-act=tmode][data-v=meal]');
       ok('[new] once its 4 hours are over with nothing reported, the second meal is on the other side', /after 1 of 2 meals\./.test(await head()), await head());
       same('[new] no error', A.errors, []); await A.ctx.close(); }
+
+    // ================= Home: today's entries, and an effect that opens what came before it =================
+    for (const lang of ['en', 'fr']) { const at = (d, h, m) => new Date(2026, 10, d, h, m).getTime(), t0 = at(15, 15, 10), A = await open(browser, base, { lang, now: t0 }), page = A.page, fr = lang === 'fr', T = `[home, ${lang}] `;
+      await page.click('[data-act=enter]'); await page.waitForSelector('.mb.meal');
+      same(T + 'with nothing reported it says so, and offers no link to Nutrition or History', [await page.locator('#todayNone').count(), await page.locator('#app [data-act=tonut], #app [data-act=hist], #todayCount').count()], [1, 0]);
+      await page.evaluate(([y, a, b, c, d, e]) => { const meal = (id, t, ks) => ({ id, k: 'meal', t, items: ks.map(k => ({ key: k, q: 1 })) });
+        S.ev = [meal('m0', y, ['f920001', 'f2850']), { id: 'x0', k: 'fx', t: a, c: 'sleep' }, meal('m1', b, ['f2873', 'f61']), meal('m2', c, ['f920001', 'f4523']), meal('m3', d, ['f502170']), { id: 'x1', k: 'fx', t: e, c: 'gut' }]; save(); render(); },
+        [at(14, 18, 30), at(15, 6, 50), at(15, 7, 40), at(15, 12, 20), at(15, 13, 50), at(15, 14, 30)]);
+      same(T + 'today’s entries in order, and nothing from yesterday', await page.locator('#todayList [data-act=entry]').evaluateAll(bs => bs.map(b => b.dataset.v)), ['x0', 'm1', 'm2', 'm3', 'x1']);
+      same(T + 'the count under them', await page.locator('#todayCount').innerText(), fr ? '3 repas · 2 effets' : '3 meals · 2 effects');
+      same(T + 'no period choice, no ring and no Effects bar on Home', await page.locator('#app [data-act=per], #app .ring, #app .fxbar').count(), 0);
+      await page.click('#todayList [data-act=entry][data-v=x1]');
+      same(T + 'an effect opens the meals in the 4 hours before it, the nearest first', [await page.locator('#befHead').innerText(), await page.locator('#befList [data-act=entry]').evaluateAll(bs => bs.map(b => b.dataset.v))], [fr ? 'Dans les 4 heures d’avant' : 'In the 4 hours before', ['m3', 'm2']]);
+      const gaps = await page.locator('#befList li').allInnerTexts(); ok(T + 'each with how long before', fr ? /40\s?min avant/.test(gaps[0]) && /2\s?h\s?10 avant/.test(gaps[1]) : /40\s?min before/.test(gaps[0]) && /2\s?h\s?10 before/.test(gaps[1]), gaps.join(' | '));
+      ok(T + 'it names the earlier meal that is outside the hours', (await page.locator('#befNote').innerText()).includes('07:40'));
+      // the same meals the Threshold tab sets this effect beside
+      same(T + 'they are the meals the lists count this effect for', await page.evaluate(() => { const I = IX(); return E.mealUnits(I, 'fat').units.filter(u => u.fx.indexOf('gut') >= 0).map(u => u.id).sort(); }), ['m2', 'm3']);
+      await page.click('#befList [data-act=entry][data-v=m2]'); ok(T + 'a meal in that list opens as a meal', (await page.locator('#sheet [data-act=mealedit]').count()) === 1); await page.evaluate(() => closeSheet());
+      await page.click('#todayList [data-act=entry][data-v=x1]'); await page.click('#sheet [data-act=fxthr]');
+      same(T + 'the link goes to the Threshold tab with that effect picked', await page.evaluate(() => [S.tab, S.tmode, UI.tsel]), ['thr', 'meal', ['gut']]);
+      await page.focus('#tWin'); await page.keyboard.press('Home'); await page.click('[data-act=tab][data-v=home]'); await page.click('#todayList [data-act=entry][data-v=x1]');
+      same(T + 'with the slider at 1 hour, only the meal in that hour', [await page.locator('#befHead').innerText(), await page.locator('#befList [data-act=entry]').evaluateAll(bs => bs.map(b => b.dataset.v))], [fr ? 'Dans l’heure d’avant' : 'In the hour before', ['m3']]);
+      await page.fill('#enAt', '10:00'); await page.click('#sheet [data-act=ensave]'); await page.click('#todayList [data-act=entry][data-v=x1]');
+      same(T + 'when the effect’s time is changed, the meals before it change with it', await page.locator('#befList [data-act=entry]').count() + (await page.locator('#befNone').count()) * 10, 10);
+      await page.evaluate(() => closeSheet()); await page.click('#todayList [data-act=entry][data-v=x0]');
+      same(T + 'a poor sleep opens the meals of the day before, the day it is counted with', [/^(Counted with the day before|Compté avec la journée d’avant)/.test(await page.locator('#befHead').innerText()), await page.locator('#befList [data-act=entry]').evaluateAll(bs => bs.map(b => b.dataset.v)), await page.locator('#befNote').count()], [true, ['m0'], 0]);
+      await page.click('#sheet [data-act=fxthr]'); same(T + 'and its link opens the Threshold tab over a day', await page.evaluate(() => [S.tab, S.tmode, UI.tsel]), ['thr', 'day', ['sleep']]);
+      await page.click('[data-act=tab][data-v=home]'); await page.click('#app [data-act=tonut]'); same(T + '“What went in” opens Nutrition on today, with the ring and the compounds', [await page.evaluate(() => [S.tab, S.nper]), await page.locator('#app .ring').count(), await page.locator('#compCard').count()], [['nut', 'today'], 1, 1]);
+      await page.click('[data-act=tab][data-v=home]'); await page.click('#app [data-act=hist]'); ok(T + '“Earlier days” opens History', (await page.locator('#hDay').count()) === 1);
+      same(T + 'saved data from before, with Home’s old period in it, is read without it', await page.evaluate(() => 'per' in clean({ per: 'h4', nper: 'month' })), false);
+      same(T + 'no error', A.errors, []); await A.ctx.close(); }
+
+    // ================= a day with nothing but water =================
+    for (const lang of ['en', 'fr']) { const t0 = new Date(2026, 10, 14, 18, 0).getTime(), A = await open(browser, base, { lang, now: t0 }), page = A.page, fr = lang === 'fr';
+      await page.click('[data-act=enter]'); await page.waitForSelector('.mb.meal');
+      await page.evaluate(t => { S.ev.push({ id: 'w1', k: 'meal', t: t - 2 * 3600e3, items: [{ key: 'f930001', q: 2 }] }, { id: 'w2', k: 'meal', t: t - 3600e3, items: [{ key: 'f930003', q: 1 }] }); IXM = null; render(); }, t0);
+      same(`[water, ${lang}] Home lists the two drinks as entries`, [await page.locator('#todayList li').count(), await page.locator('#todayCount').innerText()], [2, fr ? '2 repas · 0 effet' : '2 meals · 0 effects']);
+      await page.click('#app [data-act=tonut]'); const nut = await page.locator('#app').innerText();
+      ok(`[water, ${lang}] Nutrition doesn’t say no meal was reported when water was`, !/No meal reported|Aucun repas noté/.test(nut) && (fr ? /ne contient ni gras/ : /holds no fat/).test(nut), nut.slice(0, 300));
+      await page.click('#app [data-act=comps]'); ok(`[water, ${lang}] the flavouring of the flavoured one is in reach under Nutrition`, (await page.locator('#sheet [data-act=comp][data-v=flav]').count()) === 1);
+      await page.click('#sheet [data-act=comp][data-v=flav]'); const sheet = await page.locator('#sheet').innerText();
+      ok(`[water, ${lang}] its sheet says what it can hold, what the label leaves out, and that one product says nothing about another`, (fr ? ['Ce qu’il peut contenir', 'Ce que l’étiquette ne dit pas', 'D’un produit à l’autre', 'ne dit rien sur l’autre', 'D’où vient le compte', 'Eau pétillante aromatisée'] : ['What it can hold', 'What the label leaves out', 'One product and another', 'says nothing about another', 'Where the count comes from', 'Sparkling water, flavoured']).every(w => sheet.includes(w)), sheet.slice(0, 200));
+      await page.click('#sheet [data-act=close]');
+      for (const tab of ['nut', 'thr']) { await page.click(`[data-act=tab][data-v=${tab}]`); const t = await page.locator('#app').innerText(); ok(`[water, ${lang}] ${tab}: no broken number`, !/NaN|undefined|Infinity/.test(t)); }
+      same(`[water, ${lang}] no error`, A.errors, []); await A.ctx.close(); }
 
     // ================= a line with nothing counted =================
     { const t0 = new Date(2026, 10, 14, 18, 0).getTime(), A = await open(browser, base, { lang: 'fr', now: t0 }), page = A.page;
