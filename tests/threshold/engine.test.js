@@ -128,6 +128,8 @@ eq('nothing to compare with', E.luck(3, 0, 0, 0), null);
   eq('every line of every family is there', E.table(I, 'day').map(f => [f.f, f.rows.length]), E.FAMS.map(f => [f[0], f[1].length]));
   eq('eaten together: 3 or more aged or fermented portions, and alcohol with one', E.together(I, 'day'), { nHit: 3, nRest: 1, three: { hit: 1, rest: 0 }, both: { hit: 2, rest: 0 } });
   eq('a line opened with one effect picked counts only that effect', (() => { const B = E.bar(I, 'fat', 'day', ['gut']); return [B.n, [B.zero].concat(B.steps).reduce((t, s) => t + s.k, 0)]; })(), [4, 2]);
+  eq('a meal entered just now waits for its 4 hours, and today waits for tomorrow', (() => { const J = E.index(S, k => F2[k], T('2026-11-13', '13:00')); return [E.waiting(J, 'meal'), E.waiting(J, 'day'), E.line(J, 'fat', 'meal').n, E.line(J, 'fat', 'day').n]; })(), [{ soon: 1, open: 0 }, { soon: 1, open: 0 }, 3, 3]);
+  eq('a day left open keeps its meal out, and says so', (() => { const J = E.index({ roll: 0, ev: [meal('2026-11-10', '12:00', [['a', 1]])] }, k => F2[k], NOW); return [E.waiting(J, 'meal'), E.waiting(J, 'day'), E.line(J, 'fat', 'meal').n]; })(), [{ soon: 0, open: 1 }, { soon: 0, open: 1 }, 0]);
   eq('a caffeine pill has no figure, so its meal sits out of the caffeine line', E.usable(E.amounts({ kcal: 0, fat: 0, prot: 0, carb: 0, fib: 0, x: ['caf'] }, 1), 'caf'), false); }
 
 // ---- rules 2, 4 and 7: one food ----

@@ -198,6 +198,17 @@ async function open(browser, base, o) {
       await page.reload(); await page.waitForSelector('[data-act=enter]'); same('[install] “Not now” is remembered', await page.locator('.instbig').count(), 0);
       await page.click('[data-act=menu]'); await page.click('#sheet [data-act=install]'); ok('[install] the steps are still in the menu', (await page.locator('#sheet ol.inst').count()) >= 1); await A.ctx.close(); }
 
+    // ================= a first meal and effect, entered just now =================
+    { const t0 = new Date(2026, 10, 14, 18, 0).getTime(), A = await open(browser, base, { lang: 'en', now: t0 }), page = A.page;
+      await page.click('[data-act=enter]'); await page.waitForSelector('.mb.meal');
+      await page.evaluate(t => { S.ev.push({ id: 'w1', k: 'meal', t: t - 60000, items: [{ key: 'f109', q: 2 }] }, { id: 'w2', k: 'fx', t, c: 'head' }); IXM = null; render(); }, t0);
+      await page.click('[data-act=tab][data-v=thr]'); const wait = () => page.locator('#thrWait').innerText();
+      ok('[new] a meal entered just now says it is waiting for its 4 hours', /1 meal isn’t counted yet/.test(await wait()) && (await page.locator('#app table.rws').count()) === 0, await wait());
+      await page.click('[data-act=tmode][data-v=day]'); ok('[new] over a day, today says it is waiting for tomorrow', /Today isn’t counted yet/.test(await wait()), await wait());
+      await page.clock.setFixedTime(t0 + 4 * 3600e3 + 60000); await page.evaluate(() => { IXM = null; document.dispatchEvent(new Event('visibilitychange')); }); await page.click('[data-act=tab][data-v=thr]'); await page.click('[data-act=tmode][data-v=meal]');
+      const head = await page.locator('#thrHead').innerText(); ok('[new] once its 4 hours are over, the meal is in the lists', /after 1 of 1 meal\./.test(head), head);
+      same('[new] no error', A.errors, []); await A.ctx.close(); }
+
     // ================= the web page =================
     for (const lang of ['en', 'fr']) { const ctx = await browser.newContext({ viewport: { width: 320, height: 760 }, locale: lang === 'fr' ? 'fr-CA' : 'en-CA', serviceWorkers: 'block' }), page = await ctx.newPage(), errors = []; page.on('pageerror', e => errors.push(e.message));
       await page.goto(base + '/threshold/'); await page.waitForSelector('#langBtn'); const T = `[page, ${lang}] `, main = page.locator(`main[data-l=${lang}]`);
