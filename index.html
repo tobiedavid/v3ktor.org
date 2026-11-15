@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-  v3ktor.org — the front door: four free tools, each starting from a question.
+  v3ktor.org — the front door: five free tools, each starting from a question.
   Copyright (C) 2026  Tobie David
   SPDX-License-Identifier: AGPL-3.0-or-later — see LICENSE at https://github.com/tobiedavid/v3ktor.org
 -->
@@ -10,10 +10,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f4f6f8" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#14202b" media="(prefers-color-scheme: dark)">
-  <meta name="description" content="Four free, open-source tools for running experiments on yourself: food, energy, priorities and reactions. You’re the subject and the observer.">
+  <meta name="description" content="Five free, open-source tools for running experiments on yourself: food, energy, priorities and reactions. You’re the subject and the observer.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="V3KTOR — Mapping the Self">
-  <meta property="og:description" content="Four free tools. Start with the question that sounds like yours.">
+  <meta property="og:description" content="Five free tools. Start with the question that sounds like yours.">
   <meta property="og:url" content="https://v3ktor.org/">
   <link rel="canonical" href="https://v3ktor.org/" id="canonical">
   <link rel="alternate" hreflang="en" href="https://v3ktor.org/">
@@ -74,7 +74,7 @@
     .lang button { background: none; border: 0; padding: 12px 0; cursor: pointer; font-size: 15px; color: var(--muted); border-bottom: 2px solid transparent; }
     .lang button[aria-pressed="true"] { color: var(--ink); font-weight: 650; border-bottom-color: var(--brass); }
 
-    /* ---------- the four questions hang off the line ---------- */
+    /* ---------- the questions hang off the line ---------- */
     .plumb { position: relative; padding: 34px 0 0 var(--gutter); }
     .plumb::before { content: ""; position: absolute; left: calc(var(--rail) - 1px); top: 0; bottom: 30px; width: 2px; background: var(--brass); }
     h1 { font-size: clamp(19px, 2.1vw, 23px); font-weight: 450; line-height: 1.45; color: var(--muted); margin: 0 0 clamp(40px, 6vw, 68px); max-width: 30em; }
@@ -169,13 +169,20 @@
 <main id="main">
   <div class="shell">
     <div class="plumb">
-      <h1><b data-i18n="intro.lead">Four free tools for running experiments on yourself.</b> <span data-i18n="intro.rest">You’re the subject and the observer. Start with the question that sounds like yours.</span></h1>
+      <h1><b data-i18n="intro.lead">Five free tools for running experiments on yourself.</b> <span data-i18n="intro.rest">You’re the subject and the observer. Start with the question that sounds like yours.</span></h1>
 
       <article class="q">
         <span class="q-icon" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M3 9c5-5 9 5 14 0s8-5 12 0M3 16c5-5 9 5 14 0s8-5 12 0M3 23c5-5 9 5 14 0s8-5 12 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
         <h2><a href="/gut/" data-href-en="/gut/" data-href-fr="/gut/fr/" data-i18n="gut.q">Which foods set my gut off?</a></h2>
         <p class="q-what"><strong data-i18n="gut.name">Food Trial Log.</strong> <span data-i18n="gut.what">Log meals, stools and symptoms. Take one suspect food out, bring it back, and compare.</span></p>
         <p class="q-go"><span class="go" aria-hidden="true" data-i18n="gut.go">Open the log</span><span class="aside" data-i18n="gut.aside">Entries logged in English won’t appear in the French version, and vice versa.</span></p>
+      </article>
+
+      <article class="q">
+        <span class="q-icon" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M8 6l2.300 16.400A3 3 0 0 0 13.270 25h5.460a3 3 0 0 0 2.970-2.600L24 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 11.500h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12.200 16h7.600l-.620 4.700a1.400 1.400 0 0 1-1.390 1.200h-3.580a1.400 1.400 0 0 1-1.390-1.200z" fill="currentColor"/></svg></span>
+        <h2><a href="/threshold/" data-i18n="thr.q">What had I eaten before I felt bad?</a></h2>
+        <p class="q-what"><strong data-i18n="thr.name">Threshold Log.</strong> <span data-i18n="thr.what">Report your meals and your negative effects. It sets the meals an effect came after beside the meals it didn’t: fat, carbs, lactose, fibre, and compounds such as histamine and caffeine.</span></p>
+        <p class="q-go"><span class="go" aria-hidden="true" data-i18n="thr.go">Open the Threshold Log</span><span class="aside" data-i18n="thr.aside">Works on its own, or after the Food Trial Log.</span></p>
       </article>
 
       <article class="q">
@@ -202,7 +209,7 @@
 
     <div class="bob">
       <svg viewBox="0 0 24 34" aria-hidden="true"><path d="M12 0v8" stroke="currentColor" stroke-width="2"/><path d="M4 8h16l-2.5 9L12 33 6.500 17z" fill="currentColor"/></svg>
-      <p data-i18n="bob">Pick one. There’s no order, and no need to use all four.</p>
+      <p data-i18n="bob">Pick one. There’s no order, and no need to use all five.</p>
     </div>
   </div>
 
@@ -270,13 +277,18 @@
   var fr = {
     'skip': 'Aller au contenu',
     'newtab': ' (s’ouvre dans un nouvel onglet)',
-    'intro.lead': 'Quatre outils gratuits pour faire des expériences sur vous-même.',
+    'intro.lead': 'Cinq outils gratuits pour faire des expériences sur vous-même.',
     'intro.rest': 'Vous êtes à la fois le sujet et l’observateur. Commencez par la question qui vous ressemble.',
     'gut.q': 'Quels aliments dérangent mon ventre?',
     'gut.name': 'Food Trial Log.',
     'gut.what': 'Notez les repas, les selles et les symptômes. Retirez un aliment suspect, réintroduisez-le, puis comparez.',
     'gut.go': 'Ouvrir le journal',
     'gut.aside': 'Les entrées notées en anglais n’apparaissent pas dans la version française, et vice versa.',
+    'thr.q': 'Qu’avais‑je mangé avant de me sentir mal?',
+    'thr.name': 'Threshold Log.',
+    'thr.what': 'Notez vos repas et vos effets négatifs. Il met les repas suivis d’un effet à côté des autres : gras, glucides, lactose, fibres, et des composés comme l’histamine et la caféine.',
+    'thr.go': 'Ouvrir le Threshold Log',
+    'thr.aside': 'S’utilise seul, ou après le Food Trial Log.',
     'patch.q': 'Pourquoi est‑ce que je tombe toujours à plat?',
     'patch.name': 'La Patch.',
     'patch.what': 'Notez les repas, le sommeil, les stimulants et les symptômes, puis comparez vos bonnes journées aux mauvaises.',
@@ -290,7 +302,7 @@
     'v3ktor.what': 'Réagissez à des mots, un à la fois, et voyez quelles réactions reviennent d’une séance à l’autre.',
     'v3ktor.go': 'Ouvrir l’instrument',
     'v3ktor.aside': 'S’ouvre sur v3ktor.app',
-    'bob': 'Choisissez-en un. Aucun ordre à suivre, et pas besoin d’utiliser les quatre.',
+    'bob': 'Choisissez-en un. Aucun ordre à suivre, et pas besoin d’utiliser les cinq.',
     'show.title': 'Une mauvaise journée ne dit rien. Quatorze, peut-être.',
     'show.lede': 'Ces outils gardent la trace pour que vous puissiez comparer les journées. Ils ne vous disent pas ce que ça veut dire.',
     'show.alt1': 'La Patch, Historique : le fromage est venu avec un crash 5 des 6 jours où il a été mangé, et 1 des 24 jours sans',
@@ -338,7 +350,7 @@
     var canonical = document.getElementById('canonical');
     if (canonical) canonical.setAttribute('href', 'https://v3ktor.org/' + (lang === 'fr' ? '?lang=fr' : ''));
     meta.setAttribute('content', lang === 'fr'
-      ? 'Quatre outils gratuits à code source ouvert pour remarquer les tendances liées aux aliments, à l’énergie, aux choix et aux réactions.'
+      ? 'Cinq outils gratuits à code source ouvert pour remarquer les tendances liées aux aliments, à l’énergie, aux choix et aux réactions.'
       : metaEn);
   }
 
