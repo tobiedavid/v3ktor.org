@@ -121,30 +121,34 @@ eq('the reading rules hold nothing that works out a luck number', ['luck', 'step
 { const U = (x, hit) => ({ x, fx: hit ? ['head'] : [] }), many = (n, f) => Array.from({ length: n }, (_, i) => f(i));
   // 200 meals, a headache after 40. Lactose: those 40 held 52 g and up; 30 of the others held under 50 g and 130 held none.
   const lact = many(40, i => U(52 + i, true)).concat(many(30, i => U(3 + i * 1.5, false)), many(130, () => U(0, false)));
-  eq('an amount separates the two: the mark is the lowest amount a meal with the effect held, and nothing is on the wrong side', E.split(lact), { at: 52, below: 46.5, wrong: 0, up: 40, under: 160, nHit: 40, nRest: 160 });
+  eq('an amount separates the two: the mark is the lowest amount a meal with the effect held, and nothing is on the wrong side', E.split(lact), { at: 52, below: 46.5, dir: 'up', wrong: 0, hitIn: 40, restIn: 160, nHit: 40, nRest: 160 });
   // fat: the 40 between 8 and 69 g, the 160 others between 3 and 79 g
   const fat = many(40, i => U(8 + i * 61 / 39, true)).concat(many(160, i => U(3 + i * 76 / 159, false)));
   eq('the two are spread over the same amounts: no mark', [E.split(fat).at, E.split(fat).wrong], [null, 40]);
-  eq('several amounts do as well: the lowest of them is the mark', E.split([U(60, true), U(70, true), U(10, false), U(65, false)]), { at: 60, below: 10, wrong: 1, up: 2, under: 1, nHit: 2, nRest: 2 });
+  eq('several amounts do as well: the lowest of them is the mark', E.split([U(60, true), U(70, true), U(10, false), U(65, false)]), { at: 60, below: 10, dir: 'up', wrong: 1, hitIn: 2, restIn: 1, nHit: 2, nRest: 2 });
   eq('a mark that only splits off the top of the larger side is not kept', E.split(many(15, () => U(100, true)).concat([U(10, true)], many(5, () => U(100, false)))).at, null);
   eq('the lowest amount is never the mark: something has to sit under it', E.split([U(4, true), U(4, false)]).at, null);
   eq('with nothing on one side there is no mark', [E.split([U(5, true), U(9, true)]).at, E.split([U(5, false), U(9, false)]).at, E.split([]).at], [null, null, null]);
-  eq('a trace of it counts as none', E.split([U(0.004, false), U(0, false), U(3, true)]), { at: 3, below: 0, wrong: 0, up: 1, under: 2, nHit: 1, nRest: 2 });
+  eq('a trace of it counts as none', E.split([U(0.004, false), U(0, false), U(3, true)]), { at: 3, below: 0, dir: 'up', wrong: 0, hitIn: 1, restIn: 2, nHit: 1, nRest: 2 });
   // from the first meals on: one meal with an effect after it, two without
-  const Z = { kcal: 0, fat: 0, prot: 0, carb: 0, fib: 0, sug: 0, lact: 0, alc: 0 }, W = { rich: Object.assign({}, Z, { fat: 20 }), milk: Object.assign({}, Z, { fat: 5, lact: 10 }), bran: Object.assign({}, Z, { fat: 5, fib: 9 }), both: Object.assign({}, Z, { fat: 20, fib: 9 }) };
+  const Z = { kcal: 0, fat: 0, prot: 0, carb: 0, fib: 0, sug: 0, lact: 0, alc: 0 }, W = { rich: Object.assign({}, Z, { fat: 20 }), milk: Object.assign({}, Z, { fat: 5, carb: 10, sug: 10, lact: 10 }), bran: Object.assign({}, Z, { fat: 5, fib: 9 }), both: Object.assign({}, Z, { fat: 20, fib: 9 }) };
   const first = E.rows(E.index({ roll: 0, ev: [meal('2026-11-10', '08:00', [['milk', 1]]), meal('2026-11-10', '13:00', [['rich', 1]]), fx('2026-11-10', '14:00', 'head'), meal('2026-11-11', '12:00', [['milk', 1]]), none('2026-11-11')] }, k => W[k], NOW), 'meal');
-  eq('three meals are enough for a mark, and the row with one comes first', [first[0].b, first[0].s.at, first[0].s.wrong, first.find(r => r.b === 'lact').s.at], ['fat', 20, 0, null]);
-  eq('the rows with no mark keep their own order', first.slice(1).map(r => r.b), E.FAMS.reduce((a, f) => a.concat(f[1]), []).filter(b => b !== 'fat'));
+  eq('three meals are enough for a mark, and the rows with one come first', first.slice(0, 3).map(r => [r.b, r.s.at, r.s.dir, r.s.wrong]), [['fat', 20, 'up', 0], ['sug', 10, 'down', 0], ['lact', 10, 'down', 0]]);
+  eq('lactose is read downward here: the meal with the effect held none, the two others 10 g', first.find(r => r.b === 'lact').s, { at: 10, below: 0, dir: 'down', wrong: 0, hitIn: 1, restIn: 2, nHit: 1, nRest: 2 });
+  eq('the rows with no mark keep their own order', first.slice(3).map(r => r.b), E.FAMS.reduce((a, f) => a.concat(f[1]), []).filter(b => ['fat', 'sug', 'lact'].indexOf(b) < 0));
+  // an effect that comes with less of a thing: the four meals with it held 0, 0, 0 and 10 mg; the four others 80, 90, 100 and 0
+  eq('the mark reads downward when that leaves fewer on the wrong side: under 80 mg, 4 of 4 with; from 80 mg up, 3 of 4 without', E.split([U(0, true), U(0, true), U(0, true), U(10, true), U(80, false), U(90, false), U(100, false), U(0, false)]), { at: 80, below: 10, dir: 'down', wrong: 1, hitIn: 4, restIn: 3, nHit: 4, nRest: 4 });
+  eq('read downward, a mark has to do better than none too', E.split([U(0, true), U(5, true), U(0, false), U(5, false)]).at, null);
   eq('every row carries its meals, the top of its scale and whether any meal held it', [first.length, first[0].units.length, first[0].max, first[0].any, first.find(r => r.b === 'fib').any], [E.FAMS.reduce((t, f) => t + f[1].length, 0), 3, 20, true, false]);
   // eight days, one meal each. Fibre: the 3 with the effect held 9 g, the 5 others none. Fat: 2 of the 3 held 20 g, and so did 1 of the 5.
   const days = [['both', 1], ['both', 1], ['bran', 1], ['milk', 0], ['milk', 0], ['milk', 0], ['milk', 0], ['rich', 0]], ev = [];
   days.forEach(([k, hit], i) => { const d = '2026-11-' + String(i + 1).padStart(2, '0'); ev.push(meal(d, '12:00', [[k, 1]]), hit ? fx(d, '13:00', 'head') : none(d)); });
   const R = E.rows(E.index({ roll: 0, ev }, k => W[k], NOW), 'meal');
-  eq('the row with the fewest on the wrong side comes first, whatever its place in the fixed order', R.slice(0, 3).map(r => [r.b, r.s.at, r.s.wrong]), [['fib', 9, 0], ['fat', 20, 2], ['cplx', null, 3]]);
+  eq('the row with the fewest on the wrong side comes first, whatever its place in the fixed order', R.slice(0, 5).map(r => [r.b, r.s.at, r.s.dir, r.s.wrong]), [['fib', 9, 'up', 0], ['sug', 10, 'down', 1], ['lact', 10, 'down', 1], ['fat', 20, 'up', 2], ['cplx', null, null, 3]]);
   // a clear mark: more than half of each kind on its own side
-  eq('a mark is clear when more than half of the meals with the effect are at it or over, and more than half of the others under it', [E.clear({ at: 1, up: 21, under: 112, nHit: 27, nRest: 118 }), E.clear({ at: 8, up: 17, under: 104, nHit: 46, nRest: 110 }), E.clear({ at: 3, up: 40, under: 70, nHit: 46, nRest: 160 })], [true, false, false]);
-  eq('exactly half is not more than half, and no mark is not a clear mark', [E.clear({ at: 3, up: 1, under: 2, nHit: 2, nRest: 2 }), E.clear({ at: 3, up: 2, under: 1, nHit: 2, nRest: 2 }), E.clear({ at: null, up: 0, under: 0, nHit: 2, nRest: 2 })], [false, false, false]);
-  eq('every row says whether its mark is clear', R.slice(0, 3).map(r => [r.b, r.clear]), [['fib', true], ['fat', true], ['cplx', false]]);
+  eq('a mark is clear when more than half of the meals with the effect are on their side of it, and more than half of the others on theirs', [E.clear({ at: 1, hitIn: 21, restIn: 112, nHit: 27, nRest: 118 }), E.clear({ at: 8, hitIn: 17, restIn: 104, nHit: 46, nRest: 110 }), E.clear({ at: 3, hitIn: 40, restIn: 70, nHit: 46, nRest: 160 })], [true, false, false]);
+  eq('exactly half is not more than half, and no mark is not a clear mark', [E.clear({ at: 3, hitIn: 1, restIn: 2, nHit: 2, nRest: 2 }), E.clear({ at: 3, hitIn: 2, restIn: 1, nHit: 2, nRest: 2 }), E.clear({ at: null, hitIn: 0, restIn: 0, nHit: 2, nRest: 2 })], [false, false, false]);
+  eq('every row says whether its mark is clear', ['fib', 'sug', 'fat', 'cplx'].map(b => [b, R.find(r => r.b === b).clear]), [['fib', true], ['sug', true], ['fat', true], ['cplx', false]]);
   eq('with one effect picked that was never reported, nothing is on the "with" side and no row has a mark', E.rows(E.index({ roll: 0, ev }, k => W[k], NOW), 'meal', ['gut']).filter(r => r.s.at != null).length, 0); }
 
 // ---- a drink is an entry like any other: water alone is a meal that holds nothing, and a flavoured one holds a portion of flavouring ----
