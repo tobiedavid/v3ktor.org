@@ -726,7 +726,7 @@ return {H,WIN,WINS,STEPS,ZEPS,MANY,groups,BUCKETS,COMPS,FAMS,TAGS,line,table,spl
 if(typeof module!=='undefined') module.exports=TLE;
 /* ENGINE:END */
 /* ===================== APP: the screens. Data in, data out: the app reports what was entered and never interprets it. ===================== */
-const VER='0.4.9', CONSENT=1, KEY='v3k.threshold.v1', GUTKEYS=['v3k.gut.v1','v3k.gut.fr.v1'];   /* the Food Trial Log keeps its English and its French copy apart */
+const VER='0.4.10', CONSENT=1, KEY='v3k.threshold.v1', GUTKEYS=['v3k.gut.v1','v3k.gut.fr.v1'];   /* the Food Trial Log keeps its English and its French copy apart */
 const E=TLE, H=36e5;
 const FRAMED=(()=>{ try{ return window.self!==window.top; }catch(e){ return true; } })();
 const STANDALONE=(()=>{ try{ return !!(navigator.standalone||matchMedia('(display-mode: standalone)').matches); }catch(e){ return false; } })();
@@ -1052,10 +1052,11 @@ function dotSvg(r,label){ const X=x=>dotX(r,x); let a='', b='';
     ids.forEach((i,j)=>{ const cy=ids.length===1?y0+4+jit(i)*(DH-8):y0+3+(j+.5)*(DH-6)/ids.length, c=`<circle class="${hit?'dh':'dr'}" cx="${cx}" cy="${cy.toFixed(1)}" r="${hit?2.7:2.3}"/>`; if(hit) a+=c; else b+=c; }); }
   const mx=markX(r);
   return `<svg class="dots" viewBox="0 -3 ${DW} ${2*DH+10}" role="img" aria-label="${esc(label)}"><rect class="l1" x="0" y="0" width="${DW}" height="${DH}" rx="4"/><rect class="l2" x=".5" y="${DH+4.5}" width="${DW-1}" height="${DH-1}" rx="4"/>${a}${b}${mx==null?'':`<line class="dm" x1="${mx.toFixed(1)}" x2="${mx.toFixed(1)}" y1="-3" y2="${2*DH+7}"/>`}</svg>`; }
-function dotRow(r){ const s=r.s, nm=L(BARN[r.b][0],BARN[r.b][1]), at=s.at==null?null:amtTxt(r.b,s.at), pc=s.at==null?0:100*markX(r)/DW;
-  /* read up: with the effect from the mark up, without under it. Read down: the reverse. The sentence names the side of each. */
+/* the sentence of a mark. Read up: with the effect from the mark up, without under it. Read down: the reverse. It names the side of each. */
+function markTxt(b,s){ if(s.at==null) return ''; const at=amtTxt(b,s.at);
   const hi=L(`From ${at} up`,`À partir de ${at}`), lo=L(`Under ${at}`,`Sous ${at}`), wi=L(`${s.hitIn} of ${s.nHit} with`,`${s.hitIn} sur ${s.nHit} avec`), wo=L(`${s.restIn} of ${s.nRest} without`,`${s.restIn} sur ${s.nRest} sans`);
-  const txt=s.at==null?'':s.dir==='down'?`${lo}${COL()}${wi}. ${hi}${COL()}${wo}.`:`${hi}${COL()}${wi}. ${lo}${COL()}${wo}.`;
+  return s.dir==='down'?`${lo}${COL()}${wi}. ${hi}${COL()}${wo}.`:`${hi}${COL()}${wi}. ${lo}${COL()}${wo}.`; }
+function dotRow(r){ const s=r.s, nm=L(BARN[r.b][0],BARN[r.b][1]), at=s.at==null?null:amtTxt(r.b,s.at), pc=s.at==null?0:100*markX(r)/DW, txt=markTxt(r.b,s);
   const label=nm+L(': ',' : ')+L(`${s.nHit} with, ${s.nRest} without, by amount.`,`${s.nHit} avec, ${s.nRest} sans, selon la quantité.`)+(txt?' '+txt:'');
   return `<li class="drow" data-k="${r.b}" data-hit="${s.nHit}" data-rest="${s.nRest}"${s.at==null?'':` data-at="${s.at}" data-dir="${s.dir}" data-hitin="${s.hitIn}" data-restin="${s.restIn}"`}><button type="button" class="rowb" data-act="rowsheet" data-k="${r.b}">${nm}</button>
   <div class="dwrap${at==null?' ex':''}">${at==null?'':`<span class="dmk" aria-hidden="true" style="left:${pc.toFixed(1)}%;transform:translateX(${pc<14?'0':pc>86?'-100%':'-50%'})">${at}</span>`}${dotSvg(r,label)}</div>
@@ -1281,6 +1282,8 @@ function entrySheet(keep){ const e=S.ev.find(x=>x.id===UI.en.id); if(!e){ closeS
   else showSheet(`<h3 id="sheetTitle">${L('No effects reported','Aucun effet noté')}</h3><p class="small muted">${esc(dLabel(k))}</p><div class="row">${rm}</div>`,keep); }
 
 /* ---------- Ask AI: the log as text, copied. The app writes no question, and sends nothing. ---------- */
+/* the other compounds one meal held, for the copied text: caffeine and the rest, each with its amount */
+function compLine(am){ return E.COMPS.filter(k=>held(am,k)).map(k=>L(BARN[k][0],BARN[k][1]).toLowerCase()+' '+amtTxt(k,am[k]||0)).join(', '); }
 function aiText(scope){ const T=today(), from=scope==='month'?kAdd(T,-29):null, dk=e=>e.k==='none'?e.d:E.dayKey(e.t,S.roll), ev=S.ev.filter(e=>!from||dk(e)>=from);
   const I=E.index({ev,roll:S.roll,twin:winH()},food,now()), O=[], pl=s=>String(s).replace(/[\u00a0\u202f]/g,' '), rd=E.reportedDays(I), withMeal=I.keys.filter(k=>I.D[k].meals.length).length;
   O.push(L('My own log from Threshold Log. Not medical advice.','Mon propre journal du Threshold Log. Pas un avis médical.'));
@@ -1292,18 +1295,30 @@ function aiText(scope){ const T=today(), from=scope==='month'?kAdd(T,-29):null, 
   if(S.imp&&S.imp.out.length) O.push(L('Rejected in my Food Trial Log: ','Rejetés dans mon Food Trial Log\u00a0: ')+S.imp.out.map(r=>`${fname(food(r.key))} (${r.d}, ${pl(whyTxt(r)).replace(/ · /g,', ')})`).join('; ')+'.');
   const cs=Object.entries(S.concl).filter(([k,v])=>v&&v.trim()); if(cs.length) O.push(L('My conclusions, in my own words: ','Mes conclusions, dans mes mots\u00a0: ')+cs.map(([k,v])=>(k.startsWith('food:')?fname(food(k.slice(5))):BARN[k]?L(BARN[k][0],BARN[k][1]):k)+COL()+L('"','«\u00a0')+v.trim()+L('"','\u00a0»')).join('; ')+'.');
   for(const mode of ['meal','day']){ O.push('',mode==='meal'?L(`TALLIES AFTER A MEAL (the amount in one meal; effects reported in ${hrsAfter(winH())}: my own setting, from 1 to 8 hours)`,`COMPTES APRÈS UN REPAS (la quantité dans un repas; effets notés dans ${hrsAfter(winH())} : mon propre réglage, de 1 à 8 heures)`):L('TALLIES OVER A DAY (the total for a day; effects reported that day, that night and the next day)','COMPTES SUR UNE JOURNÉE (le total d’une journée; effets notés ce jour-là, cette nuit-là et le lendemain)'));
-    for(const b of E.BUCKETS.concat(['alc','caf'])){ const B=E.bar(I,b,mode); O.push(L(BARN[b][0],BARN[b][1])+', '+BARN[b][2]); if(!B.n){ O.push('  '+L('nothing counted yet','rien de compté pour l’instant')); continue; }
+    const had=new Set(E.rows(I,mode).filter(r=>r.any).map(r=>r.b));   /* the first rows always; another compound when a counted meal held some of it */
+    for(const b of E.BUCKETS.concat(['alc','caf'],E.COMPS.filter(k=>k!=='caf'&&had.has(k)))){ const B=E.bar(I,b,mode); O.push(L(BARN[b][0],BARN[b][1])+', '+(BARN[b][2]==='p'?'portions':BARN[b][2])); if(!B.n){ O.push('  '+L('nothing counted yet','rien de compté pour l’instant')); continue; }
       for(const s of [B.zero].concat(B.steps)){ if(!s.n) continue; const fx=Object.entries(s.fx).sort((a,c)=>c[1]-a[1]).map(([c,n])=>fxLow(c)+' '+n).join(', '); O.push('  '+pl(stepRange(B,s))+COL()+pl(stepCount(B,s))+(fx?' ('+fx+')':'')); }
       if(B.left) O.push('  '+L(`left out: ${B.left} (${leftWhy2(b)})`,`laissés de côté\u00a0: ${B.left} (${leftWhy2(b)})`)); } }
+  /* the marks the Threshold tab shows, for any effect and for each effect reported: the app's own sentences, and the rows with none */
+  const codes=Array.from(new Set(ev.filter(e=>e.k==='fx').map(e=>e.c)));
+  for(const mode of ['meal','day']){ const blocks=[];
+    for(const sel of [null].concat(codes.map(c=>[c]))){ const R=E.rows(I,mode,sel).filter(r=>r.any), s0=R.length?R[0].s:null; if(!s0||!s0.nHit||!s0.nRest) continue;
+      const mk=R.filter(r=>r.s.at!=null), no=R.filter(r=>r.s.at==null), T0=E.table(I,mode,sel)[0].rows[0], nH=T0.hit.n, nA=T0.hit.n+T0.rest.n;
+      blocks.push(cap(sel?fxLow(sel[0]):L('any effect','tout effet'))+L(`, ${nH} of ${nA} ${unitWord(mode,nA)}`,`, ${nH} sur ${nA} ${unitWord(mode,nA)}`)+COL());
+      for(const r of mk) blocks.push('  '+L(BARN[r.b][0],BARN[r.b][1])+COL()+markTxt(r.b,r.s));
+      const k=no.length; if(k) blocks.push('  '+(mk.length?L(k===1?'No mark on the other row.':`No mark on the other ${k} rows.`,k===1?'Aucune marque sur l’autre ligne.':`Aucune marque sur les ${k} autres lignes.`):L('No row has a mark.','Aucune ligne n’a de marque.'))); }
+    if(blocks.length){ O.push('',mode==='meal'?L('MARKS AFTER A MEAL','MARQUES APRÈS UN REPAS'):L('MARKS OVER A DAY','MARQUES SUR UNE JOURNÉE'));
+      if(mode==='meal') O.push(L('A mark is the amount that best puts the meals or days with the effect on one side of it and the others on the other side. "With" and "without" are with and without the effect. A row has no mark when no amount does better than none.','Une marque est la quantité qui met le mieux les repas ou les journées avec l’effet d’un côté et les autres de l’autre. «\u00a0Avec\u00a0» et «\u00a0sans\u00a0» veulent dire avec et sans l’effet. Une ligne n’a pas de marque quand aucune quantité ne fait mieux que rien.'));
+      for(const l of blocks) O.push(l.replace(/[\u00a0\u202f](?!:)/g,' ').replace(/\s+$/,'')); } }   /* plain spaces in the amounts, as in the rest of the text; the space before a colon stays */
   O.push('',L('ENTRIES','ENTRÉES'));
   for(const k of I.keys.slice().reverse()){ const d=I.D[k], [y,m,da]=k.split('-').map(Number), wd=new Date(y,m-1,da).toLocaleDateString(LOC(),{weekday:'long'});
     O.push(`${k}, ${wd}, ${!d.meals.length?L('no meal','aucun repas'):d.closed?L('complete','complète'):L('not complete','pas complète')}`);
-    const rows=d.meals.map(m=>[m.e.t,`  ${hm(m.e.t)} ${L('meal','repas')}${COL()}${m.e.items.map(it=>{ const f=food(it.key); return pl(qtxt(it.q))+' x '+fname(f)+(fserv(f)?' ('+fserv(f)+')':''); }).join('; ')}. ${cap(amountsLine(m.am,true))}`]).concat(d.rep.map(e=>[e.t,`  ${hm(e.t)} ${L('effect','effet')}${COL()}${fxLow(e.c)}`])).sort((a,b)=>a[0]-b[0]);
+    const rows=d.meals.map(m=>[m.e.t,`  ${hm(m.e.t)} ${L('meal','repas')}${COL()}${m.e.items.map(it=>{ const f=food(it.key); return pl(qtxt(it.q))+' x '+fname(f)+(fserv(f)?' ('+fserv(f)+')':''); }).join('; ')}. ${cap(amountsLine(m.am,true))}${(c=>c?'. '+L('Compounds','Composés')+COL()+pl(c):'')(compLine(m.am))}`]).concat(d.rep.map(e=>[e.t,`  ${hm(e.t)} ${L('effect','effet')}${COL()}${fxLow(e.c)}`])).sort((a,b)=>a[0]-b[0]);
     for(const r of rows) O.push(r[1]); if(d.none) O.push('  '+L('no effects reported that day','aucun effet noté ce jour-là')); }
   return O.join('\n'); }
 function aiSheet(keep){ const u=UI.ai; u.text=aiText(u.scope);
   showSheet(`<h3 id="sheetTitle">${L('Ask AI','Demander à l’IA')}</h3>
-  <p class="small">${L('This copies your log as text: the tallies behind the lists, your meals with their amounts, and your effects with their times. Paste it into the AI you use and ask your own question. The app writes no question.','Ça copie ton journal en texte\u00a0: les comptes derrière les listes, tes repas avec leurs quantités, et tes effets avec leurs heures. Colle-le dans l’IA que tu utilises et pose ta propre question. L’app n’écrit aucune question.')}</p>
+  <p class="small">${L('This copies your log as text: the tallies and the marks behind the Threshold rows, your meals with what they held, and your effects with their times. Paste it into the AI you use and ask your own question. The app writes no question.','Ça copie ton journal en texte\u00a0: les comptes et les marques derrière les lignes de Seuil, tes repas avec ce qu’ils contenaient, et tes effets avec leurs heures. Colle-le dans l’IA que tu utilises et pose ta propre question. L’app n’écrit aucune question.')}</p>
   <p class="small"><b>${L('Once you paste it somewhere, it has left your phone.','Une fois que tu le colles quelque part, il a quitté ton téléphone.')}</b></p>
   <div class="gtabs seg" role="group" aria-label="${L('How much','Quelle part')}"><button type="button" data-act="aiscope" data-v="month" aria-pressed="${u.scope==='month'}">${L('This month','Ce mois-ci')}</button><button type="button" data-act="aiscope" data-v="all" aria-pressed="${u.scope==='all'}">${L('Everything','Tout')}</button></div>
   <div class="row"><button type="button" class="btn primary sm" data-act="aicopy">${L('Copy','Copier')}</button><span class="small muted">${L(`${u.text.length.toLocaleString('en-CA')} characters`,`${u.text.length.toLocaleString('fr-CA')} caractères`)}</span></div>

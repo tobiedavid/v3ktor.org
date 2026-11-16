@@ -317,6 +317,15 @@ async function open(browser, base, o) {
         ok(T + 'the rows with no mark sit under a heading that says so', (await page.locator('#dMixHead').innerText()).replace(/\u00a0/g, ' ') === (fr ? 'Sans marque : aucune quantité ne sépare celles-ci.' : 'No mark: no amount separates these.')); }
       { const r = await page.evaluate(() => { const s = E.split(E.bar(IX(), 'lact', 'meal').units); return [s.at, s.dir, s.hitIn, s.restIn, s.nHit, s.nRest]; }), row = rows.find(x => x.k === 'lact');
         same(T + 'the lactose row shows the engine’s mark and counts', [row.at, row.dir, row.up, row.under, row.hit, row.rest], r); }
+      // what Ask AI copies carries what this tab counts: each meal's compounds, a tally for every row the person had some of, and the marks in the tab's own words
+      { const flat = t => t.replace(/[\u00a0\u202f]/g, ' ').replace(/\s+/g, ' ').trim(), ai = (await page.evaluate(() => aiText('all'))).replace(/[\u00a0\u202f]/g, ' ').split('\n'), names = (await page.locator('#app .drow .rowb').allInnerTexts()).map(flat);
+        const i0 = ai.indexOf(fr ? 'MARQUES APRÈS UN REPAS' : 'MARKS AFTER A MEAL'), m = (await head()).match(/\d+/g).map(Number), got = []; for (let i = i0 + 3; i < ai.length && ai[i].startsWith('  '); i++) got.push(ai[i].trim());
+        const marked = rows.map((r, i) => [names[i], r]).filter(x => x[1].at !== null), none = rows.length - marked.length;
+        same(T + 'the copied text opens its marks with the same count as the heading', ai[i0 + 2], fr ? `Tout effet, ${m[1]} sur ${m[2]} repas :` : `Any effect, ${m[1]} of ${m[2]} meals:`);
+        same(T + 'and gives each mark as the tab words it, in the tab’s order, then how many rows have none', got, marked.map(x => `${x[0]}${fr ? ' : ' : ': '}${x[1].text}`).concat([fr ? `Aucune marque sur les ${none} autres lignes.` : `No mark on the other ${none} rows.`]));
+        ok(T + 'each meal in it lists its other compounds', ai.some(l => (fr ? /repas : .*\. Composés : .*(tyramine|gluten)/ : /meal: .*\. Compounds: .*(tyramine|gluten)/).test(l)), ai.find(l => /tyramine/.test(l)));
+        ok(T + 'it tallies every row the person had some of, the compounds in portions too', ['Tyramine, portions', 'Gluten, portions', fr ? 'Gras, g' : 'Fat, g'].every(h => ai.includes(h)) && names.every(n => ai.some(l => l.startsWith(n + ', '))), names.filter(n => !ai.some(l => l.startsWith(n + ', '))).join('; '));
+        ok(T + 'and it still holds no question', !ai.some(l => l.includes('?'))); }
       // the three views, under Settings: Full shows every row, Medium the rows with a mark, Minimal the rows whose mark is clear
       { const keys = () => page.locator('#app .drow').evaluateAll(lis => lis.map(li => li.dataset.k)), flat = t => t.replace(/[\s\u00a0\u202f]+/g, ' ').trim(), clear = r => r.at !== null && r.up * 2 > r.hit && r.under * 2 > r.rest;
         const view = async v => { await setOpen(page); await page.click(`#tView [data-act=tview][data-v=${v}]`); const note = flat(await page.locator('#tViewNote').innerText()), on = await page.locator('#tView [aria-pressed=true]').getAttribute('data-v'); await sheetShut(page); return [on, note]; };
