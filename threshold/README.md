@@ -70,7 +70,7 @@ A row appears only when a counted meal or day held some of it (since 0.4.1 this 
 
 **When nothing is clear.** Since 0.4.3, when meals sit on both sides and no row has a clear mark, the tab says the whole log can be copied for an AI, with a button that opens Ask AI on "Everything". The app still writes no question and sends nothing.
 
-**How to read it.** The first time the tab is opened, a card at its top shows two made-up rows (one an amount separates, one it doesn't), says what the dots are, and ends with "The more meals you report, the more accurate it gets." It stays until "Got it" is tapped (`seenThr` in the saved data); "How to read this tab", under the rows, brings it back.
+**How to read it.** The first time the tab is opened, a card at its top shows two made-up rows (one an amount separates, one it doesn't), says what the dots are, and ends with "The more meals you report, the more accurate it gets." It stays until "Got it" is tapped (`seenThr` in the saved data); "How to read this tab", under the rows, brings it back. Since 0.4.6 the paragraph under the heading is one line once the card is closed ("Each dot is a meal: the further right, the more it had."); while the card is up it also says where the mark stands and which rows come first.
 
 "Eaten together" is still a small table of shares and counts, and an opened line still lists every amount with how many sat on each side.
 
