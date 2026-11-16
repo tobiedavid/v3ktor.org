@@ -277,7 +277,7 @@ async function open(browser, base, o) {
       await go(D(13, 10));
       same('[days] on the 13th, the 11th is read (the 12th is over) and it sits with the 12th’s headache', await nums(), [1, 1]);
       ok('[days] ...and the 12th waits, since the 13th is not over, and the screen says so', flat(await page.locator('#thrWait').innerText()) === '1 day isn’t counted yet: a day is read once the day after it is over.', await page.locator('#thrWait').innerText());
-      { const t = await milk(); ok('[days] the sheet for milk says its day is not counted yet', t.includes('Not reported on a complete day yet.') && t.includes('1 day with it isn’t counted yet: a day is read once the day after it is over.'), t.slice(0, 400)); }
+      { const t = await milk(); ok('[days] the sheet for milk says its day is not counted yet', t.includes('Not reported on a complete day yet.') && t.includes('1 day with it isn’t counted yet: the day after is not over, or nothing is reported for it.'), t.slice(0, 400)); }
       await go(D(14, 0, 5));
       same('[days] five minutes into the 14th, the 12th is read too', [await nums(), await page.locator('#thrWait').count()], [[2, 2], 0]);
       { const t = await milk(); ok('[days] the sheet for milk: one day with it, and the day without it carries the next day’s headache, as a day with it would', t.includes('Reported on 1 complete day.') && /Complete days without it: 1 · headache 1/.test(t) && !t.includes('counted yet'), t.slice(0, 600));
@@ -435,6 +435,18 @@ async function open(browser, base, o) {
       // water alone, with an effect after it: the meals are counted, and no row has anything to show
       await page.evaluate(t => { S.ev = [{ id: 'w1', k: 'meal', t: t - 5 * 3600e3, items: [{ key: 'f930001', q: 1 }] }, { id: 'w2', k: 'fx', t: t - 4.5 * 3600e3, c: 'head' }]; IXM = null; render(); }, t0);
       same(T + 'when no counted meal held anything, the tab says so in one line and draws no row', [await page.locator('#app .drow').count(), flat(await page.locator('#thrEmpty').innerText())], [0, fr ? 'Aucun de ces repas ne contenait ce que les lignes comptent.' : 'None of these meals held anything the rows count.']);
+      same(T + 'no error', A.errors, []); await A.ctx.close(); }
+
+    // ================= over a day: a day with no effect waits when nothing is reported for the day after =================
+    for (const lang of ['en', 'fr']) { const fr = lang === 'fr', T = `[next day, ${lang}] `, t0 = new Date(2026, 10, 14, 18, 0).getTime(), A = await open(browser, base, { lang, now: t0 }), page = A.page, flat = t => t.replace(/[\s\u00a0\u202f]+/g, ' ').trim(), D = 24 * 3600e3;
+      await page.click('[data-act=enter]'); await page.waitForSelector('.mb.meal');
+      // the 10th: a meal and a tap on "No effects". The 11th: nothing at all. The 12th: a meal and a headache. The 13th: nothing.
+      await page.evaluate(([t, D]) => { S.ev.push({ id: 'n1', k: 'meal', t: t - 4 * D, items: [{ key: 'f109', q: 1 }] }, { id: 'n2', k: 'none', t: t - 4 * D + 3600e3, d: E.dayKey(t - 4 * D, S.roll) }, { id: 'n3', k: 'meal', t: t - 2 * D, items: [{ key: 'f109', q: 2 }] }, { id: 'n4', k: 'fx', t: t - 2 * D + 3600e3, c: 'head' }); S.ev.sort((a, b) => a.t - b.t); S.seenThr = true; IXM = null; render(); }, [t0, D]);
+      await page.click('[data-act=tab][data-v=thr]'); await setMode(page, 'day');
+      same(T + 'the day with its headache is counted, and the day with no effect waits, with the reason', [flat(await page.locator('#thrHead').innerText()), flat(await page.locator('#thrWait').innerText())], fr ? ['Tout effet : noté pour 1 journée complète sur 1.', '1 journée n’est pas comptée : rien n’est noté pour le lendemain, ni effet ni appui sur « Aucun effet aujourd’hui ».'] : ['Any effect: reported for 1 of 1 complete day.', '1 day isn’t counted: nothing is reported for the day after it, no effect and no tap on “No effects today”.']);
+      await page.evaluate(([t, D]) => { S.ev.push({ id: 'n5', k: 'none', t: t - 3 * D, d: E.dayKey(t - 3 * D, S.roll) }); S.ev.sort((a, b) => a.t - b.t); IXM = null; render(); }, [t0, D]);
+      same(T + 'once the day after has a tap on “No effects”, the day is counted on the other side', [flat(await page.locator('#thrHead').innerText()), await page.locator('#thrWait').count()], [fr ? 'Tout effet : noté pour 1 journée complète sur 2.' : 'Any effect: reported for 1 of 2 complete days.', 0]);
+      await setMode(page, 'meal'); ok(T + 'after a meal, both meals were counted all along', /2/.test(await page.locator('#thrHead').innerText()));
       same(T + 'no error', A.errors, []); await A.ctx.close(); }
 
     // ================= a line with nothing counted =================
