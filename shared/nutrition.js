@@ -62,6 +62,37 @@ const NUTRI=(()=>{
   /* a total against its need: a limit (sodium, caffeine, alcohol) is only over or not; calories are fine from 85% to 130% */
   function band(k,pct){ if(k==='na'||k==='caf'||k==='sd') return pct>1?'over':'ok'; if(k==='kcal') return pct>1.3?'over':pct>=0.85?'ok':pct>=0.5?'low':'empty'; return pct>=1?'full':pct>=0.6?'ok':pct>=0.25?'low':'empty'; }
   const BAND={empty:['Empty','Vide'],low:['Low','Bas'],ok:['Okay','Correct'],full:['Full','Plein'],over:['Over','Dépassé']};
-  return {NUT, needs, band, BAND};
+  const ASK=[ /* the answers the needs rest on; s: the short form for the line above the bars */
+    {id:'sex', n:['sex','sexe'], t:['Sex','Sexe'], h:['Daily needs — iron, protein and the rest — are listed by sex. If you’d rather not say, pick the higher of the two.','Les besoins de chaque jour — fer, protéines et le reste — sont fixés par sexe. Si tu préfères ne pas le dire, prends le plus élevé des deux.'], opts:[{l:['Male','Homme'],v:'m',s:['Male','Homme']},{l:['Female','Femme'],v:'f',s:['Female','Femme']},{l:['Rather not say — use the higher needs','Je préfère ne pas le dire — prends les besoins les plus élevés'],v:'hi',s:['sex not given','sexe non précisé']}]},
+    {id:'age', n:['age','âge'], t:['Age','Âge'], opts:[{l:['19 to 30','19 à 30'],v:'a1',s:['19 to 30','19 à 30']},{l:['31 to 50','31 à 50'],v:'a2',s:['31 to 50','31 à 50']},{l:['51 to 70','51 à 70'],v:'a3',s:['51 to 70','51 à 70']},{l:['71 or over','71 ou plus'],v:'a4',s:['71 or over','71 ou plus']},{l:['Under 19','Moins de 19'],v:'minor',s:['under 19','moins de 19']}]},
+    {id:'wt', n:['weight','poids'], t:['Weight, roughly','Poids, à peu près'], h:['Only protein and calories use it.','Seules les protéines et les calories s’en servent.'], opts:[{l:['Under 60 kg (130 lb)','Moins de 60 kg (130 lb)'],v:'55',s:['under 60 kg','moins de 60 kg']},{l:['60–80 kg (130–175 lb)','60–80 kg (130–175 lb)'],v:'70',s:['60–80 kg','60–80 kg']},{l:['80–100 kg (175–220 lb)','80–100 kg (175–220 lb)'],v:'90',s:['80–100 kg','80–100 kg']},{l:['Over 100 kg (220 lb)','Plus de 100 kg (220 lb)'],v:'110',s:['over 100 kg','plus de 100 kg']}]},
+    {id:'work', n:['kind of day','type de journée'], t:['Your days','Tes journées'], opts:[{l:['Mostly sitting','Assis la plupart du temps'],v:'sit',s:['mostly sitting','assis la plupart du temps']},{l:['On my feet','Debout'],v:'feet',s:['on my feet','debout']},{l:['Heavy work, or sweating a lot','Travail dur, ou beaucoup de sueur'],v:'heavy',s:['heavy work','travail dur']}]},
+    {id:'life', t:['Also true?','Aussi vrai?'], h:['These change the needs.','Ça change les besoins.'], multi:true, opts:[{l:['I smoke or vape','Je fume ou je vapote'],v:'smoke',s:['smoke or vape','tabac ou vapotage']},{l:['I drink most days','Je bois presque tous les jours'],v:'drink',s:['drink most days','alcool presque tous les jours']},{l:['Pregnant','Enceinte'],v:'preg',s:['pregnant','enceinte']},{l:['Breastfeeding','J’allaite'],v:'bf',s:['breastfeeding','allaitement']},{l:['Vegetarian — eggs or dairy, no meat or fish','Végétarien — œufs ou produits laitiers, pas de viande ni de poisson'],v:'veg',s:['vegetarian','végé'],ex:'diet'},{l:['Vegan — no animal foods','Végane — aucun aliment animal'],v:'vegan',s:['vegan','végane'],ex:'diet'},{l:['None of these','Aucun de ces choix'],v:'none',none:true}]}
+  ];
+  /* a tap on an answer: one answer replaces the last; in a list, "none" clears the rest, and vegetarian and vegan exclude each other */
+  function pick(p,id,v){ const q=ASK.find(x=>x.id===id); if(!q) return p; const o=Object.assign({},p);
+    if(!q.multi){ o[id]=v; return o; }
+    let arr=Array.isArray(o[id])?o[id].slice():[]; const opt=q.opts.find(x=>x.v===v)||{};
+    if(arr.includes(v)) arr=arr.filter(x=>x!==v);
+    else if(opt.none) arr=[v];
+    else { arr=arr.filter(x=>!(q.opts.find(y=>y.v===x)||{}).none); if(opt.ex) arr=arr.filter(x=>(q.opts.find(y=>y.v===x)||{}).ex!==opt.ex); arr.push(v); }
+    o[id]=arr; return o; }
+  /* the line above the bars: what the needs are worked out from. fr: French. hide: answers an app doesn't ask. */
+  function summary(p,fr,hide){ p=p||{}; hide=hide||[]; const i=fr?1:0, out=[];
+    for(const q of ASK){ if(hide.includes(q.id)) continue; const val=p[q.id];
+      if(q.multi){ for(const o of q.opts) if(!o.none&&!hide.includes(o.v)&&Array.isArray(val)&&val.includes(o.v)) out.push(o.s[i]); }
+      else { const o=q.opts.find(x=>x.v===val); out.push(o?o.s[i]:q.n[i]+(fr?' non précisé':' not given')); } }
+    return out.join(' · '); }
+  /* the answers as buttons, for a sheet: data-pw is the question, data-v the answer */
+  function askHTML(p,fr,hide){ p=p||{}; hide=hide||[]; const i=fr?1:0, esc=t=>String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+    return ASK.filter(q=>!hide.includes(q.id)).map(q=>{ const val=p[q.id], on=v=>q.multi?(Array.isArray(val)&&val.includes(v)):val===v;
+      return `<fieldset class="pw"><legend><b>${esc(q.t[i])}</b></legend>${q.h?`<p class="small muted" style="margin:2px 0 0">${esc(q.h[i])}</p>`:''}<div class="chips ${q.multi?'pickn':'pick1'}">${q.opts.filter(o=>!hide.includes(o.v)).map(o=>`<button type="button" class="chip" data-pw="${q.id}" data-v="${o.v}" aria-pressed="${on(o.v)}"><span>${esc(o.l[i])}</span></button>`).join('')}</div></fieldset>`; }).join(''); }
+  /* shared by every V3KTOR app on this phone, in its browser storage (nothing leaves the phone): the answers and when they last changed.
+     Each app keeps its own copy too; the newer one wins. */
+  const SHARE='v3k.profile.v1';
+  function shared(){ try{ const o=JSON.parse(localStorage.getItem(SHARE)||'null'); return o&&o.p&&typeof o.p==='object'&&typeof o.t==='number'?o:null; }catch(e){ return null; } }
+  function share(p){ const t=Date.now(); try{ localStorage.setItem(SHARE,JSON.stringify({v:1,t,p})); }catch(e){} return t; }
+  function unshare(){ try{ localStorage.removeItem(SHARE); }catch(e){} }
+  return {NUT, needs, band, BAND, ASK, pick, summary, askHTML, SHARE, shared, share, unshare};
 })();
 /* ==== end of shared/nutrition.js ==== */

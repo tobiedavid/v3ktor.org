@@ -212,6 +212,10 @@ textarea.out.live{min-height:240px;font-size:0.875rem;line-height:1.4}
 .stp:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .food .add:focus-visible,.food .minus:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
 .gtabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.nprof{display:flex;align-items:center;gap:8px;margin:2px 0 6px}.nprof p{margin:0;flex:1;min-width:0}
+.wrench{flex:none;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);cursor:pointer}
+.wrench svg{width:20px;height:20px}
+fieldset.pw{border:0;margin:14px 0 0;padding:0}fieldset.pw legend{padding:0}fieldset.pw .chips{margin:8px 0 0}
 .gtabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;font-size:0.875rem;font-weight:600;cursor:pointer;min-height:44px}
 .gtabs button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .fill li{margin:.35em 0}
@@ -388,7 +392,7 @@ try{ if(S.wl&&S.wl.ed===true&&S.a){ const sa=Array.isArray(S.a.safety)?S.a.safet
    how long stools have been loose, dehydration signs, "book this" cards that stay until tapped, a four-week escalation;
    no food-cut tests after trouble with eating; a food-allergy question; US units for B12 and vitamin D; "another prescription
    medicine" puts every supplement behind the pharmacist; a one-time safety-update note; an optional PIN. */
-const VER='1.2.61'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
+const VER='1.2.62'; const CHECKED=['4 Nov 2026','4 nov. 2026'];
 /* v1.2.21 (5 Nov 2026): prenatal / folic-acid and pregnancy-iron lines aligned with Health Canada; Quebec route for bloodwork; hard-stool branch;
    pattern messages match the 5-a-side rule; iPhone storage note + persist(); protein note by life stage; French fixes; "about $8" in English. */
 /* v1.2.22 (6 Nov 2026): one-screen result (plain-words test card, three-line week, one notes card with the crisis line kept open); glossary words underlined once per screen;
@@ -522,7 +526,7 @@ try{ for(const r of Object.values(S.tank.rate||{})){ if(r&&r.fin&&r.at&&!r.first
 if(!S.tank.rate||typeof S.tank.rate!=='object') S.tank.rate={}; delete S.rsel; if(S.tank.roll==null) S.tank.roll=4; if(!S.tank.view) S.tank.view='normal';
 (function prune(){ const cut=rateCut(); for(const k of Object.keys(S.tank.log)){ if(k<cut||!Object.keys(S.tank.log[k]||{}).length) delete S.tank.log[k]; } for(const k of Object.keys(S.tank.rate)){ if(k<cut||!Object.keys(S.tank.rate[k]||{}).length) delete S.tank.rate[k]; } for(const k of Object.keys(S.tank.closed)){ if(k<cut) delete S.tank.closed[k]; } })();
 let saveOk=true; let persistAsked=false;
-function save(){ try{ syncMeals(); try{ shareDays(!S.sumMig); S.sumMig=true; }catch(e){} localStorage.setItem(KEY, JSON.stringify(S)); if(!saveOk){ saveOk=true; saveBar(); } askPersist(); return true; }catch(e){ saveOk=false; saveBar(); return false; } }
+function save(){ try{ try{ pushProfile(); }catch(e){} syncMeals(); try{ shareDays(!S.sumMig); S.sumMig=true; }catch(e){} localStorage.setItem(KEY, JSON.stringify(S)); if(!saveOk){ saveOk=true; saveBar(); } askPersist(); return true; }catch(e){ saveOk=false; saveBar(); return false; } }
 /* v1.2.21: once per session, ask the browser to keep this storage where it supports that */
 function askPersist(){ if(persistAsked) return; persistAsked=true; try{ if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{}); }catch(_){} }
 function saveBar(){ try{ let b=document.getElementById('savebar'); if(saveOk){ if(b) b.remove(); return; } if(!b){ b=document.createElement('div'); b.id='savebar'; b.setAttribute('role','alert'); document.body.appendChild(b); } b.innerHTML=`${SAVEFAIL()} <button type="button" class="btn sm" id="savebarBk">${L('Back up','Sauvegarder')}</button>`; const k=document.getElementById('savebarBk'); if(k) k.onclick=()=>{ try{ backupData(); }catch(_){} }; }catch(_){} }
@@ -2133,17 +2137,42 @@ const NUTRI=(()=>{
   /* a total against its need: a limit (sodium, caffeine, alcohol) is only over or not; calories are fine from 85% to 130% */
   function band(k,pct){ if(k==='na'||k==='caf'||k==='sd') return pct>1?'over':'ok'; if(k==='kcal') return pct>1.3?'over':pct>=0.85?'ok':pct>=0.5?'low':'empty'; return pct>=1?'full':pct>=0.6?'ok':pct>=0.25?'low':'empty'; }
   const BAND={empty:['Empty','Vide'],low:['Low','Bas'],ok:['Okay','Correct'],full:['Full','Plein'],over:['Over','Dépassé']};
-  return {NUT, needs, band, BAND};
+  const ASK=[ /* the answers the needs rest on; s: the short form for the line above the bars */
+    {id:'sex', n:['sex','sexe'], t:['Sex','Sexe'], h:['Daily needs — iron, protein and the rest — are listed by sex. If you’d rather not say, pick the higher of the two.','Les besoins de chaque jour — fer, protéines et le reste — sont fixés par sexe. Si tu préfères ne pas le dire, prends le plus élevé des deux.'], opts:[{l:['Male','Homme'],v:'m',s:['Male','Homme']},{l:['Female','Femme'],v:'f',s:['Female','Femme']},{l:['Rather not say — use the higher needs','Je préfère ne pas le dire — prends les besoins les plus élevés'],v:'hi',s:['sex not given','sexe non précisé']}]},
+    {id:'age', n:['age','âge'], t:['Age','Âge'], opts:[{l:['19 to 30','19 à 30'],v:'a1',s:['19 to 30','19 à 30']},{l:['31 to 50','31 à 50'],v:'a2',s:['31 to 50','31 à 50']},{l:['51 to 70','51 à 70'],v:'a3',s:['51 to 70','51 à 70']},{l:['71 or over','71 ou plus'],v:'a4',s:['71 or over','71 ou plus']},{l:['Under 19','Moins de 19'],v:'minor',s:['under 19','moins de 19']}]},
+    {id:'wt', n:['weight','poids'], t:['Weight, roughly','Poids, à peu près'], h:['Only protein and calories use it.','Seules les protéines et les calories s’en servent.'], opts:[{l:['Under 60 kg (130 lb)','Moins de 60 kg (130 lb)'],v:'55',s:['under 60 kg','moins de 60 kg']},{l:['60–80 kg (130–175 lb)','60–80 kg (130–175 lb)'],v:'70',s:['60–80 kg','60–80 kg']},{l:['80–100 kg (175–220 lb)','80–100 kg (175–220 lb)'],v:'90',s:['80–100 kg','80–100 kg']},{l:['Over 100 kg (220 lb)','Plus de 100 kg (220 lb)'],v:'110',s:['over 100 kg','plus de 100 kg']}]},
+    {id:'work', n:['kind of day','type de journée'], t:['Your days','Tes journées'], opts:[{l:['Mostly sitting','Assis la plupart du temps'],v:'sit',s:['mostly sitting','assis la plupart du temps']},{l:['On my feet','Debout'],v:'feet',s:['on my feet','debout']},{l:['Heavy work, or sweating a lot','Travail dur, ou beaucoup de sueur'],v:'heavy',s:['heavy work','travail dur']}]},
+    {id:'life', t:['Also true?','Aussi vrai?'], h:['These change the needs.','Ça change les besoins.'], multi:true, opts:[{l:['I smoke or vape','Je fume ou je vapote'],v:'smoke',s:['smoke or vape','tabac ou vapotage']},{l:['I drink most days','Je bois presque tous les jours'],v:'drink',s:['drink most days','alcool presque tous les jours']},{l:['Pregnant','Enceinte'],v:'preg',s:['pregnant','enceinte']},{l:['Breastfeeding','J’allaite'],v:'bf',s:['breastfeeding','allaitement']},{l:['Vegetarian — eggs or dairy, no meat or fish','Végétarien — œufs ou produits laitiers, pas de viande ni de poisson'],v:'veg',s:['vegetarian','végé'],ex:'diet'},{l:['Vegan — no animal foods','Végane — aucun aliment animal'],v:'vegan',s:['vegan','végane'],ex:'diet'},{l:['None of these','Aucun de ces choix'],v:'none',none:true}]}
+  ];
+  /* a tap on an answer: one answer replaces the last; in a list, "none" clears the rest, and vegetarian and vegan exclude each other */
+  function pick(p,id,v){ const q=ASK.find(x=>x.id===id); if(!q) return p; const o=Object.assign({},p);
+    if(!q.multi){ o[id]=v; return o; }
+    let arr=Array.isArray(o[id])?o[id].slice():[]; const opt=q.opts.find(x=>x.v===v)||{};
+    if(arr.includes(v)) arr=arr.filter(x=>x!==v);
+    else if(opt.none) arr=[v];
+    else { arr=arr.filter(x=>!(q.opts.find(y=>y.v===x)||{}).none); if(opt.ex) arr=arr.filter(x=>(q.opts.find(y=>y.v===x)||{}).ex!==opt.ex); arr.push(v); }
+    o[id]=arr; return o; }
+  /* the line above the bars: what the needs are worked out from. fr: French. hide: answers an app doesn't ask. */
+  function summary(p,fr,hide){ p=p||{}; hide=hide||[]; const i=fr?1:0, out=[];
+    for(const q of ASK){ if(hide.includes(q.id)) continue; const val=p[q.id];
+      if(q.multi){ for(const o of q.opts) if(!o.none&&!hide.includes(o.v)&&Array.isArray(val)&&val.includes(o.v)) out.push(o.s[i]); }
+      else { const o=q.opts.find(x=>x.v===val); out.push(o?o.s[i]:q.n[i]+(fr?' non précisé':' not given')); } }
+    return out.join(' · '); }
+  /* the answers as buttons, for a sheet: data-pw is the question, data-v the answer */
+  function askHTML(p,fr,hide){ p=p||{}; hide=hide||[]; const i=fr?1:0, esc=t=>String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+    return ASK.filter(q=>!hide.includes(q.id)).map(q=>{ const val=p[q.id], on=v=>q.multi?(Array.isArray(val)&&val.includes(v)):val===v;
+      return `<fieldset class="pw"><legend><b>${esc(q.t[i])}</b></legend>${q.h?`<p class="small muted" style="margin:2px 0 0">${esc(q.h[i])}</p>`:''}<div class="chips ${q.multi?'pickn':'pick1'}">${q.opts.filter(o=>!hide.includes(o.v)).map(o=>`<button type="button" class="chip" data-pw="${q.id}" data-v="${o.v}" aria-pressed="${on(o.v)}"><span>${esc(o.l[i])}</span></button>`).join('')}</div></fieldset>`; }).join(''); }
+  /* shared by every V3KTOR app on this phone, in its browser storage (nothing leaves the phone): the answers and when they last changed.
+     Each app keeps its own copy too; the newer one wins. */
+  const SHARE='v3k.profile.v1';
+  function shared(){ try{ const o=JSON.parse(localStorage.getItem(SHARE)||'null'); return o&&o.p&&typeof o.p==='object'&&typeof o.t==='number'?o:null; }catch(e){ return null; } }
+  function share(p){ const t=Date.now(); try{ localStorage.setItem(SHARE,JSON.stringify({v:1,t,p})); }catch(e){} return t; }
+  function unshare(){ try{ localStorage.removeItem(SHARE); }catch(e){} }
+  return {NUT, needs, band, BAND, ASK, pick, summary, askHTML, SHARE, shared, share, unshare};
 })();
 /* ==== end of shared/nutrition.js ==== */
 const TN=NUTRI.NUT;
-const TQ=[
-  {id:'sex', t:['Sex','Sexe'], h:['Daily needs — iron, protein and the rest — are listed by sex. If you’d rather not say, pick the higher of the two.','Les besoins de chaque jour — fer, protéines et le reste — sont fixés par sexe. Si tu préfères ne pas le dire, prends le plus élevé des deux.'], opts:[{l:['Male','Homme'],v:'m'},{l:['Female','Femme'],v:'f'},{l:['Rather not say — use the higher needs','Je préfère ne pas le dire — prends les besoins les plus élevés'],v:'hi'}]},
-  {id:'age', t:['Age','Âge'], opts:[{l:['19 to 30','19 à 30'],v:'a1'},{l:['31 to 50','31 à 50'],v:'a2'},{l:['51 to 70','51 à 70'],v:'a3'},{l:['71 or over','71 ou plus'],v:'a4'},{l:['Under 19','Moins de 19'],v:'minor'}]},
-  {id:'wt', t:['Weight, roughly','Poids, à peu près'], h:['Only protein and calories use it.','Seules les protéines et les calories s’en servent.'], opts:[{l:['Under 60 kg (130 lb)','Moins de 60 kg (130 lb)'],v:'55'},{l:['60–80 kg (130–175 lb)','60–80 kg (130–175 lb)'],v:'70'},{l:['80–100 kg (175–220 lb)','80–100 kg (175–220 lb)'],v:'90'},{l:['Over 100 kg (220 lb)','Plus de 100 kg (220 lb)'],v:'110'}]},
-  {id:'work', t:['Your days','Tes journées'], opts:[{l:['Mostly sitting','Assis la plupart du temps'],v:'sit'},{l:['On my feet','Debout'],v:'feet'},{l:['Heavy work, or sweating a lot','Travail dur, ou beaucoup de sueur'],v:'heavy'}]},
-  {id:'life', t:['Also true?','Aussi vrai?'], h:['These change the needs.','Ça change les besoins.'], multi:true, opts:[{l:['I smoke or vape','Je fume ou je vapote'],v:'smoke'},{l:['I drink most days','Je bois presque tous les jours'],v:'drink'},{l:['Pregnant','Enceinte'],v:'preg'},{l:['Breastfeeding','J’allaite'],v:'bf'},{l:['Vegetarian — eggs or dairy, no meat or fish','Végétarien — œufs ou produits laitiers, pas de viande ni de poisson'],v:'veg',ex:'diet'},{l:['Vegan — no animal foods','Végane — aucun aliment animal'],v:'vegan',ex:'diet'},{l:['None of these','Aucun de ces choix'],v:'none',none:true}]}
-];
+const TQ=NUTRI.ASK;
 /* v1.2.27: one questionnaire — the tank's sex, age, weight and work join the Patch just before "Does any of this apply to you?".
    Their answers stay in S.tank.p, where the tank reads them. People who finished the Patch before stay on their patch; the fuel
    card asks them only what's missing. */
@@ -2198,6 +2227,31 @@ migrateSup();
 /* v1.2.31: vitamin E in IU — food is the natural form, 1 mg = 1.49 IU */
 for(const f of TF){ if(f&&f.n&&f.n.e) f.n.e=Math.round(f.n.e*1.49*100)/100; }
 migrateE();
+/* v1.2.62 (16 Nov 2026): the answers the needs rest on (sex, age, weight, kind of day, and the list under "Also true?") are shared with the other
+   v3ktor.org apps on this phone (shared/nutrition.js), while sharing is on in the menu. The latest change wins, wherever it was made.
+   Pregnancy, breastfeeding and a vegetarian or vegan diet are also in the Patch's own questions; a change in either place moves both. */
+const LIFEQ=['preg','bf','veg','vegan'];
+function myProfile(){ const p=S.tank.p||{}, l=tankLife(), o={}; for(const k of ['sex','age','wt','work']) if(p[k]!=null) o[k]=p[k];
+  const own=Array.isArray(p.life)?p.life:[], life=['smoke','drink'].filter(k=>own.includes(k)).concat(l.preg?['preg']:[],l.bf?['bf']:[],l.vegan?['vegan']:l.veg?['veg']:[]);
+  if(own.length||life.length) o.life=life.length?life:['none']; return o; }
+function applyProfile(np){ const p=S.tank.p; for(const k of ['sex','age','wt','work']) if(np[k]!=null) p[k]=np[k];
+  if(Array.isArray(np.life)){ p.life=np.life.slice(); const a=S.a.safety;
+    if(Array.isArray(a)){ const want=LIFEQ.filter(k=>np.life.includes(k)), have=LIFEQ.filter(k=>a.includes(k));
+      if(want.join()!==have.join()){ const rest=a.filter(x=>!LIFEQ.includes(x)&&x!=='none').concat(want); S.a.safety=rest.length?rest:['none']; } } } }
+function pullProfile(){ if(!shareOn()) return false; const sh=NUTRI.shared(); if(!sh||sh.t<=(S.tank.pt||0)) return false;
+  applyProfile(sh.p); S.tank.pt=sh.t; S.tank.pp=JSON.stringify(myProfile()); return true; }
+function pushProfile(){ if(!shareOn()||!S.tank) return; const me=myProfile(); if(!Object.keys(me).length) return; const js=JSON.stringify(me);
+  if(js===S.tank.pp) return; S.tank.pt=NUTRI.share(me); S.tank.pp=js; }
+pullProfile();
+window.addEventListener('storage',e=>{ if(e.key===NUTRI.SHARE&&pullProfile()){ save(); render(); } });
+/* the wrench above the bars: what the needs are worked out from, and a sheet to change it */
+const WRENCH='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M22.7 19.3l-8.6-8.6c.9-2.3.4-5-1.5-6.9C10.6 1.8 7.6 1.4 5.2 2.5l4.1 4.1-2.8 2.8-4.2-4.1C1.2 7.7 1.7 10.7 3.6 12.6c1.9 1.9 4.6 2.4 6.9 1.5l8.6 8.6c.4.4 1 .4 1.4 0l2.2-2.2c.4-.4.4-1 0-1.2z"/></svg>';
+function profLine(){ if(!tankReady()) return '';
+  return `<div class="nprof"><p class="small muted">${L('Needs worked out for','Besoins calculés pour')}${S.lang==='fr'?'\u00a0:':':'} ${esc(NUTRI.summary(myProfile(),S.lang==='fr'))}</p><button type="button" class="wrench" data-act="nprof" aria-label="${L('Change what the needs are worked out from','Changer ce qui sert à calculer les besoins')}">${WRENCH}</button></div>`; }
+function openProf(opener){ const fr=S.lang==='fr';
+  showSheet(`<div class="handle"></div><h3 id="sheetTitle">${L('What your needs are worked out from','Ce qui sert à calculer tes besoins')}</h3><p class="small muted" style="margin:0">${shareOn()?L('The same answers in every v3ktor.org app on this phone: change one here and the others follow. Nothing leaves the phone.','Les mêmes réponses dans chaque appli v3ktor.org sur ce téléphone : change-en une ici et les autres suivent. Rien ne quitte le téléphone.'):L('Sharing with the other v3ktor.org apps is off in the menu, so these stay in The Patch.','Le partage avec les autres applis v3ktor.org est désactivé dans le menu, alors elles restent dans La Patch.')}</p>${NUTRI.askHTML(myProfile(),fr)}<div class="row" style="margin-top:16px"><button type="button" class="btn" id="closeSheet">${L('Done','Terminé')}</button></div>`, opener);
+  sheet.querySelectorAll('[data-pw]').forEach(b=>{ b.onclick=()=>{ const id=b.dataset.pw, v=b.dataset.v, y=sheet.scrollTop;
+    applyProfile(NUTRI.pick(myProfile(),id,v)); save(); render(); openProf(); sheet.scrollTop=y; const f=sheet.querySelector(`[data-pw="${id}"][data-v="${v}"]`); if(f) f.focus(); }; }); }
 function dayKey(d){ const t=new Date(d?d.getTime():Date.now()); const r=S.tank.roll||0, h=t.getHours(); if(r>0&&h<r) t.setDate(t.getDate()-1); else if(r<0&&h>=24+r) t.setDate(t.getDate()+1); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); }
 function keyAdd(k,n){ const [y,m,d]=k.split('-').map(Number); const t=new Date(y,m-1,d+n); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); }
 function tlog(){ if(!S.tank.log||typeof S.tank.log!=='object') S.tank.log={}; return S.tank.log; }
@@ -2594,6 +2648,7 @@ function vTank(){
   let v=S.tank.view; if(!v||v==='cal'||(v==='day'&&!S.tank.sel)) v=S.tank.view='today';
   const tabs=[['today',L('Today','Aujourd’hui')],['week',L('7 days','7 jours')],['normal',L('Normal day','Journée normale')]];
   let h=`<div class="eyebrow">${L('Fuel tank','Réservoir')}</div><div class="gtabs seg" role="tablist">${tabs.map(([k,l])=>`<button type="button" role="tab" data-tv="${k}" aria-pressed="${v===k||(v==='day'&&k==='today')}">${l}</button>`).join('')}</div>`;
+  h+=profLine();
   h+=`<p class="small muted" style="margin:-2px 0 8px">${L('The bars show what went in — not what your body has stored.','Les barres montrent ce qui est entré — pas ce que ton corps a en réserve.')} ${T('stores',L('Stores','Les réserves'),L('Les réserves','Les réserves'))}</p>`;
   if(v==='week'){ const ws=weekSrc(); const R=buildTank(ws);
     h+=`<h2>${tankHeadline(R)}</h2><p class="small muted" style="margin-top:-4px">${ws.days?L(`Average of the last 7 days: ${ws.nReal} logged in full, ${ws.nAss} counted as your normal day${ws.nPart?` (${ws.nPart} of them partly logged, not marked complete)`:''}.`,`Moyenne des 7 derniers jours : ${ws.nReal} notés au complet, ${ws.nAss} comptés comme ta journée normale${ws.nPart?` (dont ${ws.nPart} notés en partie, pas marqués complets)`:''}.`):''} ${L('The ones marked “stored” — vitamin A, B12, folate, iron, D — have real backup in the body, so the week matters more than the day. The rest have little spare and need steady intake.','Ceux marqués « stocké » — vitamine A, B12, folate, fer, D — ont une vraie réserve dans le corps, alors la semaine compte plus que la journée. Les autres ont peu de réserve et demandent un apport régulier.')} ${T('stores',L('How the body stores them','Comment le corps les stocke'),L('Comment le corps les stocke','Comment le corps les stocke'))}.</p>`;
@@ -4458,6 +4513,7 @@ function bindRest(){ const $=id=>document.getElementById(id);
   document.querySelectorAll('[data-grp]').forEach(b=>{ b.onclick=()=>{ S.tank.grp=b.dataset.grp; refocus=`[data-grp="${b.dataset.grp}"]`; anchorSel=refocus; save(); render(true); }; });
   if($('clearDay')) $('clearDay').onclick=function(){ if(!this.dataset.sure){ this.dataset.sure='1'; this.textContent=L('Tap again to clear this day','Appuie encore pour vider cette journée'); return; } const M=editMap(); for(const k of Object.keys(M)) delete M[k]; anchorSel='#foodQ'; save(); render(true); toast(L('Cleared','Effacé')); };
   document.querySelectorAll('[data-dose]').forEach(b=>{ b.onclick=()=>{ const x=SUPN.find(z=>z.k===b.dataset.dose); const M=editMap(); const key='x_'+x.k; let v=(M[key]||0)+x.step*(+b.dataset.dir); v=Math.max(0,Math.round(v*100)/100); if(v) M[key]=v; else delete M[key]; refocus=`[data-dose="${x.k}"][data-dir="${b.dataset.dir}"]`; anchorSel=refocus; save(); render(true); }; });
+  document.querySelectorAll('[data-act="nprof"]').forEach(b=>{ b.onclick=()=>openProf(b); });
   document.querySelectorAll('[data-tv]').forEach(b=>{ b.onclick=()=>{ S.tank.view=b.dataset.tv; save(); render(); }; });
   document.querySelectorAll('[data-cal]').forEach(b=>{ b.onclick=()=>{ S.daySel=b.dataset.cal; S.mode='day'; rEdit=null; save(); render(); }; });
   document.querySelectorAll('[data-calm]').forEach(b=>{ b.onclick=()=>{ S.tank.calMonth=b.dataset.calm; save(); render(true); }; });
@@ -4562,7 +4618,7 @@ function shareDays(all){ if(!shareOn()) return; try{
   for(const k of Object.keys(S.sum)){ const d=T[k]&&typeof T[k]==='object'?T[k]:(T[k]={}); d.patch=S.sum[k]; }
   localStorage.setItem(SHARE_KEY,JSON.stringify(T)); }catch(e){} }
 function shareClear(){ try{ const T=JSON.parse(localStorage.getItem(SHARE_KEY)||'{}'); for(const k of Object.keys(T)){ if(T[k]&&T[k].patch) delete T[k].patch; if(T[k]&&!Object.keys(T[k]).length) delete T[k]; } localStorage.setItem(SHARE_KEY,JSON.stringify(T)); }catch(e){} }
-function eraseAll(){ const l=S.lang, ack=S.ack; shareClear(); try{ localStorage.removeItem(KEY); localStorage.removeItem('patch'); localStorage.removeItem(SEEN); }catch(e){} S={a:{},step:0,started:null,checkins:[],lang:l,done:false,ack,mode:'home',c:{},cstep:0,crashes:[],intent:null,madeAt:null,tank:{p:{},day:{},log:{},rate:{},closed:{},closedMig:true,eIU:true,roll:4,view:'normal'},tstep:0}; save(); render(); toast(L('Erased','Effacé')); }
+function eraseAll(){ const l=S.lang, ack=S.ack; shareClear(); NUTRI.unshare(); try{ localStorage.removeItem(KEY); localStorage.removeItem('patch'); localStorage.removeItem(SEEN); }catch(e){} S={a:{},step:0,started:null,checkins:[],lang:l,done:false,ack,mode:'home',c:{},cstep:0,crashes:[],intent:null,madeAt:null,tank:{p:{},day:{},log:{},rate:{},closed:{},closedMig:true,eIU:true,roll:4,view:'normal'},tstep:0}; save(); render(); toast(L('Erased','Effacé')); }
 /* tappable terms: real buttons for keyboard and screen readers, not bare spans */
 /* v1.2.22: underline each glossary word once per screen — its first appearance; later mentions are plain text */
 function onceTerms(root){ const seen=new Set(); const all=[...root.querySelectorAll('.t[data-t]')];
@@ -4614,7 +4670,7 @@ function openMenu(opener){
     ['about',L('About & privacy','À propos et confidentialité')]
   ];
   const any=Object.keys(S.a).length||S.crashes.length||S.cstep||S.tstep;
-  showSheet(`<div class="handle"></div><h3 id="sheetTitle">${L('Menu','Menu')}</h3><div class="menu">${items.map(([k,l])=>`<button type="button" data-mn="${k}">${l}</button>`).join('')}<button type="button" id="mnLock">${S.lock?L('Change or remove the PIN','Changer ou enlever le NIP'):L('Lock with a PIN','Verrouiller avec un NIP')}</button>${canInstall()?`<button type="button" data-install-big>${L('Install on this phone','Installer sur ce téléphone')}</button>`:''}<button type="button" id="mnBackup">${L('Back up my data (a file)','Sauvegarder mes données (un fichier)')}</button><button type="button" id="mnRestore">${L('Restore from a backup','Restaurer une sauvegarde')}</button><button type="button" id="mnShare">${shareOn()?L('Day summary for other v3ktor.org apps on this phone: on','Résumé du jour pour les autres applis v3ktor.org sur ce téléphone\u00a0: activé'):L('Day summary for other v3ktor.org apps on this phone: off','Résumé du jour pour les autres applis v3ktor.org sur ce téléphone\u00a0: désactivé')}</button>${any?`<button type="button" class="danger" id="mnErase">${L('Erase my answers','Effacer mes réponses')}</button>`:''}</div><p class="small muted" style="margin:12px 0 0">v${VER} · ${L('sources checked','sources vérifiées le')} ${P2(CHECKED)} · ${L('pharmacist review: not yet','révision par un pharmacien : pas encore')}</p><div class="row" style="margin-top:12px"><button class="btn sm" id="closeSheet">${L('Close','Fermer')}</button></div>`, opener);
+  showSheet(`<div class="handle"></div><h3 id="sheetTitle">${L('Menu','Menu')}</h3><div class="menu">${items.map(([k,l])=>`<button type="button" data-mn="${k}">${l}</button>`).join('')}<button type="button" id="mnLock">${S.lock?L('Change or remove the PIN','Changer ou enlever le NIP'):L('Lock with a PIN','Verrouiller avec un NIP')}</button>${canInstall()?`<button type="button" data-install-big>${L('Install on this phone','Installer sur ce téléphone')}</button>`:''}<button type="button" id="mnBackup">${L('Back up my data (a file)','Sauvegarder mes données (un fichier)')}</button><button type="button" id="mnRestore">${L('Restore from a backup','Restaurer une sauvegarde')}</button><button type="button" id="mnShare">${shareOn()?L('Sharing with other v3ktor.org apps on this phone: on','Partage avec les autres applis v3ktor.org sur ce téléphone\u00a0: activé'):L('Sharing with other v3ktor.org apps on this phone: off','Partage avec les autres applis v3ktor.org sur ce téléphone\u00a0: désactivé')}</button>${any?`<button type="button" class="danger" id="mnErase">${L('Erase my answers','Effacer mes réponses')}</button>`:''}</div><p class="small muted" style="margin:12px 0 0">v${VER} · ${L('sources checked','sources vérifiées le')} ${P2(CHECKED)} · ${L('pharmacist review: not yet','révision par un pharmacien : pas encore')}</p><div class="row" style="margin-top:12px"><button class="btn sm" id="closeSheet">${L('Close','Fermer')}</button></div>`, opener);
   sheet.querySelectorAll('[data-mn]').forEach(b=>{ b.onclick=()=>{ const k=b.dataset.mn;
     if(k==='gloss'){ openGlossary(null); return; }
     if(k==='about'){ openAbout(); return; }
@@ -4626,7 +4682,7 @@ function openMenu(opener){
   document.getElementById('mnLock').onclick=()=>{ closeSheet(true); setTimeout(()=>openPinSheet(null),0); };
   document.getElementById('mnBackup').onclick=backupData;
   document.getElementById('mnRestore').onclick=openRestore;
-  const sh=document.getElementById('mnShare'); if(sh) sh.onclick=()=>{ S.share=!shareOn(); if(S.share) shareDays(true); else shareClear(); save(); closeSheet(true); toast(S.share?L('Day summary on — it stays on this phone','Résumé du jour activé — ça reste sur ce téléphone'):L('Day summary off','Résumé du jour désactivé')); };
+  const sh=document.getElementById('mnShare'); if(sh) sh.onclick=()=>{ S.share=!shareOn(); if(S.share){ shareDays(true); pullProfile(); delete S.tank.pp; } else shareClear(); save(); closeSheet(true); toast(S.share?L('Sharing on: your day summary and what your needs are worked out from. It stays on this phone.','Partage activé : ton résumé du jour et ce qui sert à calculer tes besoins. Ça reste sur ce téléphone.'):L('Sharing off','Partage désactivé')); };
   const er=document.getElementById('mnErase'); if(er) er.onclick=()=>{ if(er.dataset.sure){ closeSheet(true); eraseAll(); return; } er.dataset.sure='1'; er.textContent=L('Tap again to erase everything','Appuie encore pour tout effacer'); };
 }
 function openSheet(k, opener, viaGloss){ const g=G[k]; if(!g) return;
