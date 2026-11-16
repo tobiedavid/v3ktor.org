@@ -15,6 +15,8 @@ function loadTable(file) {
 }
 const MICRO = ['ca', 'fe', 'mg', 'k', 'zn', 'c', 'b1', 'b2', 'b3', 'b6', 'fol', 'b12', 'd', 'vk', 'va', 'mn', 'cu', 'e', 'se'];
 const HOUR = 3600e3;
+// the kinds of fat and sugar, sodium and selenium: rows of their own, but not compounds in a meal's count of compounds
+const NUTRIENTS = ['sat', 'mono', 'poly', 'frs', 'gluc', 'sucr', 'malt', 'gal', 'na', 'se'];
 const two = n => (n < 10 ? '0' : '') + n;
 const ymd = d => d.getFullYear() + '-' + two(d.getMonth() + 1) + '-' + two(d.getDate());
 // a day starts at the person's own hour on the wall clock
@@ -45,7 +47,7 @@ function canRead(am, bar) {
   if ((bar === 'cplx' || bar === 'sug') && am.carbsUnlisted > 2) return false;
   if (bar === 'hist' && am.histNoFigure > 0) return false;
   if (bar === 'fib' && am.fibreNoFigure > 0) return false;
-  if (bar === 'caf' && am.microNoFigure.caf > 0) return false;
+  if (am.microNoFigure[bar] > 0) return false;      // a food that holds it with no figure: a caffeine pill, sugars whose kinds aren't listed, polyols not split
   return true;
 }
 
@@ -70,7 +72,7 @@ function recount(entries, roll, now) {
   // together: with several effects picked, all of them have to be there. Otherwise any one is enough.
   // hours: after a meal, how many hours count. It is the person's own setting on the slider, 4 unless they moved it.
   // how many different compounds an amount holds: alcohol, histamine food, and each of the others the table names (caffeine among them), once each
-  const compounds = am => (am.alcohol > 0.005 ? 1 : 0) + (am.histPortions > 0 ? 1 : 0) + Object.keys(am.also).filter(k => am.also[k] > 0.005).length;
+  const compounds = am => (am.alcohol > 0.005 ? 1 : 0) + (am.histPortions > 0 ? 1 : 0) + Object.keys(am.also).filter(k => !NUTRIENTS.includes(k) && am.also[k] > 0.005).length;
   function units(bar, mode, pick, together, hours) { const span = (hours || 4) * HOUR;
     const out = [], field = BARS[bar], amt = am => field ? am[field] : (am.also[bar] || 0), keep = fx => { if (!pick || !pick.length) return fx; const f = fx.filter(c => pick.includes(c)); return together && !pick.every(c => f.includes(c)) ? [] : f; }; let left = 0;
     for (const k of keys) { const d = days[k]; if (!d.complete) continue;
@@ -82,6 +84,9 @@ function recount(entries, roll, now) {
         const next = days[dayPlus(k, 1)], fx = keep(d.fx.map(e => e.c).concat(next ? next.fx.filter(e => e.c !== 'sleep').map(e => e.c) : []));
         if (!answered(k) && !fx.length) continue;      // nothing reported for the day after, and no picked effect here: not settled
         out.push({ x: amt(d.total), alc: d.total.alcohol, held: compounds(d.total), fx, day: k }); } }
+    // amounts closer than a thousandth of the highest (to a power of ten) are the same amount: 0.1 g when the highest is 22 g
+    const top = out.reduce((m, x) => x.x > m ? x.x : m, 0);
+    if (top > 0.005) { const step = Math.pow(10, Math.ceil(Math.log10(top / 1000))); for (const x of out) x.x = Math.round(x.x / step) * step; }
     return { list: out, left };
   }
   function cells(bar, mode, pick, all, hours) {

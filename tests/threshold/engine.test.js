@@ -117,6 +117,18 @@ eq('step width for a 3 mg range', E.stepWidth(3), 0.5);
 // ---- rule 9: the app puts no number on luck ----
 eq('the reading rules hold nothing that works out a luck number', ['luck', 'stepLuck', 'stepRest', 'foodLuck', 'dealt', 'across', 'DEALS'].filter(k => k in E), []);
 
+// ---- 0.5.0: the kinds of fat and sugar, sodium and selenium, and a food that holds a thing with no figure ----
+{ const Z = { kcal: 0, fat: 0, prot: 0, carb: 0, fib: 0, sug: 0, lact: 0, alc: 0 }, K = { pear: Object.assign({}, Z, { g: 178, carb: 27, sug: 17, fib: 5, c: { frs: 11.4, gluc: 4.6, sucr: 1.3, fruc: 6.8, sorb: 7.3, na: 2, sat: 0.04 } }),
+    bar: Object.assign({}, Z, { fat: 12, carb: 30, sug: 20, x: ['frs', 'gluc', 'sucr', 'malt', 'gal', 'fruc'], c: { sat: 7, mono: 4, poly: 1, na: 40 } }) };
+  const ev = [meal('2026-11-10', '08:00', [['pear', 1]]), fx('2026-11-10', '09:00', 'gut'), meal('2026-11-10', '12:00', [['bar', 1]]), meal('2026-11-10', '18:00', [['pear', 2], ['bar', 1]])];
+  const I = E.index({ roll: 0, ev }, k => K[k], T('2026-11-13', '12:00'));
+  eq('a meal with a food whose sugars are not split sits out of each kind of sugar, and of excess fructose, but not of fat', ['frs', 'gluc', 'fruc', 'sat', 'sorb'].map(b => [b, E.bar(I, b, 'meal').n, E.bar(I, b, 'meal').left]), [['frs', 1, 2], ['gluc', 1, 2], ['fruc', 1, 2], ['sat', 3, 0], ['sorb', 3, 0]]);
+  eq('the amounts are the food’s, times the servings', [E.mealUnits(I, 'sorb').units.map(u => u.x), E.mealUnits(I, 'na').units.map(u => u.x)], [[7.3, 0, 14.6], [2, 40, 44]]);
+  eq('the kinds sit under their row: a group stands where its best row would, with its parent first', E.grouped([{ b: 'cplx' }, { b: 'gluc' }, { b: 'poly' }, { b: 'fat' }, { b: 'lact' }, { b: 'sug' }]).map(r => r.b), ['cplx', 'sug', 'gluc', 'lact', 'fat', 'poly']);
+  eq('the nutrients are rows, but not compounds in a meal’s count of compounds', [E.NUTR.every(k => E.COMPS.includes(k)), E.groups(E.amounts(K.bar, 1)), E.groups(E.amounts(K.pear, 1))], [true, 0, 2]);
+  eq('amounts closer than a thousandth of the highest count as one amount, to a power of ten', [E.snap([{ x: 5 }, { x: 5.001 }, { x: 22 }]).map(u => +u.x.toFixed(6)), E.snap([{ x: 0.026 }, { x: 0.0263 }]).map(u => +u.x.toFixed(6)), E.snap([{ x: 900 }, { x: 899.6 }]).map(u => u.x)], [[5, 5, 22], [0.026, 0.0263], [900, 900]]);
+  eq('the tab can have 35 rows', E.FAMS.reduce((t, f) => t + f[1].length, 0), 35); }
+
 // ---- the mark: the amount that leaves the fewest meals on the wrong side of it, and the order of the rows ----
 { const U = (x, hit) => ({ x, fx: hit ? ['head'] : [] }), many = (n, f) => Array.from({ length: n }, (_, i) => f(i));
   // 200 meals, a headache after 40. Lactose: those 40 held 52 g and up; 30 of the others held under 50 g and 130 held none.
@@ -144,7 +156,7 @@ eq('the reading rules hold nothing that works out a luck number', ['luck', 'step
   const days = [['both', 1], ['both', 1], ['bran', 1], ['milk', 0], ['milk', 0], ['milk', 0], ['milk', 0], ['rich', 0]], ev = [];
   days.forEach(([k, hit], i) => { const d = '2026-11-' + String(i + 1).padStart(2, '0'); ev.push(meal(d, '12:00', [[k, 1]]), hit ? fx(d, '13:00', 'head') : none(d)); });
   const R = E.rows(E.index({ roll: 0, ev }, k => W[k], NOW), 'meal');
-  eq('the row with the fewest on the wrong side comes first, whatever its place in the fixed order', R.slice(0, 5).map(r => [r.b, r.s.at, r.s.dir, r.s.wrong]), [['fib', 9, 'up', 0], ['sug', 10, 'down', 1], ['lact', 10, 'down', 1], ['fat', 20, 'up', 2], ['cplx', null, null, 3]]);
+  eq('the row with the fewest on the wrong side comes first, whatever its place in the fixed order', R.slice(0, 5).map(r => [r.b, r.s.at, r.s.dir, r.s.wrong]), [['fib', 9, 'up', 0], ['sug', 10, 'down', 1], ['lact', 10, 'down', 1], ['fat', 20, 'up', 2], ['sat', null, null, 3]]);   // the first row with no mark is the first in the fixed order: saturated fat, under fat
   // a clear mark: more than half of each kind on its own side
   eq('a mark is clear when more than half of the meals with the effect are on their side of it, and more than half of the others on theirs', [E.clear({ at: 1, hitIn: 21, restIn: 112, nHit: 27, nRest: 118 }), E.clear({ at: 8, hitIn: 17, restIn: 104, nHit: 46, nRest: 110 }), E.clear({ at: 3, hitIn: 40, restIn: 70, nHit: 46, nRest: 160 })], [true, false, false]);
   eq('exactly half is not more than half, and no mark is not a clear mark', [E.clear({ at: 3, hitIn: 1, restIn: 2, nHit: 2, nRest: 2 }), E.clear({ at: 3, hitIn: 2, restIn: 1, nHit: 2, nRest: 2 }), E.clear({ at: null, hitIn: 0, restIn: 0, nHit: 2, nRest: 2 })], [false, false, false]);
