@@ -74,6 +74,8 @@ A row appears only when a counted meal or day held some of it (since 0.4.1 this 
 
 "Eaten together" is still a small table of shares and counts, and an opened line still lists every amount with how many sat on each side.
 
+**Over a day, and the day after.** A day is read with the next day's effects. Since 0.4.5, when nothing at all is reported for the next day (no effect, no tap on "No effects today"), a day with none of the picked effects is not settled, so it waits, as a meal whose hours are not over does. A day that already has the picked effects is counted. The tab says how many days wait for that reason. "One food" follows the same rule.
+
 An effect read alone keeps its own hours. Any effect, or several together, use the general hours. An effect opened from Home is read with the same hours the lists use for it.
 
 "Eaten together" has a third line: the meals or days that held 5 compounds or more. Alcohol, caffeine, histamine food and each of the other compounds count once. It is there for the person whose trouble follows the load and not one food.

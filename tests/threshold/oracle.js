@@ -63,6 +63,9 @@ function recount(entries, roll, now) {
 
   // A day is read with its own effects, that night's and the next day's. So it is read once the day after it is over (the start of the day two later has come).
   const over = k => dayBegins(dayPlus(k, 2), roll) <= now;
+  // Something is reported for the day after: an effect that belongs to it, an effect entered on it, or a tap on "No effects today".
+  // When there is nothing, a day with no effect of its own is not settled, and it is not counted.
+  const answered = k => { const next = days[dayPlus(k, 1)]; return !!next && (next.fx.length > 0 || next.said.length > 0 || next.none); };
   // pick: the effects that count. Empty means any effect.
   // together: with several effects picked, all of them have to be there. Otherwise any one is enough.
   // hours: after a meal, how many hours count. It is the person's own setting on the slider, 4 unless they moved it.
@@ -76,7 +79,9 @@ function recount(entries, roll, now) {
           if (m.t + span > now && !fx.length) continue;      // its hours are not over and nothing is reported after it yet: its side is not settled
           out.push({ x: amt(m.am), alc: m.am.alcohol, held: compounds(m.am), fx, meal: m }); } }
       else { if (!over(k)) continue; if (!canRead(d.total, bar)) { left++; continue; }
-        const next = days[dayPlus(k, 1)]; out.push({ x: amt(d.total), alc: d.total.alcohol, held: compounds(d.total), fx: keep(d.fx.map(e => e.c).concat(next ? next.fx.filter(e => e.c !== 'sleep').map(e => e.c) : [])), day: k }); } }
+        const next = days[dayPlus(k, 1)], fx = keep(d.fx.map(e => e.c).concat(next ? next.fx.filter(e => e.c !== 'sleep').map(e => e.c) : []));
+        if (!answered(k) && !fx.length) continue;      // nothing reported for the day after, and no picked effect here: not settled
+        out.push({ x: amt(d.total), alc: d.total.alcohol, held: compounds(d.total), fx, day: k }); } }
     return { list: out, left };
   }
   function cells(bar, mode, pick, all, hours) {
@@ -135,6 +140,7 @@ function recount(entries, roll, now) {
       if (!over(k)) { if (q) waiting++; continue; }      // the day after it is not over: not read yet
       const next = days[dayPlus(k, 1)], carried = next ? next.fx.filter(e => e.c !== 'sleep').map(e => e.c) : [];
       // a day without the food is read over the same span as a day with it: that day, that night and the next day
+      if (!answered(k) && !d.fx.length) { if (q) waiting++; continue; }      // nothing reported for the day after, and no effect here: not settled
       if (!q) { without.n++; for (const c of new Set(d.fx.map(e => e.c).concat(carried))) without.fx[c] = (without.fx[c] || 0) + 1; continue; }
       times++; if (othersOnList) clean++;
       const r = rows[q] || (rows[q] = { q, n: 0, k: 0, same: {}, night: {}, next: {}, any: {} }); r.n++; const seen = new Set(), put = (o, c) => { o[c] = (o[c] || 0) + 1; seen.add(c); };
