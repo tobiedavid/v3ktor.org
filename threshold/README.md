@@ -54,6 +54,16 @@ Windows can overlap. With the slider at 8, an effect at 2 p.m. counts for a 7 a.
 
 The app puts no number on luck. Version 0.2 gave Fisher's exact test for one tapped amount, which misleads a person who looks at a hundred amounts. Version 0.3.0 counted them all by dealing whole days again, which was unfair to a person who tests one thing at a time and blind to anything that repeats every day. Since 0.3.1 an opened line gives its counts on both sides and one fixed statement, the same for everyone: what leaves luck more room (few entries, several things eaten together, meals closer together than the hours set) and what leaves it less.
 
+## The Threshold tab
+
+Since 0.3.7 the tab holds the lists and two buttons. **Filter** picks the effects the lists are read for; the picks are kept. **Settings** holds the reading ("After a meal" or "Over a day") and, for "After a meal", the slider.
+
+Each line shows, for each side, the share of its meals or days that held any of it, and how many that is: "67%, 31 of 46". The rows no longer show the lowest and highest amount: on made-up people those ranges sat inside each other on almost every line. Every amount is still one tap away, in the opened line. Nothing is averaged and nothing is ranked.
+
+An effect read alone keeps its own hours. Any effect, or several together, use the general hours. An effect opened from Home is read with the same hours the lists use for it.
+
+"Eaten together" has a third line: the meals or days that held 5 compounds or more. Alcohol, caffeine, histamine food and each of the other compounds count once. It is there for the person whose trouble follows the load and not one food.
+
 ## Home
 
 Since 0.3.4, Home is the two buttons and today's entries, in order. It has no period choice, no ring and no Effects bar. The ring, with alcohol, caffeine and the other compounds under it, is on the Nutrition tab.

@@ -112,28 +112,31 @@ async function play(browser, base, person, table) {
   const picks = [[]].concat(most ? [[most]] : [], ranked.length > 1 ? [ranked.slice(0, 2)] : []);      // any effect, the one reported most, and the two reported most together
   const dec = x => x < 1 ? 2 : x < 10 ? 1 : 0, near = (shown, real) => Math.abs(shown - real) <= 0.5 * Math.pow(10, -dec(real)) + 1e-9;
   // after a meal, the slider sets the hours that count: where it starts (4), then its two ends
-  const slide = async h => { await page.focus('#tWin'); await page.keyboard.press('Home'); for (let i = 1; i < h; i++) await page.keyboard.press('ArrowRight'); };
-  same(N('the slider starts at 4 hours'), [await page.inputValue('#tWin'), await page.evaluate(() => S.twin)], ['4', 4]);
+  // the reading and its hours are under Settings, the effects under Filter
+  const sheetShut = () => page.evaluate(() => closeSheet());
+  const setOpen = async () => { if (!(await page.locator('#sheet.on [data-act=tmode]').count())) await page.click('#thrBar [data-act=tset]'); await page.waitForSelector('#sheet.on [data-act=tmode]'); };
+  const setMode = async m => { await setOpen(); await page.click(`#sheet [data-act=tmode][data-v=${m}]`); await sheetShut(); };
+  const slide = async h => { await setOpen(); await page.focus('#tWin'); await page.keyboard.press('Home'); for (let i = 1; i < h; i++) await page.keyboard.press('ArrowRight'); await sheetShut(); };
+  const pickFx = async pick => { await page.click('#thrBar [data-act=tfilter]'); await page.click('#sheet .fxpick [data-act=tfx][data-v=""]'); for (const c of pick) await page.click(`#sheet .fxpick [data-act=tfx][data-v="${c}"]`); const together = pick.length > 1 ? await page.locator('#allAny [data-v="1"]').getAttribute('aria-pressed') : null; await sheetShut(); return together; };
+  await setOpen(); same(N('the slider starts at 4 hours'), [await page.inputValue('#tWin'), await page.evaluate(() => S.twin)], ['4', 4]); await sheetShut();
   for (const [mode, hours] of [['meal', 4], ['meal', 1], ['meal', 8], ['day', 4]]) for (const pick of picks) { const all = pick.length > 1;
-    await page.click(`[data-act=tmode][data-v=${mode}]`); if (mode === 'meal') await slide(hours);
-    await page.click('.fxpick [data-act=tfx][data-v=""]'); for (const c of pick) await page.click(`.fxpick [data-act=tfx][data-v="${c}"]`);
-    if (all) same(N(`${mode}: two effects picked are read together unless the person switches`), await page.locator('#allAny [data-v="1"]').getAttribute('aria-pressed'), 'true');
+    await setMode(mode); const together = await pickFx(pick); if (mode === 'meal') await slide(hours);      // the hours are set after the pick: an effect read alone keeps its own
+    if (all) same(N(`${mode}: two effects picked are read together unless the person switches`), together, 'true');
     const tag = `${mode}${mode === 'meal' ? ', ' + hours + ' h' : ''}, ${pick.length ? pick.join(' and ') : 'any effect'}`;
     if (mode === 'meal') { const f = R.sides('fat', mode, pick, all, hours), head = await page.locator('#thrHead').innerText();
-      same(N(`${tag}: the setting is kept, and the slider shows it`), [await page.evaluate(() => S.twin), await page.inputValue('#tWin')], [hours, String(hours)]);
+      await setOpen(); same(N(`${tag}: the setting is kept where it belongs, and the slider shows it`), [await page.evaluate(() => [thrH(), S.tsel.length === 1 ? S.fxw[S.tsel[0]] : S.twin]), await page.inputValue('#tWin')], [[hours, hours], String(hours)]);
       same(N(`${tag}: the heading counts the meals with the effect in those hours, of all the meals counted`), (head.match(/\d+/g) || []).map(Number), (hours === 1 ? [] : [hours]).concat([f.hit.n, f.hit.n + f.rest.n]));
-      ok(N(`${tag}: the hours are said in words beside the slider`), (await page.locator('.twin label').innerText()).includes(fr ? (hours === 1 ? 'l’heure suivante' : `les ${hours} heures suivantes`) : (hours === 1 ? 'the hour after it' : `the ${hours} hours after it`))); }
-    else same(N(`${tag}: there is no slider over a day`), await page.locator('#tWin').count(), 0);
-    const shown = await page.locator('#app table.rws:not(#fam-tog) tbody tr').evaluateAll(trs => trs.map(tr => [tr.querySelector('[data-act=rowsheet]').dataset.k, tr.cells[1].textContent, tr.cells[2].textContent]));
+      ok(N(`${tag}: the hours are said in words beside the slider`), (await page.locator('.twin label').innerText()).includes(fr ? (hours === 1 ? 'l’heure suivante' : `les ${hours} heures suivantes`) : (hours === 1 ? 'the hour after it' : `the ${hours} hours after it`))); await sheetShut(); }
+    else { await setOpen(); same(N(`${tag}: there is no slider over a day`), await page.locator('#tWin').count(), 0); await sheetShut(); }
+    const shown = await page.locator('#app table.rws:not(#fam-tog) tbody tr').evaluateAll(trs => trs.map(tr => [tr.querySelector('[data-act=rowsheet]').dataset.k].concat([1, 2].map(i => { const td = tr.cells[i], b = td.querySelector('b'); return b ? [b.textContent, td.querySelector('small').textContent] : [td.textContent.trim()]; }))));
     const lines = KEYS.map(k => [k, R.sides(k, mode, pick, all, hours)]).filter(([k, s]) => BASE.includes(k) ? s.hit.n + s.rest.n > 0 : s.hit.ate + s.rest.ate > 0);      // a line with nothing counted is not shown
     same(N(`${tag}: the lines shown`), shown.map(r => r[0]).sort(), lines.map(r => r[0]).sort());
     for (const [k, s] of lines) { const row = shown.find(r => r[0] === k); if (!row) continue;
-      [[row[1], s.hit], [row[2], s.rest]].forEach(([txt, side], j) => { const nums = (txt.match(/\d[\d.,  ]*\d|\d/g) || []).map(num), name = N(`${tag}: ${k}, ${j ? 'without' : 'with'}`);
-        if (!side.n) same(name, txt.trim(), '–');
-        else if (PORTIONS.includes(k)) same(name, nums, [side.ate, side.n]);                                  // how many held any, of how many
-        else ok(name, nums.length > 0 && near(nums[0], side.lo) && near(nums[nums.length - 1], side.hi), `screen "${txt}", recount ${side.lo} to ${side.hi}`); }); }   // the lowest and the highest, never an average
-    const G = R.together(mode, pick, all, hours), cell = (x, n) => n ? [x, n] : [], tog = await page.locator('#fam-tog tbody tr').evaluateAll(trs => trs.map(tr => [tr.cells[1].textContent, tr.cells[2].textContent].map(t => (t.match(/\d+/g) || []).map(Number))));
-    same(N(`${tag}: eaten together`), tog, G.three.hit + G.three.rest + G.both.hit + G.both.rest > 0 ? [[cell(G.three.hit, G.nHit), cell(G.three.rest, G.nRest)], [cell(G.both.hit, G.nHit), cell(G.both.rest, G.nRest)]] : []);
+      [[row[1], s.hit], [row[2], s.rest]].forEach(([cell, side], j) => { const name = N(`${tag}: ${k}, ${j ? 'without' : 'with'}`);
+        if (!side.n) same(name, cell, ['–']);
+        else same(name, [(cell[0].match(/\d+/) || []).map(Number)[0], /%/.test(cell[0]), (cell[1].match(/\d+/g) || []).map(Number)], [Math.round(100 * side.ate / side.n), true, [side.ate, side.n]]); }); }   // the share that held any, and how many that is: never an average, never a range
+    const G = R.together(mode, pick, all, hours), cell = (x, n) => n ? [Math.round(100 * x / n), x, n] : [], tog = await page.locator('#fam-tog tbody tr').evaluateAll(trs => trs.map(tr => [tr.cells[1].textContent, tr.cells[2].textContent].map(t => (t.match(/\d+/g) || []).map(Number))));
+    same(N(`${tag}: eaten together`), tog, G.three.hit + G.three.rest + G.both.hit + G.both.rest + G.many.hit + G.many.rest > 0 ? [[cell(G.three.hit, G.nHit), cell(G.three.rest, G.nRest)], [cell(G.both.hit, G.nHit), cell(G.both.rest, G.nRest)], [cell(G.many.hit, G.nHit), cell(G.many.rest, G.nRest)]] : []);
     // one line, opened: every amount, with how many sat on each side
     for (const k of ['lact', 'glu']) { if (!shown.find(r => r[0] === k)) continue; const c = R.cells(k, mode, pick, all, hours), amounts = [c.zero].concat(c.steps).filter(x => x.n > 0);
       await page.click(`#app [data-act=rowsheet][data-k=${k}]`); const got = await page.locator('#rowSteps tbody tr').evaluateAll(trs => trs.map(tr => [+tr.cells[1].textContent, +tr.cells[2].textContent]));
@@ -144,7 +147,7 @@ async function play(browser, base, person, table) {
     : (mode === 'meal' ? 'More room for luck: few entries, several things eaten together, meals closer together than the hours set. Less room: more entries, one thing changed at a time, meals further apart than the hours set.' : 'More room for luck: few days, several things eaten on the same day. Less room: more days, one thing changed at a time.');
   const flatten = t => t.replace(/[\u00a0\u202f]/g, ' ').replace(/\s+/g, ' ').trim();
   for (const [mode, hours, pick] of [['meal', 4, []], ['meal', 8, most ? [most] : []], ['meal', 2, ranked.slice(0, 2)], ['day', 4, most ? [most] : []], ['day', 4, []]]) { const all = pick.length > 1, tag = `${mode}${mode === 'meal' ? ', ' + hours + ' h' : ''}, ${pick.length ? pick.join(' and ') : 'any effect'}`;
-    await page.click(`[data-act=tmode][data-v=${mode}]`); if (mode === 'meal') await slide(hours); await page.click('.fxpick [data-act=tfx][data-v=""]'); for (const c of pick) await page.click(`.fxpick [data-act=tfx][data-v="${c}"]`);
+    await setMode(mode); await pickFx(pick); if (mode === 'meal') await slide(hours);
     let pressed = 0;
     for (const k of ['fat', 'lact']) { if (!(await page.locator(`#app [data-act=rowsheet][data-k=${k}]`).count())) continue; const c = R.cells(k, mode, pick, all, hours), cellsAll = [c.zero].concat(c.steps), K = cellsAll.reduce((t, y) => t + y.k, 0), M = cellsAll.reduce((t, y) => t + y.n, 0);
       await page.click(`#app [data-act=rowsheet][data-k=${k}]`);
@@ -156,7 +159,7 @@ async function play(browser, base, person, table) {
       ok(N(`${tag}: ${k}: every reading says whose it is`), (await page.locator('#sheet').innerText()).includes(fr ? 'Ton propre relevé. Pas un conseil.' : 'Your own report. Not advice.'));
       await page.click('#sheet [data-act=close]'); }
     ok(N(`${tag}: amounts were pressed`), pressed >= 2, pressed); }
-  await page.click('[data-act=tmode][data-v=meal]'); await slide(4); await page.click('.fxpick [data-act=tfx][data-v=""]');
+  await setMode('meal'); await pickFx([]); await slide(4);
   same(N('the app holds nothing that works out a luck number'), await page.evaluate(() => ['luck', 'stepLuck', 'foodLuck', 'dealt', 'across'].filter(k => k in TLE).concat(['luckTxt', 'luckOne', 'dealtOf'].filter(k => typeof window[k] === 'function'))), []);
 
   // ---- Home: today's entries; and every effect opened, with the meals in the hours before it ----
@@ -165,7 +168,7 @@ async function play(browser, base, person, table) {
     same(N('Home: today’s meals and effects, in order'), shown, R.todayList());
     if (w.meals || w.effects) same(N('Home: the count under them'), await page.locator('#todayCount').innerText(), fr ? `${w.meals} repas · ${w.effects} effet${w.effects > 1 ? 's' : ''}` : `${w.meals} meal${w.meals === 1 ? '' : 's'} · ${w.effects} effect${w.effects === 1 ? '' : 's'}`);
     same(N('Home: no ring, no period choice and no Effects bar'), await page.locator('#app .ring, #app [data-act=per], #app .fxbar').count(), 0); }
-  for (const hours of [4, 1, 8]) { await page.evaluate(h => { S.twin = h; save(); }, hours); const wrong = []; let withMeals = 0, withOutside = 0;
+  for (const hours of [4, 1, 8]) { await page.evaluate(h => { S.twin = h; S.fxw = {}; save(); }, hours); const wrong = []; let withMeals = 0, withOutside = 0;
     for (const f of R.effects) { const want = R.before(f, hours), out = R.outside(f, hours);
       const got = await page.evaluate(([t, c]) => { const e = S.ev.find(x => x.k === 'fx' && x.t === t && x.c === c); UI.en = { id: e.id, at: hm(e.t) }; entrySheet(); const note = document.getElementById('befNote');
         return { meals: [...document.querySelectorAll('#befList [data-act=entry]')].map(b => S.ev.find(x => x.id === b.dataset.v).t), none: !!document.getElementById('befNone'), note: note ? note.textContent : '' }; }, [f.t, f.c]);
