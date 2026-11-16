@@ -127,6 +127,9 @@ ul{padding-left:1.1em;margin:.3em 0 .6em} li{margin:.3em 0}
 textarea.out{width:100%;min-height:140px;border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit;font-size:.9rem;background:var(--bg);color:var(--ink)}
 .toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s;z-index:60;max-width:calc(100vw - 24px)}
 .toast.show{opacity:1}
+.busy{position:fixed;left:50%;top:calc(74px + env(safe-area-inset-top));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:999px;font-size:.9rem;font-weight:700;z-index:70;white-space:nowrap;box-shadow:0 2px 12px rgba(0,0,0,.28)}
+.busy::before{content:"";display:inline-block;width:.75em;height:.75em;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;margin-right:8px;vertical-align:-.08em;animation:busyturn .8s linear infinite}
+@keyframes busyturn{to{transform:rotate(360deg)}} @media (prefers-reduced-motion:reduce){.busy::before{animation:none}}
 .toast.live{pointer-events:auto}.toast .undo{background:none;border:0;color:inherit;font:inherit;font-weight:800;text-decoration:underline;padding:12px 10px;margin:-12px -8px -12px 0;min-width:44px;min-height:44px;cursor:pointer}
 [hidden]{display:none!important}
 .chip.ack,.chip.ack[aria-pressed="true"]{width:100%;font-size:0.875rem;line-height:1.35;padding:10px 14px;cursor:default;background:transparent;color:var(--muted);border-color:var(--line);box-shadow:none;margin:12px 0 10px}
@@ -263,6 +266,7 @@ svg.dots{display:block;width:100%;height:auto;overflow:visible} .dots .l1{fill:v
 <div class="sheet-bg" id="sheetBg"></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" tabindex="-1" aria-hidden="true"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="busy" id="busy" role="status" aria-live="polite" hidden></div>
 <script>
 /* DATA:START */
 /* The food table: the Food Trial Log's 205 foods. Names, servings, groups and the 19 vitamins and minerals are its own (The Patch's table:
@@ -543,13 +547,14 @@ function usable(am,b){ if(am.noNum>0) return false;                       /* a f
 
 /* rule 3, after a meal: the amount in that meal, beside the effects reported in the hours after it (I.win: 1 to 8 hours, the person's setting).
    Windows can overlap: an effect 2 hours after lunch and 7 after breakfast counts for both meals at 8 hours. Nothing picks one of them. */
-function mealUnits(I,b){ const out=[], left=[], W=I.win||WIN;
-  for(const k of I.keys){ const d=I.D[k]; if(!d.closed) continue; const nx=I.D[keyAdd(k,1)];
-    const fx=d.fx.concat(nx?nx.fx:[]).filter(e=>e.c!=='sleep');
-    for(const m of d.meals){
-      if(!usable(m.am,b)){ left.push(m.e.id); continue; }
-      /* w: its hours are not over. Such a meal counts only once an effect is reported after it, since "no effect yet" is not "no effect" (see bar). */
-      out.push({x:m.am[b],fx:fx.filter(e=>e.t>=m.e.t&&e.t<=m.e.t+W).map(e=>e.c),id:m.e.id,t:m.e.t,w:m.e.t+W>I.now}); } }
+/* what was reported after a meal does not depend on the row: it is worked out once for an index and its hours, and every row reads it.
+   w: its hours are not over. Such a meal counts only once an effect is reported after it, since "no effect yet" is not "no effect" (see bar). */
+function mealFx(I){ const W=I.win||WIN; if(I._mf&&I._mf.W===W&&I._mf.now===I.now) return I._mf.list; const list=[];
+  for(const k of I.keys){ const d=I.D[k]; if(!d.closed) continue; const nx=I.D[keyAdd(k,1)], fx=d.fx.concat(nx?nx.fx:[]).filter(e=>e.c!=='sleep');
+    for(const m of d.meals) list.push({m,fx:fx.filter(e=>e.t>=m.e.t&&e.t<=m.e.t+W).map(e=>e.c),w:m.e.t+W>I.now}); }
+  I._mf={W,now:I.now,list}; return list; }
+function mealUnits(I,b){ const out=[], left=[];
+  for(const q of mealFx(I)){ const m=q.m; if(!usable(m.am,b)){ left.push(m.e.id); continue; } out.push({x:m.am[b],fx:q.fx,id:m.e.id,t:m.e.t,w:q.w}); }
   return {units:out,left}; }
 /* rule 3, over a day: the day's total, beside the effects of that day, that night and the next day */
 /* a day is read with its own effects, that night's and the next day's. So it can be read only once the day after it is over:
@@ -612,11 +617,13 @@ function line(I,b,mode,sel,all){ const B=bar(I,b,mode,sel,all), side=()=>({n:0,a
    smaller of the two sides. hitIn and restIn: how many of each kind are on their own side. Nothing is tested and nothing is averaged. */
 function split(units){ let nHit=0, nRest=0; const v=u=>u.x>ZEPS?u.x:0; for(const u of units){ if(u.fx.length) nHit++; else nRest++; }
   let best={at:null,below:null,dir:null,wrong:Math.min(nHit,nRest),hitIn:0,restIn:0,nHit,nRest}; if(!nHit||!nRest) return best;
-  const xs=Array.from(new Set(units.map(v))).sort((a,b)=>a-b);
-  for(let i=1;i<xs.length;i++){ const c=xs[i]; let up=0, under=0; for(const u of units){ if(u.fx.length){ if(v(u)>=c) up++; } else if(v(u)<c) under++; }
-    const wUp=nHit-up+nRest-under, wDown=up+under;   /* below: the next amount down, so the mark can be drawn between the two */
-    if(wUp<best.wrong) best={at:c,below:xs[i-1],dir:'up',wrong:wUp,hitIn:up,restIn:under,nHit,nRest};
-    if(wDown<best.wrong) best={at:c,below:xs[i-1],dir:'down',wrong:wDown,hitIn:nHit-up,restIn:nRest-under,nHit,nRest}; }
+  /* one pass over the entries in the order of their amounts: at each new amount, how many of each kind sit under it is already known */
+  const a=units.map(u=>[v(u),u.fx.length>0]).sort((p,q)=>p[0]-q[0]); let hb=0, rb=0, prev=null;
+  for(let i=0;i<a.length;){ const c=a[i][0];
+    if(prev!==null){ const up=nHit-hb, under=rb, wUp=nHit-up+nRest-under, wDown=up+under;   /* below: the next amount down, so the mark can be drawn between the two */
+      if(wUp<best.wrong) best={at:c,below:prev,dir:'up',wrong:wUp,hitIn:up,restIn:under,nHit,nRest};
+      if(wDown<best.wrong) best={at:c,below:prev,dir:'down',wrong:wDown,hitIn:nHit-up,restIn:nRest-under,nHit,nRest}; }
+    for(;i<a.length&&a[i][0]===c;i++){ if(a[i][1]) hb++; else rb++; } prev=c; }
   return best; }
 /* every line with its entries and its mark, in the order the tab shows them: first the lines with a mark, by the share of their entries on the
    wrong side of it; then the lines with none. Ties, and the lines with no mark, keep the fixed order. This holds from the first meal on. */
@@ -726,7 +733,7 @@ return {H,WIN,WINS,STEPS,ZEPS,MANY,groups,BUCKETS,COMPS,FAMS,TAGS,line,table,spl
 if(typeof module!=='undefined') module.exports=TLE;
 /* ENGINE:END */
 /* ===================== APP: the screens. Data in, data out: the app reports what was entered and never interprets it. ===================== */
-const VER='0.4.10', CONSENT=1, KEY='v3k.threshold.v1', GUTKEYS=['v3k.gut.v1','v3k.gut.fr.v1'];   /* the Food Trial Log keeps its English and its French copy apart */
+const VER='0.4.11', CONSENT=1, KEY='v3k.threshold.v1', GUTKEYS=['v3k.gut.v1','v3k.gut.fr.v1'];   /* the Food Trial Log keeps its English and its French copy apart */
 const E=TLE, H=36e5;
 const FRAMED=(()=>{ try{ return window.self!==window.top; }catch(e){ return true; } })();
 const STANDALONE=(()=>{ try{ return !!(navigator.standalone||matchMedia('(display-mode: standalone)').matches); }catch(e){ return false; } })();
@@ -815,10 +822,20 @@ function renderBar(v){ if(v==='hist'){ bar.classList.remove('hidden'); bar.inner
   if(v!=='meal'){ bar.innerHTML=''; bar.classList.add('hidden'); return; }
   const n=Object.keys(V.items).length; bar.classList.remove('hidden');
   bar.innerHTML=`<div class="in"><button type="button" class="btn ghost sm" data-act="back">← ${L('Back','Retour')}</button><span class="small muted">${V.mode==='list'?L(`My list · ${n}`,`Ma liste · ${n}`):n?L(`${n} food${n>1?'s':''}`,`${n} aliment${n>1?'s':''}`):L('Meal','Repas')}</span><button type="button" class="btn primary sm" data-act="mealdone" ${V.mode==='list'||n?'':'disabled'}>${L('Done','Terminé')}</button></div>`; }
-function render(keep){ const y=window.scrollY, g=keep&&!document.getElementById('sheet').classList.contains('on')?focusSig(document.activeElement):null; save(); renderTop(); const v=view();
+/* ---------- a long log: the Threshold tab can take a moment to count, and the page cannot draw while it counts. When the last count was slow
+   on this phone and the log is long, the next one is put off by one frame, so that "Counting…" shows first. A newer change replaces one that
+   has not run yet, so a drag on the slider counts once. ---------- */
+let thrMs=0, BUSY_MS=250, BUSY_FROM=600, busyJob=null;
+function soon(f){ if(!(thrMs>=BUSY_MS&&S.ev.length>=BUSY_FROM)){ f(); return; }
+  const el=document.getElementById('busy'); el.textContent=L('Counting…','Calcul en cours…'); el.hidden=false;
+  if(busyJob){ cancelAnimationFrame(busyJob.r); clearTimeout(busyJob.t); }
+  const job=busyJob={}; job.r=requestAnimationFrame(()=>{ job.t=setTimeout(()=>{ if(busyJob===job) busyJob=null; try{ f(); } finally{ if(!busyJob) el.hidden=true; } },0); }); }
+const thrShown=()=>S.tab==='thr'&&['door','meal','hist'].indexOf(view())<0;
+function render(keep){ save(); if(thrShown()) soon(()=>draw(keep)); else draw(keep); }
+function draw(keep){ const t0=performance.now(), thr=thrShown(), y=window.scrollY, g=keep&&!document.getElementById('sheet').classList.contains('on')?focusSig(document.activeElement):null; renderTop(); const v=view();
   app.innerHTML=(STORE==='ok'?'':`<div class="card" style="border-color:var(--warn)"><p class="small" style="margin:0">${STORE==='bad'?L('<b>Your saved data couldn’t be read.</b> It hasn’t been overwritten, so nothing new is being saved either. Menu → Restore from a backup brings a saved copy back.','<b>Tes données n’ont pas pu être lues.</b> Elles n’ont pas été écrasées, alors rien de nouveau n’est enregistré non plus. Menu → Restaurer à partir d’une sauvegarde ramène une copie.'):L('<b>Not saved.</b> This browser is blocking storage (private mode?). What you enter stays until you close this page.','<b>Pas enregistré.</b> Ce navigateur bloque la mémoire (mode privé?). Ce que tu entres reste jusqu’à ce que tu fermes la page.')}</p></div>`)
     +(v==='door'?vDoor():v==='meal'?vMeal():v==='hist'?vHist():tabsHTML()+(S.tab==='nut'?vNut():S.tab==='thr'?vThr():vHome()));
-  renderBar(v); { const pill=document.getElementById('installPill'); if(pill) pill.innerHTML=pillHTML(); } window.scrollTo(0,keep?y:0); refocus(document,g); }
+  renderBar(v); { const pill=document.getElementById('installPill'); if(pill) pill.innerHTML=pillHTML(); } window.scrollTo(0,keep?y:0); refocus(document,g); if(thr) thrMs=performance.now()-t0; }
 
 /* ---------- the door: the only place the app mentions allergy, medicine or eating disorders ---------- */
 const AGREE=()=>[L('I am 18 or older.','J’ai 18 ans ou plus.'),
@@ -1039,7 +1056,7 @@ const hrsAfter=h=>L(h===1?'the hour after it':`the ${h} hours after it`,h===1?'l
 function twinHTML(h){ return `<div class="twin"><label class="small muted" for="tWin">${L('The amount in one meal, and the effects you reported in','La quantité dans un repas, et les effets que tu as notés dans')} <b id="tWinTxt">${hrsAfter(h)}</b>.</label><input type="range" id="tWin" data-in="twin" min="1" max="8" step="1" value="${h}" aria-valuetext="${hrsWord(h)}"><div class="ends" aria-hidden="true">${E.WINS.map(x=>`<span>${x}</span>`).join('')}</div></div>`; }
 /* ---------- the dots: one row for each line. Every counted meal or day is a dot, placed by its amount: filled if the picked effects were
    reported for it, empty if not. The mark, when a line has one, stands just left of the dots at its amount. Nothing is coloured. ---------- */
-const DW=300, DL=6, DH=18;
+const DW=300, DL=6, DH=18, PILE=8;
 /* where a dot sits in the height of its lane: the same place every time for the same entry, so the picture does not move between two looks */
 function jit(i){ let h=Math.imul(i+1,2654435761)>>>0; h^=h>>>15; h=Math.imul(h,2246822519)>>>0; h^=h>>>13; return (h>>>0)/4294967296; }
 const dotX=(r,x)=>DL+(DW-2*DL)*Math.min(1,(x>E.ZEPS?x:0)/(r.max>0?r.max:1));
@@ -1048,8 +1065,14 @@ const markX=r=>r.s.at==null?null:dotX(r,r.s.at)-Math.min(3.6,(dotX(r,r.s.at)-dot
 function dotSvg(r,label){ const X=x=>dotX(r,x); let a='', b='';
   /* entries with the same amount stand one over the other in their lane, so a pile reads as a pile; an entry alone sits at a height of its own */
   const pile={}; r.units.forEach((u,i)=>{ const k=(u.fx.length?'h':'r')+X(u.x).toFixed(1); (pile[k]||(pile[k]=[])).push(i); });
-  for(const k of Object.keys(pile)){ const hit=k[0]==='h', y0=hit?0:DH+4, ids=pile[k], cx=k.slice(1);
-    ids.forEach((i,j)=>{ const cy=ids.length===1?y0+4+jit(i)*(DH-8):y0+3+(j+.5)*(DH-6)/ids.length, c=`<circle class="${hit?'dh':'dr'}" cx="${cx}" cy="${cy.toFixed(1)}" r="${hit?2.7:2.3}"/>`; if(hit) a+=c; else b+=c; }); }
+  /* Each lane is one shape, a circle for each entry, so a year of entries is two elements a row and not thousands. A pile is drawn with at
+     most PILE circles: past that they cover one another and the column looks the same. data-n holds how many entries the lane has, and
+     data-p where they are: each amount's place, with how many sit there when it is more than one. */
+  const pa=[], pb=[];
+  for(const k of Object.keys(pile)){ const hit=k[0]==='h', y0=hit?0:DH+4, ids=pile[k], cx=k.slice(1), n=ids.length, m=Math.min(n,PILE), r=hit?2.7:2.3; let c='';
+    for(let j=0;j<m;j++){ const cy=n===1?y0+4+jit(ids[0])*(DH-8):y0+3+(j+.5)*(DH-6)/m; c+=`M${(+cx-r).toFixed(1)} ${cy.toFixed(1)}a${r} ${r} 0 1 0 ${2*r} 0a${r} ${r} 0 1 0 ${-2*r} 0`; }
+    if(hit){ a+=c; pa.push(n>1?cx+':'+n:cx); } else { b+=c; pb.push(n>1?cx+':'+n:cx); } }
+  const lane=(cl,d,p,n)=>d?`<path class="${cl}" data-n="${n}" data-p="${p.join(' ')}" d="${d}"/>`:'', nh=r.units.reduce((t,u)=>t+(u.fx.length?1:0),0); a=lane('dh',a,pa,nh); b=lane('dr',b,pb,r.units.length-nh);
   const mx=markX(r);
   return `<svg class="dots" viewBox="0 -3 ${DW} ${2*DH+10}" role="img" aria-label="${esc(label)}"><rect class="l1" x="0" y="0" width="${DW}" height="${DH}" rx="4"/><rect class="l2" x=".5" y="${DH+4.5}" width="${DW-1}" height="${DH-1}" rx="4"/>${a}${b}${mx==null?'':`<line class="dm" x1="${mx.toFixed(1)}" x2="${mx.toFixed(1)}" y1="-3" y2="${2*DH+7}"/>`}</svg>`; }
 /* the sentence of a mark. Read up: with the effect from the mark up, without under it. Read down: the reverse. It names the side of each. */
@@ -1077,7 +1100,8 @@ function thrIntro(){ return `<div class="card" id="thrIntro"><h3 style="margin:0
 function sideHead(mode,a,b){ const c=k=>`<span class="thn">${k} ${unitWord(mode,k)}</span>`; return `<th scope="col">${L('With effect','Avec effet')}${c(a)}</th><th scope="col">${L('Without','Sans')}${c(b)}</th>`; }
 function vThr(){ const mode=S.tmode, h=thrH(), I=IX(), h1=h===1, hE=h1?'the hour':`the ${h} hours`, hF=h1?'l’heure':`les ${h} heures`, rd=E.reportedDays(I), seen=fxSeen(I), sel=selOf().filter(c=>seen.indexOf(c)>=0); S.tsel=sel;
   const all=sel.length>1&&S.tall!==false;
-  const T=E.table(I,mode,sel,all), base=T[0].rows[0], nHit=base.hit.n, nRest=base.rest.n, n=nHit+nRest, G=E.together(I,mode,sel,all), nm=cap(selName(sel,all)), Wt=E.waiting(I,mode,sel,all), wn=[], o=Wt.open;
+  /* every row is read once here: its entries, its mark and its place in the order */
+  const ALL=E.rows(I,mode,sel,all), base=ALL.find(r=>r.b==='fat'), nHit=base.s.nHit, nRest=base.s.nRest, n=nHit+nRest, G=E.together(I,mode,sel,all), nm=cap(selName(sel,all)), Wt=E.waiting(I,mode,sel,all), wn=[], o=Wt.open;
   if(Wt.soon) wn.push(mode==='meal'?L(Wt.soon===1?`1 meal isn’t counted yet: nothing is reported after it so far, and ${h1?'its hour isn’t':`its ${h} hours aren’t`} over.`:`${Wt.soon} meals aren’t counted yet: nothing is reported after them so far, and ${h1?'their hour isn’t':`their ${h} hours aren’t`} over.`,Wt.soon===1?'1 repas n’est pas encore compté : rien n’est noté après pour l’instant, et '+(h1?'son heure n’est pas terminée':`ses ${h} heures ne sont pas terminées`)+'.':`${Wt.soon} repas ne sont pas encore comptés : rien n’est noté après pour l’instant, et ${h1?'leur heure n’est pas terminée':`leurs ${h} heures ne sont pas terminées`}.`)
     :L(`${Wt.soon===1?'1 day isn’t':Wt.soon+' days aren’t'} counted yet: a day is read once the day after it is over.`,`${Wt.soon===1?'1 journée n’est pas encore comptée':Wt.soon+' journées ne sont pas encore comptées'} : une journée est lue quand le lendemain est terminé.`));
   if(o) wn.push(mode==='meal'?L(`${o} ${o===1?'meal sits':'meals sit'} in a day left open, with no effect and no tap on “No effects today”, so ${o===1?'it stays':'they stay'} out.`,`${o} repas ${o===1?'est':'sont'} dans une journée laissée ouverte, sans effet ni appui sur « Aucun effet aujourd’hui », alors ${o===1?'il reste':'ils restent'} en dehors.`)
@@ -1086,10 +1110,10 @@ function vThr(){ const mode=S.tmode, h=thrH(), I=IX(), h1=h===1, hE=h1?'the hour
   const waitHTML=wn.length?`<p class="small muted" id="thrWait" style="margin:0 0 6px">${wn.join(' ')}</p>`:'';
   const th=sideHead(mode,nHit,nRest);
   /* a line with nothing counted on either side is not shown as two dashes: it is named under the lists, with what kept its meals or days out */
-  const gone=T[0].rows.filter(r=>r.hit.n+r.rest.n===0&&r.left>0);
+  const gone=ALL.filter(r=>r.f==='base'&&!r.n&&r.left>0).sort((p,q)=>p.i-q.i);
   const goneHTML=gone.length?`<p class="small muted" id="thrGone" style="margin:0 0 8px">${L('Not in the list','Pas dans la liste')}${COL()}${gone.map(r=>L(BARN[r.b][0],BARN[r.b][1]).toLowerCase()).join(', ')}. ${L(`${gone[0].left} ${unitWord(mode,gone[0].left)} left out`,`${gone[0].left} ${unitWord(mode,gone[0].left)} laissé${mode==='day'?'e':''}${gone[0].left>1?'s':''} de côté`)} (${leftWhy2(gone[0].b)}).</p>`:'';
   /* a row appears only when a counted meal or day held some of it: what a person never has is not shown. In the engine's order: the rows an amount separates, then the others */
-  const RA=E.rows(I,mode,sel,all).filter(r=>r.any), view=S.tview, R=view==='min'?RA.filter(r=>r.clear):view==='med'?RA.filter(r=>r.s.at!=null):RA, sep=R.filter(r=>r.s.at!=null), mix=R.filter(r=>r.s.at==null);
+  const RA=ALL.filter(r=>r.any), view=S.tview, R=view==='min'?RA.filter(r=>r.clear):view==='med'?RA.filter(r=>r.s.at!=null):RA, sep=R.filter(r=>r.s.at!=null), mix=R.filter(r=>r.s.at==null);
   /* the view, set under Settings, leaves rows out: under the rows, one line says how many and of which kind, with the way back */
   const nLess=RA.filter(r=>r.s.at!=null&&!r.clear).length, nNone=RA.filter(r=>r.s.at==null).length, rw=k=>k+' '+L(k===1?'row':'rows',k===1?'ligne':'lignes');
   const hid=(view==='min'&&nLess?[L(`${rw(nLess)} with a less clear mark`,`${rw(nLess)} à la marque moins nette`)]:[]).concat(view!=='all'&&nNone?[L(`${rw(nNone)} with no mark`,`${rw(nNone)} sans marque`)]:[]);
@@ -1523,8 +1547,9 @@ document.addEventListener('input',e=>{ const el=e.target, k=el.dataset&&el.datas
   if(k==='tq'){ UI.tq=v; document.getElementById('tqRows').innerHTML=tqRows(); return; }
   /* the slider moves: the lists under it are read again at once. The slider itself is left alone, so a drag is never cut short. It is saved when the thumb is let go. */
   if(k==='twin'){ const h=Math.round(+v), sel=selOf(), one=sel.length===1?sel[0]:null; if(E.WINS.indexOf(h)<0||h===thrH()) return; if(one) S.fxw[one]=h; else S.twin=h;
-    el.setAttribute('aria-valuetext',hrsWord(h)); const tx=document.getElementById('tWinTxt'); if(tx) tx.textContent=hrsAfter(h); const tmp=document.createElement('div'); tmp.innerHTML=vThr();
-    for(const id of ['thrCard','thrBar']){ const a=document.getElementById(id), b=tmp.querySelector('#'+id); if(a&&b) a.innerHTML=b.innerHTML; } return; }
+    el.setAttribute('aria-valuetext',hrsWord(h)); const tx=document.getElementById('tWinTxt'); if(tx) tx.textContent=hrsAfter(h);
+    soon(()=>{ const t0=performance.now(), tmp=document.createElement('div'); tmp.innerHTML=vThr();
+      for(const id of ['thrCard','thrBar']){ const a=document.getElementById(id), b=tmp.querySelector('#'+id); if(a&&b) a.innerHTML=b.innerHTML; } thrMs=performance.now()-t0; }); return; }
   if(k==='hday'){ UI.hday=v; return; } if(k==='mat'){ if(V) V.at=v; return; } if(k==='fxat'){ UI.fx.at=v; return; } if(k==='fxown'){ UI.fx.own=v; return; } if(k==='enat'){ UI.en.at=v; return; } if(k==='lb'){ UI.lb[el.dataset.k]=v; return; }
   if(k==='concl'){ const key=el.dataset.k, t=v.slice(0,200); if(t.trim()) S.concl[key]=t; else delete S.concl[key]; UI.dirty=true; save(); } });
 document.addEventListener('change',e=>{ const el=e.target;
