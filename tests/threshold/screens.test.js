@@ -21,6 +21,12 @@ const OTHER_LANG = { en: word(['repas', 'effets?', 'aliments?', 'journée', 'auj
   fr: word(['the', 'and', 'your', 'meals?', 'effects?', 'reported', 'days?', 'foods?', 'with', 'from', 'close', 'done', 'save', 'remove', 'search', 'today', 'yesterday', 'week', 'month', 'up to', 'none']) };
 const BROKEN = /undefined|NaN|\[object|(?<![\p{L}])null(?![\p{L}])/u;
 
+// the Threshold tab keeps its settings (the reading and its hours) and its filter (the effects) in two sheets
+const setOpen = async page => { if (!(await page.locator('#sheet.on [data-act=tmode]').count())) await page.click('#thrBar [data-act=tset]'); await page.waitForSelector('#sheet.on [data-act=tmode]'); };
+const sheetShut = async page => { await page.evaluate(() => closeSheet()); };
+const setMode = async (page, mode) => { await setOpen(page); await page.click(`#sheet [data-act=tmode][data-v=${mode}]`); await sheetShut(page); };
+const setHours = async (page, h) => { await setOpen(page); await page.focus('#tWin'); await page.keyboard.press('Home'); for (let i = 1; i < h; i++) await page.keyboard.press('ArrowRight'); await sheetShut(page); };
+const filterOpen = async page => { if (!(await page.locator('#sheet.on .fxpick').count())) await page.click('#thrBar [data-act=tfilter]'); await page.waitForSelector('#sheet.on [data-act=close]'); };
 async function open(browser, base, o) {
   const ctx = await browser.newContext({ viewport: { width: o.width || 390, height: 760 }, locale: o.lang === 'fr' ? 'fr-CA' : 'en-CA', timezoneId: o.zone || ZONE, reducedMotion: 'reduce', serviceWorkers: o.sw ? 'allow' : 'block' });
   if (o.clip) await ctx.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: base });
@@ -64,7 +70,7 @@ async function open(browser, base, o) {
           ok(T + name + ': French punctuation, no plain space before : ; ? !', !p1, p1 && t.slice(Math.max(0, p1.index - 50), p1.index + 20)); ok(T + name + ': French punctuation, a non-breaking space inside « »', !p2, p2 && t.slice(Math.max(0, p2.index - 30), p2.index + 30)); }
         ok(T + name + ': nothing runs off a 320-pixel screen', r.over <= 1 && r.sheetOver <= 1 && !r.wide.length, `page ${r.over}px, sheet ${r.sheetOver}px, ${r.wide.join(' | ')}`);
         ok(T + name + ': every control has a name', !r.nameless.length, r.nameless.join(' | ')); };
-      const tap = sel => page.click(sel), shut = () => page.click('#sheet [data-act=close]'), slide = async h => { await page.focus('#tWin'); await page.keyboard.press('Home'); for (let i = 1; i < h; i++) await page.keyboard.press('ArrowRight'); };
+      const tap = sel => page.click(sel), shut = () => page.click('#sheet [data-act=close]'), slide = h => setHours(page, h);
       await visit('Home');
       // an effect, opened: the meals in the slider's hours before it. And a poor sleep, which opens the day before.
       for (const [name, pick] of [['an effect, opened', 'x => x.k === "fx" && x.c !== "sleep"'], ['a poor sleep, opened', 'x => x.k === "fx" && x.c === "sleep"']]) { const id = await page.evaluate(src => { const e = S.ev.slice().reverse().find(eval(src)); if (!e) return null; UI.en = { id: e.id, at: hm(e.t) }; entrySheet(); return e.id; }, pick); if (id) { await visit(name); await shut(); } }
@@ -75,9 +81,12 @@ async function open(browser, base, o) {
       await tap('.mb.fx'); await visit('effect, physical'); await tap('#sheet [data-act=fxtab][data-v=psy]'); await visit('effect, psychological'); await shut();
       await tap('[data-act=tab][data-v=nut]'); for (const per of ['today', 'week', 'month']) { await tap(`[data-act=nper][data-v=${per}]`); await visit('Nutrition, ' + per); } await tap('details.note summary'); await visit('Nutrition, the reference questions');
       if (B.gut) { await tap('[data-act=impread]'); await visit('import, confirm'); await shut(); const rej = page.locator('#app [data-act=foodrd]'); if (await rej.count()) { await rej.first().click(); await visit('one food, rejected in the Food Trial Log'); await shut(); } }
-      await tap('[data-act=tab][data-v=thr]'); for (const mode of ['meal', 'day']) { await tap(`[data-act=tmode][data-v=${mode}]`); await visit('Threshold, ' + mode);
+      await tap('[data-act=tab][data-v=thr]'); for (const mode of ['meal', 'day']) { await setMode(page, mode); await visit('Threshold, ' + mode); await setOpen(page); await visit('Threshold, ' + mode + ', the settings'); await sheetShut(page);
         if (mode === 'meal') { await slide(1); await visit('Threshold, meal, the slider at 1 hour'); await slide(8); await visit('Threshold, meal, the slider at 8 hours'); }
-        const fx = page.locator('.fxpick [data-act=tfx]'); if (await fx.count() > 1) { await fx.nth(1).click(); await visit('Threshold, ' + mode + ', one effect'); if (await fx.count() > 2) { await fx.nth(2).click(); await visit('Threshold, ' + mode + ', two effects together'); await tap('#allAny [data-v="0"]'); await visit('Threshold, ' + mode + ', any of two effects'); await tap('#allAny [data-v="1"]'); } await fx.first().click(); }
+        await filterOpen(page); await visit('Threshold, ' + mode + ', the filter'); const fx = page.locator('#sheet .fxpick [data-act=tfx]');
+        if (await fx.count() > 1) { await fx.nth(1).click(); await sheetShut(page); await visit('Threshold, ' + mode + ', one effect'); await filterOpen(page);
+          if (await fx.count() > 2) { await fx.nth(2).click(); await visit('Threshold, ' + mode + ', two effects together, in the filter'); await sheetShut(page); await visit('Threshold, ' + mode + ', two effects together'); await filterOpen(page); await tap('#allAny [data-v="0"]'); await sheetShut(page); await visit('Threshold, ' + mode + ', any of two effects'); await filterOpen(page); await tap('#allAny [data-v="1"]'); }
+          await fx.first().click(); } await sheetShut(page);
         const ln = page.locator('#app [data-act=rowsheet][data-k=lact]'); if (await ln.count()) { await ln.click(); const st = page.locator('#sheet [data-act=rstep]'); if (await st.count()) await st.last().click(); await visit('a line, ' + mode); await shut(); } }
       const chip = page.locator('#tqRows [data-act=foodrd]'); if (await chip.count()) { await chip.first().click(); const f = page.locator('#sheet [data-act=frfx]'); if (await f.count()) await f.first().click(); await visit('one food'); await shut(); }
       await page.fill('#tQ', lang === 'fr' ? 'pain' : 'bread'); await visit('Threshold, a food search'); await page.fill('#tQ', 'zzzz'); await visit('Threshold, a food search with no match'); await page.fill('#tQ', '');
@@ -219,7 +228,9 @@ async function open(browser, base, o) {
     // ================= the slider: how many hours after a meal an effect counts =================
     for (const lang of ['en', 'fr']) { const person = people.varied, B = build(person, table, lang), A = await open(browser, base, { state: B.state, now: person.now, lang }), page = A.page, fr = lang === 'fr', T = `[slider, ${lang}] `;
       await page.click('[data-act=tab][data-v=thr]'); const head = () => page.locator('#thrHead').innerText(), saved = () => page.evaluate(k => JSON.parse(localStorage.getItem(k)).twin, KEY), meals = async () => (await head()).match(/\d+/g).map(Number);
-      const box = await page.locator('#tWin').boundingBox();
+      same(T + 'the tab opens on two buttons, Filter and Settings, with no switch, slider or chips on it', [await page.locator('#thrBar [data-act=tfilter]').count(), await page.locator('#thrBar [data-act=tset]').count(), await page.locator('#app #tWin, #app [data-act=tmode], #app [data-act=tfx]').count()], [1, 1, 0]);
+      ok(T + 'the buttons say what is picked and how it is read', (await page.locator('#thrBar').innerText()).replace(/\s+/g, ' ').includes(fr ? 'Tout effet' : 'Any effect') && (await page.locator('#thrBar').innerText()).replace(/[\s\u00a0]+/g, ' ').includes(fr ? 'Après un repas · 4 heures' : 'After a meal · 4 hours'));
+      await setOpen(page); const box = await page.locator('#tWin').boundingBox();
       same(T + 'it starts at 4 hours, runs from 1 to 8 in steps of one, and is at least 44 pixels high', [await page.inputValue('#tWin'), ...(await page.locator('#tWin').evaluate(e => [e.min, e.max, e.step])), box.height >= 44], ['4', '1', '8', '1', true]);
       same(T + 'its eight stops are numbered under it', (await page.locator('.twin .ends').innerText()).split(/\s+/).filter(Boolean), ['1', '2', '3', '4', '5', '6', '7', '8']);
       { const g = await page.evaluate(() => { const r = document.getElementById('tWin').getBoundingClientRect(); return { w: r.width, at: [...document.querySelectorAll('.twin .ends span')].map(x => { const q = x.getBoundingClientRect(); return q.left + q.width / 2 - r.left; }) }; });
@@ -233,14 +244,14 @@ async function open(browser, base, o) {
       ok(T + 'more hours take in more meals with an effect, never fewer', held[1] >= at4[1], `${at4} then ${held}`);
       same(T + 'the setting is saved when the thumb is let go, not before', [heldSaved === undefined || heldSaved === 4, await saved()], [true, 8]);
       await page.focus('#tWin'); await page.keyboard.press('ArrowLeft'); same(T + 'an arrow key moves it one hour, and the focus stays on it', [await page.inputValue('#tWin'), (await meals())[0], await page.evaluate(() => document.activeElement.id), await saved()], ['7', 7, 'tWin', 7]);
-      await page.reload(); await page.waitForSelector('.mb.meal'); await page.click('[data-act=tab][data-v=thr]'); same(T + 'the setting is still there when the app is opened again', [await page.inputValue('#tWin'), (await meals())[0]], ['7', 7]);
-      ok(T + 'under the lists’ heading, one line says which side usually has the narrower range', (await page.locator('#thrCard').innerText()).includes(fr ? 'Le côté qui compte le moins de repas a d’habitude l’intervalle le plus étroit.' : 'The side with fewer meals usually has the narrower range.'));
+      await page.reload(); await page.waitForSelector('.mb.meal'); await page.click('[data-act=tab][data-v=thr]'); await setOpen(page); same(T + 'the setting is still there when the app is opened again', [await page.inputValue('#tWin'), (await meals())[0]], ['7', 7]); await sheetShut(page);
+      ok(T + 'under the lists’ heading, one line says what each side shows', (await page.locator('#thrCard').innerText()).includes(fr ? 'Chaque côté montre la part qui en contenait, et combien ça fait.' : 'Each side shows the share that held any of it, and how many that is.'));
       await page.click('#app [data-act=rowsheet][data-k=fat]'); await page.locator('#sheet [data-act=rstep]').last().click(); const sheet = (await page.locator('#sheet').innerText()).replace(/[\u00a0\u202f]/g, ' ');
       ok(T + 'an opened line says the hours it was read at', sheet.includes(fr ? 'effets notés dans les 7 heures suivantes.' : 'effects reported in the 7 hours after it.'), sheet.slice(0, 200));
       ok(T + 'it puts no number on luck, and says what leaves luck more room and what leaves it less', !/luck alone|hasard seul|times? in \d|fois sur \d/i.test(sheet) && sheet.includes(fr ? 'Plus de place pour le hasard : peu d’entrées, plusieurs choses mangées ensemble, des repas plus rapprochés que les heures réglées. Moins de place : plus d’entrées, une seule chose changée à la fois, des repas plus espacés que les heures réglées.' : 'More room for luck: few entries, several things eaten together, meals closer together than the hours set. Less room: more entries, one thing changed at a time, meals further apart than the hours set.'), sheet.slice(-420));
       await page.click('#sheet [data-act=close]');
-      await page.click('[data-act=tmode][data-v=day]'); same(T + 'over a day there is no slider', await page.locator('#tWin').count(), 0);
-      ok(T + 'over a day, the line about ranges speaks of days', (await page.locator('#thrCard').innerText()).includes(fr ? 'Le côté qui compte le moins de jours' : 'The side with fewer days'));
+      await setOpen(page); await page.click('#sheet [data-act=tmode][data-v=day]'); same(T + 'over a day there is no slider', await page.locator('#tWin').count(), 0); await sheetShut(page);
+      ok(T + 'over a day, the Settings button says so', (await page.locator('#thrBar').innerText()).includes(fr ? 'Sur une journée' : 'Over a day'));
       await page.click('#app [data-act=rowsheet][data-k=fat]'); await page.locator('#sheet [data-act=rstep]').last().click();
       { const day = (await page.locator('#sheet').innerText()).replace(/[\u00a0\u202f]/g, ' '); ok(T + 'over a day, the words about luck speak of days and name no slider', !/luck alone|hasard seul|times? in \d|fois sur \d|hours set|heures réglées/i.test(day) && day.includes(fr ? 'Plus de place pour le hasard : peu de jours, plusieurs choses mangées le même jour. Moins de place : plus de jours, une seule chose changée à la fois.' : 'More room for luck: few days, several things eaten on the same day. Less room: more days, one thing changed at a time.'), day.slice(-300)); } await page.click('#sheet [data-act=close]');
       await page.click('#topbar [data-act=ai]'); await page.click('#sheet [data-act=aiscope][data-v=all]'); const ai = await page.locator('#sheet textarea').inputValue();
@@ -248,7 +259,7 @@ async function open(browser, base, o) {
       await page.click('#sheet [data-act=close]'); same(T + 'no error', A.errors, []); await A.ctx.close(); }
     // a saved setting that is not a stop of the slider is read as 4 hours; one that is, is kept
     for (const [twin, want] of [[9, '4'], [0, '4'], ['6', '4'], [2.5, '4'], [6, '6'], [1, '1']]) { const person = people.steady, B = build(person, table, 'en'), A = await open(browser, base, { state: Object.assign({}, B.state, { twin }), now: person.now, lang: 'en' }), page = A.page;
-      await page.click('[data-act=tab][data-v=thr]'); same(`[slider] saved as ${JSON.stringify(twin)}, shown as ${want}`, [await page.inputValue('#tWin'), A.errors], [want, []]); await A.ctx.close(); }
+      await page.click('[data-act=tab][data-v=thr]'); await setOpen(page); same(`[slider] saved as ${JSON.stringify(twin)}, shown as ${want}`, [await page.inputValue('#tWin'), A.errors], [want, []]); await A.ctx.close(); }
     // the app says how many hours count and nothing about how long anything takes to act: no compound's sheet and no help text gives a time
     { const person = people.varied, B = build(person, table, 'en'), A = await open(browser, base, { state: B.state, now: person.now, lang: 'en' }), page = A.page;
       const texts = await page.evaluate(() => Object.keys(INFO).map(k => INFO[k].join(' '))); const timed = texts.filter(t => /\b(minutes?|hours?)\b/i.test(t));
@@ -259,7 +270,7 @@ async function open(browser, base, o) {
       await page.click('[data-act=enter]'); await page.waitForSelector('.mb.meal');
       // the 11th: cheese, and "No effects". The 12th: milk, and a headache two hours later. It is now the 13th, 10 a.m.
       await page.evaluate(([a, b]) => { S.ev.push({ id: 'd1', k: 'meal', t: a, items: [{ key: 'f109', q: 1 }] }, { id: 'd2', k: 'none', t: a + 36e5, d: TLE.dayKey(a, S.roll) }, { id: 'd3', k: 'meal', t: b, items: [{ key: 'f61', q: 1 }] }, { id: 'd4', k: 'fx', t: b + 72e5, c: 'head' }); IXM = null; render(); }, [D(11, 12), D(12, 12)]);
-      const go = async t => { await page.clock.setFixedTime(t); await page.evaluate(() => { IXM = null; document.dispatchEvent(new Event('visibilitychange')); }); await page.click('[data-act=tab][data-v=thr]'); await page.click('[data-act=tmode][data-v=day]'); };
+      const go = async t => { await page.clock.setFixedTime(t); await page.evaluate(() => { IXM = null; document.dispatchEvent(new Event('visibilitychange')); }); await page.click('[data-act=tab][data-v=thr]'); await setMode(page, 'day'); };
       const nums = async () => ((await page.locator('#thrHead').innerText()).match(/\d+/g) || []).map(Number), milk = async () => { await page.fill('#tQ', 'Milk, 2%'); await page.click('#tqRows [data-act=foodrd][data-v="f61"]'); const t = flat(await page.locator('#sheet').innerText()); await page.click('#sheet [data-act=close]'); return t; };
       await go(D(13, 10));
       same('[days] on the 13th, the 11th is read (the 12th is over) and it sits with the 12th’s headache', await nums(), [1, 1]);
@@ -280,14 +291,37 @@ async function open(browser, base, o) {
       await page.evaluate(t => { S.ev.push({ id: 'w3', k: 'meal', t: t + 600000, items: [{ key: 'f109', q: 1 }] }); IXM = null; render(); }, t0); await page.clock.setFixedTime(t0 + 900000); await page.evaluate(() => { IXM = null; document.dispatchEvent(new Event('visibilitychange')); }); await page.click('[data-act=tab][data-v=thr]');
       ok('[new] a meal with nothing reported after it waits, and the screen says so', /1 meal isn’t counted yet/.test(await wait()) && /after 1 of 1 meal\./.test(await head()), await wait());
       const refresh = async ms => { await page.clock.setFixedTime(t0 + ms); await page.evaluate(() => { IXM = null; document.dispatchEvent(new Event('visibilitychange')); }); await page.click('[data-act=tab][data-v=thr]'); };
-      await page.focus('#tWin'); await page.keyboard.press('Home'); ok('[new] with the slider at 1 hour, the meal waits for its hour', /its hour isn’t over/.test(await wait()), await wait());
+      await setHours(page, 1); ok('[new] with the slider at 1 hour, the meal waits for its hour', /its hour isn’t over/.test(await wait()), await wait());
       await refresh(80 * 60000); ok('[new] 80 minutes on, at 1 hour, the second meal has settled on the other side', /in the hour after 1 of 2 meals\./.test(await head()) && (await page.locator('#thrWait').count()) === 0, await head());
-      await page.focus('#tWin'); await page.keyboard.press('End'); ok('[new] ...and at 8 hours it is waiting again, since its 8 hours are not over', /its 8 hours aren’t over/.test(await wait()) && /in the 8 hours after 1 of 1 meal\./.test(await head()), (await head()) + ' | ' + (await wait()));
-      await page.keyboard.press('Home'); for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowRight'); await refresh(900000);
-      await page.click('[data-act=tmode][data-v=day]'); ok('[new] over a day, today says it is waiting until the day after it is over', /^1 day isn’t counted yet: a day is read once the day after it is over\.$/.test((await wait()).trim()), await wait());
-      await page.clock.setFixedTime(t0 + 5 * 3600e3); await page.evaluate(() => { IXM = null; document.dispatchEvent(new Event('visibilitychange')); }); await page.click('[data-act=tab][data-v=thr]'); await page.click('[data-act=tmode][data-v=meal]');
+      await setHours(page, 8); ok('[new] ...and at 8 hours it is waiting again, since its 8 hours are not over', /its 8 hours aren’t over/.test(await wait()) && /in the 8 hours after 1 of 1 meal\./.test(await head()), (await head()) + ' | ' + (await wait()));
+      await setHours(page, 4); await refresh(900000);
+      await setMode(page, 'day'); ok('[new] over a day, today says it is waiting until the day after it is over', /^1 day isn’t counted yet: a day is read once the day after it is over\.$/.test((await wait()).trim()), await wait());
+      await page.clock.setFixedTime(t0 + 5 * 3600e3); await page.evaluate(() => { IXM = null; document.dispatchEvent(new Event('visibilitychange')); }); await page.click('[data-act=tab][data-v=thr]'); await setMode(page, 'meal');
       ok('[new] once its 4 hours are over with nothing reported, the second meal is on the other side', /after 1 of 2 meals\./.test(await head()), await head());
       same('[new] no error', A.errors, []); await A.ctx.close(); }
+
+    // ================= Threshold: shares on both sides, a kept filter, and an effect's own hours =================
+    for (const lang of ['en', 'fr']) { const person = people.varied, B = build(person, table, lang), A = await open(browser, base, { state: B.state, now: person.now, lang }), page = A.page, fr = lang === 'fr', T = `[lists, ${lang}] `;
+      await page.click('[data-act=tab][data-v=thr]'); const bar = async () => (await page.locator('#thrBar').innerText()).replace(/[\s\u00a0]+/g, ' '), head = async () => (await page.locator('#thrHead').innerText()).replace(/[\s\u00a0]+/g, ' ');
+      const cells = (await page.locator('#fam-base tbody td, #fam-added tbody td, #fam-tog tbody td').allInnerTexts()).map(c => c.replace(/[\s\u00a0]+/g, ' ').trim());
+      ok(T + 'each side of every line is a share and a count, with no range', cells.length >= 12 && cells.every(c => (fr ? /^\d+ % \d+ sur \d+$/ : /^\d+% \d+ of \d+$/).test(c)), JSON.stringify(cells.slice(0, 6)));
+      { const r = await page.evaluate(() => { const l = E.line(IX(), 'lact', 'meal'); return [l.hit.ate, l.hit.n, l.rest.ate, l.rest.n]; }), row = (await page.locator('#fam-base tr', { has: page.locator('[data-k=lact]') }).locator('td').allInnerTexts()).map(c => c.replace(/[\s\u00a0]+/g, ' ').trim()), pc = (a, n) => Math.round(100 * a / n);
+        same(T + 'the lactose line shows the engine’s counts and their share', row, fr ? [`${pc(r[0], r[1])} % ${r[0]} sur ${r[1]}`, `${pc(r[2], r[3])} % ${r[2]} sur ${r[3]}`] : [`${pc(r[0], r[1])}% ${r[0]} of ${r[1]}`, `${pc(r[2], r[3])}% ${r[2]} of ${r[3]}`]); }
+      ok(T + '“Eaten together” has the line for 5 compounds or more', (await page.locator('#togMany').innerText()).includes(fr ? '5 composés ou plus dans le repas' : '5 compounds or more in the meal'));
+      await filterOpen(page); await page.click('#sheet .fxpick [data-act=tfx][data-v=head]'); await sheetShut(page); await setHours(page, 2);
+      same(T + 'with one effect filtered, the slider sets that effect’s own hours and leaves the general ones', await page.evaluate(() => [S.tsel, S.fxw, S.twin]), [['head'], { head: 2 }, 4]);
+      ok(T + 'the Settings button and the heading say those 2 hours', (await bar()).includes(fr ? '2 heures' : '2 hours') && (await head()).includes(fr ? 'les 2 heures' : 'the 2 hours'), (await bar()) + ' | ' + (await head()));
+      await setOpen(page); ok(T + 'and the settings say whose hours they are', (await page.locator('#tWinNote').innerText()).includes(fr ? 'mal de tête seulement' : 'headache alone')); await sheetShut(page);
+      await filterOpen(page); await page.locator('#sheet .fxpick [data-act=tfx]').first().click(); await sheetShut(page);
+      ok(T + 'back on any effect, the general 4 hours are read', (await bar()).includes(fr ? 'Tout effet' : 'Any effect') && (await bar()).includes(fr ? '4 heures' : '4 hours'), await bar());
+      await filterOpen(page); await page.click('#sheet .fxpick [data-act=tfx][data-v=head]'); await page.click('#sheet .fxpick [data-act=tfx][data-v=gut]'); await page.click('#allAny [data-v="0"]'); await sheetShut(page);
+      ok(T + 'two effects together are read with the general hours', (await bar()).includes(fr ? '4 heures' : '4 hours'), await bar());
+      await page.reload(); await page.waitForSelector('.mb.meal'); await page.click('[data-act=tab][data-v=thr]');
+      same(T + 'the picks, how they combine and the hours are still there when the app is opened again', await page.evaluate(() => [S.tsel, S.tall, S.fxw, S.twin]), [['head', 'gut'], false, { head: 2 }, 4]);
+      await page.evaluate(() => { const e = S.ev.slice().reverse().find(x => x.k === 'fx' && x.c === 'head'); UI.en = { id: e.id, at: hm(e.t) }; entrySheet(); });
+      same(T + 'a headache opened from Home is read with its own 2 hours', await page.locator('#befHead').innerText(), fr ? 'Dans les 2 heures d’avant' : 'In the 2 hours before'); await sheetShut(page);
+      same(T + 'saved hours and picks that make no sense are dropped when the data is read', await page.evaluate(() => { const c = clean({ fxw: { head: 9, gut: '3', joint: 3 }, tsel: 'head', tall: 0 }); return [c.fxw, c.tsel, c.tall]; }), [{ joint: 3 }, [], true]);
+      same(T + 'no error', A.errors, []); await A.ctx.close(); }
 
     // ================= Home: today's entries, and an effect that opens what came before it =================
     for (const lang of ['en', 'fr']) { const at = (d, h, m) => new Date(2026, 10, d, h, m).getTime(), t0 = at(15, 15, 10), A = await open(browser, base, { lang, now: t0 }), page = A.page, fr = lang === 'fr', T = `[home, ${lang}] `;
@@ -307,14 +341,14 @@ async function open(browser, base, o) {
       same(T + 'they are the meals the lists count this effect for', await page.evaluate(() => { const I = IX(); return E.mealUnits(I, 'fat').units.filter(u => u.fx.indexOf('gut') >= 0).map(u => u.id).sort(); }), ['m2', 'm3']);
       await page.click('#befList [data-act=entry][data-v=m2]'); ok(T + 'a meal in that list opens as a meal', (await page.locator('#sheet [data-act=mealedit]').count()) === 1); await page.evaluate(() => closeSheet());
       await page.click('#todayList [data-act=entry][data-v=x1]'); await page.click('#sheet [data-act=fxthr]');
-      same(T + 'the link goes to the Threshold tab with that effect picked', await page.evaluate(() => [S.tab, S.tmode, UI.tsel]), ['thr', 'meal', ['gut']]);
-      await page.focus('#tWin'); await page.keyboard.press('Home'); await page.click('[data-act=tab][data-v=home]'); await page.click('#todayList [data-act=entry][data-v=x1]');
+      same(T + 'the link goes to the Threshold tab with that effect picked', await page.evaluate(() => [S.tab, S.tmode, S.tsel]), ['thr', 'meal', ['gut']]);
+      await setHours(page, 1); await page.click('[data-act=tab][data-v=home]'); await page.click('#todayList [data-act=entry][data-v=x1]');
       same(T + 'with the slider at 1 hour, only the meal in that hour', [await page.locator('#befHead').innerText(), await page.locator('#befList [data-act=entry]').evaluateAll(bs => bs.map(b => b.dataset.v))], [fr ? 'Dans l’heure d’avant' : 'In the hour before', ['m3']]);
       await page.fill('#enAt', '10:00'); await page.click('#sheet [data-act=ensave]'); await page.click('#todayList [data-act=entry][data-v=x1]');
       same(T + 'when the effect’s time is changed, the meals before it change with it', await page.locator('#befList [data-act=entry]').count() + (await page.locator('#befNone').count()) * 10, 10);
       await page.evaluate(() => closeSheet()); await page.click('#todayList [data-act=entry][data-v=x0]');
       same(T + 'a poor sleep opens the meals of the day before, the day it is counted with', [/^(Counted with the day before|Compté avec la journée d’avant)/.test(await page.locator('#befHead').innerText()), await page.locator('#befList [data-act=entry]').evaluateAll(bs => bs.map(b => b.dataset.v)), await page.locator('#befNote').count()], [true, ['m0'], 0]);
-      await page.click('#sheet [data-act=fxthr]'); same(T + 'and its link opens the Threshold tab over a day', await page.evaluate(() => [S.tab, S.tmode, UI.tsel]), ['thr', 'day', ['sleep']]);
+      await page.click('#sheet [data-act=fxthr]'); same(T + 'and its link opens the Threshold tab over a day', await page.evaluate(() => [S.tab, S.tmode, S.tsel]), ['thr', 'day', ['sleep']]);
       await page.click('[data-act=tab][data-v=home]'); await page.click('#app [data-act=tonut]'); same(T + '“What went in” opens Nutrition on today, with the ring and the compounds', [await page.evaluate(() => [S.tab, S.nper]), await page.locator('#app .ring').count(), await page.locator('#compCard').count()], [['nut', 'today'], 1, 1]);
       await page.click('[data-act=tab][data-v=home]'); await page.click('#app [data-act=hist]'); ok(T + '“Earlier days” opens History', (await page.locator('#hDay').count()) === 1);
       same(T + 'saved data from before, with Home’s old period in it, is read without it', await page.evaluate(() => 'per' in clean({ per: 'h4', nper: 'month' })), false);

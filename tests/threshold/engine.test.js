@@ -130,7 +130,7 @@ eq('the reading rules hold nothing that works out a luck number', ['luck', 'step
   eq('after a meal: the 4 hours after it', [E.line(I, 'fat', 'meal').hit, E.line(I, 'fat', 'meal').rest], [{ n: 2, ate: 2, lo: 6, hi: 10 }, { n: 2, ate: 2, lo: 10, hi: 22 }]);
   eq('every line of every family is there', E.table(I, 'day').map(f => [f.f, f.rows.length]), E.FAMS.map(f => [f[0], f[1].length]));
   eq('flavourings are a line of the “added” family, counted in portions', [E.COMPS.includes('flav'), E.TAGS.includes('flav'), E.FAMS.find(f => f[0] === 'added')[1]], [true, true, ['sulph', 'nitr', 'swt', 'flav']]);
-  eq('eaten together: 3 or more aged or fermented portions, and alcohol with one', E.together(I, 'day'), { nHit: 3, nRest: 1, three: { hit: 1, rest: 0 }, both: { hit: 2, rest: 0 } });
+  eq('eaten together: 3 or more aged or fermented portions, and alcohol with one', E.together(I, 'day'), { nHit: 3, nRest: 1, three: { hit: 1, rest: 0 }, both: { hit: 2, rest: 0 }, many: { hit: 0, rest: 0 } });
   eq('a line opened with one effect picked counts only that effect', (() => { const B = E.bar(I, 'fat', 'day', ['gut']); return [B.n, [B.zero].concat(B.steps).reduce((t, s) => t + s.k, 0)]; })(), [4, 2]);
   eq('a meal entered just now waits for its 4 hours; today and yesterday wait until the day after each is over', (() => { const J = E.index(S, k => F2[k], T('2026-11-13', '13:00')); return [E.waiting(J, 'meal'), E.waiting(J, 'day'), E.line(J, 'fat', 'meal').n, E.line(J, 'fat', 'day').n]; })(), [{ soon: 1, open: 0 }, { soon: 2, open: 0 }, 3, 2]);
   eq('a meal counts at once when an effect is reported after it, before its 4 hours are over', (() => { const J = E.index({ roll: 0, ev: [meal('2026-11-10', '12:00', [['a', 1]]), fx('2026-11-10', '13:00', 'head')] }, k => F2[k], T('2026-11-10', '13:30')); return [E.line(J, 'fat', 'meal').hit.n, E.line(J, 'fat', 'meal').rest.n, E.waiting(J, 'meal')]; })(), [1, 0, { soon: 0, open: 0 }]);
@@ -181,6 +181,18 @@ eq('the reading rules hold nothing that works out a luck number', ['luck', 'step
   eq('the month: every day with a meal', [E.went(I, 'month').days, E.went(I, 'month').meals], [10, 10]);
   eq('complete days are counted', E.reportedDays(I), 10);
   eq('the reading rules hold no Effects bar and no "last 4 hours" period', ['came', 'cameMax', 'BAR_DAYS'].filter(k => k in E), []); }
+
+// ---- eaten together: a meal or a day that held 5 compounds or more ----
+{ const Z = { kcal: 100, fat: 5, prot: 5, carb: 10, fib: 1, sug: 2, lact: 0, alc: 0 };
+  const F3 = { six: Object.assign({}, Z, { alc: 10, h: true, hist: 1, c: { caf: 50, tyr: 1, glu: 1, fru: 1 } }), four: Object.assign({}, Z, { c: { caf: 50, glu: 1, fru: 1, swt: 1 } }), plain: Z, one: Object.assign({}, Z, { c: { flav: 1 } }) };
+  eq('alcohol, caffeine, histamine food and each other compound count once', [E.groups(E.amounts(F3.six, 2)), E.groups(E.amounts(F3.four, 1)), E.groups(E.amounts(F3.plain, 1))], [6, 4, 0]);
+  const S = { roll: 0, ev: [meal('2026-11-10', '08:00', [['six', 1]]), fx('2026-11-10', '09:00', 'head'), meal('2026-11-10', '18:00', [['four', 1]]),
+    meal('2026-11-11', '08:00', [['four', 1], ['one', 1]]), meal('2026-11-11', '18:00', [['plain', 1]]), none('2026-11-11')] };
+  const I = E.index(S, k => F3[k], NOW), G = E.together(I, 'meal'), D = E.together(I, 'day');
+  // after a meal: the six-compound meal is "with"; four, then four and one more (5), then none are "without"
+  eq('after a meal: the meals that held 5 or more, on each side', [E.MANY, G.nHit, G.nRest, G.many], [5, 1, 3, { hit: 1, rest: 1 }]);
+  // over a day: Nov 10 held 7 different ones and has the headache; Nov 11 held 5 and has none
+  eq('over a day: a day’s compounds are counted once each, not added up', [D.nHit, D.nRest, D.many], [1, 1, { hit: 1, rest: 1 }]); }
 
 // ---- the pie ----
 { const P = E.pie({ fat: 140, prot: 95, cplx: 55, lact: 0, sugo: 5, fib: 6, unk: 0, alc: 0 });

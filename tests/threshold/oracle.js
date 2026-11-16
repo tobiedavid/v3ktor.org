@@ -66,15 +66,17 @@ function recount(entries, roll, now) {
   // pick: the effects that count. Empty means any effect.
   // together: with several effects picked, all of them have to be there. Otherwise any one is enough.
   // hours: after a meal, how many hours count. It is the person's own setting on the slider, 4 unless they moved it.
+  // how many different compounds an amount holds: alcohol, histamine food, and each of the others the table names (caffeine among them), once each
+  const compounds = am => (am.alcohol > 0.005 ? 1 : 0) + (am.histPortions > 0 ? 1 : 0) + Object.keys(am.also).filter(k => am.also[k] > 0.005).length;
   function units(bar, mode, pick, together, hours) { const span = (hours || 4) * HOUR;
     const out = [], field = BARS[bar], amt = am => field ? am[field] : (am.also[bar] || 0), keep = fx => { if (!pick || !pick.length) return fx; const f = fx.filter(c => pick.includes(c)); return together && !pick.every(c => f.includes(c)) ? [] : f; }; let left = 0;
     for (const k of keys) { const d = days[k]; if (!d.complete) continue;
       if (mode === 'meal') { for (const m of d.meals) { if (!canRead(m.am, bar)) { left++; continue; }
           const fx = keep(allFx.filter(e => e.c !== 'sleep' && e.t >= m.t && e.t <= m.t + span).map(e => e.c));
           if (m.t + span > now && !fx.length) continue;      // its hours are not over and nothing is reported after it yet: its side is not settled
-          out.push({ x: amt(m.am), alc: m.am.alcohol, fx, meal: m }); } }
+          out.push({ x: amt(m.am), alc: m.am.alcohol, held: compounds(m.am), fx, meal: m }); } }
       else { if (!over(k)) continue; if (!canRead(d.total, bar)) { left++; continue; }
-        const next = days[dayPlus(k, 1)]; out.push({ x: amt(d.total), alc: d.total.alcohol, fx: keep(d.fx.map(e => e.c).concat(next ? next.fx.filter(e => e.c !== 'sleep').map(e => e.c) : [])), day: k }); } }
+        const next = days[dayPlus(k, 1)]; out.push({ x: amt(d.total), alc: d.total.alcohol, held: compounds(d.total), fx: keep(d.fx.map(e => e.c).concat(next ? next.fx.filter(e => e.c !== 'sleep').map(e => e.c) : [])), day: k }); } }
     return { list: out, left };
   }
   function cells(bar, mode, pick, all, hours) {
@@ -94,8 +96,8 @@ function recount(entries, roll, now) {
   }
   // eaten together: 3 or more portions of the aged and fermented foods, and alcohol with one of them
   function together(mode, pick, all, hours) {
-    const o = { nHit: 0, nRest: 0, three: { hit: 0, rest: 0 }, both: { hit: 0, rest: 0 } };
-    for (const x of units('histN', mode, pick, all, hours).list) { const k = x.fx.length ? 'hit' : 'rest'; if (k === 'hit') o.nHit++; else o.nRest++; if (x.x >= 3) o.three[k]++; if (x.x > 0 && x.alc > 0.005) o.both[k]++; }
+    const o = { nHit: 0, nRest: 0, three: { hit: 0, rest: 0 }, both: { hit: 0, rest: 0 }, many: { hit: 0, rest: 0 } };
+    for (const x of units('histN', mode, pick, all, hours).list) { const k = x.fx.length ? 'hit' : 'rest'; if (k === 'hit') o.nHit++; else o.nRest++; if (x.x >= 3) o.three[k]++; if (x.x > 0 && x.alc > 0.005) o.both[k]++; if (x.held >= 5) o.many[k]++; }
     return o;
   }
   // Nutrition and Home: what went in and what was reported, over a period that ends today
