@@ -106,8 +106,11 @@ async function play(browser, base, person, table) {
   }
   // ...and the same counts as the lists show them: for any effect, then for the effect reported most often
   await page.click('[data-act=tab][data-v=thr]');
-  const KEYS = ['fat', 'cplx', 'sug', 'lact', 'fib', 'alc', 'caf', 'hist', 'tyr', 'ox', 'nit', 'ga', 'cap', 'fru', 'gos', 'sorb', 'mann', 'fruc', 'sulph', 'nitr', 'swt', 'flav', 'glu', 'pur', 'theo'], BASE = KEYS.slice(0, 5);
-  const PORTIONS = ['tyr', 'ox', 'ga', 'cap', 'fru', 'gos', 'sorb', 'mann', 'fruc', 'sulph', 'nitr', 'swt', 'flav', 'glu', 'pur'];
+  const KEYS = ['fat', 'sat', 'mono', 'poly', 'cplx', 'sug', 'frs', 'gluc', 'sucr', 'malt', 'gal', 'lact', 'fib', 'alc', 'caf', 'hist', 'tyr', 'ox', 'nit', 'ga', 'cap', 'fru', 'gos', 'sorb', 'mann', 'fruc', 'sulph', 'nitr', 'swt', 'flav', 'glu', 'pur', 'theo', 'na', 'se'], BASE = ['fat', 'cplx', 'sug', 'lact', 'fib'];
+  const PORTIONS = ['ox', 'ga', 'cap', 'fru', 'gos', 'sulph', 'nitr', 'swt', 'flav', 'glu', 'pur'];
+  // the kinds of fat and sugar sit under their row: the group stands where its first row would, its parent first, then its kinds in their own order
+  const KIDS = { fat: ['sat', 'mono', 'poly'], sug: ['frs', 'gluc', 'sucr', 'malt', 'gal', 'lact'] }, parentOf = k => Object.keys(KIDS).find(p => KIDS[p].includes(k)) || k;
+  const group = list => { const out = [], seen = new Set(); for (const k of list) { if (seen.has(k)) continue; const p = parentOf(k); for (const m of [p].concat(KIDS[p] || [])) if (list.includes(m) && !seen.has(m)) { out.push(m); seen.add(m); } } return out; };
   const tally = want.filter(e => e.k === 'fx').reduce((o, e) => (o[e.c] = (o[e.c] || 0) + 1, o), {}), ranked = Object.keys(tally).sort((x, y) => tally[y] - tally[x] || x.localeCompare(y)), most = ranked[0];
   const picks = [[]].concat(most ? [[most]] : [], ranked.length > 1 ? [ranked.slice(0, 2)] : []);      // any effect, the one reported most, and the two reported most together
   const dec = x => x < 1 ? 2 : x < 10 ? 1 : 0, near = (shown, real) => Math.abs(shown - real) <= 0.5 * Math.pow(10, -dec(real)) + 1e-9;
@@ -133,7 +136,7 @@ async function play(browser, base, person, table) {
       return [d.k, { hit: +d.hit, rest: +d.rest, at: d.at === undefined ? null : +d.at, dir: d.dir || null, up: +(d.hitin || 0), under: +(d.restin || 0), dh: cx('circle.dh'), dr: cx('circle.dr'), lx: line ? +line.getAttribute('x1') : null, label: (li.querySelector('.dmk') || {}).textContent || '', text: ((li.querySelector('.dtx') || {}).textContent || '') }]; }));
     const lines = KEYS.map(k => [k, R.sides(k, mode, pick, all, hours), R.split(k, mode, pick, all, hours)]).filter(([k, s]) => s.hit.ate + s.rest.ate > 0);      // a row appears only when a counted meal or day held some of it
     const marked = lines.filter(l => l[2].at !== null).sort((a, b) => a[2].wrong / a[2].n - b[2].wrong / b[2].n || KEYS.indexOf(a[0]) - KEYS.indexOf(b[0]));
-    same(N(`${tag}: the rows shown, the ones with a mark first by the share on its wrong side, then the others in their own order`), shown.map(r => r[0]), marked.concat(lines.filter(l => l[2].at === null)).map(l => l[0]));
+    same(N(`${tag}: the rows shown, the ones with a mark first by the share on its wrong side, then the others in their own order, each kind under its row`), shown.map(r => r[0]), group(marked.map(l => l[0])).concat(group(lines.filter(l => l[2].at === null).map(l => l[0]))));
     for (const [k, s, sp] of lines) { const row = (shown.find(r => r[0] === k) || [])[1]; if (!row) continue;
       same(N(`${tag}: ${k}, a filled dot for each with and an empty one for each without`), [row.dh.length, row.dr.length, row.hit, row.rest], [s.hit.n, s.rest.n, s.hit.n, s.rest.n]);
       same(N(`${tag}: ${k}, the mark and how many are on each side of it`), [row.at === null ? null : Math.abs(row.at - sp.at) < 1e-6, row.dir, row.up, row.under], [sp.at === null ? null : true, sp.dir, sp.up, sp.under]);
@@ -145,8 +148,8 @@ async function play(browser, base, person, table) {
     // the three views: Medium keeps the rows with a mark, Minimal those whose mark has more than half of each kind on its own side
     { const view = async v => { await setOpen(); await page.click(`#tView [data-act=tview][data-v=${v}]`); await sheetShut(); return page.locator('#app .drow').evaluateAll(lis => lis.map(li => li.dataset.k)); };
       const clearMark = sp => sp.at !== null && sp.up * 2 > sp.nHit && sp.under * 2 > sp.nRest, rest = lines.filter(l => l[2].at === null).length;
-      same(N(`${tag}: Medium shows the rows with a mark`), await view('med'), marked.map(l => l[0]));
-      same(N(`${tag}: Minimal shows the rows with a clear mark`), await view('min'), marked.filter(l => clearMark(l[2])).map(l => l[0]));
+      same(N(`${tag}: Medium shows the rows with a mark`), await view('med'), group(marked.map(l => l[0])));
+      same(N(`${tag}: Minimal shows the rows with a clear mark`), await view('min'), group(marked.filter(l => clearMark(l[2])).map(l => l[0])));
       same(N(`${tag}: the rows left out of Minimal are counted under it`), ((await page.locator('#thrMore').count()) ? (await page.locator('#thrMore').innerText()).match(/\d+/g) || [] : []).map(Number), [marked.filter(l => !clearMark(l[2])).length, rest].filter(x => x > 0));
       same(N(`${tag}: Full shows them all again`), (await view('all')).length, lines.length); }
     const G = R.together(mode, pick, all, hours), cell = (x, n) => n ? [Math.round(100 * x / n), x, n] : [], tog = await page.locator('#fam-tog tbody tr').evaluateAll(trs => trs.map(tr => [tr.cells[1].textContent, tr.cells[2].textContent].map(t => (t.match(/\d+/g) || []).map(Number))));
@@ -196,7 +199,7 @@ async function play(browser, base, person, table) {
   // ---- Nutrition: the ring, the compounds, and a day's amounts beside the reference ----
   await page.click('[data-act=tab][data-v=nut]');
   const SL = { fat: 'fat', prot: 'prot', cplx: 'complex', lact: 'lactose', sugo: 'otherSugars', fib: 'fibre', unk: 'carbsUnlisted' };
-  const OTHERS = ['tyr', 'ox', 'nit', 'ga', 'cap', 'fru', 'gos', 'sorb', 'mann', 'fruc', 'sulph', 'nitr', 'swt', 'flav', 'glu', 'pur', 'theo'];
+  const OTHERS = ['tyr', 'ox', 'nit', 'ga', 'cap', 'fru', 'gos', 'sorb', 'mann', 'fruc', 'sulph', 'nitr', 'swt', 'flav', 'glu', 'pur', 'theo', 'na', 'se'];
   for (const per of ['today', 'week', 'month']) { await page.click(`[data-act=nper][data-v=${per}]`); const w = R.period(per), div = Math.max(1, w.mealDays);
     // the ring, its key and its middle: a day on average
     const key = await page.locator('#app .card ul.key').first().locator('.keyrow').evaluateAll(els => els.map(e => [getComputedStyle(e.querySelector('.sw')).backgroundColor, e.querySelector('.am').textContent]));
