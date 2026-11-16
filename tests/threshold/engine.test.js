@@ -128,6 +128,10 @@ eq('the reading rules hold nothing that works out a luck number', ['luck', 'step
   days.forEach(([k, hit], i) => { const d = '2026-11-' + String(i + 1).padStart(2, '0'); ev.push(meal(d, '12:00', [[k, 1]]), hit ? fx(d, '13:00', 'head') : none(d)); });
   const R = E.rows(E.index({ roll: 0, ev }, k => W[k], NOW), 'meal');
   eq('the row with the fewest on the wrong side comes first, whatever its place in the fixed order', R.slice(0, 3).map(r => [r.b, r.s.at, r.s.wrong]), [['fib', 9, 0], ['fat', 20, 2], ['cplx', null, 3]]);
+  // a clear mark: more than half of each kind on its own side
+  eq('a mark is clear when more than half of the meals with the effect are at it or over, and more than half of the others under it', [E.clear({ at: 1, up: 21, under: 112, nHit: 27, nRest: 118 }), E.clear({ at: 8, up: 17, under: 104, nHit: 46, nRest: 110 }), E.clear({ at: 3, up: 40, under: 70, nHit: 46, nRest: 160 })], [true, false, false]);
+  eq('exactly half is not more than half, and no mark is not a clear mark', [E.clear({ at: 3, up: 1, under: 2, nHit: 2, nRest: 2 }), E.clear({ at: 3, up: 2, under: 1, nHit: 2, nRest: 2 }), E.clear({ at: null, up: 0, under: 0, nHit: 2, nRest: 2 })], [false, false, false]);
+  eq('every row says whether its mark is clear', R.slice(0, 3).map(r => [r.b, r.clear]), [['fib', true], ['fat', true], ['cplx', false]]);
   eq('with one effect picked that was never reported, nothing is on the "with" side and no row has a mark', E.rows(E.index({ roll: 0, ev }, k => W[k], NOW), 'meal', ['gut']).filter(r => r.s.at != null).length, 0); }
 
 // ---- a drink is an entry like any other: water alone is a meal that holds nothing, and a flavoured one holds a portion of flavouring ----

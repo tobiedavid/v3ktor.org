@@ -66,6 +66,8 @@ A row appears only when a counted meal or day held some of it (since 0.4.1 this 
 
 **The order.** The rows with a mark come first, by the share of their meals on the wrong side of it; the rows with none follow in their fixed order, under a heading that says no amount separates them. This holds from the first meal on: with three meals almost every row has a mark, and the order settles as meals are added. Earlier versions ranked nothing; the order is by a count the person can check on the row, and the app still says nothing about what a row means.
 
+**The view.** Since 0.4.2, "Rows shown" under Settings sets how many rows the tab draws. **Full** (the default) draws every row. **Medium** draws the rows with a mark. **Minimal** draws only the rows with a clear mark: more than half of the meals with the effect at the mark or over, and more than half of the others under it (`E.clear`). Under the rows, one line counts what the view leaves out and links to Settings. The choice is kept (`tview` in the saved data).
+
 **How to read it.** The first time the tab is opened, a card at its top shows two made-up rows (one an amount separates, one it doesn't), says what the dots are, and ends with "The more meals you report, the more accurate it gets." It stays until "Got it" is tapped (`seenThr` in the saved data); "How to read this tab", under the rows, brings it back.
 
 "Eaten together" is still a small table of shares and counts, and an opened line still lists every amount with how many sat on each side.

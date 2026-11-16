@@ -141,6 +141,13 @@ async function play(browser, base, person, table) {
         same(N(`${tag}: ${k}, the sentence under the row gives those counts`), (row.text.match(/\d+ (?:of|sur) \d+/g) || []).map(t => (t.match(/\d+/g) || []).map(Number)), [[sp.up, s.hit.n], [sp.under, s.rest.n]]);
         ok(N(`${tag}: ${k}, the mark is labelled with its amount`), row.label.length > 0 && row.text.includes(row.label), row.label + ' | ' + row.text); }
       else same(N(`${tag}: ${k}, no mark: no line, no label, no sentence`), [row.lx, row.label, row.text], [null, '', '']); }
+    // the three views: Medium keeps the rows with a mark, Minimal those whose mark has more than half of each kind on its own side
+    { const view = async v => { await setOpen(); await page.click(`#tView [data-act=tview][data-v=${v}]`); await sheetShut(); return page.locator('#app .drow').evaluateAll(lis => lis.map(li => li.dataset.k)); };
+      const clearMark = sp => sp.at !== null && sp.up * 2 > sp.nHit && sp.under * 2 > sp.nRest, rest = lines.filter(l => l[2].at === null).length;
+      same(N(`${tag}: Medium shows the rows with a mark`), await view('med'), marked.map(l => l[0]));
+      same(N(`${tag}: Minimal shows the rows with a clear mark`), await view('min'), marked.filter(l => clearMark(l[2])).map(l => l[0]));
+      same(N(`${tag}: the rows left out of Minimal are counted under it`), ((await page.locator('#thrMore').count()) ? (await page.locator('#thrMore').innerText()).match(/\d+/g) || [] : []).map(Number), [marked.filter(l => !clearMark(l[2])).length, rest].filter(x => x > 0));
+      same(N(`${tag}: Full shows them all again`), (await view('all')).length, lines.length); }
     const G = R.together(mode, pick, all, hours), cell = (x, n) => n ? [Math.round(100 * x / n), x, n] : [], tog = await page.locator('#fam-tog tbody tr').evaluateAll(trs => trs.map(tr => [tr.cells[1].textContent, tr.cells[2].textContent].map(t => (t.match(/\d+/g) || []).map(Number))));
     same(N(`${tag}: eaten together`), tog, G.three.hit + G.three.rest + G.both.hit + G.both.rest + G.many.hit + G.many.rest > 0 ? [[cell(G.three.hit, G.nHit), cell(G.three.rest, G.nRest)], [cell(G.both.hit, G.nHit), cell(G.both.rest, G.nRest)], [cell(G.many.hit, G.nHit), cell(G.many.rest, G.nRest)]] : []);
     // one line, opened: every amount, with how many sat on each side
