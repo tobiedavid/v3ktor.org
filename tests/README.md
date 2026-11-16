@@ -6,6 +6,7 @@
 |---|---|---|
 | `threshold/engine.test.js` | One check or more for each of the Threshold Log's reading rules. The rules are read out of the shipped app file, so what is tested is what people open. | Node |
 | `gut/repair.test.js` | The Food Trial Log's 13 repair cases, in the English and the French copy. | Node |
+| `../tools/foods/pack.js` | The Patch and the Food Trial Log (English and French) hold exactly the foods in `data/foods.csv`, and every row of the CSV is whole. | Node |
 | `../tools/stamp_cache.js --check` | Every app's offline cache carries the name of the file it holds. | Node |
 | `apps/load.test.js` | Every page and app on the site loads, runs no script error, asks nothing of another site, and every link leads somewhere. | Playwright |
 | `gut/one-food.test.js` | In the Food Trial Log, a bad day takes one food off the list, and undoing the report puts it back. | Playwright |
