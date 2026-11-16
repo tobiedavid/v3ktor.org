@@ -170,7 +170,7 @@ FR_SERVING = {1704: ('1 moyen', '1 moyenne'), 1696: ('1 moyen', '1 moyenne'), 17
               2185: ('1 moyen', '1 format moyen')}                                                                                                 # frites: a size, like « 1 format régulier »
 by_id = {r['id']: r for r in rows}
 for fid, (old, new) in FR_SERVING.items():
-    assert by_id[fid]['s'][1] == old, ('the Food Trial Log changed this serving', fid, by_id[fid]['s'][1]); by_id[fid]['s'][1] = new
+    assert by_id[fid]['s'][1] in (old, new), ('the Food Trial Log changed this serving', fid, by_id[fid]['s'][1]); by_id[fid]['s'][1] = new      # the Food Trial Log carries the corrected form since its own fix
 
 assert len(rows) == 208, len(rows)
 print('foods:', len(rows), '| from Health Canada:', sum(r['src'] == 'hc' for r in rows), '| from a label or typical value:', sum(r['src'] == 'label' for r in rows), '| supplements:', sum(r['src'] == 'none' for r in rows))
