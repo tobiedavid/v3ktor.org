@@ -128,13 +128,19 @@ async function play(browser, base, person, table) {
       same(N(`${tag}: the heading counts the meals with the effect in those hours, of all the meals counted`), (head.match(/\d+/g) || []).map(Number), (hours === 1 ? [] : [hours]).concat([f.hit.n, f.hit.n + f.rest.n]));
       ok(N(`${tag}: the hours are said in words beside the slider`), (await page.locator('.twin label').innerText()).includes(fr ? (hours === 1 ? 'l’heure suivante' : `les ${hours} heures suivantes`) : (hours === 1 ? 'the hour after it' : `the ${hours} hours after it`))); await sheetShut(); }
     else { await setOpen(); same(N(`${tag}: there is no slider over a day`), await page.locator('#tWin').count(), 0); await sheetShut(); }
-    const shown = await page.locator('#app table.rws:not(#fam-tog) tbody tr').evaluateAll(trs => trs.map(tr => [tr.querySelector('[data-act=rowsheet]').dataset.k].concat([1, 2].map(i => { const td = tr.cells[i], b = td.querySelector('b'); return b ? [b.textContent, td.querySelector('small').textContent] : [td.textContent.trim()]; }))));
-    const lines = KEYS.map(k => [k, R.sides(k, mode, pick, all, hours)]).filter(([k, s]) => BASE.includes(k) ? s.hit.n + s.rest.n > 0 : s.hit.ate + s.rest.ate > 0);      // a line with nothing counted is not shown
-    same(N(`${tag}: the lines shown`), shown.map(r => r[0]).sort(), lines.map(r => r[0]).sort());
-    for (const [k, s] of lines) { const row = shown.find(r => r[0] === k); if (!row) continue;
-      [[row[1], s.hit], [row[2], s.rest]].forEach(([cell, side], j) => { const name = N(`${tag}: ${k}, ${j ? 'without' : 'with'}`);
-        if (!side.n) same(name, cell, ['–']);
-        else same(name, [(cell[0].match(/\d+/) || []).map(Number)[0], /%/.test(cell[0]), (cell[1].match(/\d+/g) || []).map(Number)], [Math.round(100 * side.ate / side.n), true, [side.ate, side.n]]); }); }   // the share that held any, and how many that is: never an average, never a range
+    // every row: one dot for each meal or day, on its own side; the mark and the counts under it; and the order of the rows
+    const shown = await page.locator('#app .drow').evaluateAll(lis => lis.map(li => { const d = li.dataset, line = li.querySelector('.dm'), cx = q => [...li.querySelectorAll(q)].map(c => +c.getAttribute('cx'));
+      return [d.k, { hit: +d.hit, rest: +d.rest, at: d.at === undefined ? null : +d.at, up: +(d.up || 0), under: +(d.under || 0), dh: cx('circle.dh'), dr: cx('circle.dr'), lx: line ? +line.getAttribute('x1') : null, label: (li.querySelector('.dmk') || {}).textContent || '', text: ((li.querySelector('.dtx') || {}).textContent || '') }]; }));
+    const lines = KEYS.map(k => [k, R.sides(k, mode, pick, all, hours), R.split(k, mode, pick, all, hours)]).filter(([k, s]) => BASE.includes(k) ? s.hit.n + s.rest.n > 0 : s.hit.ate + s.rest.ate > 0);      // a line with nothing counted is not shown
+    const marked = lines.filter(l => l[2].at !== null).sort((a, b) => a[2].wrong / a[2].n - b[2].wrong / b[2].n || KEYS.indexOf(a[0]) - KEYS.indexOf(b[0]));
+    same(N(`${tag}: the rows shown, the ones with a mark first by the share on its wrong side, then the others in their own order`), shown.map(r => r[0]), marked.concat(lines.filter(l => l[2].at === null)).map(l => l[0]));
+    for (const [k, s, sp] of lines) { const row = (shown.find(r => r[0] === k) || [])[1]; if (!row) continue;
+      same(N(`${tag}: ${k}, a filled dot for each with and an empty one for each without`), [row.dh.length, row.dr.length, row.hit, row.rest], [s.hit.n, s.rest.n, s.hit.n, s.rest.n]);
+      same(N(`${tag}: ${k}, the mark and how many are on each side of it`), [row.at === null ? null : Math.abs(row.at - sp.at) < 1e-6, row.up, row.under], [sp.at === null ? null : true, sp.up, sp.under]);
+      if (sp.at !== null) { same(N(`${tag}: ${k}, the picture agrees: filled dots right of the line, empty dots left of it`), [row.dh.filter(x => x > row.lx).length, row.dr.filter(x => x < row.lx).length], [sp.up, sp.under]);
+        same(N(`${tag}: ${k}, the sentence under the row gives those counts`), (row.text.match(/\d+ (?:of|sur) \d+/g) || []).map(t => (t.match(/\d+/g) || []).map(Number)), [[sp.up, s.hit.n], [sp.under, s.rest.n]]);
+        ok(N(`${tag}: ${k}, the mark is labelled with its amount`), row.label.length > 0 && row.text.includes(row.label), row.label + ' | ' + row.text); }
+      else same(N(`${tag}: ${k}, no mark: no line, no label, no sentence`), [row.lx, row.label, row.text], [null, '', '']); }
     const G = R.together(mode, pick, all, hours), cell = (x, n) => n ? [Math.round(100 * x / n), x, n] : [], tog = await page.locator('#fam-tog tbody tr').evaluateAll(trs => trs.map(tr => [tr.cells[1].textContent, tr.cells[2].textContent].map(t => (t.match(/\d+/g) || []).map(Number))));
     same(N(`${tag}: eaten together`), tog, G.three.hit + G.three.rest + G.both.hit + G.both.rest + G.many.hit + G.many.rest > 0 ? [[cell(G.three.hit, G.nHit), cell(G.three.rest, G.nRest)], [cell(G.both.hit, G.nHit), cell(G.both.rest, G.nRest)], [cell(G.many.hit, G.nHit), cell(G.many.rest, G.nRest)]] : []);
     // one line, opened: every amount, with how many sat on each side
