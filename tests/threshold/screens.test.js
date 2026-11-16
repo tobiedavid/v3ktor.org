@@ -370,6 +370,10 @@ async function open(browser, base, o) {
       same(T + 'no period choice, no ring and no Effects bar on Home', await page.locator('#app [data-act=per], #app .ring, #app .fxbar').count(), 0);
       await page.click('#todayList [data-act=entry][data-v=x1]');
       same(T + 'an effect opens the meals in the 4 hours before it, the nearest first', [await page.locator('#befHead').innerText(), await page.locator('#befList [data-act=entry]').evaluateAll(bs => bs.map(b => b.dataset.v))], [fr ? 'Dans les 4 heures d’avant' : 'In the 4 hours before', ['m3', 'm2']]);
+      { const shown = await page.locator('#befList li').evaluateAll(lis => lis.map(li => [li.querySelector('[data-act=entry]').dataset.v, ((li.querySelector('.held') || {}).textContent || '').replace(/\u00a0/g, ' ')]));
+        const want = await page.evaluate(ids => ids.map(id => { const am = E.mealAmounts(S.ev.find(x => x.id === id), food); return E.FAMS.reduce((a, f) => a.concat(f[1]), []).filter(k => (am[k] || 0) > 0.005 || (k === 'hist' && am.histN > 0)).map(k => (S.lang === 'fr' ? BARN[k][1] : BARN[k][0]).toLowerCase()); }), shown.map(r => r[0]));
+        same(T + 'under each meal before the effect, what that meal held: the things the Threshold rows count, and only those', shown.map(r => r[1] ? r[1].split(' · ').map(p => want.flat().filter(n => p.startsWith(n + ' ')).sort((a, b) => b.length - a.length)[0]) : []), want);
+        ok(T + 'each with its amount', shown.every(r => r[1] && r[1].split(' · ').every(p => /\d/.test(p) && /(g|mg|portions?)$/.test(p))), JSON.stringify(shown)); }
       const gaps = await page.locator('#befList li').allInnerTexts(); ok(T + 'each with how long before', fr ? /40\s?min avant/.test(gaps[0]) && /2\s?h\s?10 avant/.test(gaps[1]) : /40\s?min before/.test(gaps[0]) && /2\s?h\s?10 before/.test(gaps[1]), gaps.join(' | '));
       ok(T + 'it names the earlier meal that is outside the hours', (await page.locator('#befNote').innerText()).includes('07:40'));
       // the same meals the Threshold tab sets this effect beside
