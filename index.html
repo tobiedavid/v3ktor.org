@@ -90,6 +90,10 @@
     .q:hover .q-icon { background: var(--ink); color: var(--paper); }
     .q-what { margin: 0 0 16px; max-width: 34em; color: var(--muted); }
     .q-what strong { color: var(--ink); font-weight: 650; }
+    .q-name { margin-bottom: 8px; }
+    .q-pts { margin: 0 0 14px; padding-left: 1.1em; max-width: 34em; color: var(--muted); }
+    .q-pts li { margin: 0 0 7px; }
+    .q-pts strong { color: var(--ink); font-weight: 650; }
     .q-go { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 22px; margin: 0; font-size: 16px; }
     .go { font-weight: 680; padding-bottom: 2px; border-bottom: 2px solid var(--brass); }
     .q:hover .go { border-bottom-color: var(--ink); }
@@ -180,8 +184,14 @@
 
       <article class="q">
         <span class="q-icon" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M8 6l2.300 16.400A3 3 0 0 0 13.270 25h5.460a3 3 0 0 0 2.970-2.600L24 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 11.500h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12.200 16h7.600l-.620 4.700a1.400 1.400 0 0 1-1.390 1.200h-3.580a1.400 1.400 0 0 1-1.390-1.200z" fill="currentColor"/></svg></span>
-        <h2><a href="/threshold/" data-i18n="thr.q">What had I eaten before I felt bad?</a></h2>
-        <p class="q-what"><strong data-i18n="thr.name">Threshold Log.</strong> <span data-i18n="thr.what">Report your meals and your negative effects. It sets the meals an effect came after beside the meals it didn’t: fat, carbs, lactose, fibre, and compounds such as histamine and caffeine.</span></p>
+        <h2><a href="/threshold/" data-i18n="thr.q">Why do my negative effects seem random?</a></h2>
+        <p class="q-what q-name"><strong data-i18n="thr.name">Threshold Log.</strong></p>
+        <ul class="q-pts">
+          <li><strong data-i18n="thr.p1b">Each compound in food has its own bucket.</strong> <span data-i18n="thr.p1">Fill it past the rim and a negative effect shows. Your buckets aren’t the same size as anyone else’s.</span></li>
+          <li><strong data-i18n="thr.p2b">Foods that look unrelated fill the same bucket.</strong> <span data-i18n="thr.p2">Cheddar, salami and red wine all pour in tyramine.</span></li>
+          <li><strong data-i18n="thr.p3b">A compound judged safe can still overflow yours.</strong></li>
+        </ul>
+        <p class="q-what" data-i18n="thr.what">Report your meals and your negative effects. It adds up 25 compounds across your meals, and shows how full each bucket was when an effect came.</p>
         <p class="q-go"><span class="go" aria-hidden="true" data-i18n="thr.go">Open the Threshold Log</span><span class="aside" data-i18n="thr.aside">On its own for a problem that comes and goes. After the Food Trial Log for one that’s there most days.</span></p>
       </article>
 
@@ -284,9 +294,14 @@
     'gut.what': 'Notez les repas, les selles et les symptômes. Retirez un aliment suspect, réintroduisez-le, puis comparez.',
     'gut.go': 'Ouvrir le journal',
     'gut.aside': 'Les entrées notées en anglais n’apparaissent pas dans la version française, et vice versa.',
-    'thr.q': 'Qu’avais‑je mangé avant de me sentir mal?',
+    'thr.q': 'Pourquoi mes effets négatifs semblent‑ils arriver au hasard?',
     'thr.name': 'Threshold Log.',
-    'thr.what': 'Notez vos repas et vos effets négatifs. Il met les repas suivis d’un effet à côté des autres : gras, glucides, lactose, fibres, et des composés comme l’histamine et la caféine.',
+    'thr.p1b': 'Chaque composé des aliments a son propre seau.',
+    'thr.p1': 'S’il déborde, un effet négatif apparaît. Vos seaux n’ont pas la même taille que ceux d’une autre personne.',
+    'thr.p2b': 'Des aliments sans lien apparent remplissent le même seau.',
+    'thr.p2': 'Le cheddar, le salami et le vin rouge y versent tous de la tyramine.',
+    'thr.p3b': 'Un composé jugé sûr peut quand même faire déborder le vôtre.',
+    'thr.what': 'Notez vos repas et vos effets négatifs. Il additionne 25 composés dans vos repas, et montre à quel point chaque seau était plein quand un effet est arrivé.',
     'thr.go': 'Ouvrir le Threshold Log',
     'thr.aside': 'Seul, pour un problème qui va et vient. Après le Food Trial Log, pour un problème présent presque tous les jours.',
     'patch.q': 'Pourquoi est‑ce que je tombe toujours à plat?',

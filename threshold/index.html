@@ -8,8 +8,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Threshold Log — what you had eaten before a negative effect</title>
-<meta name="description" content="Report your meals and your negative effects. The app counts, and sets the meals an effect came after beside the meals it didn’t: fat, carbs, lactose, fibre and compounds in food. Free and private: your log stays on your phone.">
+<title>Threshold Log — how much of each compound, before a negative effect</title>
+<meta name="description" content="Report your meals and your negative effects. The app adds up 25 compounds in every meal and shows the amounts an effect came after, beside the amounts it didn’t. Free and private: your log stays on your phone.">
 <meta name="theme-color" content="#c8481f">
 <link rel="canonical" href="https://v3ktor.org/threshold/">
 <link rel="icon" type="image/png" sizes="32x32" href="app/icons/favicon-32.png">
@@ -17,7 +17,7 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://v3ktor.org/threshold/">
 <meta property="og:title" content="Threshold Log">
-<meta property="og:description" content="See what you reported after a food, at each amount.">
+<meta property="og:description" content="See how much of each compound you had eaten before each negative effect you reported.">
 <meta property="og:image" content="https://v3ktor.org/threshold/app/icons/icon-512.png">
 <style>
 :root{--bg:#f7f4ee;--card:#fff;--ink:#1c1b19;--muted:#6b665d;--line:#e6e0d4;--accent:#c8481f;--teal:#0f6b6b;--frame:#1c1b19}
@@ -38,6 +38,8 @@ a{color:var(--teal);text-underline-offset:3px}
 [hidden]{display:none!important}
 .wrap{max-width:1000px;margin:0 auto;padding:0 20px}
 .text{max-width:660px}
+.text h3{margin-top:1.5em}
+.text h3:first-child{margin-top:0}
 .small{font-size:.92rem;color:var(--muted)}
 .top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 0}
 .brand{display:flex;align-items:center;gap:12px;font:800 1.2rem ui-serif,Georgia,'Times New Roman',serif;color:var(--ink);text-decoration:none}
@@ -84,8 +86,8 @@ section{padding:42px 0;border-top:1px solid var(--line)}
   <main data-l="en" lang="en-CA">
   <div class="hero">
     <div>
-      <h1>See what you had eaten before the negative effects you reported.</h1>
-      <p class="sub">Fat, carbs, lactose, fibre, and compounds in food such as histamine, caffeine and gluten. Your meals, your reports.</p>
+      <h1>Why do my negative effects seem random?</h1>
+      <p class="sub">Report your meals and your negative effects. The app adds up 25 compounds in every meal. For each one it shows the amounts an effect came after, beside the amounts it didn’t.</p>
       <div class="cta">
         <a class="btn" href="app/">Open the app</a>
         <a class="btn ghost" href="#install">Install on your phone</a>
@@ -97,6 +99,23 @@ section{padding:42px 0;border-top:1px solid var(--line)}
       <figcaption>What you ate when an effect was reported, beside when it wasn’t.</figcaption>
     </figure>
   </div>
+
+  <section>
+    <h2>Each compound has its own threshold</h2>
+    <div class="text">
+      <p>Picture a bucket for each compound in food. Each meal pours some in. Past the rim, a negative effect shows. The rim is your threshold for that compound. It isn’t at the same height for every compound, and yours isn’t where anyone else’s is.</p>
+    </div>
+    <ul class="facts text">
+      <li><b>A threshold near zero.</b> A trace is enough. That is an allergy. For peanut, milk and egg, an expert panel of the FAO and the WHO set its reference amount at 2&nbsp;mg of the food’s protein, the amount about 1 allergic person in 20 reacts to (<a href="https://www.foodsafetynews.com/2023/01/experts-advance-allergen-amount-understanding/">Food Safety News, 2023</a>). Don’t eat a food you’re allergic to in order to test it: that is one of the five statements on the app’s first screen.</li>
+      <li><b>A little higher.</b> A small amount passes and a usual portion doesn’t. That is an intolerance.</li>
+      <li><b>Higher still.</b> Any one food passes. Several foods that hold the same compound, in the same day, add up past it. The foods look unrelated, so the effect seems random.</li>
+    </ul>
+    <div class="text">
+      <p><b>Foods that look unrelated fill the same bucket.</b> Cheddar, salami and red wine all hold tyramine. What adds up is the compound, not the food.</p>
+      <p><b>A compound most people take without an effect can still pass your threshold.</b> A limit set for most people doesn’t say where yours is.</p>
+      <p><b>The app holds no thresholds.</b> It adds up 25 compounds in every meal. For each one it shows the amounts an effect came after, beside the amounts it didn’t. It doesn’t judge. It counts, and shows where things land.</p>
+    </div>
+  </section>
 
   <section>
     <h2>How it works</h2>
@@ -131,7 +150,7 @@ section{padding:42px 0;border-top:1px solid var(--line)}
     <h2>Step two, after the Food Trial Log</h2>
     <div class="text">
       <p>The <a href="../gut/">Food Trial Log</a> finds the foods your gut rejects. It answers yes or no, one food at a time.</p>
-      <p>The Threshold Log looks at the amount. A food can sit well at one portion and not at three, and what a food holds matters: its fat, its lactose, its fibre.</p>
+      <p>The Threshold Log looks at the amount of each compound. A food can pass at one portion and not at three, and two foods that look unrelated can hold the same compound.</p>
       <p>If you used the Food Trial Log, bring in your list, the foods it rejected, and what those have in common. The Threshold Log works without it too.</p>
     </div>
   </section>
@@ -146,6 +165,23 @@ section{padding:42px 0;border-top:1px solid var(--line)}
       <li><b>A row can’t tell apart</b> two things eaten together. And what you expect can shape what you feel and report.</li>
       <li><b>Reference amounts</b> come from Health Canada’s Dietary Reference Intakes and are shown for comparison only. The app doesn’t endorse them or advise on them. Health Canada has no connection with this app. This doesn’t replace a dietitian.</li>
     </ul>
+  </section>
+
+  <section>
+    <h2>The amount isn’t the whole equation</h2>
+    <div class="text">
+      <h3>What puts the body in fight or flight.</h3>
+      <p>Under stress or danger the body goes into fight or flight. Digestion slows down so its energy goes elsewhere. Norepinephrine carries that signal.</p>
+      <p>Some of what you take raises it. Caffeine does, by blocking what holds norepinephrine back. People who often drink a lot of alcohol in one sitting had more of it over a day than moderate drinkers. Stress, hard exercise and illness do it with nothing taken.</p>
+      <p>Caffeine and alcohol have rows of their own. A row shows one compound at a time, not what one does to another, and we found no source that measures how far this moves a threshold. While you log, keep these low, or at least the same from one day to the next. A medicine a doctor gave you isn’t on this list.</p>
+      <p class="small">Sources: <a href="https://my.clevelandclinic.org/health/body/23262-sympathetic-nervous-system-sns-fight-or-flight">Cleveland Clinic, the sympathetic nervous system</a>; <a href="https://courses.lumenlearning.com/suny-mcc-ap1/chapter/drugs-that-affect-the-autonomic-system/">Anatomy and Physiology, drugs that affect the autonomic system</a>; <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7239610">Hwang and others, Journal of Hypertension, 2020</a>.</p>
+      <h3>Volume counts, not only compounds.</h3>
+      <p>A stomach that stretches tells the colon to move along what is already in it. That starts within minutes, up to about an hour. A bigger stretch sends a stronger signal.</p>
+      <p>Gas stretches the stomach too. In one study, a 300&nbsp;ml carbonated drink left the stomach about 250&nbsp;ml bigger than the same drink without bubbles, and most of the difference was gas. A small can takes up the room of a drink almost twice its size.</p>
+      <p>Cold changes it as well. A drink at 4&nbsp;°C changed how the stomach moved for the next half hour, compared with the same drink at body temperature.</p>
+      <p>The rows add up compounds. They don’t add up volume, gas or temperature.</p>
+      <p class="small">Sources: <a href="https://my.clevelandclinic.org/health/body/gastrocolic-reflex">Cleveland Clinic, the gastrocolic reflex</a>; <a href="https://doi.org/10.1186/1475-2891-10-114">Cuomo and others, Nutrition Journal, 2011</a> (10 adults; funded by Coca-Cola); <a href="https://gut.bmj.com/content/gutjnl/37/3/329.full.pdf">Sun and others, Gut, 1995</a> (12 adults).</p>
+    </div>
   </section>
 
   <section>
@@ -194,8 +230,8 @@ section{padding:42px 0;border-top:1px solid var(--line)}
   <main data-l="fr" lang="fr-CA" hidden>
   <div class="hero">
     <div>
-      <h1>Vois ce que tu avais mangé avant les effets négatifs que tu as notés.</h1>
-      <p class="sub">Gras, glucides, lactose, fibres, et des composés des aliments comme l’histamine, la caféine et le gluten. Tes repas, tes relevés.</p>
+      <h1>Pourquoi mes effets négatifs semblent‑ils arriver au hasard?</h1>
+      <p class="sub">Note tes repas et tes effets négatifs. L’app additionne 25 composés dans chaque repas. Pour chacun, elle montre les quantités suivies d’un effet, à côté de celles qui ne l’ont pas été.</p>
       <div class="cta">
         <a class="btn" href="app/">Ouvrir l’app</a>
         <a class="btn ghost" href="#installer">Installer sur ton téléphone</a>
@@ -207,6 +243,23 @@ section{padding:42px 0;border-top:1px solid var(--line)}
       <figcaption>Ce que tu as mangé quand un effet a été noté, à côté de quand il ne l’a pas été.</figcaption>
     </figure>
   </div>
+
+  <section>
+    <h2>Chaque composé a son propre seuil</h2>
+    <div class="text">
+      <p>Imagine un seau pour chaque composé des aliments. Chaque repas en verse un peu. Passé le bord, un effet négatif apparaît. Le bord, c’est ton seuil pour ce composé. Il n’est pas à la même hauteur pour chaque composé, et le tien n’est pas à la même hauteur que celui d’une autre personne.</p>
+    </div>
+    <ul class="facts text">
+      <li><b>Un seuil près de zéro.</b> Une trace suffit. C’est une allergie. Pour l’arachide, le lait et l’œuf, un groupe d’experts de la FAO et de l’OMS a fixé sa quantité de référence à 2&nbsp;mg de la protéine de l’aliment, la quantité à laquelle réagit environ 1 personne allergique sur 20 (<a href="https://www.foodsafetynews.com/2023/01/experts-advance-allergen-amount-understanding/">Food Safety News, 2023</a>). Ne mange pas un aliment auquel tu es allergique pour le tester&nbsp;: c’est un des cinq énoncés du premier écran de l’app.</li>
+      <li><b>Un peu plus haut.</b> Une petite quantité passe, une portion ordinaire ne passe pas. C’est une intolérance.</li>
+      <li><b>Plus haut encore.</b> Chaque aliment passe, pris seul. Plusieurs aliments qui contiennent le même composé, dans la même journée, s’additionnent et dépassent le seuil. Ces aliments n’ont pas l’air liés, alors l’effet semble arriver au hasard.</li>
+    </ul>
+    <div class="text">
+      <p><b>Des aliments sans lien apparent remplissent le même seau.</b> Le cheddar, le salami et le vin rouge contiennent tous de la tyramine. Ce qui s’additionne, c’est le composé, pas l’aliment.</p>
+      <p><b>Un composé que la plupart des gens prennent sans effet peut quand même dépasser ton seuil.</b> Une limite fixée pour la plupart des gens ne dit pas où est la tienne.</p>
+      <p><b>L’app ne contient aucun seuil.</b> Elle additionne 25 composés dans chaque repas. Pour chacun, elle montre les quantités suivies d’un effet, à côté de celles qui ne l’ont pas été. Elle ne juge pas. Elle compte, et montre où les choses se situent.</p>
+    </div>
+  </section>
 
   <section>
     <h2>Comment ça marche</h2>
@@ -241,7 +294,7 @@ section{padding:42px 0;border-top:1px solid var(--line)}
     <h2>La deuxième étape, après le Food Trial Log</h2>
     <div class="text">
       <p>Le <a href="../gut/fr/">Food Trial Log</a> trouve les aliments que ton ventre rejette. Il répond par oui ou par non, un aliment à la fois.</p>
-      <p>Le Threshold Log regarde la quantité. Un aliment peut bien passer à une portion et pas à trois, et ce qu’un aliment contient compte&nbsp;: son gras, son lactose, ses fibres.</p>
+      <p>Le Threshold Log regarde la quantité de chaque composé. Un aliment peut passer à une portion et pas à trois, et deux aliments sans lien apparent peuvent contenir le même composé.</p>
       <p>Si tu as utilisé le Food Trial Log, importe ta liste, les aliments qu’il a rejetés, et ce qu’ils ont en commun. Le Threshold Log fonctionne aussi sans lui.</p>
     </div>
   </section>
@@ -256,6 +309,23 @@ section{padding:42px 0;border-top:1px solid var(--line)}
       <li><b>Une ligne ne peut pas départager</b> deux choses mangées ensemble. Et ce à quoi tu t’attends peut influencer ce que tu ressens et ce que tu notes.</li>
       <li><b>Les quantités de référence</b> viennent des Apports nutritionnels de référence de Santé Canada et sont montrées pour comparaison seulement. L’app ne les endosse pas et ne donne pas de conseil à leur sujet. Santé Canada n’a aucun lien avec cette app. Ça ne remplace pas une diététiste.</li>
     </ul>
+  </section>
+
+  <section>
+    <h2>La quantité n’est pas toute l’équation</h2>
+    <div class="text">
+      <h3>Ce qui met le corps en mode combat ou fuite.</h3>
+      <p>Devant un stress ou un danger, le corps passe en mode combat ou fuite. La digestion ralentit pour que son énergie aille ailleurs. La noradrénaline porte ce signal.</p>
+      <p>Une partie de ce que tu prends la fait monter. La caféine le fait, en bloquant ce qui retient la noradrénaline. Les personnes qui boivent souvent beaucoup d’alcool en une fois en avaient plus sur une journée que les buveurs modérés. Le stress, l’effort intense et la maladie le font sans que tu prennes quoi que ce soit.</p>
+      <p>La caféine et l’alcool ont leurs propres lignes. Une ligne montre un composé à la fois, pas ce que l’un fait à l’autre, et nous n’avons trouvé aucune source qui mesure de combien ça déplace un seuil. Pendant que tu notes, garde-les bas, ou au moins pareils d’une journée à l’autre. Un médicament donné par un médecin n’est pas sur cette liste.</p>
+      <p class="small">Sources&nbsp;: <a href="https://my.clevelandclinic.org/health/body/23262-sympathetic-nervous-system-sns-fight-or-flight">Cleveland Clinic, le système nerveux sympathique</a>; <a href="https://courses.lumenlearning.com/suny-mcc-ap1/chapter/drugs-that-affect-the-autonomic-system/">Anatomy and Physiology, les substances qui agissent sur le système autonome</a>; <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7239610">Hwang et coll., Journal of Hypertension, 2020</a>. En anglais.</p>
+      <h3>Le volume compte, pas seulement les composés.</h3>
+      <p>Un estomac qui s’étire dit au côlon de faire avancer ce qui s’y trouve déjà. Ça commence en quelques minutes, jusqu’à environ une heure. Plus l’étirement est grand, plus le signal est fort.</p>
+      <p>Le gaz étire l’estomac aussi. Dans une étude, une boisson gazéifiée de 300&nbsp;ml a laissé l’estomac environ 250&nbsp;ml plus gros que la même boisson sans bulles, et presque toute la différence était du gaz. Une petite canette prend la place d’une boisson presque deux fois plus grosse.</p>
+      <p>Le froid change aussi les choses. Une boisson à 4&nbsp;°C a changé la façon dont l’estomac bougeait pendant la demi-heure suivante, comparée à la même boisson à la température du corps.</p>
+      <p>Les lignes additionnent des composés. Elles n’additionnent ni le volume, ni le gaz, ni la température.</p>
+      <p class="small">Sources&nbsp;: <a href="https://my.clevelandclinic.org/health/body/gastrocolic-reflex">Cleveland Clinic, le réflexe gastrocolique</a>; <a href="https://doi.org/10.1186/1475-2891-10-114">Cuomo et coll., Nutrition Journal, 2011</a> (10 adultes; financée par Coca-Cola); <a href="https://gut.bmj.com/content/gutjnl/37/3/329.full.pdf">Sun et coll., Gut, 1995</a> (12 adultes). En anglais.</p>
+    </div>
   </section>
 
   <section>
@@ -316,8 +386,8 @@ section{padding:42px 0;border-top:1px solid var(--line)}
 <script>
 /* One page, two languages. English is in the page as it loads, so it reads without JavaScript. The choice is the one the front page keeps. */
 (function(){ var KEY='v3ktor-lang', btn=document.getElementById('langBtn'), meta=document.querySelector('meta[name="description"]');
-  var T={en:{title:'Threshold Log — what you had eaten before a negative effect',desc:meta.getAttribute('content'),other:'Français',otherLang:'fr'},
-         fr:{title:'Threshold Log — ce que tu avais mangé avant un effet négatif',desc:'Note tes repas et tes effets négatifs. L’app compte, et met les repas suivis d’un effet à côté des autres repas\u00a0: gras, glucides, lactose, fibres et composés des aliments. Gratuit et privé\u00a0: ton journal reste sur ton téléphone.',other:'English',otherLang:'en'}};
+  var T={en:{title:'Threshold Log — how much of each compound, before a negative effect',desc:meta.getAttribute('content'),other:'Français',otherLang:'fr'},
+         fr:{title:'Threshold Log — combien de chaque composé, avant un effet négatif',desc:'Note tes repas et tes effets négatifs. L’app additionne 25 composés dans chaque repas et montre les quantités suivies d’un effet, à côté des autres. Gratuit et privé\u00a0: ton journal reste sur ton téléphone.',other:'English',otherLang:'en'}};
   function show(l){ if(l!=='fr') l='en'; document.documentElement.lang=l==='fr'?'fr-CA':'en-CA';
     var all=document.querySelectorAll('[data-l]'); for(var i=0;i<all.length;i++) all[i].hidden=all[i].getAttribute('data-l')!==l;
     document.title=T[l].title; meta.setAttribute('content',T[l].desc); btn.textContent=T[l].other; btn.setAttribute('lang',T[l].otherLang); btn.setAttribute('data-to',T[l].otherLang); }
