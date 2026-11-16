@@ -58,7 +58,15 @@ The app puts no number on luck. Version 0.2 gave Fisher's exact test for one tap
 
 Since 0.3.7 the tab holds the lists and two buttons. **Filter** picks the effects the lists are read for; the picks are kept. **Settings** holds the reading ("After a meal" or "Over a day") and, for "After a meal", the slider.
 
-Each line shows, for each side, the share of its meals or days that held any of it, and how many that is: "67%, 31 of 46". The rows no longer show the lowest and highest amount: on made-up people those ranges sat inside each other on almost every line. Every amount is still one tap away, in the opened line. Nothing is averaged and nothing is ranked.
+Since 0.4.0 each line is a row of dots. Every counted meal (or day) is one dot, placed by how much it held: filled if the picked effects were reported for it, empty if not. Meals with the same amount stand one over the other. The lists of shares ("67%, 31 of 46") said only whether a meal held any of a thing; the amount was a tap away, one line at a time. Nothing is averaged.
+
+**The mark.** A row gets a mark at the amount that leaves the fewest meals on the wrong side of it: a meal with the effect under the mark, or one without it at the mark or over. The mark is one of the amounts the person ate, never the lowest, and the lowest such amount when several do as well. It is kept only when it leaves fewer on the wrong side than the smaller of the two sides holds, since a mark at either end separates nothing. The sentence under the row gives the counts: "From 8.4 g up: 17 of 46 with. Under 8.4 g: 104 of 110 without." `E.split` in the engine does the count; `tests/threshold/oracle.js` recounts it.
+
+**The order.** The rows with a mark come first, by the share of their meals on the wrong side of it; the rows with none follow in their fixed order, under a heading that says no amount separates them. This holds from the first meal on: with three meals almost every row has a mark, and the order settles as meals are added. Earlier versions ranked nothing; the order is by a count the person can check on the row, and the app still says nothing about what a row means.
+
+**How to read it.** The first time the tab is opened, a card at its top shows two made-up rows (one an amount separates, one it doesn't), says what the dots are, and ends with "The more meals you report, the more accurate it gets." It stays until "Got it" is tapped (`seenThr` in the saved data); "How to read this tab", under the rows, brings it back.
+
+"Eaten together" is still a small table of shares and counts, and an opened line still lists every amount with how many sat on each side.
 
 An effect read alone keeps its own hours. Any effect, or several together, use the general hours. An effect opened from Home is read with the same hours the lists use for it.
 

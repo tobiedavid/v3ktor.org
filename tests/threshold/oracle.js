@@ -94,6 +94,15 @@ function recount(entries, roll, now) {
     for (const x of u.list) { const s = x.fx.length ? hit : rest; s.n++; if (x.x > 0.005) s.ate++; if (s.lo === null || x.x < s.lo) s.lo = x.x; if (s.hi === null || x.x > s.hi) s.hi = x.x; }
     return { hit, rest, left: u.left };
   }
+  // the mark of one line, counted the slow way: try every amount but the lowest, count who is on the wrong side of it (with the effect and under it,
+  // or without and at it or over), and keep the lowest of the best. It has to do better than a mark at either end, which leaves one whole side wrong.
+  function split(bar, mode, pick, all, hours) {
+    const list = units(bar, mode, pick, all, hours).list.map(x => ({ x: x.x > 0.005 ? x.x : 0, hit: x.fx.length > 0 })), hits = list.filter(u => u.hit), rest = list.filter(u => !u.hit);
+    const out = { at: null, up: 0, under: 0, nHit: hits.length, nRest: rest.length, n: list.length, wrong: Math.min(hits.length, rest.length) }; if (!hits.length || !rest.length) return out;
+    for (const c of [...new Set(list.map(u => u.x))].sort((a, b) => a - b).slice(1)) { const up = hits.filter(u => u.x >= c).length, under = rest.filter(u => u.x < c).length, wrong = hits.length - up + rest.length - under;
+      if (wrong < out.wrong) Object.assign(out, { at: c, up, under, wrong }); }
+    return out;
+  }
   // eaten together: 3 or more portions of the aged and fermented foods, and alcohol with one of them
   function together(mode, pick, all, hours) {
     const o = { nHit: 0, nRest: 0, three: { hit: 0, rest: 0 }, both: { hit: 0, rest: 0 }, many: { hit: 0, rest: 0 } };
@@ -135,7 +144,7 @@ function recount(entries, roll, now) {
       if (seen.size) r.k++; for (const c of seen) r.any[c] = (r.any[c] || 0) + 1; }
     return { times, clean, rows: Object.values(rows).sort((a, b) => a.q - b.q), without, waiting };
   }
-  return { days, keys, complete: keys.filter(k => days[k].complete).length, cells, sides, together, period, todayList, before, outside, effects: allFx.slice().sort((a, b) => a.t - b.t), oneFood };
+  return { days, keys, complete: keys.filter(k => days[k].complete).length, cells, sides, split, together, period, todayList, before, outside, effects: allFx.slice().sort((a, b) => a.t - b.t), oneFood };
 }
 
 module.exports = { loadTable, holds, plus, nothing, recount, dayOf, dayPlus, dayBegins, MICRO, APP };
