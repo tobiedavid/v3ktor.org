@@ -84,6 +84,8 @@ Since 0.3.4, Home is the two buttons and today's entries, in order. It has no pe
 
 Tapping an effect opens the meals reported in the hours before it, the nearest first, each with how long before. The hours are the ones set on the Threshold slider, so the sheet lists exactly the meals the lists set that effect beside. Earlier meals of the same day that fall outside those hours are named, not listed. Poor sleep is counted with the day before, so it opens that day's meals. Nothing on the sheet says what any of it means.
 
+An effect's sheet lists the meals in the hours before it. Since 0.4.4 each of those meals says what it held, of the things the Threshold rows count ("fat 12 g · lactose 5 g · caffeine 80 mg"), so the amounts are in view where the effect was reported.
+
 ## Drinks, and flavourings
 
 A drink is entered like a meal. Since 0.3.3 the table carries water, plain sparkling water and flavoured sparkling water as three entries, so a person can report which one it was. Water alone is a meal that holds nothing: it sits on a side of every line with an amount of zero.

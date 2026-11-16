@@ -715,7 +715,7 @@ return {H,WIN,WINS,STEPS,ZEPS,MANY,groups,BUCKETS,COMPS,FAMS,TAGS,line,table,spl
 if(typeof module!=='undefined') module.exports=TLE;
 /* ENGINE:END */
 /* ===================== APP: the screens. Data in, data out: the app reports what was entered and never interprets it. ===================== */
-const VER='0.4.3', CONSENT=1, KEY='v3k.threshold.v1', GUTKEYS=['v3k.gut.v1','v3k.gut.fr.v1'];   /* the Food Trial Log keeps its English and its French copy apart */
+const VER='0.4.4', CONSENT=1, KEY='v3k.threshold.v1', GUTKEYS=['v3k.gut.v1','v3k.gut.fr.v1'];   /* the Food Trial Log keeps its English and its French copy apart */
 const E=TLE, H=36e5;
 const FRAMED=(()=>{ try{ return window.self!==window.top; }catch(e){ return true; } })();
 const STANDALONE=(()=>{ try{ return !!(navigator.standalone||matchMedia('(display-mode: standalone)').matches); }catch(e){ return false; } })();
@@ -1238,6 +1238,8 @@ function amountsLine(am,plain){ const u=(x,un,d)=>plain?num(x,d).replace(/[\u00a
   if(am.histN>0) P.push(L('histamine est.','histamine est.')+' '+u(am.hist,'mg',am.hist<1?2:1)+(am.histUnk>0?L(' plus a food with no figure',' plus un aliment sans chiffre'):''));
   P.push(u(am.kcal,'kcal',0)); if(am.noNum>0) P.push(L('a food with no numbers is not counted','un aliment sans chiffres n’est pas compté'));
   return P.join(plain?', ':' · '); }
+/* what one meal held, of the things the Threshold rows count: only what is there, each with its amount */
+function heldLine(am){ const P=[]; for(const f of E.FAMS) for(const k of f[1]) if(held(am,k)&&E.usable(am,k)) P.push(L(BARN[k][0],BARN[k][1]).toLowerCase()+' '+amtTxt(k,am[k]||0)); return P.join(' · '); }
 function entrySheet(keep){ const e=S.ev.find(x=>x.id===UI.en.id); if(!e){ closeSheet(); return; } const k=e.k==='none'?e.d:E.dayKey(e.t,S.roll), rm=`<button type="button" class="btn ghost sm" data-act="del" data-v="${e.id}">${L('Remove','Retirer')}</button>`;
   if(e.k==='meal') showSheet(`<h3 id="sheetTitle">${L('Meal','Repas')} · ${esc(dLabel(k))}, ${hm(e.t)}</h3>
     <ul class="evs">${e.items.map(it=>{ const f=food(it.key); return `<li>${qtxt(it.q)}\u00a0×\u00a0<button type="button" class="lnk" data-act="foodrd" data-v="${esc(it.key)}">${esc(fname(f))}</button>${fserv(f)?` <span class="small muted">${esc(fserv(f))}</span>`:''}</li>`; }).join('')}</ul>
@@ -1245,7 +1247,7 @@ function entrySheet(keep){ const e=S.ev.find(x=>x.id===UI.en.id); if(!e){ closeS
   else if(e.k==='fx'){ const h=winFor(e.c), W=h*E.H, sleep=e.c==='sleep', dk=E.fxDay(e,S.roll), meals=S.ev.filter(x=>x.k==='meal'&&x.t<=e.t);
     /* the meals the lists set this effect beside: within the slider's hours before it. Poor sleep is counted with the day before, so it shows that day's meals. */
     const bef=sleep?meals.filter(x=>E.dayKey(x.t,S.roll)===dk):meals.filter(x=>x.t>=e.t-W).reverse(), out=sleep?[]:meals.filter(x=>x.t<e.t-W&&E.dayKey(x.t,S.roll)===k);
-    const row=x=>`<li><button type="button" class="lnk" data-act="entry" data-v="${x.id}">${hm(x.t)}</button>${sleep?'':' · '+gapTxt(e.t-x.t)}<br>${mealText(x)}</li>`;
+    const row=x=>`<li><button type="button" class="lnk" data-act="entry" data-v="${x.id}">${hm(x.t)}</button>${sleep?'':' · '+gapTxt(e.t-x.t)}<br>${mealText(x)}${(h=>h?`<br><span class="small muted held">${h}</span>`:'')(heldLine(E.mealAmounts(x,food)))}</li>`;
     const outs=out.map(x=>hm(x.t)), outL=outs.length>1?outs.slice(0,-1).join(', ')+L(' and ',' et ')+outs[outs.length-1]:outs[0];
     showSheet(`<h3 id="sheetTitle">${esc(fxName(e.c))}</h3><p class="small muted" style="margin:-4px 0 12px">${esc(dLabel(k))}, ${hm(e.t)}</p>
     <p style="margin:0"><b id="befHead">${sleep?L('Counted with the day before','Compté avec la journée d’avant')+COL()+esc(dLabel(dk)):h===1?L('In the hour before','Dans l’heure d’avant'):L(`In the ${h} hours before`,`Dans les ${h} heures d’avant`)}</b></p>
