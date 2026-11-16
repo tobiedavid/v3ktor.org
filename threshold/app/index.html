@@ -244,6 +244,7 @@ svg.dots{display:block;width:100%;height:auto;overflow:visible} .dots .l1{fill:v
 .dh{fill:var(--ink);fill-opacity:.82} .dr{fill:none;stroke:var(--muted);stroke-width:1.1} .dots .dm{stroke:var(--ink);stroke-width:1.6}
 .dmk{position:absolute;top:0;font-size:.78rem;font-weight:700;white-space:nowrap;line-height:1.3rem} .dax{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums}
 .dtx{margin:4px 0 0} .dkey{display:flex;flex-wrap:wrap;gap:2px 16px;margin:0 0 6px} .dkey svg{width:.8em;height:.8em;margin-right:5px;vertical-align:-.02em}
+.thn{display:block;font-weight:400;font-size:.78rem;text-transform:none;letter-spacing:0;white-space:nowrap}
 .thrbar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 12px}
 .tbb{display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-height:56px;min-width:0;padding:8px 14px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:inherit;font:inherit;text-align:left;cursor:pointer}
 .tbb small{font-size:.78rem;color:var(--muted)} .tbb b{font-size:.95rem;line-height:1.2;overflow-wrap:anywhere}
@@ -721,7 +722,7 @@ return {H,WIN,WINS,STEPS,ZEPS,MANY,groups,BUCKETS,COMPS,FAMS,TAGS,line,table,spl
 if(typeof module!=='undefined') module.exports=TLE;
 /* ENGINE:END */
 /* ===================== APP: the screens. Data in, data out: the app reports what was entered and never interprets it. ===================== */
-const VER='0.4.6', CONSENT=1, KEY='v3k.threshold.v1', GUTKEYS=['v3k.gut.v1','v3k.gut.fr.v1'];   /* the Food Trial Log keeps its English and its French copy apart */
+const VER='0.4.7', CONSENT=1, KEY='v3k.threshold.v1', GUTKEYS=['v3k.gut.v1','v3k.gut.fr.v1'];   /* the Food Trial Log keeps its English and its French copy apart */
 const E=TLE, H=36e5;
 const FRAMED=(()=>{ try{ return window.self!==window.top; }catch(e){ return true; } })();
 const STANDALONE=(()=>{ try{ return !!(navigator.standalone||matchMedia('(display-mode: standalone)').matches); }catch(e){ return false; } })();
@@ -1065,6 +1066,8 @@ function thrIntro(){ return `<div class="card" id="thrIntro"><h3 style="margin:0
   <p class="small" style="margin:2px 0 10px">${L('Here none does. A row like this comes last.','Ici, aucune ne le fait. Une ligne comme celle-ci vient en dernier.')}</p>
   <p style="margin:0 0 12px"><b>${L('The more meals you report, the more accurate it gets.','Plus tu notes de repas, plus c’est précis.')}</b></p>
   <button type="button" class="btn primary" style="width:100%" data-act="thrgot">${L('Got it','Compris')}</button></div>`; }
+/* the two columns of a table of counts: named for what they are, each with how many meals or days it holds */
+function sideHead(mode,a,b){ const c=k=>`<span class="thn">${k} ${unitWord(mode,k)}</span>`; return `<th scope="col">${L('With effect','Avec effet')}${c(a)}</th><th scope="col">${L('Without','Sans')}${c(b)}</th>`; }
 function vThr(){ const mode=S.tmode, h=thrH(), I=IX(), h1=h===1, hE=h1?'the hour':`the ${h} hours`, hF=h1?'l’heure':`les ${h} heures`, rd=E.reportedDays(I), seen=fxSeen(I), sel=selOf().filter(c=>seen.indexOf(c)>=0); S.tsel=sel;
   const all=sel.length>1&&S.tall!==false;
   const T=E.table(I,mode,sel,all), base=T[0].rows[0], nHit=base.hit.n, nRest=base.rest.n, n=nHit+nRest, G=E.together(I,mode,sel,all), nm=cap(selName(sel,all)), Wt=E.waiting(I,mode,sel,all), wn=[], o=Wt.open;
@@ -1074,7 +1077,7 @@ function vThr(){ const mode=S.tmode, h=thrH(), I=IX(), h1=h===1, hE=h1?'the hour
     :L(`${o} ${o===1?'day is':'days are'} left open, with no effect and no tap on “No effects today”, so ${o===1?'it stays':'they stay'} out.`,`${o} ${o===1?'journée est laissée ouverte':'journées sont laissées ouvertes'}, sans effet ni appui sur « Aucun effet aujourd’hui », alors ${o===1?'elle reste':'elles restent'} en dehors.`));
   if(Wt.next) wn.push(L(`${Wt.next===1?'1 day isn’t counted: nothing is reported for the day after it':Wt.next+' days aren’t counted: nothing is reported for the day after them'}, no effect and no tap on “No effects today”.`,`${Wt.next===1?'1 journée n’est pas comptée':Wt.next+' journées ne sont pas comptées'} : rien n’est noté pour ${Wt.next===1?'le':'leur'} lendemain, ni effet ni appui sur « Aucun effet aujourd’hui ».`));
   const waitHTML=wn.length?`<p class="small muted" id="thrWait" style="margin:0 0 6px">${wn.join(' ')}</p>`:'';
-  const th=`<th scope="col">${L('With','Avec')}</th><th scope="col">${L('Without','Sans')}</th>`;
+  const th=sideHead(mode,nHit,nRest);
   /* a line with nothing counted on either side is not shown as two dashes: it is named under the lists, with what kept its meals or days out */
   const gone=T[0].rows.filter(r=>r.hit.n+r.rest.n===0&&r.left>0);
   const goneHTML=gone.length?`<p class="small muted" id="thrGone" style="margin:0 0 8px">${L('Not in the list','Pas dans la liste')}${COL()}${gone.map(r=>L(BARN[r.b][0],BARN[r.b][1]).toLowerCase()).join(', ')}. ${L(`${gone[0].left} ${unitWord(mode,gone[0].left)} left out`,`${gone[0].left} ${unitWord(mode,gone[0].left)} laissé${mode==='day'?'e':''}${gone[0].left>1?'s':''} de côté`)} (${leftWhy2(gone[0].b)}).</p>`:'';
@@ -1142,7 +1145,7 @@ function rowSheet(keep){ const u=UI.rs, sel=selOf(), al=sel.length>1&&S.tall!==f
   showSheet(`<h3 id="sheetTitle">${L(en,fr)}</h3>
   <p class="small muted" style="margin:0 0 8px">${B.mode==='meal'?L(`After a meal: effects reported in ${hrsAfter(thrH())}.`,'Après un repas : effets notés dans '+hrsAfter(thrH())+'.'):L('Over a day: effects reported that day, that night and the next day.','Sur une journée : effets notés ce jour-là, cette nuit-là et le lendemain.')}</p>
   ${N?`<p style="margin:0"><b>${esc(cap(selName(sel,al)))}${COL()}${K} ${L('of','sur')} ${N} ${uw(N)}</b></p>
-  <table class="cov rws" id="rowSteps"><thead><tr><th scope="col" style="text-align:left">${L('Amount','Quantité')}</th><th scope="col">${L('With','Avec')}</th><th scope="col">${L('Without','Sans')}</th></tr></thead><tbody>${all.map(s=>`<tr><th scope="row"><button type="button" class="rowb" data-act="rstep" data-v="${s.i}" aria-pressed="${u.i===s.i}">${stepRange(B,s)}</button></th><td>${s.k}</td><td>${s.n-s.k}</td></tr>`).join('')}</tbody></table>
+  <table class="cov rws" id="rowSteps"><thead><tr><th scope="col" style="text-align:left">${L('Amount','Quantité')}</th>${sideHead(B.mode,K,N-K)}</tr></thead><tbody>${all.map(s=>`<tr><th scope="row"><button type="button" class="rowb" data-act="rstep" data-v="${s.i}" aria-pressed="${u.i===s.i}">${stepRange(B,s)}</button></th><td>${s.k}</td><td>${s.n-s.k}</td></tr>`).join('')}</tbody></table>
   ${more||`<p class="small muted" style="margin:0">${L('Tap an amount to see the foods it came from.','Appuie sur une quantité pour voir les aliments d’où elle vient.')}</p>`}${luckNote(B.mode)}`
     :`<p class="small muted">${L('Nothing counted yet.','Rien de compté pour l’instant.')}</p>`}
   ${B.left?`<p class="small muted" style="margin:10px 0 0">${L(`${B.left} ${uw(B.left)} left out`,`${B.left} ${uw(B.left)} laissé${B.mode==='day'?'e':''}${B.left>1?'s':''} de côté`)}${COL()}${leftWhy2(u.b)}.</p>`:''}

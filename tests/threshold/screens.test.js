@@ -342,6 +342,11 @@ async function open(browser, base, o) {
         same(T + 'back on Full, every row is there again', [(await view('all'))[0], (await keys()).length, await more()], ['all', rows.length, '']); }
       { const cells = (await page.locator('#fam-tog tbody td').allInnerTexts()).map(c => c.replace(/[\s\u00a0]+/g, ' ').trim());
         ok(T + '“Eaten together” keeps a share and a count on each side', cells.length === 6 && cells.every(c => (fr ? /^\d+ % \d+ sur \d+$/ : /^\d+% \d+ of \d+$/).test(c)), JSON.stringify(cells)); }
+      // the two columns say what they are, each with how many meals it holds: "With" alone, beside a food's name, read as "with that food"
+      { const flat = t => t.replace(/[\s\u00a0\u202f]+/g, ' ').trim(), m = (await head()).match(/\d+/g).map(Number), want = fr ? [`Avec effet ${m[1]} repas`, `Sans ${m[2] - m[1]} repas`] : [`With effect ${m[1]} meals`, `Without ${m[2] - m[1]} meals`];
+        same(T + '“Eaten together”: the columns are “With effect” and “Without”, with the meals in each', (await page.locator('#fam-tog thead th').allInnerTexts()).slice(1).map(flat), want);
+        await page.click('#app [data-act=rowsheet][data-k=fat]'); await page.waitForSelector('#rowSteps');
+        same(T + 'an opened line: the same two columns', (await page.locator('#rowSteps thead th').allInnerTexts()).slice(1).map(flat), want); await sheetShut(page); }
       ok(T + '“Eaten together” has the line for 5 compounds or more', (await page.locator('#togMany').innerText()).includes(fr ? '5 composés ou plus dans le repas' : '5 compounds or more in the meal'));
       await filterOpen(page); await page.click('#sheet .fxpick [data-act=tfx][data-v=head]'); await sheetShut(page); await setHours(page, 2);
       same(T + 'with one effect filtered, the slider sets that effect’s own hours and leaves the general ones', await page.evaluate(() => [S.tsel, S.fxw, S.twin]), [['head'], { head: 2 }, 4]);
