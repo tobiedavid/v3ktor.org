@@ -173,17 +173,17 @@ eq('the reading rules hold nothing that works out a luck number', ['luck', 'step
   eq('and it counts portions', [E.amounts(W.fizz, 2).flav, E.amounts(W.water, 2).flav], [2, 0]); }
 
 // ---- the data view: the meals or days an effect was reported for, beside all the others. Nothing is averaged. ----
-{ const F2 = { a: { kcal: 100, fat: 10, prot: 5, carb: 0, fib: 0, sug: 0, lact: 0, alc: 0, c: { caf: 50, ox: 1 } }, b: { kcal: 50, fat: 2, prot: 1, carb: 0, fib: 0, sug: 0, lact: 0, alc: 10, h: true, hist: 1.5 } };
+{ const F2 = { a: { kcal: 100, fat: 10, prot: 5, carb: 0, fib: 0, sug: 0, lact: 0, alc: 0, c: { caf: 50, gos: 1 } }, b: { kcal: 50, fat: 2, prot: 1, carb: 0, fib: 0, sug: 0, lact: 0, alc: 10, h: true, hist: 1.5 } };
   const S = { roll: 0, ev: [ meal('2026-11-10', '12:00', [['a', 1]]), fx('2026-11-10', '13:00', 'head'),
     meal('2026-11-11', '12:00', [['a', 2], ['b', 1]]), none('2026-11-11'),
     meal('2026-11-12', '12:00', [['b', 3]]), fx('2026-11-12', '13:00', 'gut'),
     meal('2026-11-13', '12:00', [['a', 1]]), none('2026-11-13'), none('2026-11-14') ] };      // the 14th: a tap and no meal, so the 13th is answered for
   const I = E.index(S, k => F2[k], NOW);
-  eq('a food carries its compounds, times the portions', [E.amounts(F2.a, 2).caf, E.amounts(F2.a, 2).ox], [100, 2]);
+  eq('a food carries its compounds, times the portions', [E.amounts(F2.a, 2).caf, E.amounts(F2.a, 2).gos], [100, 2]);
   // over a day, an effect counts for its own day and for the day before it: Nov 10, 11 and 12 are "with", Nov 13 is "without"
   eq('grams: how many on each side, and the lowest and highest', E.line(I, 'fat', 'day'), { b: 'fat', hit: { n: 3, ate: 3, lo: 6, hi: 22 }, rest: { n: 1, ate: 1, lo: 10, hi: 10 }, left: 0, n: 4 });
   eq('milligrams: a day with none of it sets the lowest at zero', [E.line(I, 'caf', 'day').hit, E.line(I, 'caf', 'day').rest], [{ n: 3, ate: 2, lo: 0, hi: 100 }, { n: 1, ate: 1, lo: 50, hi: 50 }]);
-  eq('portions: how many held any', [E.line(I, 'ox', 'day').hit.ate, E.line(I, 'ox', 'day').hit.n, E.line(I, 'ox', 'day').rest.ate, E.line(I, 'ox', 'day').rest.n], [2, 3, 1, 1]);
+  eq('portions: how many held any', [E.line(I, 'gos', 'day').hit.ate, E.line(I, 'gos', 'day').hit.n, E.line(I, 'gos', 'day').rest.ate, E.line(I, 'gos', 'day').rest.n], [2, 3, 1, 1]);
   eq('one effect picked: only that effect puts a day on the "with" side', [E.line(I, 'fat', 'day', ['head']).hit.n, E.line(I, 'fat', 'day', ['head']).rest.n], [1, 3]);
   eq('two effects picked together: a day needs both', [E.line(I, 'fat', 'day', ['head', 'gut'], true).hit.n, E.line(I, 'fat', 'day', ['head', 'gut'], false).hit.n], [0, 3]);
   eq('after a meal: the 4 hours after it', [E.line(I, 'fat', 'meal').hit, E.line(I, 'fat', 'meal').rest], [{ n: 2, ate: 2, lo: 6, hi: 10 }, { n: 2, ate: 2, lo: 10, hi: 22 }]);
