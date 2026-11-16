@@ -35,6 +35,12 @@ const status = url => new Promise(res => http.get(url, r => { r.resume(); res(r.
     ok(`/ (${lang.slice(0, 2)}) the Threshold Log is the second`, !!list[1] && list[1][0] === '/threshold/', JSON.stringify(list.map(r => r[0])));
     const txt = await page.locator('main').innerText(); ok(`/ (${lang.slice(0, 2)}) says five, not four`, lang === 'fr-CA' ? /Cinq outils/.test(txt) && !/Quatre outils|les quatre/.test(txt) : /Five free tools/.test(txt) && !/Four free tools|all four/.test(txt));
     ok(`/ (${lang.slice(0, 2)}) nothing runs off a 320-pixel screen`, await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)); await ctx.close(); }
+  // the public pages say « vous »; the apps say « tu ». The only « tu » allowed is in a label quoted from an app.
+  { const LABELS = /Ton motif|Un message de ta bonne journée|Demande à une IA|Commence ici|Je le fais — rappelle-moi/g, TU = /(^|[^A-Za-zÀ-ÿ’'])(tu|ton|ta|tes|toi|te|t’[a-zà-ÿ]+)(?![A-Za-zÀ-ÿ])/i;
+    for (const u of ['/', '/threshold/', '/threshold/how-soon/', '/gut/fr/', '/patch/', '/sollum/']) { const ctx = await browser.newContext({ viewport: { width: 1000, height: 800 }, locale: 'fr-CA', serviceWorkers: 'block' }), page = await ctx.newPage();
+      await page.addInitScript(() => { try { localStorage.setItem('v3ktor-lang', 'fr'); } catch (e) {} }); await page.goto(base + u, { waitUntil: 'load' }); await page.waitForTimeout(200);
+      const t = (await page.evaluate(() => { const m = document.querySelector('main:not([hidden])') || document.body; return m.innerText + '\n' + document.title; })).replace(LABELS, '§'), hit = TU.exec(t);
+      ok(`${u} (fr) says « vous »`, !hit, hit && t.slice(Math.max(0, hit.index - 50), hit.index + 30)); await ctx.close(); } }
   await browser.close(); await srv.close();
   // the offline caches
   let out = ''; try { out = execFileSync(process.execPath, [path.join(ROOT, 'tools', 'stamp_cache.js'), '--check'], { encoding: 'utf8' }); ok('every app’s offline cache carries its file’s name', true); } catch (e) { out = String(e.stdout || e); ok('every app’s offline cache carries its file’s name', false, out); }
