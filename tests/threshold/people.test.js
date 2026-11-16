@@ -131,7 +131,7 @@ async function play(browser, base, person, table) {
     // every row: one dot for each meal or day, on its own side; the mark and the counts under it; and the order of the rows
     const shown = await page.locator('#app .drow').evaluateAll(lis => lis.map(li => { const d = li.dataset, line = li.querySelector('.dm'), cx = q => [...li.querySelectorAll(q)].map(c => +c.getAttribute('cx'));
       return [d.k, { hit: +d.hit, rest: +d.rest, at: d.at === undefined ? null : +d.at, up: +(d.up || 0), under: +(d.under || 0), dh: cx('circle.dh'), dr: cx('circle.dr'), lx: line ? +line.getAttribute('x1') : null, label: (li.querySelector('.dmk') || {}).textContent || '', text: ((li.querySelector('.dtx') || {}).textContent || '') }]; }));
-    const lines = KEYS.map(k => [k, R.sides(k, mode, pick, all, hours), R.split(k, mode, pick, all, hours)]).filter(([k, s]) => BASE.includes(k) ? s.hit.n + s.rest.n > 0 : s.hit.ate + s.rest.ate > 0);      // a line with nothing counted is not shown
+    const lines = KEYS.map(k => [k, R.sides(k, mode, pick, all, hours), R.split(k, mode, pick, all, hours)]).filter(([k, s]) => s.hit.ate + s.rest.ate > 0);      // a row appears only when a counted meal or day held some of it
     const marked = lines.filter(l => l[2].at !== null).sort((a, b) => a[2].wrong / a[2].n - b[2].wrong / b[2].n || KEYS.indexOf(a[0]) - KEYS.indexOf(b[0]));
     same(N(`${tag}: the rows shown, the ones with a mark first by the share on its wrong side, then the others in their own order`), shown.map(r => r[0]), marked.concat(lines.filter(l => l[2].at === null)).map(l => l[0]));
     for (const [k, s, sp] of lines) { const row = (shown.find(r => r[0] === k) || [])[1]; if (!row) continue;

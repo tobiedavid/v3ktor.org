@@ -400,7 +400,13 @@ async function open(browser, base, o) {
       await page.click('#thrIntro [data-act=thrgot]');
       await page.evaluate(t => { const H = 3600e3; S.ev.push({ id: 'h1', k: 'meal', t: t - 30 * H, items: [{ key: 'f109', q: 1 }] }, { id: 'h2', k: 'none', t: t - 26 * H, d: E.dayKey(t - 30 * H, S.roll) }, { id: 'h3', k: 'meal', t: t - 9 * H, items: [{ key: 'f109', q: 1 }] }, { id: 'h4', k: 'meal', t: t - 5 * H, items: [{ key: 'f109', q: 3 }] }, { id: 'h5', k: 'fx', t: t - 4.5 * H, c: 'head' }); S.ev.sort((a, b) => a.t - b.t); IXM = null; render(); }, t0);
       const first = await page.locator('#app .drow').evaluateAll(lis => lis.map(li => [li.dataset.k, li.dataset.at !== undefined, +li.dataset.hit, +li.dataset.rest, +(li.dataset.up || 0), +(li.dataset.under || 0)]));
-      ok(T + 'with three meals, one of them followed by an effect, the rows already have their marks and their order', first.length > 0 && first[0][1] && first.every(r => r[2] === 1 && r[3] === 2) && first.filter(r => r[1]).every(r => r[4] === 1 && r[5] === 2) && first.findIndex(r => !r[1]) >= first.filter(r => r[1]).length, JSON.stringify(first));
+      ok(T + 'with three meals, one of them followed by an effect, the rows already have their marks and their order', first.length > 0 && first[0][1] && first.every(r => r[2] === 1 && r[3] === 2) && first.filter(r => r[1]).every(r => r[4] === 1 && r[5] === 2) && (first.findIndex(r => !r[1]) < 0 || first.findIndex(r => !r[1]) >= first.filter(r => r[1]).length), JSON.stringify(first));
+      { const held = await page.evaluate(() => E.rows(IX(), 'meal').map(r => [r.b, r.any])), shown = first.map(r => r[0]).sort();
+        same(T + 'a row appears only when one of the meals held some of it', shown, held.filter(r => r[1]).map(r => r[0]).sort());
+        ok(T + 'what was never had has no row: no alcohol, no lactose, no fibre here', held.some(r => !r[1]) && ['alc', 'lact', 'fib'].every(k => !shown.includes(k)), JSON.stringify(shown)); }
+      // water alone, with an effect after it: the meals are counted, and no row has anything to show
+      await page.evaluate(t => { S.ev = [{ id: 'w1', k: 'meal', t: t - 5 * 3600e3, items: [{ key: 'f930001', q: 1 }] }, { id: 'w2', k: 'fx', t: t - 4.5 * 3600e3, c: 'head' }]; IXM = null; render(); }, t0);
+      same(T + 'when no counted meal held anything, the tab says so in one line and draws no row', [await page.locator('#app .drow').count(), flat(await page.locator('#thrEmpty').innerText())], [0, fr ? 'Aucun de ces repas ne contenait ce que les lignes comptent.' : 'None of these meals held anything the rows count.']);
       same(T + 'no error', A.errors, []); await A.ctx.close(); }
 
     // ================= a line with nothing counted =================
@@ -408,7 +414,8 @@ async function open(browser, base, o) {
       await page.click('[data-act=enter]'); await page.waitForSelector('.mb.meal');
       await page.evaluate(t => { S.ev.push({ id: 'g1', k: 'meal', t, items: [{ key: 'f910001', q: 1 }] }, { id: 'g2', k: 'fx', t, c: 'head' }); IXM = null; render(); }, t0);      // a can whose label does not split its carbs
       await page.click('[data-act=tab][data-v=thr]'); const gone = await page.locator('#thrGone').innerText();
-      ok('[new] a line with nothing counted is not shown as two dashes', (await page.locator('#app [data-act=rowsheet][data-k=cplx]').count()) === 0 && (await page.locator('#app [data-act=rowsheet][data-k=sug]').count()) === 0 && (await page.locator('#app [data-act=rowsheet][data-k=fat]').count()) === 1);
+      ok('[new] a line with nothing counted is not shown as two dashes', (await page.locator('#app [data-act=rowsheet][data-k=cplx]').count()) === 0 && (await page.locator('#app [data-act=rowsheet][data-k=sug]').count()) === 0 && (await page.locator('#app [data-act=rowsheet][data-k=caf]').count()) === 1);
+      ok('[new] the can holds no fat, so there is no fat row either', (await page.locator('#app [data-act=rowsheet][data-k=fat]').count()) === 0);
       ok('[new] it is named under the lists, with what kept its meal out', /glucides complexes, sucres/.test(gone) && /1 repas laissé de côté/.test(gone), gone);
       same('[new] no error with nothing counted', A.errors, []); await A.ctx.close(); }
 
