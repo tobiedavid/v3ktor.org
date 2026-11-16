@@ -481,6 +481,8 @@ async function open(browser, base, o) {
       // plain sparkling water alone, with an effect after it: the meals are counted, and no row has anything to show (tap water has sodium; sparkling water's minerals have no figure)
       await page.evaluate(t => { S.ev = [{ id: 'w1', k: 'meal', t: t - 5 * 3600e3, items: [{ key: 'f930002', q: 1 }] }, { id: 'w2', k: 'fx', t: t - 4.5 * 3600e3, c: 'head' }]; IXM = null; render(); }, t0);
       same(T + 'when no counted meal held anything, the tab says so in one line and draws no row', [await page.locator('#app .drow').count(), flat(await page.locator('#thrEmpty').innerText())], [0, fr ? 'Aucun de ces repas ne contenait ce que les lignes comptent.' : 'None of these meals held anything the rows count.']);
+      // 0.5.1: oxalate and purines are milligrams, from the Harvard list and the USDA database; a food neither names has no figure
+      same(T + 'oxalate and purines in milligrams: spinach, sardines, and coffee with no purine figure', await page.evaluate(() => [BARN.ox[2], BARN.pur[2], FB.f2214.c.ox, FB.f3203.c.pur, FB.f2873.c.ox, FB.f2873.x.includes('pur'), E.TAGS.includes('ox') || E.TAGS.includes('pur')]), ['mg', 'mg', 577.79, 422.94, 1.8, true, false]);
       same(T + 'no error', A.errors, []); await A.ctx.close(); }
 
     // ================= one name for one thing: the tab draws rows, and nothing else on screen calls them lists or lines =================

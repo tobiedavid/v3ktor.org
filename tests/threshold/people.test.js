@@ -107,7 +107,7 @@ async function play(browser, base, person, table) {
   // ...and the same counts as the lists show them: for any effect, then for the effect reported most often
   await page.click('[data-act=tab][data-v=thr]');
   const KEYS = ['fat', 'sat', 'mono', 'poly', 'cplx', 'sug', 'frs', 'gluc', 'sucr', 'malt', 'gal', 'lact', 'fib', 'alc', 'caf', 'hist', 'tyr', 'ox', 'nit', 'ga', 'cap', 'fru', 'gos', 'sorb', 'mann', 'fruc', 'sulph', 'nitr', 'swt', 'flav', 'glu', 'pur', 'theo', 'na', 'se'], BASE = ['fat', 'cplx', 'sug', 'lact', 'fib'];
-  const PORTIONS = ['ox', 'ga', 'cap', 'fru', 'gos', 'sulph', 'nitr', 'swt', 'flav', 'glu', 'pur'];
+  const PORTIONS = ['ga', 'cap', 'fru', 'gos', 'sulph', 'nitr', 'swt', 'flav', 'glu'];
   // the kinds of fat and sugar sit under their row: the group stands where its first row would, its parent first, then its kinds in their own order
   const KIDS = { fat: ['sat', 'mono', 'poly'], sug: ['frs', 'gluc', 'sucr', 'malt', 'gal', 'lact'] }, parentOf = k => Object.keys(KIDS).find(p => KIDS[p].includes(k)) || k;
   const group = list => { const out = [], seen = new Set(); for (const k of list) { if (seen.has(k)) continue; const p = parentOf(k); for (const m of [p].concat(KIDS[p] || [])) if (list.includes(m) && !seen.has(m)) { out.push(m); seen.add(m); } } return out; };
