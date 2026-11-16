@@ -346,7 +346,17 @@ async function open(browser, base, o) {
       { const flat = t => t.replace(/[\s\u00a0\u202f]+/g, ' ').trim(), m = (await head()).match(/\d+/g).map(Number), want = fr ? [`Avec effet ${m[1]} repas`, `Sans ${m[2] - m[1]} repas`] : [`With effect ${m[1]} meals`, `Without ${m[2] - m[1]} meals`];
         same(T + '“Eaten together”: the columns are “With effect” and “Without”, with the meals in each', (await page.locator('#fam-tog thead th').allInnerTexts()).slice(1).map(flat), want);
         await page.click('#app [data-act=rowsheet][data-k=fat]'); await page.waitForSelector('#rowSteps');
-        same(T + 'an opened line: the same two columns', (await page.locator('#rowSteps thead th').allInnerTexts()).slice(1).map(flat), want); await sheetShut(page); }
+        same(T + 'an opened line: the same two columns', (await page.locator('#rowSteps thead th').allInnerTexts()).slice(1).map(flat), want);
+        // an opened row names the foods it came from at once: every food eaten that held it, with how many of the counted meals it was in
+        const foods = await page.evaluate(() => { const ids = new Set(E.bar(IX(), 'fat', 'meal').units.filter(u => u.x > 0.005).map(u => u.id)), n = {};
+          for (const e of S.ev) if (e.k === 'meal' && ids.has(e.id)) for (const key of new Set(e.items.filter(it => E.amounts(food(it.key), it.q).fat > 0).map(it => it.key))) n[key] = (n[key] || 0) + 1;
+          return Object.entries(n).map(([k, c]) => [fname(food(k)), c]); });
+        const read = async () => (await page.locator('#lineFoods button').allInnerTexts()).map(t => { const m = flat(t).match(/^(.*) · (\d+)$/); return m ? [m[1], +m[2]] : [flat(t), -1]; }), first = await read(), least = Math.min(...first.map(f => f[1]));
+        ok(T + 'the opened row lists the 8 foods it came from most often, each with its count of meals', first.length === 8 && first.every(f => foods.some(w => w[0] === f[0] && w[1] === f[1])) && first.every((f, i) => !i || first[i - 1][1] >= f[1]) && foods.filter(w => w[1] > least).every(w => first.some(f => f[0] === w[0])), JSON.stringify(first));
+        ok(T + 'the list sits above the amounts, under a heading that says what the number is', flat(await page.locator('#sheet').innerText()).indexOf(fr ? 'Les aliments d’où ça vient, et dans combien de repas' : 'The foods it came from, and in how many meals') > 0 && await page.evaluate(() => document.getElementById('lineFoods').getBoundingClientRect().top < document.getElementById('rowSteps').getBoundingClientRect().top));
+        same(T + 'a link says how many there are in all', flat(await page.locator('#sheet [data-act=rsall]').innerText()), fr ? `Afficher les ${foods.length}` : `Show all ${foods.length}`);
+        await page.click('#sheet [data-act=rsall]'); same(T + 'and shows them all, every food that held it and no other', [(await read()).map(f => f.join(':')).sort(), await page.locator('#sheet [data-act=rsall]').count()], [foods.map(f => f.join(':')).sort(), 0]);
+        await page.locator('#lineFoods button').first().click(); same(T + 'a food in the list opens that food', flat(await page.locator('#sheetTitle').innerText()), first[0][0]); await sheetShut(page); }
       ok(T + '“Eaten together” has the line for 5 compounds or more', (await page.locator('#togMany').innerText()).includes(fr ? '5 composés ou plus dans le repas' : '5 compounds or more in the meal'));
       await filterOpen(page); await page.click('#sheet .fxpick [data-act=tfx][data-v=head]'); await sheetShut(page); await setHours(page, 2);
       same(T + 'with one effect filtered, the slider sets that effect’s own hours and leaves the general ones', await page.evaluate(() => [S.tsel, S.fxw, S.twin]), [['head'], { head: 2 }, 4]);
