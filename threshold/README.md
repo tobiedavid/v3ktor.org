@@ -58,7 +58,7 @@ The app puts no number on luck. Version 0.2 gave Fisher's exact test for one tap
 
 Since 0.3.7 the tab holds the lists and two buttons. **Filter** picks the effects the lists are read for; the picks are kept. **Settings** holds the reading ("After a meal" or "Over a day") and, for "After a meal", the slider.
 
-Each line shows, for each side, the share of its meals or days that held any of it, and how many that is: "67%, 31 of 46". The rows no longer show the lowest and highest amount: on made-up people those ranges sat inside each other on almost every line. Every amount is still one tap away, in the opened line. Nothing is averaged and nothing is ranked.
+Each line shows, for each side, how many of its meals or days had that in it, and the share that is: "67%, 31 of 46". Since 0.3.8 three short lines under the heading say what the sides are in the person's own numbers: "With: the one meal followed by an effect. Without: the 2 other meals. Each line shows how many of them had that in it." The earlier wording ("With is those 1") was hard to read. The rows no longer show the lowest and highest amount: on made-up people those ranges sat inside each other on almost every line. Every amount is still one tap away, in the opened line. Nothing is averaged and nothing is ranked.
 
 An effect read alone keeps its own hours. Any effect, or several together, use the general hours. An effect opened from Home is read with the same hours the lists use for it.
 
