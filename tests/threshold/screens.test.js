@@ -317,6 +317,23 @@ async function open(browser, base, o) {
         ok(T + 'the rows with no mark sit under a heading that says so', (await page.locator('#dMixHead').innerText()).replace(/\u00a0/g, ' ') === (fr ? 'Sans marque : aucune quantité ne sépare celles-ci.' : 'No mark: no amount separates these.')); }
       { const r = await page.evaluate(() => { const s = E.split(E.bar(IX(), 'lact', 'meal').units); return [s.at, s.up, s.under, s.nHit, s.nRest]; }), row = rows.find(x => x.k === 'lact');
         same(T + 'the lactose row shows the engine’s mark and counts', [row.at, row.up, row.under, row.hit, row.rest], r); }
+      // the three views, under Settings: Full shows every row, Medium the rows with a mark, Minimal the rows whose mark is clear
+      { const keys = () => page.locator('#app .drow').evaluateAll(lis => lis.map(li => li.dataset.k)), flat = t => t.replace(/[\s\u00a0\u202f]+/g, ' ').trim(), clear = r => r.at !== null && r.up * 2 > r.hit && r.under * 2 > r.rest;
+        const view = async v => { await setOpen(page); await page.click(`#tView [data-act=tview][data-v=${v}]`); const note = flat(await page.locator('#tViewNote').innerText()), on = await page.locator('#tView [aria-pressed=true]').getAttribute('data-v'); await sheetShut(page); return [on, note]; };
+        const more = async () => (await page.locator('#thrMore').count()) ? flat(await page.locator('#thrMore').innerText()) : '', rw = n => fr ? `${n} ${n === 1 ? 'ligne' : 'lignes'}` : `${n} ${n === 1 ? 'row' : 'rows'}`;
+        const marked = rows.filter(r => r.at !== null), none = rows.length - marked.length;
+        await setOpen(page); same(T + 'Settings has “Rows shown” with three choices, and it starts on Full', [(await page.locator('#tView button').allInnerTexts()).map(flat), await page.locator('#tView [aria-pressed=true]').getAttribute('data-v'), await more()], [fr ? ['Minimale', 'Moyenne', 'Complète'] : ['Minimal', 'Medium', 'Full'], 'all', '']); await sheetShut(page);
+        same(T + 'Medium: says what it keeps', await view('med'), ['med', fr ? 'Toutes les lignes qui ont une marque.' : 'Every row with a mark.']);
+        same(T + 'Medium keeps the rows with a mark, in the same order, and the heading for the others is gone', [await keys(), await page.locator('#dMixHead').count()], [marked.map(r => r.k), 0]);
+        same(T + 'under the rows, one line says how many rows are not in this view, with the way to Settings', await more(), fr ? `Hors de cette vue : ${rw(none)} sans marque. Réglages` : `Not in this view: ${rw(none)} with no mark. Settings`);
+        same(T + 'Minimal: says what a clear mark is', await view('min'), ['min', fr ? 'Seulement les lignes où la marque a plus de la moitié des points pleins à sa droite et plus de la moitié des points vides à sa gauche.' : 'Only the rows where the mark has more than half of the filled dots to its right and more than half of the empty dots to its left.']);
+        const clr = marked.filter(clear), less = marked.length - clr.length;
+        same(T + 'Minimal keeps only the rows whose mark has more than half of each kind on its own side', await keys(), clr.map(r => r.k));
+        ok(T + 'the rows left out are counted by kind', (await more()) === (fr ? `Hors de cette vue : ${less ? rw(less) + ' à la marque moins nette, ' : ''}${rw(none)} sans marque. Réglages` : `Not in this view: ${less ? rw(less) + ' with a less clear mark, ' : ''}${rw(none)} with no mark. Settings`), await more());
+        if (!clr.length) same(T + 'with no clear mark, the tab says so', flat(await page.locator('#thrNoRow').innerText()), fr ? 'Aucune ligne n’a de marque nette.' : 'No row has a clear mark.');
+        same(T + 'the view is saved', await page.evaluate(k => JSON.parse(localStorage.getItem(k)).tview, KEY), 'min');
+        await page.click('#thrMore [data-act=tset]'); same(T + 'the link under the rows opens Settings', await page.locator('#sheet.on #tView').count(), 1); await sheetShut(page);
+        same(T + 'back on Full, every row is there again', [(await view('all'))[0], (await keys()).length, await more()], ['all', rows.length, '']); }
       { const cells = (await page.locator('#fam-tog tbody td').allInnerTexts()).map(c => c.replace(/[\s\u00a0]+/g, ' ').trim());
         ok(T + '“Eaten together” keeps a share and a count on each side', cells.length === 6 && cells.every(c => (fr ? /^\d+ % \d+ sur \d+$/ : /^\d+% \d+ of \d+$/).test(c)), JSON.stringify(cells)); }
       ok(T + '“Eaten together” has the line for 5 compounds or more', (await page.locator('#togMany').innerText()).includes(fr ? '5 composés ou plus dans le repas' : '5 compounds or more in the meal'));
