@@ -30,12 +30,17 @@ const NEVER = /\b(safe|avoid|should|trigger|healthy|unhealthy)\b|sécuritaire|é
       // a stop that isn't written yet says so; Energy lists its cards
       await page.locator('.cardrow[data-v="gut"]').click(); await page.waitForTimeout(60);
       ok(T('a stop not written yet says so'), await page.locator('.card.soft').count() === 1);
-      await page.click('[data-act="home"] >> nth=-1'); await page.waitForTimeout(60);
-      await page.locator('svg .stop[data-v="energy"]').click(); await page.waitForTimeout(60);
-      const cards = await page.evaluate(() => CARDS.filter(c => c.sec === 'energy').map(c => ({ id: c.id, n: c.f.length, src: c.src.length })));
-      ok(T('Energy lists its cards'), await page.locator('.cardrow[data-act="card"]').count() === cards.length && cards.length >= 4);
-      // every picture of every card, one tap at a time
-      for (const c of cards) {
+      // every stop that has cards lists them; every picture of every card, one tap at a time
+      const secs = await page.evaluate(() => SECTIONS.filter(s => CARDS.some(c => c.sec === s.id)).map(s => s.id));
+      ok(T('Energy and Signals have cards'), secs.includes('energy') && secs.includes('signals'), secs.join(' '));
+      let cards = [];
+      for (const sec of secs) {
+      await page.click('.topbar [data-act="home"]'); await page.waitForTimeout(60);
+      await page.locator(`svg .stop[data-v="${sec}"]`).click(); await page.waitForTimeout(60);
+      const list = await page.evaluate(s => CARDS.filter(c => c.sec === s).map(c => ({ id: c.id, n: c.f.length, src: c.src.length })), sec);
+      if (sec === 'energy') cards = list;
+      ok(T(`${sec} lists its cards`), await page.locator('.cardrow[data-act="card"]').count() === list.length && list.length >= 1);
+      for (const c of list) {
         await page.locator(`.cardrow[data-v="${c.id}"]`).click(); await page.waitForTimeout(60);
         ok(T(`${c.id}: Back is hidden on the first picture`), await page.locator('#bar [data-act="prev"].hide').count() === 1);
         for (let i = 0; i < c.n; i++) { const W = T(`${c.id} picture ${i + 1}`);
@@ -58,7 +63,12 @@ const NEVER = /\b(safe|avoid|should|trigger|healthy|unhealthy)\b|sécuritaire|é
         await page.click('#bar [data-act="next"]'); await page.waitForTimeout(80);
         ok(T(`${c.id}: Done goes back to the section and marks the card`), (await page.locator(`.cardrow[data-v="${c.id}"] .n`).innerText()).includes('✓'));
       }
+      }
+      // a stop with one card says « 1 card », not « 1 cards »
+      await page.click('.topbar [data-act="home"]'); await page.waitForTimeout(60);
+      ok(T('home: one card is singular'), !/\b1 (cards|cartes)\b/.test(await page.locator('.cardrow').allInnerTexts().then(a => a.join(' '))));
       // the keyboard and a swipe move one picture
+      await page.locator('svg .stop[data-v="energy"]').click(); await page.waitForTimeout(60);
       await page.locator(`.cardrow[data-v="${cards[0].id}"]`).click(); await page.waitForTimeout(60);
       await page.keyboard.press('ArrowRight'); await page.waitForTimeout(40);
       ok(T('the right arrow key moves one picture'), (await page.locator('#bar .small').innerText()).replace(/\s+/g, ' ').includes(`2 / ${cards[0].n}`));
