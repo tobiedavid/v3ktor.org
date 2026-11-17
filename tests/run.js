@@ -13,6 +13,7 @@ const TESTS = [
   ['patch/needs.test.js', true, 'The Patch: the daily needs of 131 made-up people, unchanged'],
   ['patch/wrench.test.js', true, 'The Patch: the wrench above the Nutrition bars, and the answers shared on the phone'],
   ['gut/nutrition.test.js', true, 'Food Trial Log: Nutrition on the shared rules, the wrench, and the answers shared with The Patch'],
+  ['threshold/nutrition.test.js', true, 'Threshold Log: the reference on the shared rules, the wrench, and the answers shared on the phone'],
   ['gut/one-food.test.js', true, 'Food Trial Log: one food comes off per bad day'],
   ['threshold/import.test.js', true, 'Threshold Log: the import equals the Food Trial Log’s own lists'],
   ['threshold/screens.test.js', true, 'Threshold Log: every screen, both languages, 320 pixels, keyboard, offline'],

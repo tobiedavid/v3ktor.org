@@ -5,7 +5,7 @@
 'use strict';
 const fs = require('fs'), path = require('path');
 const R = path.join(__dirname, '..');
-const USES = { 'patch/app/index.html': ['nutrition.css', 'nutrition.js'], 'gut/app/index.html': ['nutrition.css', 'nutrition.js'], 'gut/fr/app/index.html': ['nutrition.css', 'nutrition.js'] };
+const USES = { 'patch/app/index.html': ['nutrition.css', 'nutrition.js'], 'gut/app/index.html': ['nutrition.css', 'nutrition.js'], 'gut/fr/app/index.html': ['nutrition.css', 'nutrition.js'], 'threshold/app/index.html': ['nutrition.css', 'nutrition.js'] };
 let off = 0;
 for (const [app, pieces] of Object.entries(USES)) { const file = path.join(R, app); let src = fs.readFileSync(file, 'utf8'); const was = src; let missing = false;
   for (const piece of pieces) { const text = fs.readFileSync(path.join(R, 'shared', piece), 'utf8').replace(/\n+$/, '');
