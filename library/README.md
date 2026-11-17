@@ -3,7 +3,7 @@
 How the body works, one picture at a time. The other V3KTOR apps measure what happens in one person; the Library explains how bodies work in general, so those apps don't each have to.
 
 - **The app:** https://v3ktor.org/library/app/ (installs on a phone, works offline). A card has its own address, so another app can link straight to it: `https://v3ktor.org/library/app/#caffeine-clock`.
-- **Status:** a first slice. The home screen (a meal's path through the body, six stops) and the Energy stop: four cards, 27 pictures. The other five stops say they are being written. No public page yet, and it isn't on the front page yet.
+- **Status:** a first slice. The home screen (a meal's path through the body, six stops) and the Energy stop: five cards, 37 pictures (Tiny batteries, What slows the power plant, What the brain runs on, Caffeine's clock, The heart and a scare). The other five stops say they are being written. No public page yet, and it isn't on the front page yet.
 
 ## How a card is written
 - **One idea per picture.** Each picture changes one thing from the one before; the first one says what we're looking at and where it is in the body.
