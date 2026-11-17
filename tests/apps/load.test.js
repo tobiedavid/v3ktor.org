@@ -14,7 +14,7 @@ const status = url => new Promise(res => http.get(url, r => { r.resume(); res(r.
 
 (async () => {
   const srv = await serve(ROOT), base = srv.url, browser = await chromium.launch(), list = pages(ROOT, []).sort().concat(['/404.html']);
-  ok('the site has the pages it is known to have', ['/', '/gut/', '/gut/app/', '/gut/fr/', '/gut/fr/app/', '/patch/', '/patch/app/', '/sollum/', '/sollum/app/', '/threshold/', '/threshold/app/', '/threshold/how-soon/'].every(p => list.includes(p)), list.join(' '));
+  ok('the site has the pages it is known to have', ['/', '/gut/', '/gut/app/', '/gut/fr/', '/gut/fr/app/', '/library/app/', '/patch/', '/patch/app/', '/sollum/', '/sollum/app/', '/threshold/', '/threshold/app/', '/threshold/how-soon/'].every(p => list.includes(p)), list.join(' '));
   try { const links = new Map();
     for (const p of list) for (const lang of ['en-CA', 'fr-CA']) {
       const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: lang, serviceWorkers: 'block' }), page = await ctx.newPage(), errors = [], outside = [], missing = [];
@@ -44,6 +44,6 @@ const status = url => new Promise(res => http.get(url, r => { r.resume(); res(r.
   await browser.close(); await srv.close();
   // the offline caches
   let out = ''; try { out = execFileSync(process.execPath, [path.join(ROOT, 'tools', 'stamp_cache.js'), '--check'], { encoding: 'utf8' }); ok('every app’s offline cache carries its file’s name', true); } catch (e) { out = String(e.stdout || e); ok('every app’s offline cache carries its file’s name', false, out); }
-  ok('five apps keep an offline copy', (out.match(/^ok /gm) || []).length === 5, out);
+  ok('six apps keep an offline copy', (out.match(/^ok /gm) || []).length === 6, out);
   console.log(fail ? `\n${fail} FAILED, ${pass} passed` : `apps: all ${pass} checks passed`); process.exit(fail ? 1 : 0);
 })();
