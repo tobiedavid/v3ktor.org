@@ -28,7 +28,8 @@ const NEVER = /\b(safe|avoid|should|trigger|healthy|unhealthy)\b|sécuritaire|é
       ok(T('home: six stops on the picture and six rows'), await page.locator('svg .stop').count() === 6 && await page.locator('.cardrow').count() === 6);
       ok(T('home fits'), await fits()); await words('home');
       // a stop that isn't written yet says so; Energy lists its cards
-      await page.locator('.cardrow[data-v="gut"]').click(); await page.waitForTimeout(60);
+      const empty = await page.evaluate(() => (SECTIONS.find(s => !CARDS.some(c => c.sec === s.id)) || {}).id);
+      await page.locator(`.cardrow[data-v="${empty}"]`).click(); await page.waitForTimeout(60);
       ok(T('a stop not written yet says so'), await page.locator('.card.soft').count() === 1);
       // every stop that has cards lists them; every picture of every card, one tap at a time
       const secs = await page.evaluate(() => SECTIONS.filter(s => CARDS.some(c => c.sec === s.id)).map(s => s.id));
