@@ -7,5 +7,6 @@ These scripts made the Threshold Log's figures in November 2026, before they mov
 - `add_compounds.py` added the rest: caffeine, theobromine, nitrate, the kinds of fat and sugar, sodium, selenium, sorbitol, mannitol, tyramine, oxalate, purines and the lists counted in portions. Its tables say, food by food, which source row each oxalate and purine figure came from and how the serving was converted. Its purine table is replaced by `purines_2026.py`.
 - `new_foods_2026_11.py` added 31 foods from Health Canada's files, with the same sources.
 - `purines_2026.py` worked the purine column out again from release 3 of the USDA and ODS-NIH purine database (September 2026). It reads the database's spreadsheet, given as an argument, and lists the rows each food's figure comes from. Northern pike lost the cod figures it had carried by mistake (purines and oxalate); neither source names pike.
+- `oxalate_2026.py` set plain animal foods the Harvard list doesn't name to no oxalate (a rule, with the list's own figures as its grounds) and took watermelon and canned tomatoes from a 2023 review (Salgado and others, Foods 2023;12(17):3201, CC BY 4.0).
 
 Since then, figures are changed in `data/foods.csv` itself (`data/README.md`).
