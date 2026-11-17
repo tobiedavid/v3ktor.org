@@ -212,10 +212,12 @@ textarea.out.live{min-height:240px;font-size:0.875rem;line-height:1.4}
 .stp:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .food .add:focus-visible,.food .minus:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
 .gtabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+/* ==== shared/nutrition.css: the line above the Nutrition bars, its wrench, and the wrench's sheet. Edit it in shared/, then run node tools/shared.js --write. ==== */
 .nprof{display:flex;align-items:center;gap:8px;margin:2px 0 6px}.nprof p{margin:0;flex:1;min-width:0}
 .wrench{flex:none;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);cursor:pointer}
 .wrench svg{width:20px;height:20px}
 fieldset.pw{border:0;margin:14px 0 0;padding:0}fieldset.pw legend{padding:0}fieldset.pw .chips{margin:8px 0 0}
+/* ==== end of shared/nutrition.css ==== */
 .gtabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;font-size:0.875rem;font-weight:600;cursor:pointer;min-height:44px}
 .gtabs button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .fill li{margin:.35em 0}
@@ -2108,10 +2110,10 @@ const NUTRI=(()=>{
      breastfeeding; 1.6 with a muscle goal). Calories: kg × 28, 32 or 36 by the kind of day, + 340 pregnant or 350 breastfeeding: rough, not a DRI.
      The person (every answer can be missing):
        sex 'm' | 'f' (missing: the higher of the two)   age 'a1' 19–30 | 'a2' 31–50 | 'a3' 51–70 | 'a4' 71+ | 'minor' under 19
-       kg  a number (missing: 70)   work 'sit' | 'feet' | 'heavy' (missing: 'feet')
+       kg  a number (missing: no calories, and the protein RDA in place of 0.8 g per kg)   work 'sit' | 'feet' | 'heavy' (missing: 'feet')
        smoke, preg, bf, veg, muscle  true or false (muscle: the goal is muscle, and nothing rules out more protein) */
   function needs(p){ p=p||{};
-    const sex=p.sex||'hi'; const age=p.age==='minor'?'a1':(p.age||'a2'); const kg=(Number.isFinite(+p.kg)&&+p.kg>0)?+p.kg:70; const work=p.work||'feet';
+    const sex=p.sex||'hi'; const age=p.age==='minor'?'a1':(p.age||'a2'); const kg=(Number.isFinite(+p.kg)&&+p.kg>0)?+p.kg:null; const work=p.work||'feet';
     const M={ca:age==='a4'?1200:1000, fe:8, mg:age==='a1'?400:420, k:3400, zn:11, c:90, b1:1.2, fol:400, b12:2.4, d:age==='a4'?800:600, vk:120, va:900, mn:2.3, cu:0.9, fib:(age==='a3'||age==='a4')?30:38, e:15, b2:1.3, b3:16, b6:(age==='a3'||age==='a4')?1.7:1.3, se:55};
     const F={ca:(age==='a3'||age==='a4')?1200:1000, fe:(age==='a1'||age==='a2')?18:8, mg:age==='a1'?310:320, k:2600, zn:8, c:75, b1:1.1, fol:400, b12:2.4, d:age==='a4'?800:600, vk:90, va:700, mn:1.8, cu:0.9, fib:(age==='a3'||age==='a4')?21:25, e:15, b2:1.1, b3:14, b6:(age==='a3'||age==='a4')?1.5:1.3, se:55};
     let T={}; for(const k of Object.keys(M)) T[k]= sex==='m'?M[k] : sex==='f'?F[k] : Math.max(M[k],F[k]);
@@ -2127,11 +2129,14 @@ const NUTRI=(()=>{
     /* upper limits (Health Canada DRI tables): D 4,000 IU, iron 45 mg, zinc 40 mg, vitamin C 2,000 mg, calcium 2,500 mg (2,000 over 50).
        Vitamin E's ceiling counts supplements only: 1,100 IU, the synthetic form's, so it holds for either form. */
     T.ul={d:4000, fe:45, zn:40, c:2000, ca:(age==='a3'||age==='a4')?2000:2500, mn:11, cu:10, e:1100, b6:100, se:400};
-    /* caffeine: Health Canada maximums: 400 mg adults, 300 pregnant or breastfeeding, 2.5 mg/kg under 18 */
-    T.caf = p.age==='minor' ? Math.round(2.5*kg) : (p.preg||p.bf) ? 300 : 400;
+    /* caffeine: Health Canada maximums: 400 mg adults, 300 pregnant or breastfeeding, 2.5 mg/kg under 18 (70 kg when the weight isn't given) */
+    T.caf = p.age==='minor' ? Math.round(2.5*(kg||70)) : (p.preg||p.bf) ? 300 : 400;
     /* alcohol: Canada's Guidance on Alcohol and Health (2023): no more than 2 on any day; none in pregnancy, while breastfeeding, or under 18 */
     T.sd = (p.preg||p.bf||p.age==='minor') ? 0 : 2;
-    T.na=2300; T.prot=Math.round((p.muscle?Math.max(1.6,p.bf?1.3:p.preg?1.1:0.8):(p.bf?1.3:p.preg?1.1:0.8))*kg); T.kcal=Math.round(kg*(work==='sit'?28:work==='feet'?32:36))+(p.bf?350:p.preg?340:0);
+    T.na=2300;
+    /* with no weight: the protein RDA for an average adult (46 g women, 56 g men, 71 g pregnant or breastfeeding), and no calories */
+    if(kg){ T.prot=Math.round((p.muscle?Math.max(1.6,p.bf?1.3:p.preg?1.1:0.8):(p.bf?1.3:p.preg?1.1:0.8))*kg); T.kcal=Math.round(kg*(work==='sit'?28:work==='feet'?32:36))+(p.bf?350:p.preg?340:0); }
+    else T.prot=(p.preg||p.bf)?71:sex==='f'?46:56;
     return T;
   }
   /* a total against its need: a limit (sodium, caffeine, alcohol) is only over or not; calories are fine from 85% to 130% */
@@ -2159,16 +2164,23 @@ const NUTRI=(()=>{
       else { const o=q.opts.find(x=>x.v===val); out.push(o?o.s[i]:q.n[i]+(fr?' non précisé':' not given')); } }
     return out.join(' · '); }
   /* the answers as buttons, for a sheet: data-pw is the question, data-v the answer */
-  function askHTML(p,fr,hide){ p=p||{}; hide=hide||[]; const i=fr?1:0, esc=t=>String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+  function askHTML(p,fr,hide){ p=p||{}; hide=hide||[]; const i=fr?1:0;
     return ASK.filter(q=>!hide.includes(q.id)).map(q=>{ const val=p[q.id], on=v=>q.multi?(Array.isArray(val)&&val.includes(v)):val===v;
       return `<fieldset class="pw"><legend><b>${esc(q.t[i])}</b></legend>${q.h?`<p class="small muted" style="margin:2px 0 0">${esc(q.h[i])}</p>`:''}<div class="chips ${q.multi?'pickn':'pick1'}">${q.opts.filter(o=>!hide.includes(o.v)).map(o=>`<button type="button" class="chip" data-pw="${q.id}" data-v="${o.v}" aria-pressed="${on(o.v)}"><span>${esc(o.l[i])}</span></button>`).join('')}</div></fieldset>`; }).join(''); }
+  const esc=t=>String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const WRENCH='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M22.7 19.3l-8.6-8.6c.9-2.3.4-5-1.5-6.9C10.6 1.8 7.6 1.4 5.2 2.5l4.1 4.1-2.8 2.8-4.2-4.1C1.2 7.7 1.7 10.7 3.6 12.6c1.9 1.9 4.6 2.4 6.9 1.5l8.6 8.6c.4.4 1 .4 1.4 0l2.2-2.2c.4-.4.4-1 0-1.2z"/></svg>';
+  /* the line above the bars, with the wrench (data-act="nprof": the app opens the sheet) */
+  function lineHTML(p,fr,hide){ return `<div class="nprof"><p class="small muted">${fr?'Besoins calculés pour :':'Needs worked out for:'} ${esc(summary(p,fr,hide))}</p><button type="button" class="wrench" data-act="nprof" aria-label="${fr?'Changer ce qui sert à calculer les besoins':'Change what the needs are worked out from'}">${WRENCH}</button></div>`; }
+  /* the wrench's sheet, without its close button (each app frames its sheets). alone: the app's name when its sharing is off. */
+  function sheetHTML(p,fr,hide,alone){ return `<h3 id="sheetTitle">${fr?'Ce qui sert à calculer tes besoins':'What your needs are worked out from'}</h3><p class="small muted" style="margin:0">${alone?(fr?`Le partage avec les autres applis v3ktor.org est désactivé dans le menu, alors elles restent dans ${alone}.`:`Sharing with the other v3ktor.org apps is off in the menu, so these stay in ${alone}.`):(fr?'Les mêmes réponses dans chaque appli v3ktor.org sur ce téléphone : change-en une ici et les autres suivent. Rien ne quitte le téléphone.':'The same answers in every v3ktor.org app on this phone: change one here and the others follow. Nothing leaves the phone.')}</p>${askHTML(p,fr,hide)}`; }
   /* shared by every V3KTOR app on this phone, in its browser storage (nothing leaves the phone): the answers and when they last changed.
      Each app keeps its own copy too; the newer one wins. */
   const SHARE='v3k.profile.v1';
   function shared(){ try{ const o=JSON.parse(localStorage.getItem(SHARE)||'null'); return o&&o.p&&typeof o.p==='object'&&typeof o.t==='number'?o:null; }catch(e){ return null; } }
-  function share(p){ const t=Date.now(); try{ localStorage.setItem(SHARE,JSON.stringify({v:1,t,p})); }catch(e){} return t; }
+  /* a write keeps what another app wrote and this one doesn't ask (an answer is changed, never taken away) */
+  function share(p){ const t=Date.now(), old=shared(); try{ localStorage.setItem(SHARE,JSON.stringify({v:1,t,p:Object.assign({},old?old.p:{},p)})); }catch(e){} return t; }
   function unshare(){ try{ localStorage.removeItem(SHARE); }catch(e){} }
-  return {NUT, needs, band, BAND, ASK, pick, summary, askHTML, SHARE, shared, share, unshare};
+  return {NUT, needs, band, BAND, ASK, pick, summary, askHTML, lineHTML, sheetHTML, SHARE, shared, share, unshare};
 })();
 /* ==== end of shared/nutrition.js ==== */
 const TN=NUTRI.NUT;
@@ -2192,7 +2204,7 @@ function tankPrefill(){ const p=S.tank.p; if(Array.isArray(p.life) || (!S.a.fuel
 function tankLife(){ const p=S.tank.p; const l=Array.isArray(p.life)?p.life:[]; return { smoke:l.includes('smoke'), drink:l.includes('drink'), preg:(l.includes('preg')||(has('safety','preg')&&!l.includes('bf'))) && p.sex!=='m', bf:(l.includes('bf')||(has('safety','bf')&&!has('safety','preg'))) && p.sex!=='m' && !l.includes('preg'), coffee:any('fuel','coffee','energy'), veg:l.includes('veg')||l.includes('vegan')||any('safety','veg','vegan'), vegan:l.includes('vegan')||(has('safety','vegan')&&!l.includes('veg')) }; }
 /* Targets: Health Canada DRI tables (elements, vitamins; sodium/potassium 2019 values). Protein: RDA 0.8 g/kg. Calories: rough kg × activity factor — not a DRI. */
 /* the needs, from the tank's answers and the Patch's (pregnancy, diet, kidney disease, the muscle goal): shared/nutrition.js */
-function tankTargets(){ const p=S.tank.p, life=tankLife(); return NUTRI.needs({sex:p.sex, age:p.age, kg:p.wt, work:p.work, smoke:life.smoke, preg:life.preg, bf:life.bf, veg:life.veg, muscle:goalOn('muscle')&&!has('safety','kidney')}); }
+function tankTargets(){ const p=S.tank.p, life=tankLife(); return NUTRI.needs({sex:p.sex, age:p.age, kg:(+p.wt>0?+p.wt:70), work:p.work, smoke:life.smoke, preg:life.preg, bf:life.bf, veg:life.veg, muscle:goalOn('muscle')&&!has('safety','kidney')}); }
 /* which logged foods count for the crash door's "what went in" question */
 const CRASHCAT={hist:[],sweetener:[502395,2926,910002,910006,502444,502447,509001,509002],refined:[4407,4127,4124,4066,3671,3893,3915,1242,1256,501819,3812,4903,502357,4962,4635,4617,2185,501999],sweet:[4186,6230,5288,502393,910001,910003,910004,910005,910007,4318,70,502158,1620,1745,4163,3812,3893,4148],protein:[130,133,3203,5965,3081,501869,501872,2696,6146,842,854,1787,1816,691,3183,3187,3037,3588,3580,3572,502170,25,4086,2657,5335,3212,3116,3118,3404,502444,502447,1148,1154]};
 /* the crash option says "aged cheese, cured meat, canned fish, leftovers" — so only those pre-tick it; wine, beer and fermented foods are asked elsewhere */
@@ -2245,11 +2257,9 @@ function pushProfile(){ if(!shareOn()||!S.tank) return; const me=myProfile(); if
 pullProfile();
 window.addEventListener('storage',e=>{ if(e.key===NUTRI.SHARE&&pullProfile()){ save(); render(); } });
 /* the wrench above the bars: what the needs are worked out from, and a sheet to change it */
-const WRENCH='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M22.7 19.3l-8.6-8.6c.9-2.3.4-5-1.5-6.9C10.6 1.8 7.6 1.4 5.2 2.5l4.1 4.1-2.8 2.8-4.2-4.1C1.2 7.7 1.7 10.7 3.6 12.6c1.9 1.9 4.6 2.4 6.9 1.5l8.6 8.6c.4.4 1 .4 1.4 0l2.2-2.2c.4-.4.4-1 0-1.2z"/></svg>';
-function profLine(){ if(!tankReady()) return '';
-  return `<div class="nprof"><p class="small muted">${L('Needs worked out for','Besoins calculés pour')}${S.lang==='fr'?'\u00a0:':':'} ${esc(NUTRI.summary(myProfile(),S.lang==='fr'))}</p><button type="button" class="wrench" data-act="nprof" aria-label="${L('Change what the needs are worked out from','Changer ce qui sert à calculer les besoins')}">${WRENCH}</button></div>`; }
+function profLine(){ return tankReady()?NUTRI.lineHTML(myProfile(),S.lang==='fr'):''; }
 function openProf(opener){ const fr=S.lang==='fr';
-  showSheet(`<div class="handle"></div><h3 id="sheetTitle">${L('What your needs are worked out from','Ce qui sert à calculer tes besoins')}</h3><p class="small muted" style="margin:0">${shareOn()?L('The same answers in every v3ktor.org app on this phone: change one here and the others follow. Nothing leaves the phone.','Les mêmes réponses dans chaque appli v3ktor.org sur ce téléphone : change-en une ici et les autres suivent. Rien ne quitte le téléphone.'):L('Sharing with the other v3ktor.org apps is off in the menu, so these stay in The Patch.','Le partage avec les autres applis v3ktor.org est désactivé dans le menu, alors elles restent dans La Patch.')}</p>${NUTRI.askHTML(myProfile(),fr)}<div class="row" style="margin-top:16px"><button type="button" class="btn" id="closeSheet">${L('Done','Terminé')}</button></div>`, opener);
+  showSheet(`<div class="handle"></div>${NUTRI.sheetHTML(myProfile(),fr,[],shareOn()?'':L('The Patch','La Patch'))}<div class="row" style="margin-top:16px"><button type="button" class="btn" id="closeSheet">${L('Done','Terminé')}</button></div>`, opener);
   sheet.querySelectorAll('[data-pw]').forEach(b=>{ b.onclick=()=>{ const id=b.dataset.pw, v=b.dataset.v, y=sheet.scrollTop;
     applyProfile(NUTRI.pick(myProfile(),id,v)); save(); render(); openProf(); sheet.scrollTop=y; const f=sheet.querySelector(`[data-pw="${id}"][data-v="${v}"]`); if(f) f.focus(); }; }); }
 function dayKey(d){ const t=new Date(d?d.getTime():Date.now()); const r=S.tank.roll||0, h=t.getHours(); if(r>0&&h<r) t.setDate(t.getDate()-1); else if(r<0&&h>=24+r) t.setDate(t.getDate()+1); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); }

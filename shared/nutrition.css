@@ -1,0 +1,6 @@
+/* ==== shared/nutrition.css: the line above the Nutrition bars, its wrench, and the wrench's sheet. Edit it in shared/, then run node tools/shared.js --write. ==== */
+.nprof{display:flex;align-items:center;gap:8px;margin:2px 0 6px}.nprof p{margin:0;flex:1;min-width:0}
+.wrench{flex:none;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);cursor:pointer}
+.wrench svg{width:20px;height:20px}
+fieldset.pw{border:0;margin:14px 0 0;padding:0}fieldset.pw legend{padding:0}fieldset.pw .chips{margin:8px 0 0}
+/* ==== end of shared/nutrition.css ==== */

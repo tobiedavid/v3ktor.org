@@ -410,6 +410,12 @@ a.tw,.sheet a.tw,.wrap p a.tw{color:inherit;text-decoration:underline dotted;tex
 .card.stg:not(.on){opacity:.72}.card.stg.on{border:2px solid var(--ink)}.card.stg .big{font-size:1.15rem}
 .pick1{display:grid;gap:8px}.pick1 .btn{display:block;width:100%;text-align:left;white-space:normal;line-height:1.3;padding:12px 14px}.pick1 .btn small{display:block;font-weight:400;opacity:.75;margin-top:2px}
 details.faq summary{cursor:pointer;line-height:1.35}details.faq p{line-height:1.5}
+/* ==== shared/nutrition.css: the line above the Nutrition bars, its wrench, and the wrench's sheet. Edit it in shared/, then run node tools/shared.js --write. ==== */
+.nprof{display:flex;align-items:center;gap:8px;margin:2px 0 6px}.nprof p{margin:0;flex:1;min-width:0}
+.wrench{flex:none;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);cursor:pointer}
+.wrench svg{width:20px;height:20px}
+fieldset.pw{border:0;margin:14px 0 0;padding:0}fieldset.pw legend{padding:0}fieldset.pw .chips{margin:8px 0 0}
+/* ==== end of shared/nutrition.css ==== */
 </style>
 </head>
 <body>
@@ -651,7 +657,7 @@ const UA=navigator.userAgent||'', IOS=/iPad|iPhone|iPod/.test(UA)||(navigator.pl
   STANDALONE=(()=>{ try{ return navigator.standalone===true||matchMedia('(display-mode: standalone)').matches; }catch(e){ return false; } })(),
   SHARE='<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M7 11H5v10h14V11h-2"/></svg>';
 if(FRAMED||STANDALONE) document.documentElement.classList.add('noinst');
-const VER='1.4.9', RULES=5, CONSENT=3, KEY='v3k.gut.v1', H=36e5;
+const VER='1.5.0', RULES=5, CONSENT=3, KEY='v3k.gut.v1', H=36e5;
 const BK={alc:[4,'Alcohol'],caf:[4,'Caffeine and coffee'],proc:[4,'Processed or packaged food'],swt:[4,'Sugar-free sweeteners'],sup:[4,'Supplements and protein powder'],dairy:[3,'Dairy'],fat:[3,'Fatty or fried food'],sugar:[3,'Sugar and fructose'],rawsea:[3,'Raw shellfish'],gluten:[2,'Wheat, barley and rye'],fibre:[2,'Bran and high-fibre food'],legume:[2,'Beans and lentils'],onion:[2,'Onion and garlic'],spicy:[2,'Spicy food'],hist:[2,'Histamine-rich food'],veg:[1,'Vegetables, other than the plain ones'],fruit:[1,'Fruit, other than banana'],nuts:[1,'Nuts and seeds']};
 const BKN={caf:'coffee (decaf too), tea, energy drinks, cola',proc:'most have 20 or more ingredients, so one product is one suspect',swt:'sorbitol, xylitol, sugar-free gum and candy',sup:'over-the-counter only. Never stop a prescribed medicine to test it.',sugar:'juice, honey, soft drinks, apples, pears, mango',hist:'aged cheese, cured meat, canned fish, leftovers, wine, fermented food',veg:'plain: peeled potatoes and squash',fruit:'banana is plain',dairy:'all of it when cutting. Coming back: milk proves it fastest; hard cheese has almost no lactose and is worth its own test'};
 /* the Plain tab leads with what people reach for when their gut is off; the rest follow in A to Z */
@@ -687,7 +693,116 @@ const AGREE=['I am 18 or older.','This is a log, not medical or dietitian advice
 const HOLD=[[7,'Most days, or every few days'],[14,'About once a week'],[28,'Every two weeks or less']];
 const AGES=[['a1','18–30'],['a2','31–50'],['a3','51–70'],['a4','71+']], LIFE=[['veg','Vegetarian'],['preg','Pregnant'],['bf','Breastfeeding']];
 /* key, name, unit, decimals, what it's for (The Patch's short lines) */
-const TN=[['prot','Protein','g',0,'muscle, repair, steady energy'],['fib','Fibre','g',0,'gut, fullness, steadier stools'],['fe','Iron','mg',1,'oxygen, energy'],['mg','Magnesium','mg',0,'sleep, muscles, energy'],['k','Potassium','mg',0,'blood pressure, cramps'],['b1','Thiamine (B1)','mg',2,'turning carbs into energy'],['b2','Riboflavin (B2)','mg',1,'turning food into energy'],['b3','Niacin (B3)','mg',0,'energy from food'],['b6','Vitamin B6','mg',1,'protein, blood, nerves'],['b12','B12','mcg',1,'nerves, blood, fog'],['fol','Folate','mcg',0,'blood, repair'],['zn','Zinc','mg',1,'healing, taste, immune'],['se','Selenium','mcg',0,'thyroid'],['cu','Copper','mg',1,'moving iron, nerves'],['ca','Calcium','mg',0,'bone, muscle'],['c','Vitamin C','mg',0,'iron absorption, repair'],['e','Vitamin E','IU',0,'protects cell walls'],['d','Vitamin D','IU',0,'bone, immune'],['va','Vitamin A','mcg',0,'eyes, skin, immune'],['mn','Manganese','mg',1,'bone, blood sugar'],['vk','Vitamin K','mcg',0,'clotting, bone']];
+/* ==== shared/nutrition.js: the Nutrition rules every V3KTOR food app uses. Edit it in shared/, then run node tools/shared.js --write. ==== */
+const NUTRI=(()=>{
+  const NUT=[ /* key, unit, label [en, fr], what it's for [en, fr], decimals; cap: a limit, not a need; ceil: too much can hurt; gl: the glossary entry */
+    {k:'prot',u:'g',l:['Protein','Protéines'],w:['muscle, repair, steady energy','muscles, réparation, énergie stable'],d:0},
+    {k:'fib',u:'g',l:['Fibre','Fibres'],w:['gut, fullness, steadier stools','intestin, satiété, selles plus régulières'],d:0,gl:'fibre'},
+    {k:'fe',u:'mg',l:['Iron','Fer'],w:['oxygen, energy','oxygène, énergie'],d:1},
+    {k:'mg',u:'mg',l:['Magnesium','Magnésium'],w:['sleep, muscles, energy','sommeil, muscles, énergie'],d:0},
+    {k:'k',u:'mg',l:['Potassium','Potassium'],w:['blood pressure, cramps','pression, crampes'],d:0},
+    {k:'b1',u:'mg',l:['Thiamine (B1)','Thiamine (B1)'],w:['turning carbs and alcohol into energy','transformer glucides et alcool en énergie'],d:2},
+    {k:'b2',u:'mg',l:['Riboflavin (B2)','Riboflavine (B2)'],w:['turning food into energy','transformer la nourriture en énergie'],d:1,gl:'bvits'},
+    {k:'b3',u:'mg',l:['Niacin (B3)','Niacine (B3)'],w:['energy from food — counts what protein makes too','énergie tirée des aliments — compte ce que les protéines fabriquent'],d:0,gl:'bvits'},
+    {k:'b6',u:'mg',l:['Vitamin B6','Vitamine B6'],w:['protein, blood, nerves — too much can hurt','protéines, sang, nerfs — trop peut nuire'],d:1,gl:'b6'},
+    {k:'b12',u:'mcg',l:['B12','B12'],w:['nerves, blood, fog','nerfs, sang, brouillard'],d:1},
+    {k:'fol',u:'mcg',l:['Folate','Folate'],w:['blood, repair','sang, réparation'],d:0},
+    {k:'zn',u:'mg',l:['Zinc','Zinc'],w:['healing, taste, immune','guérison, goût, immunité'],d:1},
+    {k:'se',u:'mcg',l:['Selenium','Sélénium'],w:['thyroid, antioxidant enzymes — too much can hurt','thyroïde, enzymes antioxydantes — trop peut nuire'],d:0,gl:'selenium'},
+    {k:'cu',u:'mg',l:['Copper','Cuivre'],w:['moving iron, making energy, nerves','déplacer le fer, produire l’énergie, les nerfs'],d:1,gl:'copper'},
+    {k:'ca',u:'mg',l:['Calcium','Calcium'],w:['bone, muscle','os, muscles'],d:0},
+    {k:'c',u:'mg',l:['Vitamin C','Vitamine C'],w:['iron absorption, repair','absorption du fer, réparation'],d:0},
+    {k:'e',u:'IU',l:['Vitamin E','Vitamine E'],w:['antioxidant in fats and cell walls','antioxydant dans les gras et les membranes'],d:0,gl:'vite'},
+    {k:'d',u:'IU',l:['Vitamin D','Vitamine D'],w:['bone, immune — almost none from the sun October to March','os, immunité — presque rien du soleil d’octobre à mars'],d:0},
+    {k:'va',u:'mcg',l:['Vitamin A','Vitamine A'],w:['eyes, skin, immune — too much can hurt','yeux, peau, immunité — trop peut nuire'],d:0,ceil:true},
+    {k:'mn',u:'mg',l:['Manganese','Manganèse'],w:['enzymes for bone, blood sugar and clotting','enzymes des os, de la glycémie et de la coagulation'],d:1,gl:'manganese'},
+    {k:'vk',u:'mcg',l:['Vitamin K','Vitamine K'],w:['clotting; the proteins that put calcium in bone','coagulation; les protéines qui mettent le calcium dans l’os'],d:0},
+    {k:'na',u:'mg',l:['Sodium','Sodium'],w:['a cap, not a target','un plafond, pas une cible'],d:0,cap:true},
+    {k:'caf',u:'mg',l:['Caffeine','Caféine'],w:['Health Canada’s daily limit','la limite quotidienne de Santé Canada'],d:0,cap:true,gl:'caffeine'},
+    {k:'sd',u:'',l:['Alcohol — standard drinks','Alcool — consommations standard'],w:['Canada’s guidance: no more than 2 on any day','repère canadien : pas plus de 2 par jour'],d:1,cap:true,gl:'drinks'},
+    {k:'kcal',u:'kcal',l:['Fuel (calories)','Carburant (calories)'],w:['rough — by weight and work','approximatif — selon poids et travail'],d:0,fuel:true}
+  ];
+
+  /* The daily needs. Health Canada's Dietary Reference Intakes (elements, vitamins; sodium and potassium as revised in 2019), by sex and age;
+     the pregnancy and lactation columns; vitamin E in IU of the natural form (1 mg = 1.49 IU). Protein: 0.8 g per kg (1.1 pregnant, 1.3
+     breastfeeding; 1.6 with a muscle goal). Calories: kg × 28, 32 or 36 by the kind of day, + 340 pregnant or 350 breastfeeding: rough, not a DRI.
+     The person (every answer can be missing):
+       sex 'm' | 'f' (missing: the higher of the two)   age 'a1' 19–30 | 'a2' 31–50 | 'a3' 51–70 | 'a4' 71+ | 'minor' under 19
+       kg  a number (missing: no calories, and the protein RDA in place of 0.8 g per kg)   work 'sit' | 'feet' | 'heavy' (missing: 'feet')
+       smoke, preg, bf, veg, muscle  true or false (muscle: the goal is muscle, and nothing rules out more protein) */
+  function needs(p){ p=p||{};
+    const sex=p.sex||'hi'; const age=p.age==='minor'?'a1':(p.age||'a2'); const kg=(Number.isFinite(+p.kg)&&+p.kg>0)?+p.kg:null; const work=p.work||'feet';
+    const M={ca:age==='a4'?1200:1000, fe:8, mg:age==='a1'?400:420, k:3400, zn:11, c:90, b1:1.2, fol:400, b12:2.4, d:age==='a4'?800:600, vk:120, va:900, mn:2.3, cu:0.9, fib:(age==='a3'||age==='a4')?30:38, e:15, b2:1.3, b3:16, b6:(age==='a3'||age==='a4')?1.7:1.3, se:55};
+    const F={ca:(age==='a3'||age==='a4')?1200:1000, fe:(age==='a1'||age==='a2')?18:8, mg:age==='a1'?310:320, k:2600, zn:8, c:75, b1:1.1, fol:400, b12:2.4, d:age==='a4'?800:600, vk:90, va:700, mn:1.8, cu:0.9, fib:(age==='a3'||age==='a4')?21:25, e:15, b2:1.1, b3:14, b6:(age==='a3'||age==='a4')?1.5:1.3, se:55};
+    let T={}; for(const k of Object.keys(M)) T[k]= sex==='m'?M[k] : sex==='f'?F[k] : Math.max(M[k],F[k]);
+    if(p.preg){ T.fe=27; T.mg=age==='a1'?350:360; T.k=2900; T.zn=11; T.c=85; T.b1=1.4; T.fol=600; T.b12=2.6; T.vk=90; T.va=770; T.mn=2.0; T.cu=1.0; T.fib=28; T.b2=1.4; T.b3=18; T.b6=1.9; T.se=60; }
+    /* lactation column: iron drops back to 9; vitamin A, C, zinc, folate, B12 and manganese go up */
+    else if(p.bf){ T.ca=1000; T.fe=9; T.mg=age==='a1'?310:320; T.k=2800; T.zn=12; T.c=120; T.b1=1.4; T.fol=500; T.b12=2.8; T.vk=90; T.va=1300; T.mn=2.6; T.cu=1.3; T.fib=29; T.e=19; T.b2=1.6; T.b3=17; T.b6=2.0; T.se=70; }
+    T.e=Math.round(T.e*1.49*10)/10; /* vitamin E in IU (food, natural form): 15 mg is 22 IU, 19 mg is 28 */
+    if(p.smoke) T.c+=35;
+    /* vegetarian and vegan: NIH/IOM: iron 1.8× (plant iron absorbs less), zinc up to 1.5×. Not in pregnancy: 27 mg is already the need. */
+    if(p.veg){ if(!p.preg) T.fe=Math.round(T.fe*1.8); T.zn=Math.round(T.zn*1.5); }
+    /* plant omega-3 (ALA) adequate intake, g/day */
+    T.ala = p.preg?1.4 : p.bf?1.3 : sex==='f'?1.1 : 1.6;
+    /* upper limits (Health Canada DRI tables): D 4,000 IU, iron 45 mg, zinc 40 mg, vitamin C 2,000 mg, calcium 2,500 mg (2,000 over 50).
+       Vitamin E's ceiling counts supplements only: 1,100 IU, the synthetic form's, so it holds for either form. */
+    T.ul={d:4000, fe:45, zn:40, c:2000, ca:(age==='a3'||age==='a4')?2000:2500, mn:11, cu:10, e:1100, b6:100, se:400};
+    /* caffeine: Health Canada maximums: 400 mg adults, 300 pregnant or breastfeeding, 2.5 mg/kg under 18 (70 kg when the weight isn't given) */
+    T.caf = p.age==='minor' ? Math.round(2.5*(kg||70)) : (p.preg||p.bf) ? 300 : 400;
+    /* alcohol: Canada's Guidance on Alcohol and Health (2023): no more than 2 on any day; none in pregnancy, while breastfeeding, or under 18 */
+    T.sd = (p.preg||p.bf||p.age==='minor') ? 0 : 2;
+    T.na=2300;
+    /* with no weight: the protein RDA for an average adult (46 g women, 56 g men, 71 g pregnant or breastfeeding), and no calories */
+    if(kg){ T.prot=Math.round((p.muscle?Math.max(1.6,p.bf?1.3:p.preg?1.1:0.8):(p.bf?1.3:p.preg?1.1:0.8))*kg); T.kcal=Math.round(kg*(work==='sit'?28:work==='feet'?32:36))+(p.bf?350:p.preg?340:0); }
+    else T.prot=(p.preg||p.bf)?71:sex==='f'?46:56;
+    return T;
+  }
+  /* a total against its need: a limit (sodium, caffeine, alcohol) is only over or not; calories are fine from 85% to 130% */
+  function band(k,pct){ if(k==='na'||k==='caf'||k==='sd') return pct>1?'over':'ok'; if(k==='kcal') return pct>1.3?'over':pct>=0.85?'ok':pct>=0.5?'low':'empty'; return pct>=1?'full':pct>=0.6?'ok':pct>=0.25?'low':'empty'; }
+  const BAND={empty:['Empty','Vide'],low:['Low','Bas'],ok:['Okay','Correct'],full:['Full','Plein'],over:['Over','Dépassé']};
+  const ASK=[ /* the answers the needs rest on; s: the short form for the line above the bars */
+    {id:'sex', n:['sex','sexe'], t:['Sex','Sexe'], h:['Daily needs — iron, protein and the rest — are listed by sex. If you’d rather not say, pick the higher of the two.','Les besoins de chaque jour — fer, protéines et le reste — sont fixés par sexe. Si tu préfères ne pas le dire, prends le plus élevé des deux.'], opts:[{l:['Male','Homme'],v:'m',s:['Male','Homme']},{l:['Female','Femme'],v:'f',s:['Female','Femme']},{l:['Rather not say — use the higher needs','Je préfère ne pas le dire — prends les besoins les plus élevés'],v:'hi',s:['sex not given','sexe non précisé']}]},
+    {id:'age', n:['age','âge'], t:['Age','Âge'], opts:[{l:['19 to 30','19 à 30'],v:'a1',s:['19 to 30','19 à 30']},{l:['31 to 50','31 à 50'],v:'a2',s:['31 to 50','31 à 50']},{l:['51 to 70','51 à 70'],v:'a3',s:['51 to 70','51 à 70']},{l:['71 or over','71 ou plus'],v:'a4',s:['71 or over','71 ou plus']},{l:['Under 19','Moins de 19'],v:'minor',s:['under 19','moins de 19']}]},
+    {id:'wt', n:['weight','poids'], t:['Weight, roughly','Poids, à peu près'], h:['Only protein and calories use it.','Seules les protéines et les calories s’en servent.'], opts:[{l:['Under 60 kg (130 lb)','Moins de 60 kg (130 lb)'],v:'55',s:['under 60 kg','moins de 60 kg']},{l:['60–80 kg (130–175 lb)','60–80 kg (130–175 lb)'],v:'70',s:['60–80 kg','60–80 kg']},{l:['80–100 kg (175–220 lb)','80–100 kg (175–220 lb)'],v:'90',s:['80–100 kg','80–100 kg']},{l:['Over 100 kg (220 lb)','Plus de 100 kg (220 lb)'],v:'110',s:['over 100 kg','plus de 100 kg']}]},
+    {id:'work', n:['kind of day','type de journée'], t:['Your days','Tes journées'], opts:[{l:['Mostly sitting','Assis la plupart du temps'],v:'sit',s:['mostly sitting','assis la plupart du temps']},{l:['On my feet','Debout'],v:'feet',s:['on my feet','debout']},{l:['Heavy work, or sweating a lot','Travail dur, ou beaucoup de sueur'],v:'heavy',s:['heavy work','travail dur']}]},
+    {id:'life', t:['Also true?','Aussi vrai?'], h:['These change the needs.','Ça change les besoins.'], multi:true, opts:[{l:['I smoke or vape','Je fume ou je vapote'],v:'smoke',s:['smoke or vape','tabac ou vapotage']},{l:['I drink most days','Je bois presque tous les jours'],v:'drink',s:['drink most days','alcool presque tous les jours']},{l:['Pregnant','Enceinte'],v:'preg',s:['pregnant','enceinte']},{l:['Breastfeeding','J’allaite'],v:'bf',s:['breastfeeding','allaitement']},{l:['Vegetarian — eggs or dairy, no meat or fish','Végétarien — œufs ou produits laitiers, pas de viande ni de poisson'],v:'veg',s:['vegetarian','végé'],ex:'diet'},{l:['Vegan — no animal foods','Végane — aucun aliment animal'],v:'vegan',s:['vegan','végane'],ex:'diet'},{l:['None of these','Aucun de ces choix'],v:'none',none:true}]}
+  ];
+  /* a tap on an answer: one answer replaces the last; in a list, "none" clears the rest, and vegetarian and vegan exclude each other */
+  function pick(p,id,v){ const q=ASK.find(x=>x.id===id); if(!q) return p; const o=Object.assign({},p);
+    if(!q.multi){ o[id]=v; return o; }
+    let arr=Array.isArray(o[id])?o[id].slice():[]; const opt=q.opts.find(x=>x.v===v)||{};
+    if(arr.includes(v)) arr=arr.filter(x=>x!==v);
+    else if(opt.none) arr=[v];
+    else { arr=arr.filter(x=>!(q.opts.find(y=>y.v===x)||{}).none); if(opt.ex) arr=arr.filter(x=>(q.opts.find(y=>y.v===x)||{}).ex!==opt.ex); arr.push(v); }
+    o[id]=arr; return o; }
+  /* the line above the bars: what the needs are worked out from. fr: French. hide: answers an app doesn't ask. */
+  function summary(p,fr,hide){ p=p||{}; hide=hide||[]; const i=fr?1:0, out=[];
+    for(const q of ASK){ if(hide.includes(q.id)) continue; const val=p[q.id];
+      if(q.multi){ for(const o of q.opts) if(!o.none&&!hide.includes(o.v)&&Array.isArray(val)&&val.includes(o.v)) out.push(o.s[i]); }
+      else { const o=q.opts.find(x=>x.v===val); out.push(o?o.s[i]:q.n[i]+(fr?' non précisé':' not given')); } }
+    return out.join(' · '); }
+  /* the answers as buttons, for a sheet: data-pw is the question, data-v the answer */
+  function askHTML(p,fr,hide){ p=p||{}; hide=hide||[]; const i=fr?1:0;
+    return ASK.filter(q=>!hide.includes(q.id)).map(q=>{ const val=p[q.id], on=v=>q.multi?(Array.isArray(val)&&val.includes(v)):val===v;
+      return `<fieldset class="pw"><legend><b>${esc(q.t[i])}</b></legend>${q.h?`<p class="small muted" style="margin:2px 0 0">${esc(q.h[i])}</p>`:''}<div class="chips ${q.multi?'pickn':'pick1'}">${q.opts.filter(o=>!hide.includes(o.v)).map(o=>`<button type="button" class="chip" data-pw="${q.id}" data-v="${o.v}" aria-pressed="${on(o.v)}"><span>${esc(o.l[i])}</span></button>`).join('')}</div></fieldset>`; }).join(''); }
+  const esc=t=>String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const WRENCH='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M22.7 19.3l-8.6-8.6c.9-2.3.4-5-1.5-6.9C10.6 1.8 7.6 1.4 5.2 2.5l4.1 4.1-2.8 2.8-4.2-4.1C1.2 7.7 1.7 10.7 3.6 12.6c1.9 1.9 4.6 2.4 6.9 1.5l8.6 8.6c.4.4 1 .4 1.4 0l2.2-2.2c.4-.4.4-1 0-1.2z"/></svg>';
+  /* the line above the bars, with the wrench (data-act="nprof": the app opens the sheet) */
+  function lineHTML(p,fr,hide){ return `<div class="nprof"><p class="small muted">${fr?'Besoins calculés pour :':'Needs worked out for:'} ${esc(summary(p,fr,hide))}</p><button type="button" class="wrench" data-act="nprof" aria-label="${fr?'Changer ce qui sert à calculer les besoins':'Change what the needs are worked out from'}">${WRENCH}</button></div>`; }
+  /* the wrench's sheet, without its close button (each app frames its sheets). alone: the app's name when its sharing is off. */
+  function sheetHTML(p,fr,hide,alone){ return `<h3 id="sheetTitle">${fr?'Ce qui sert à calculer tes besoins':'What your needs are worked out from'}</h3><p class="small muted" style="margin:0">${alone?(fr?`Le partage avec les autres applis v3ktor.org est désactivé dans le menu, alors elles restent dans ${alone}.`:`Sharing with the other v3ktor.org apps is off in the menu, so these stay in ${alone}.`):(fr?'Les mêmes réponses dans chaque appli v3ktor.org sur ce téléphone : change-en une ici et les autres suivent. Rien ne quitte le téléphone.':'The same answers in every v3ktor.org app on this phone: change one here and the others follow. Nothing leaves the phone.')}</p>${askHTML(p,fr,hide)}`; }
+  /* shared by every V3KTOR app on this phone, in its browser storage (nothing leaves the phone): the answers and when they last changed.
+     Each app keeps its own copy too; the newer one wins. */
+  const SHARE='v3k.profile.v1';
+  function shared(){ try{ const o=JSON.parse(localStorage.getItem(SHARE)||'null'); return o&&o.p&&typeof o.p==='object'&&typeof o.t==='number'?o:null; }catch(e){ return null; } }
+  /* a write keeps what another app wrote and this one doesn't ask (an answer is changed, never taken away) */
+  function share(p){ const t=Date.now(), old=shared(); try{ localStorage.setItem(SHARE,JSON.stringify({v:1,t,p:Object.assign({},old?old.p:{},p)})); }catch(e){} return t; }
+  function unshare(){ try{ localStorage.removeItem(SHARE); }catch(e){} }
+  return {NUT, needs, band, BAND, ASK, pick, summary, askHTML, lineHTML, sheetHTML, SHARE, shared, share, unshare};
+})();
+/* ==== end of shared/nutrition.js ==== */
+/* v1.5.0: the nutrients' names and short lines come from shared/nutrition.js, as in The Patch; these are the 21 rows this app shows */
+const TN=['prot','fib','fe','mg','k','b1','b2','b3','b6','b12','fol','zn','se','cu','ca','c','e','d','va','mn','vk'].map(k=>{ const n=NUTRI.NUT.find(x=>x.k===k); return [k,n.l[0],n.u,n.d,n.w[0]]; });
 
 /* ---------- tap a word to learn it, a line or two, with the question that goes deeper ---------- */
 const STG=['Keep it boring','Add one food a day'];
@@ -785,7 +900,7 @@ function fixFalls(n){ const F=n.fast; if(n.route!=='fast'||!F||!Array.isArray(n.
     for(const c of cs) if(c!==keep&&!(n.tests||[]).some(t=>t&&t.key===c.key&&t.d1>=c.d)) back.push(c); }
   if(back.length){ n.cuts=n.cuts.filter(c=>!back.includes(c)); n.fixed=[...(n.fixed||[]),...back.map(c=>({key:c.key,d:c.d}))]; }
   return n; }
-function save(){ MEMO={}; if(STORE==='bad'||NOSAVE) return; try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){ STORE='none'; } if(!persistAsked){ persistAsked=true; try{ navigator.storage&&navigator.storage.persist&&navigator.storage.persist().catch(()=>{}); }catch(e){} } }
+function save(){ MEMO={}; if(STORE==='bad'||NOSAVE) return; try{ pushProf(); }catch(e){} try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){ STORE='none'; } if(!persistAsked){ persistAsked=true; try{ navigator.storage&&navigator.storage.persist&&navigator.storage.persist().catch(()=>{}); }catch(e){} } }
 
 /* ---------- days: a day starts at S.roll o'clock, as in The Patch ---------- */
 const p2=n=>String(n).padStart(2,'0'), now=()=>Date.now();
@@ -987,14 +1102,20 @@ function dur(min){ if(min<60) return min+' min'; const h=Math.floor(min/60), mm=
 function afterText(t,doc){ const s=sinceMeal(t); return s?`${dur(s.min)} after ${doc?'the':'your'} ${s.at} meal (${s.names})`:''; }
 
 /* ---------- nutrition: The Patch's targets (Health Canada DRIs), adults only ---------- */
-function targets(){ const p=S.p, sex=p.sex||'hi', age=p.age||'a2', life=p.life||[]; const preg=life.includes('preg')&&sex!=='m', bf=life.includes('bf')&&sex!=='m'&&!preg, veg=life.includes('veg');
-  const M={ca:age==='a4'?1200:1000,fe:8,mg:age==='a1'?400:420,k:3400,zn:11,c:90,b1:1.2,fol:400,b12:2.4,d:age==='a4'?800:600,vk:120,va:900,mn:2.3,cu:0.9,fib:(age==='a3'||age==='a4')?30:38,e:15,b2:1.3,b3:16,b6:(age==='a3'||age==='a4')?1.7:1.3,se:55};
-  const F={ca:(age==='a3'||age==='a4')?1200:1000,fe:(age==='a1'||age==='a2')?18:8,mg:age==='a1'?310:320,k:2600,zn:8,c:75,b1:1.1,fol:400,b12:2.4,d:age==='a4'?800:600,vk:90,va:700,mn:1.8,cu:0.9,fib:(age==='a3'||age==='a4')?21:25,e:15,b2:1.1,b3:14,b6:(age==='a3'||age==='a4')?1.5:1.3,se:55};
-  const T={}; for(const k of Object.keys(M)) T[k]=sex==='m'?M[k]:sex==='f'?F[k]:Math.max(M[k],F[k]);
-  if(preg) Object.assign(T,{fe:27,mg:age==='a1'?350:360,k:2900,zn:11,c:85,b1:1.4,fol:600,b12:2.6,vk:90,va:770,mn:2.0,cu:1.0,fib:28,b2:1.4,b3:18,b6:1.9,se:60});
-  else if(bf) Object.assign(T,{ca:1000,fe:9,mg:age==='a1'?310:320,k:2800,zn:12,c:120,b1:1.4,fol:500,b12:2.8,vk:90,va:1300,mn:2.6,cu:1.3,fib:29,e:19,b2:1.6,b3:17,b6:2.0,se:70});
-  T.e=Math.round(T.e*1.49*10)/10; if(veg){ if(!preg) T.fe=Math.round(T.fe*1.8); T.zn=Math.round(T.zn*1.5); }
-  T.prot=preg||bf?71:sex==='f'?46:56; T.ul={d:4000,fe:45,zn:40,c:2000,ca:(age==='a3'||age==='a4')?2000:2500,mn:11,cu:10,b6:100,se:400}; return T; }
+/* v1.5.0: the needs come from shared/nutrition.js, the same rules as The Patch, from the answers shared with the other v3ktor.org apps
+   on this phone (sex, age, weight, and smoking, pregnancy, breastfeeding, vegetarian or vegan). With no weight: the protein RDA, as before. */
+function myLife(){ const p=S.p, l=Array.isArray(p.life)?p.life:[], m=p.sex==='m', preg=l.includes('preg')&&!m; return {smoke:l.includes('smoke'),preg,bf:l.includes('bf')&&!m&&!preg,veg:l.includes('veg')||l.includes('vegan')}; }
+function targets(){ const p=S.p, l=myLife(); return NUTRI.needs({sex:p.sex, age:p.age, kg:p.wt, work:p.work, smoke:l.smoke, preg:l.preg, bf:l.bf, veg:l.veg}); }
+/* the answers: S.pk lists the ones the person gave (here, or in another app); the others stay at their starting values and aren't shared.
+   S.pt is when they last changed. The newer of this app's and the shared ones wins. The wrench doesn't ask the kind of day (only calories use
+   it, and this app counts none) nor drinking most days; they're kept as another app gave them. */
+const HIDE=['work','drink','minor'], PFIELDS=['sex','age','wt','work','life'];
+function myProf(){ const p=S.p, k=S.pk||[], o={}; for(const f of PFIELDS) if(k.includes(f)&&p[f]!=null) o[f]=f==='life'?((p.life||[]).length?p.life.slice():['none']):p[f]; return o; }
+function takeProf(np){ const k=new Set(S.pk||[]); for(const f of PFIELDS) if(np[f]!=null){ S.p[f]=Array.isArray(np[f])?np[f].slice():np[f]; k.add(f); } S.pk=[...k]; }
+function pullProf(){ const sh=NUTRI.shared(); if(!sh||sh.t<=(S.pt||0)) return false; takeProf(sh.p); S.pt=sh.t; S.pp=JSON.stringify(myProf()); return true; }
+function pushProf(){ const me=myProf(); if(!Object.keys(me).length) return; const js=JSON.stringify(me); if(js===S.pp) return; S.pt=NUTRI.share(me); S.pp=js; }
+function openProf(){ const y=sheet.classList.contains('on')?sheet.scrollTop:0; showSheet(NUTRI.sheetHTML(myProf(),false,HIDE)); sheet.scrollTop=y;
+  sheet.querySelectorAll('[data-pw]').forEach(b=>{ b.onclick=()=>{ const id=b.dataset.pw, v=b.dataset.v; takeProf(NUTRI.pick(myProf(),id,v)); save(); render(true); openProf(); const f=sheet.querySelector(`[data-pw="${id}"][data-v="${v}"]`); if(f) f.focus(); }; }); }
 function outBuckets(){ const si=slowInfo(); if(si) return si.out.filter(isB); const fi=fastInfo(); if(!fi) return []; const inb=new Set(fi.base.flatMap(x=>x.b)); return Object.keys(BK).filter(b=>!inb.has(b)); }
 /* the food groups that carry the most of each one, best first; meat, fish and eggs are plain foods, so they aren't groups */
 const SRC={prot:['dairy','legume','nuts'],fib:['fibre','legume','veg','fruit'],fe:['legume','gluten'],mg:['nuts','legume','fibre'],k:['veg','fruit','legume','dairy'],b1:['gluten','legume','nuts'],b2:['dairy','gluten'],b3:['gluten','nuts'],b6:['legume','fruit','veg'],b12:['dairy'],fol:['legume','veg','gluten'],zn:['dairy','nuts','legume'],se:['nuts','gluten'],cu:['nuts','legume'],ca:['dairy'],c:['fruit','veg'],e:['nuts'],d:['dairy'],va:['veg','dairy'],mn:['fibre','nuts','legume'],vk:['veg']};
@@ -1235,7 +1356,7 @@ function planBits(){ const fi=D.fi, si=D.si; let h='';
   h+=(fi&&!S.tests.some(t=>t.route==='fast')?'':resultsCard());
   return h; }
 function vNut(){ const p=S.p, N=nutri(), seg=(k,o)=>`<div class="gtabs" style="margin:4px 0 8px">${o.map(([v,l])=>`<button type="button" data-act="np" data-k="${k}" data-v="${v}" aria-pressed="${p[k]===v}">${l}</button>`).join('')}</div>`;
-  let h=`<div class="eyebrow">Nutrition</div><h2>${N.list?'A day on your list':'Your last 7 days'}</h2><div class="card"><details class="note" data-tog="np" ${V.np?'open':''}><summary>Daily needs for: <b>${{m:'a man',f:'a woman',hi:'either sex'}[p.sex]}, ${AGES.find(a=>a[0]===p.age)[1]}${(p.life||[]).map(v=>', '+LIFE.find(x=>x[0]===v)[1].toLowerCase()).join('')}</b></summary>${seg('sex',[['m','Male'],['f','Female'],['hi','Either']])}${seg('age',AGES)}<div class="gtabs" style="margin:4px 0 8px">${LIFE.map(([v,l])=>`<button type="button" data-act="nlife" data-v="${v}" aria-pressed="${(p.life||[]).includes(v)}">${l}</button>`).join('')}</div></details></div>`;
+  let h=`<div class="eyebrow">Nutrition</div><h2>${N.list?'A day on your list':'Your last 7 days'}</h2>${NUTRI.lineHTML(myProf(),false,HIDE)}`;
   if(!N.n) return h+`<div class="card"><p class="small" style="margin:0">Nothing to count yet. Report what you eat with <b>Meal or drink</b>.</p></div>`;
   h+=`<div class="card"><p class="small muted" style="margin-top:0">${N.list?'Each food on your list counts at its usual amount a day (History → Your foods and how much). On a day when you reported a meal, the app counts what you reported.':`Averaged over the ${N.n} day${N.n===1?'':'s'} with meals reported.`} Needs from Health Canada’s reference tables. No calories, on purpose.${N.typed?' Foods you added by name count as unknown (?).':''}</p><div class="tk">${N.rows.map(r=>`<div class="r"><div class="nm">${G(r.k)}<small>${esc(r.w)}</small></div><div class="meter ${r.band}" role="img" aria-label="${esc(r.l)} ${Math.round(r.pc*100)}%"><i style="width:${Math.min(100,Math.round(r.pc*100))}%"></i></div><div class="amt"><b>${fmt(r.v,r.dc)}${r.lack||N.typed?'?':''}</b> / ${fmt(r.t,r.dc)} ${r.u}<br>${r.over?'Over the upper limit':{full:'Full',ok:'Okay',low:'Low',empty:'Empty'}[r.band]}</div></div>`).join('')}</div></div>`;
   const lo=N.rows.filter(r=>r.band==='low'||r.band==='empty'||r.over);
@@ -1344,7 +1465,7 @@ function openRestore(){ showSheet(`<h3 id="sheetTitle">Restore a backup</h3><p c
 function parseBackup(text){ let o; try{ o=JSON.parse(text); }catch(e){ o=null; } if(!o||o.app!=='food-trial-log'||!o.state||typeof o.state!=='object'||!Array.isArray(o.state.ev)){ toast('That isn’t a Food Trial Log backup'); return; }
   UI.restore=o; showSheet(`<h3 id="sheetTitle">Restore this backup?</h3><p>It’s from ${esc(ymd(o.saved)||'an unknown date')}. Everything on this phone gets replaced by it.</p><button type="button" class="btn primary sm" data-act="dorestore">Replace everything</button>`); }
 function navBack(){ if(sheet.classList.contains('on')){ closeSheet(); return true; } if(V){ V=V.prev||null; render(); return true; } if(S.tab&&S.tab!=='report'){ S.tab='report'; save(); render(); return true; } return false; }
-function eraseAll(){ if(STORE==='bad') STORE='ok'; try{ localStorage.removeItem(KEY); }catch(e){} S=S0(); UI={}; V=null; closeSheet(); render(); toast('Erased'); }
+function eraseAll(){ if(STORE==='bad') STORE='ok'; try{ localStorage.removeItem(KEY); }catch(e){} NUTRI.unshare(); S=S0(); UI={}; V=null; closeSheet(); render(); toast('Erased'); }
 
 /* ---------- actions: one delegated handler ---------- */
 const openRep=(v,b,x)=>{ const k=(b&&b.dataset.day)||today(); go(Object.assign({v,day:k,at:k===today()?hm(now()):''},x)); };
@@ -1416,7 +1537,7 @@ const ACT={
   ate:()=>{ const t=running(); if(!t) return; UNDO={add:[addEv({k:'food',key:t.key,q:1,t:now()}).id]}; save(); render(true); toast('Portion reported',true); },
   stoptest:b=>{ const t=running(); if(!t) return; if(!b.dataset.sure){ b.dataset.sure='1'; b.textContent='Tap again to stop it'; return; } t.stop={res:'void',d:today(),why:'you stopped it'}; save(); render(); },
   day:b=>go({v:'day',k:b.dataset.v}), calm:b=>{ S.cal=b.dataset.v; save(); render(true); },
-  nut:()=>go({v:'nut'}), np:b=>{ S.p[b.dataset.k]=b.dataset.v; save(); render(true); }, nlife:b=>{ const v=b.dataset.v, l=S.p.life||[]; S.p.life=l.includes(v)?l.filter(x=>x!==v):[...l,v]; save(); render(true); },
+  nut:()=>go({v:'nut'}), nprof:()=>openProf(),
   sumcopy:async()=>{ toast(await copyText(UI.sum)?'Copied':'Couldn’t copy: select the text'); }, sumshare:()=>{ try{ navigator.share({title:'Food Trial Log summary',text:UI.sum}).catch(()=>{}); }catch(e){} },
   bkcopy:async()=>{ const ok=await copyText(UI.bk); if(ok){ S.bkAt=new Date().toISOString(); save(); } toast(ok?'Backup copied: paste it somewhere private':'Couldn’t copy: select the text'); },
   bkfile:()=>{ try{ const u=URL.createObjectURL(new Blob([UI.bk],{type:'application/json'})), a=document.createElement('a'); a.href=u; a.download='food-trial-log-backup-'+today()+'.json'; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(u); a.remove(); },500); S.bkAt=new Date().toISOString(); save(); toast('Saved to your downloads'); }catch(e){ toast('Download failed: use Copy'); } },
@@ -1450,6 +1571,10 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden&&!sheet.c
 /* load: if the saved data can't be read, nothing is overwritten */
 { let raw=null; try{ raw=localStorage.getItem(KEY); }catch(e){ STORE='none'; }
   if(raw){ try{ const o=JSON.parse(raw); if(o&&typeof o==='object'&&Array.isArray(o.ev)) S=migrate(o); else STORE='bad'; }catch(e){ S=S0(); STORE='bad'; } } }
+/* v1.5.0: the answers already given count as given (anything but the starting "either sex", 31 to 50, nothing else), then newer shared ones win */
+if(!S.pk){ const p=S.p||{}; S.pk=[]; if(p.sex&&p.sex!=='hi') S.pk.push('sex'); if(p.age&&p.age!=='a2') S.pk.push('age'); if((p.life||[]).length) S.pk.push('life'); }
+if(STORE!=='bad') pullProf();
+window.addEventListener('storage',e=>{ if(e.key===NUTRI.SHARE&&STORE!=='bad'&&pullProf()){ save(); render(true); } });
 S.tab='report'; render();
 if(IOS||(ANDROID&&!CHROME)) installPill(); else if(ANDROID) setTimeout(installPill,4000); /* Chrome on Android: the bar comes with Chrome's offer, or after 4 seconds without one */
 if(STORE==='bad') toast('Couldn’t read your saved data. It hasn’t been overwritten.');
