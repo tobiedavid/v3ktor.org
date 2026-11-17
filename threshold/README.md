@@ -11,12 +11,25 @@ Step two of the system, after the [Food Trial Log](../gut/). You report meals wi
 |---|---|
 | `index.html` | the web page, both languages |
 | `img/` | the page's pictures, from a made-up person's six weeks |
-| `app/index.html` | the whole app: styles, food table, reading rules and screens in one file. No build step. |
+| `app/index.html` | the whole app: styles, food table, reading rules and screens in one file, built from `tools/threshold/src/` |
 | `app/sw.js`, `app/manifest.webmanifest`, `app/icons/` | the offline copy, the install file and the icons |
 
-Inside `app/index.html`, the food table sits between `/* DATA:START */` and `/* DATA:END */`, and the reading rules between `/* ENGINE:START */` and `/* ENGINE:END */`. The tests read both straight out of the file.
+## The source, and building the app
 
-After any change to `app/index.html`, run `node tools/stamp_cache.js` so the offline copy gets a new name and phones fetch the new file.
+The app ships as one file, but it is written in parts, in `tools/threshold/src/`:
+
+| Part | What it is |
+|---|---|
+| `shell_head.html`, `style.css`, `shell_mid.html`, `shell_tail.html` | the page around the app, and its styles |
+| `data.json` | the food table, made by the three steps below |
+| `engine.js` | the reading rules: no screen, no storage; the tests run it on plain Node |
+| `app_a.js`, `app_b.js`, `app_c.js` | the screens |
+
+`node tools/threshold/build.js --write` puts them together into `app/index.html`, with the shared Nutrition pieces from `shared/`. Run alone, it checks that `app/index.html` is exactly what the parts build; the test run does the same, so a change made only in the built file fails. Inside `app/index.html`, the food table sits between `/* DATA:START */` and `/* DATA:END */`, and the reading rules between `/* ENGINE:START */` and `/* ENGINE:END */`. The tests read both straight out of the file.
+
+After building, run `node tools/stamp_cache.js` so the offline copy gets a new name and phones fetch the new file.
+
+The page's pictures: `node tools/threshold/pictures.js <folder>` takes them from the made-up people in `tests/fixtures/threshold-varied.json` and `threshold-steady.json`, and `python3 tools/threshold/pictures_webp.py <folder>` puts the ones that changed into `img/` (it needs Pillow).
 
 ## Where the numbers come from
 
@@ -46,7 +59,8 @@ To rebuild the table (Health Canada's CSV files are not in this repository; the 
 node tools/threshold/dump_tables.js . tables.json
 python3 -I tools/threshold/build_data.py tables.json <folder with Health Canada's CSV files> data.json
 python3 -I tools/threshold/add_compounds.py data.json <folder with Health Canada's CSV files> tables.json
-node tools/threshold/pack_data.js data.json --write
+cp data.json tools/threshold/src/data.json
+node tools/threshold/build.js --write
 node tools/stamp_cache.js
 ```
 

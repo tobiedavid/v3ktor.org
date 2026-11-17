@@ -6,6 +6,7 @@ const { spawnSync } = require('child_process'), path = require('path');
 const TESTS = [
   ['threshold/engine.test.js', false, 'Threshold Log: one check or more for each reading rule'],
   ['gut/repair.test.js', false, 'Food Trial Log: the 13 repair cases, English and French'],
+  ['../tools/threshold/build.js', false, 'the Threshold Log ships exactly what its source in tools/threshold/src builds'],
   ['../tools/foods/pack.js', false, 'The Patch and the Food Trial Log hold the foods in data/foods.csv'],
   ['../tools/shared.js', false, 'every app holds the current copy of shared/ (the Nutrition rules)'],
   ['../tools/stamp_cache.js', false, 'every app’s offline cache carries its file’s name', ['--check']],

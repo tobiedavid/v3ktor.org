@@ -6,6 +6,7 @@
 |---|---|---|
 | `threshold/engine.test.js` | One check or more for each of the Threshold Log's reading rules. The rules are read out of the shipped app file, so what is tested is what people open. | Node |
 | `gut/repair.test.js` | The Food Trial Log's 13 repair cases, in the English and the French copy. | Node |
+| `../tools/threshold/build.js` | `threshold/app/index.html` is exactly what `tools/threshold/src/` and `shared/` build, so the source and the shipped file can't drift apart. | Node |
 | `../tools/foods/pack.js` | The Patch and the Food Trial Log (English and French) hold exactly the foods in `data/foods.csv`, and every row of the CSV is whole. | Node |
 | `../tools/shared.js` | Every app holds the current copy of each piece in `shared/` (the Nutrition rules). | Node |
 | `patch/needs.test.js` | The Patch's daily needs for 131 made-up people (every sex and age, weights, work, smoking, diet, pregnancy, breastfeeding, kidney disease, the muscle goal), its bands and its nutrient list, against `fixtures/patch-needs.json`, recorded before the rules moved to `shared/nutrition.js`. `--record` writes the fixture again, for a change meant to move a need. | Browser |
