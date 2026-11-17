@@ -160,7 +160,7 @@ ol.srcs{padding-left:1.3em;font-size:.9rem} ol.srcs li{margin:0 0 6px}
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" tabindex="-1" aria-hidden="true"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
-const VER='0.7.0', CONSENT=1, KEY='v3k.library.v1';
+const VER='0.8.0', CONSENT=1, KEY='v3k.library.v1';
 const FRAMED=(()=>{ try{ return window.self!==window.top; }catch(e){ return true; } })();
 const STANDALONE=(()=>{ try{ return !!(navigator.standalone||matchMedia('(display-mode: standalone)').matches); }catch(e){ return false; } })();
 const UA=navigator.userAgent||'', IOS=/iPad|iPhone|iPod/.test(UA)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1), ANDROID=/Android/.test(UA), SAFARI=IOS&&/Safari\//.test(UA)&&!/CriOS|FxiOS|EdgiOS|OPiOS|FBAN|FBAV|Instagram/.test(UA), CHROME=ANDROID&&/Chrome\//.test(UA)&&!/SamsungBrowser|EdgA|OPR\/|Firefox|; wv\)|FBAN|FBAV|Instagram/.test(UA);
@@ -272,6 +272,22 @@ const SRC={
   niddkPanc:{l:['NIDDK — Pancreatitis','NIDDK — La pancréatite'],u:'https://www.niddk.nih.gov/health-information/digestive-diseases/pancreatitis'},
   merckPanc:{l:['Merck Manual, Professional — Acute pancreatitis','Manuel Merck, version professionnelle — La pancréatite aiguë'],u:'https://www.merckmanuals.com/professional/gastrointestinal-disorders/pancreatitis/acute-pancreatitis'},
   mayoHA:{l:['Mayo Clinic — Heart attack: symptoms and causes','Mayo Clinic — La crise cardiaque\u00a0: symptômes et causes'],u:'https://www.mayoclinic.org/diseases-conditions/heart-attack/symptoms-causes/syc-20373106'},
+  niddkDigest:{l:['NIDDK — Your digestive system and how it works','NIDDK — Le système digestif et son fonctionnement'],u:'https://www.niddk.nih.gov/health-information/digestive-diseases/digestive-system-how-it-works'},
+  lee14:{l:['Lee 2014 — how to measure regional and whole-gut transit with a wireless capsule','Lee 2014 — mesurer le transit par région et total avec une capsule sans fil'],u:PM(24840380)},
+  wang15:{l:['Wang 2015 — gut transit in 215 volunteers measured with a wireless capsule','Wang 2015 — le transit chez 215 volontaires, mesuré avec une capsule sans fil'],u:PM(26223837)},
+  clevelandGE:{l:['Cleveland Clinic — Gastric emptying study','Cleveland Clinic — L’étude de la vidange gastrique'],u:'https://my.clevelandclinic.org/health/diagnostics/gastric-emptying-study'},
+  statpearlsCCK:{l:['StatPearls — Biochemistry, cholecystokinin','StatPearls — Biochimie de la cholécystokinine'],u:'https://www.ncbi.nlm.nih.gov/books/NBK534204/'},
+  konturek94:{l:['Konturek 1994 — cholecystokinin and the slower emptying of a fatty meal (10 people)','Konturek 1994 — la cholécystokinine et la vidange plus lente d’un repas gras (10 personnes)'],u:'https://doi.org/10.3109/00365529409092476'},
+  niddkLactose:{l:['NIDDK — Lactose intolerance','NIDDK — L’intolérance au lactose'],u:'https://www.niddk.nih.gov/health-information/digestive-diseases/lactose-intolerance'},
+  asnicar21:{l:['Asnicar 2021 — Blue poo: gut transit time measured with a blue dye (863 adults)','Asnicar 2021 — « Blue poo »\u00a0: le temps de transit mesuré avec un colorant bleu (863 adultes)'],u:'https://doi.org/10.1136/gutjnl-2020-323877'},
+  statpearlsGC:{l:['StatPearls — Physiology, gastrocolic reflex','StatPearls — Physiologie du réflexe gastrocolique'],u:'https://www.ncbi.nlm.nih.gov/books/NBK549888/'},
+  brown90:{l:['Brown 1990 — effect of coffee on the end of the colon','Brown 1990 — l’effet du café sur le bout du côlon'],u:PM(2338272)},
+  lewis97:{l:['Lewis & Heaton 1997 — stool form as a guide to transit time (66 volunteers)','Lewis et Heaton 1997 — la forme des selles comme indice du temps de transit (66 volontaires)'],u:PM(9299672)},
+  degen96:{l:['Degen & Phillips 1996 — variability of gut transit in women and men (32 volunteers)','Degen et Phillips 1996 — la variabilité du transit chez les femmes et les hommes (32 volontaires)'],u:PM(8977347)},
+  mullerlissner88:{l:['Müller-Lissner 1988 — wheat bran, stool weight and transit time (meta-analysis)','Müller-Lissner 1988 — le son de blé, le poids des selles et le transit (méta-analyse)'],u:PM(2832033)},
+  devries15:{l:['de Vries 2015 — cereal fibre and bowel function (review of 65 studies)','de Vries 2015 — les fibres de céréales et l’intestin (revue de 65 études)'],u:PM(26269686)},
+  niddkConst:{l:['NIDDK — Constipation','NIDDK — La constipation'],u:'https://www.niddk.nih.gov/health-information/digestive-diseases/constipation'},
+  niddkDiarrhea:{l:['NIDDK — Diarrhea','NIDDK — La diarrhée'],u:'https://www.niddk.nih.gov/health-information/digestive-diseases/diarrhea'},
 };
 /* the fixed line on every card that talks about a medicine */
 const RX=['Any change to a medicine goes through whoever prescribed it.','Tout changement à un médicament passe par la personne qui l’a prescrit.'];
@@ -465,6 +481,29 @@ const CARDS=[
    [['The store empties first','La réserve se vide en premier'],['When more iron leaves than comes in, the store empties first {low ferritin}. Next, new red blood cells get less iron. Only at the end does hemoglobin drop {anemia}. So iron can run low while hemoglobin is still normal.','Quand plus de fer sort qu’il n’en entre, la réserve se vide en premier {ferritine basse}. Ensuite, les nouveaux globules rouges reçoivent moins de fer. C’est seulement à la fin que l’hémoglobine baisse {anémie}. Le fer peut donc être bas pendant que l’hémoglobine est encore normale.'],'solid',w=>IRON(w,8)],
    [['What a blood test reads','Ce que lit une prise de sang'],['Ferritin reads the store; hemoglobin reads the blood. The WHO counts a ferritin under 15 as low in adults; for women, newer studies put the line nearer 25. Inflammation pushes ferritin up, so a ferritin that looks normal can hide a low store.','La ferritine lit la réserve; l’hémoglobine lit le sang. L’OMS compte une ferritine sous 15 comme basse chez l’adulte; chez les femmes, des études plus récentes placent la limite plus près de 25. L’inflammation fait monter la ferritine, alors une ferritine qui a l’air normale peut cacher une réserve basse.'],'solid',w=>IRON(w,9)],
    [['Too much iron','Trop de fer'],['The body has no way to get rid of extra iron, so it can build up. Some people absorb too much because of a gene they’re born with {hereditary hemochromatosis}. And swallowing iron pills by accident is a leading cause of fatal poisoning in children under 6.','Le corps n’a aucun moyen de se débarrasser du fer en trop, alors il peut s’accumuler. Certaines personnes en absorbent trop à cause d’un gène avec lequel elles sont nées {hémochromatose héréditaire}. Et avaler des comprimés de fer par accident est une cause majeure d’empoisonnement mortel chez les enfants de moins de 6 ans.'],'solid',w=>IRON(w,10)]
+  ]},
+{ id:'transit', sec:'gut', t:['How long food takes','Le temps que prend la nourriture'], d:['The trip from the mouth to the end, and what speeds it up or slows it down.','Le trajet de la bouche jusqu’au bout, et ce qui l’accélère ou le ralentit.'],
+  src:['niddkDigest','lee14','wang15','clevelandGE','statpearlsCCK','konturek94','niddkLactose','asnicar21','statpearlsGC','brown90','lewis97','degen96','mullerlissner88','devries15','niddkConst','niddkDiarrhea'],
+  more:[['The times on the first picture come from a swallowed capsule that reports where it is {wireless motility capsule}: normal ranges of 2 to 5 hours for the stomach, 2 to 6 for the small intestine, 10 to 59 for the large intestine and 10 to 73 for the whole trip. How the test is done moves the numbers: in 215 volunteers, taking the capsule right after the meal instead of right before changed the stomach time by about 52 minutes.','Les temps de la première image viennent d’une capsule avalée qui signale où elle se trouve {capsule de motilité sans fil}\u00a0: des plages normales de 2 à 5 heures pour l’estomac, 2 à 6 pour l’intestin grêle, 10 à 59 pour le gros intestin et 10 à 73 pour le trajet complet. La façon de faire le test change les chiffres\u00a0: chez 215 volontaires, avaler la capsule juste après le repas plutôt que juste avant changeait le temps de l’estomac d’environ 52 minutes.'],
+        ['In the stomach test, a standard meal of egg whites and toast carries a tracer, and a scanner follows it. Normal results: at least 40\u00a0% of the meal gone at 2 hours, at least 90\u00a0% at 4 hours. In 10 people, adding oil to a liquid meal made it take about 50\u00a0% longer to empty, and blocking cholecystokinin reduced that slowing.','Dans le test de l’estomac, un repas standard de blancs d’œufs et de pain grillé porte un traceur, et un appareil le suit. Résultats normaux\u00a0: au moins 40\u00a0% du repas sorti à 2 heures, au moins 90\u00a0% à 4 heures. Chez 10 personnes, ajouter de l’huile à un repas liquide le faisait sortir environ 50\u00a0% plus lentement, et bloquer la cholécystokinine diminuait ce ralentissement.'],
+        ['NIDDK: the small intestine absorbs most of the nutrients in food, and its wall takes water and nutrients into the blood; the large intestine absorbs water and changes the waste from liquid into stool, and its bacteria help break down what is left and make vitamin K. With lactose intolerance, symptoms can start within a few hours of milk or milk products.','NIDDK\u00a0: l’intestin grêle absorbe la plupart des nutriments de la nourriture, et sa paroi fait passer l’eau et les nutriments dans le sang; le gros intestin absorbe l’eau et change les déchets liquides en selles, et ses bactéries aident à défaire ce qui reste et fabriquent de la vitamine K. Avec l’intolérance au lactose, les symptômes peuvent commencer quelques heures après le lait ou les produits laitiers.'],
+        ['In the blue-muffin study (863 adults), under 14 hours counted as fast, 14 to 58 as normal, and 59 or more as slow; the trip time matched the makeup of the gut bacteria better than stool form or how often a person went. In 66 volunteers, stool form followed the whole trip better than how often a person went or how much stool came out. In 32 volunteers, the large intestine moved faster in men than in women, and one person’s two tests sometimes differed a lot.','Dans l’étude des muffins bleus (863 adultes), moins de 14 heures comptait comme rapide, 14 à 58 comme normal, et 59 ou plus comme lent; le temps du trajet allait mieux avec la composition des bactéries de l’intestin que la forme des selles ou leur fréquence. Chez 66 volontaires, la forme des selles suivait le trajet complet mieux que la fréquence ou la quantité de selles. Chez 32 volontaires, le gros intestin avançait plus vite chez les hommes que chez les femmes, et les deux tests d’une même personne différaient parfois beaucoup.'],
+        ['The large intestine’s response to a meal shows up as electrical activity within minutes of eating; people with irritable bowel can have a stronger response. In the coffee study, 14 people had the end of the colon measured with a pressure probe; 8 of them had said coffee gave them the urge, and in those 8 the response lasted at least 30 minutes.','La réponse du gros intestin à un repas se voit comme une activité électrique quelques minutes après avoir mangé; les personnes qui ont le côlon irritable peuvent avoir une réponse plus forte. Dans l’étude sur le café, 14 personnes ont eu le bout du côlon mesuré avec une sonde de pression; 8 d’entre elles avaient dit que le café leur donnait l’envie, et chez ces 8, la réponse durait au moins 30 minutes.'],
+        ['In a meta-analysis of 20 papers, bran made stools heavier and the trip shorter in every study, but people with long-standing constipation responded less. The 45-minute figure comes from a review of 65 studies of intact wheat fibre, paid for by a cereal company.','Dans une méta-analyse de 20 articles, le son rendait les selles plus lourdes et le trajet plus court dans chaque étude, mais les personnes constipées depuis longtemps répondaient moins. Le chiffre de 45 minutes vient d’une revue de 65 études sur les fibres de blé intactes, payée par une compagnie de céréales.'],
+        ['NIDDK also lists, with constipation, being unable to pass gas and lower back pain; with diarrhea, a change in mental state, frequent vomiting, severe belly or rectal pain, and black, tarry or bloody stools.','Le NIDDK nomme aussi, avec la constipation, ne plus pouvoir passer de gaz et une douleur au bas du dos; avec la diarrhée, un changement de l’état mental, des vomissements fréquents, une forte douleur au ventre ou au rectum, et des selles noires, goudronneuses ou sanglantes.']],
+  f:[
+   [['Three stations','Trois stations'],['A meal crosses three stations. The stomach holds it for about 2 to 5 hours, the small intestine for 2 to 6, and the large intestine for 10 to 59. In people with no gut trouble, the whole trip takes from about 10 to 73 hours {whole-gut transit time}.','Un repas traverse trois stations. L’estomac le garde environ 2 à 5 heures, l’intestin grêle 2 à 6, et le gros intestin 10 à 59. Chez les personnes sans problème digestif, le trajet complet prend d’environ 10 à 73 heures {temps de transit total}.'],'solid',w=>TRANSIT(w,0)],
+   [['The stomach lets it out slowly','L’estomac le laisse sortir lentement'],['The stomach mixes food with its juices and lets the paste out a little at a time. In the standard test meal, at least 40\u00a0% has left after 2 hours, and at least 90\u00a0% after 4. Fat holds the meal back: the small intestine sends a messenger that slows the stomach {cholecystokinin}.','L’estomac mélange la nourriture avec ses sucs et laisse sortir la pâte un peu à la fois. Avec le repas du test standard, au moins 40\u00a0% est sorti après 2 heures, et au moins 90\u00a0% après 4. Le gras retient le repas\u00a0: l’intestin grêle envoie un messager qui ralentit l’estomac {cholécystokinine}.'],'solid',w=>TRANSIT(w,1)],
+   [['The small intestine: hours','L’intestin grêle\u00a0: des heures'],['In the small intestine, waves of muscle push the paste along {peristalsis}, and the wall takes most of the food into the blood. The front of a meal can reach the large intestine within a few hours.','Dans l’intestin grêle, des vagues de muscle poussent la pâte {péristaltisme}, et la paroi fait passer la plus grande partie de la nourriture dans le sang. Le début d’un repas peut arriver au gros intestin en quelques heures.'],'solid',w=>TRANSIT(w,2)],
+   [['What it leaves behind','Ce qu’il laisse passer'],['Whatever the small intestine doesn’t take in goes on to the large intestine, where bacteria ferment it. In a person short of the enzyme that splits milk sugar {lactase}, that sugar gets through, and gas, bloating, cramps or loose stool can start within a few hours.','Ce que l’intestin grêle n’absorbe pas continue vers le gros intestin, où des bactéries le font fermenter. Chez une personne qui manque de l’enzyme qui coupe le sucre du lait {lactase}, ce sucre passe, et des gaz, des ballonnements, des crampes ou des selles molles peuvent commencer en quelques heures.'],'solid',w=>TRANSIT(w,3)],
+   [['The long wait','La longue attente'],['The large intestine is the slow station: most of the trip is spent there. It takes water back out of what is left, turning it from liquid into stool, and its bacteria feed on the leftovers.','Le gros intestin est la station lente\u00a0: la plus grande partie du trajet se passe là. Il reprend l’eau de ce qui reste, ce qui change le liquide en selles, et ses bactéries se nourrissent des restes.'],'solid',w=>TRANSIT(w,4)],
+   [['Today’s stool, older meals','Les selles d’aujourd’hui, des repas d’avant'],['In 863 adults who ate blue-dyed muffins, the middle time until blue showed up in the stool was about 29 hours. So a stool passed after lunch mostly holds food from earlier meals, often from the day before.','Chez 863 adultes qui ont mangé des muffins teints en bleu, le temps du milieu avant que le bleu apparaisse dans les selles était d’environ 29 heures. Alors les selles qui sortent après le dîner contiennent surtout de la nourriture de repas d’avant, souvent de la veille.'],'solid',w=>TRANSIT(w,5)],
+   [['Eating wakes the large intestine','Manger réveille le gros intestin'],['When food stretches the stomach, the large intestine starts pushing within minutes {gastrocolic reflex}. It moves what is already there, older food, to make room. That is the urge after a meal; the meal itself is still in the stomach.','Quand la nourriture étire l’estomac, le gros intestin commence à pousser en quelques minutes {réflexe gastrocolique}. Il fait avancer ce qui est déjà là, de la nourriture plus vieille, pour faire de la place. C’est l’envie après un repas; le repas lui-même est encore dans l’estomac.'],'solid',w=>TRANSIT(w,6)],
+   [['Coffee’s push','La poussée du café'],['In a 1990 study, 29 in 100 people said coffee brought on the urge. In those who felt it, the end of the large intestine got busier within 4 minutes of a cup, with decaf too; hot water did nothing.','Dans une étude de 1990, 29 personnes sur 100 disaient que le café leur donnait l’envie. Chez celles qui la sentaient, le bout du gros intestin devenait plus actif moins de 4 minutes après une tasse, même avec du décaféiné; l’eau chaude ne faisait rien.'],'likely',w=>TRANSIT(w,7)],
+   [['Speed shows in the stool','La vitesse se voit dans les selles'],['The longer stool stays in the large intestine, the more water comes out. So a slow trip tends to give hard stool, and a fast one mushy or watery stool. In the blue-muffin study, the hardest stools went with trips of over 5 days, and mushy pieces with about 1 day.','Plus les selles restent longtemps dans le gros intestin, plus l’eau en sort. Alors un trajet lent donne souvent des selles dures, et un trajet rapide des selles pâteuses ou aqueuses. Dans l’étude des muffins bleus, les selles les plus dures allaient avec des trajets de plus de 5 jours, et les morceaux pâteux avec environ 1 jour.'],'solid',w=>TRANSIT(w,8)],
+   [['Fibre and the trip','Les fibres et le trajet'],['In trials, wheat bran made stools heavier and the trip shorter in every study. In people whose trip took over 48 hours, each extra gram of wheat fibre a day shortened it by about 45 minutes.','Dans les essais, le son de blé rendait les selles plus lourdes et le trajet plus court dans chaque étude. Chez les personnes dont le trajet dépassait 48 heures, chaque gramme de plus de fibres de blé par jour le raccourcissait d’environ 45 minutes.'],'solid',w=>TRANSIT(w,9)],
+   [['Measuring the trip','Mesurer le trajet'],['The trip differs a lot from one person to the next, and in the same person from one test to the next. The blue-muffin study measured it simply: the time from eating a blue-dyed food to the first blue stool.','Le trajet varie beaucoup d’une personne à l’autre, et chez la même personne d’un test à l’autre. L’étude des muffins bleus le mesurait simplement\u00a0: le temps entre manger un aliment teint en bleu et les premières selles bleues.'],'solid',w=>TRANSIT(w,10)],
+   [['When a change matters','Quand un changement compte'],['NIDDK lists these as reasons to see a doctor right away. With constipation: blood, constant belly pain, vomiting, fever, or losing weight without trying. With diarrhea: lasting more than 2 days, a high fever, six or more loose stools a day, or signs of losing too much water {dehydration}.','Le NIDDK nomme ces signes comme raisons de voir un médecin tout de suite. Avec la constipation\u00a0: du sang, une douleur constante au ventre, des vomissements, de la fièvre, ou une perte de poids sans essayer. Avec la diarrhée\u00a0: plus de 2 jours, une forte fièvre, six selles molles ou plus par jour, ou des signes de manque d’eau {déshydratation}.'],'solid',w=>TRANSIT(w,11)]
   ]},
 { id:'the-burn', sec:'gut', drug:true, t:['The burn after a meal','La brûlure après le repas'], d:['What burns, and why it happens.','Ce qui brûle, et pourquoi ça arrive.'],
   src:['niddkGERD','openstaxStomach','harvardGERD','iwakiri17','fujiwara05','kaltenbach06','acg22','nihNewsReflux','mayoGERD'],
@@ -1020,6 +1059,120 @@ function PAIN(w,k){
       +`<rect x="36" y="110" width="8" height="26" rx="4" fill="none" stroke="${C.ink2}" stroke-width="2"/><circle cx="40" cy="140" r="6" fill="${C.heart}"/>`+t2(66,126,w('fever or chills','fièvre ou frissons'))
       +`<ellipse cx="222" cy="126" rx="16" ry="10" fill="#E8C547"/><circle cx="222" cy="126" r="5" fill="${C.ink2}"/>`+t2(248,120,w('yellow skin','peau ou yeux'),w('or eyes','jaunes'))
       +heartP(40,184,14)+t2(66,178,w('a heart attack can be felt','une crise cardiaque peut se sentir'),w('in the upper belly too','dans le haut du ventre aussi'));
+  } }
+/* how long food takes: k = 0 three stations, 1 the stomach lets it out slowly, 2 the small intestine, 3 what it leaves behind,
+   4 the long wait, 5 today's stool, older meals, 6 eating wakes the large intestine, 7 coffee's push, 8 speed shows in the stool,
+   9 fibre and the trip, 10 measuring the trip, 11 when a change matters.
+   Stool is drawn in its own browns, darker the harder it is. The stomach's fill is drawn by area, so 60 % of the bag looks like 60 %. */
+function TRANSIT(w,k){
+  const S1='#6E5238', S2='#8A6A4A', S3='#A8865F', S4='#C2A57C', BLUE='#3E63C8';
+  const COLON='M80 184 V120 Q80 112 88 112 H136 Q144 112 144 120 V176 Q144 192 124 196 Q112 198 110 206 V212';
+  const tube=()=>`<circle cx="110" cy="22" r="17" fill="${C.cell}" opacity="0.45"/><rect x="58" y="44" width="104" height="174" rx="30" fill="${C.cell}" opacity="0.3"/>`
+     +`<path d="M110 34 V78" stroke="${C.gut}" stroke-width="6" stroke-opacity="0.5" stroke-linecap="round"/>`
+     +`<ellipse cx="124" cy="88" rx="22" ry="12" transform="rotate(-15 124 88)" fill="${C.gut}" fill-opacity="0.2" stroke="${C.gut}" stroke-width="2"/>`
+     +`<path d="${COLON}" fill="none" stroke="${C.gut}" stroke-width="9" stroke-opacity="0.35" stroke-linecap="round" stroke-linejoin="round"/>`
+     +`<path d="M144 88 C156 96 148 106 130 108 M128 124 C106 120 94 128 98 136 C102 146 132 136 132 148 C132 160 100 152 100 164 C100 174 92 178 84 180" fill="none" stroke="${C.gut}" stroke-width="4" stroke-opacity="0.6" stroke-linecap="round"/>`;
+  /* a bag filled to an area fraction f: solve the circle segment for its height */
+  const bagFill=(cx,cy,rx,ry,f,col)=>{ if(f>=1) return `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${col}"/>`;
+    let lo=0,hi=2; for(let i=0;i<40;i++){ const h=(lo+hi)/2, a=Math.acos(1-h)-(1-h)*Math.sqrt(2*h-h*h); if(a/Math.PI<f) lo=h; else hi=h; }
+    const h=(lo+hi)/2, y0=cy+ry-h*ry, dx=rx*Math.sqrt(Math.max(0,1-((y0-cy)/ry)**2));
+    return `<path d="M${(cx-dx).toFixed(1)} ${y0.toFixed(1)} A${rx} ${ry} 0 ${f>0.5?1:0} 0 ${(cx+dx).toFixed(1)} ${y0.toFixed(1)} Z" fill="${col}"/>`; };
+  const sbag=(cx,cy,f)=>`<path d="M${cx-22} ${cy-44} V${cy-26}" stroke="${C.gut}" stroke-width="6" stroke-opacity="0.45" stroke-linecap="round"/><path d="M${cx+44} ${cy+8} h12" stroke="${C.gut}" stroke-width="6" stroke-opacity="0.45" stroke-linecap="round"/>`
+     +bagFill(cx,cy,46,28,f,C.fat)+`<ellipse cx="${cx}" cy="${cy}" rx="46" ry="28" fill="none" stroke="${C.gut}" stroke-width="2"/><rect x="${cx+42}" y="${cy+3}" width="5" height="10" rx="2" fill="${C.ink2}"/>`;
+  const germ=(x,y)=>`<path d="M${x-7} ${y} q3.5 -5 7 0 t7 0" stroke="${C.ink2}" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+  const pair=(x,y)=>fuelDot(x,y,4)+fuelDot(x+8,y,4);
+  switch(k){
+   case 0: return tube()+fuelDot(136,16,4)+fuelDot(146,24,4)+fuelDot(136,30,4)+tx(156,22,w('a meal','un repas'),'start')
+      +tx(186,46,w('whole trip','trajet complet'),'start','lbi')+tx(186,62,'10–73 h','start')
+      +lead(182,96,146,90)+tx(186,92,w('stomach','estomac'),'start','lbi')+tx(186,108,'2–5 h','start')
+      +lead(182,140,132,144)+tx(186,136,w('small intestine','intestin grêle'),'start','lbi')+tx(186,152,'2–6 h','start')
+      +lead(182,184,148,172)+tx(186,180,w('large intestine','gros intestin'),'start','lbi')+tx(186,196,'10–59 h','start');
+   case 1: { const st=(cx,f,t,l)=>sbag(cx,62,f)+tx(cx,108,t,'middle','lbi')+tx(cx,124,l);
+      return st(66,1,w('meal','repas'),w('still in: 100%','reste\u00a0: 100\u00a0%'))+st(190,0.6,'2 h',w('still in: ≤60%','reste\u00a0: ≤\u00a060\u00a0%'))+st(314,0.1,'4 h',w('still in: ≤10%','reste\u00a0: ≤\u00a010\u00a0%'))
+        +fatDrop(36,178,8)+tx(36,202,w('fat','gras'))+arr(48,178,92,178)
+        +`<rect x="98" y="168" width="120" height="20" rx="10" fill="${C.gut}" fill-opacity="0.15" stroke="${C.gut}" stroke-width="2"/>`+tx(158,154,w('small intestine','intestin grêle'))
+        +ball(158,178,6)+tx(158,204,w('messenger','messager'))
+        +`<path d="M226 176 Q262 150 288 168" fill="none" stroke="${C.msg}" stroke-width="2" marker-end="url(#ar)"/>`
+        +`<ellipse cx="316" cy="178" rx="22" ry="13" fill="${C.gut}" fill-opacity="0.15" stroke="${C.gut}" stroke-width="2"/>`+tx(316,204,w('stomach slows','l’estomac ralentit')); }
+   case 2: { const pinch=x=>`<path d="M${x-9} 76 Q${x} 94 ${x+9} 76 M${x-9} 124 Q${x} 106 ${x+9} 124" stroke="${C.gut}" stroke-width="3" fill="none"/>`+arr(x+14,100,x+40,100,C.ink2);
+      return `<rect x="24" y="16" width="256" height="16" rx="8" fill="${C.heart}" opacity="0.25"/>`+tx(290,24,w('blood','sang'),'start')
+        +`<rect x="24" y="76" width="256" height="48" rx="24" fill="${C.gut}" fill-opacity="0.12" stroke="${C.gut}" stroke-width="2"/>`
+        +`<ellipse cx="62" cy="100" rx="16" ry="10" fill="${C.fat}"/><ellipse cx="168" cy="100" rx="13" ry="8" fill="${C.fat}"/><ellipse cx="250" cy="100" rx="10" ry="6" fill="${C.fat}"/>`
+        +pinch(100)+pinch(206)
+        +[66,166,246].map(x=>arr(x,72,x,38,C.fuel)+fuelDot(x,52,4)).join('')
+        +arr(284,100,318,100)+tx(348,92,w('large','gros'),'middle','lbi')+tx(348,108,w('intestine','intestin'),'middle','lbi')
+        +tx(152,146,w('muscle waves push','des vagues de muscle poussent'))+tx(152,168,w('most of the food: into the blood','la plupart de la nourriture\u00a0: dans le sang'))
+        +tx(152,196,w('2 to 6 hours','2 à 6 heures'),'middle','lbi'); }
+   case 3: { const lane=(y,n,pass)=>`<rect x="24" y="${y-18}" width="196" height="36" rx="18" fill="${C.gut}" fill-opacity="0.12" stroke="${C.gut}" stroke-width="2"/>`
+        +[60,100,140].slice(0,n).map(x=>`<rect x="${x-8}" y="${y+12}" width="16" height="6" rx="2" fill="${C.machine}"/>`).join('')+pair(30,y)
+        +arr(224,y,248,y)+`<rect x="252" y="${y-24}" width="104" height="48" rx="20" fill="${C.gut}" fill-opacity="0.12" stroke="${C.gut}" stroke-width="2"/>`;
+      return tx(24,12,w('small intestine','intestin grêle'),'start','lbi')+tx(304,12,w('large intestine','gros intestin'),'middle','lbi')
+        +lane(64,3)+fuelDot(152,64,4)+fuelDot(164,64,4)+fuelDot(188,64,4)+fuelDot(200,64,4)+arr(158,58,158,36,C.fuel)+arr(194,58,194,36,C.fuel)
+        +germ(282,64)+germ(326,58)
+        +tx(122,100,w('enough lactase: sugar taken in','assez de lactase\u00a0: sucre absorbé'))+tx(304,100,w('quiet','calme'))
+        +lane(152,1)+pair(106,152)+pair(166,152)
+        +pair(268,146)+pair(300,160)+germ(284,162)+germ(330,144)+[[322,162,5],[338,154,4],[344,168,3.5]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#fff" stroke="${C.grey}" stroke-width="1.3"/>`).join('')
+        +tx(122,190,w('short of lactase: it gets through','pas assez de lactase\u00a0: il passe'))+tx(304,190,w('gas, cramps','gaz, crampes'),'middle','lbi'); }
+   case 4: { const U='M64 204 V78 Q64 50 92 50 H288 Q316 50 316 78 V204';
+      const blob=(x,y,rx,ry,c,o)=>`<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${c}" opacity="${o||1}"/>`;
+      return `<path d="${U}" fill="none" stroke="${C.gut}" stroke-width="36" stroke-opacity="0.16" stroke-linejoin="round"/>`
+        +blob(64,190,13,9,S4,0.8)+blob(64,154,12,9,S4,0.8)+blob(64,104,10,8,S3)+blob(112,50,10,8,S3)+blob(176,50,9,7,S2)+blob(236,50,9,7,S2)+blob(316,96,7,9,S1)+blob(316,150,6,10,S1)+blob(316,192,6,11,S1)
+        +germ(64,128)+germ(146,50)+germ(316,122)
+        +[120,180,240].map(x=>arr(x,30,x,20,C.gut)+`<circle cx="${x}" cy="12" r="3.5" fill="${C.gut}"/>`).join('')
+        +tx(190,96,w('water taken back','eau reprise'))+tx(190,126,'10–59 h','middle','lbi')
+        +tx(98,154,w('bacteria','bactéries'),'start')+lead(96,150,74,132)
+        +tx(88,206,w('liquid in','liquide qui entre'),'start')+tx(296,206,w('stool','selles'),'end','lbi'); }
+   case 5: { const X=h=>34+h*6.6, meal=h=>`<rect x="${(X(h)-6).toFixed(1)}" y="100" width="12" height="12" rx="3" fill="${C.fuel}"/>`;
+      return `<path class="axis" d="M34 114 H352"/><line x1="${X(24)}" y1="22" x2="${X(24)}" y2="160" stroke="${C.grey}" stroke-dasharray="3 4"/>`
+        +tx(X(12),30,w('day 1','jour 1'),'middle','lbi')+tx(X(36),30,w('day 2','jour 2'),'middle','lbi')
+        +[9,13,18,32,36].map(meal).join('')+tx(X(9)+6,86,w('breakfast','déjeuner'),'end')+tx(X(36),86,w('lunch','dîner'))
+        +`<path d="M${X(9)} 122 C${X(9)+30} 196 ${X(38)-30} 196 ${X(38)} 146" fill="none" stroke="${C.ink2}" stroke-width="1.6" marker-end="url(#ar)"/>`
+        +`<ellipse cx="${X(38)}" cy="132" rx="11" ry="6" fill="${S2}"/>`+tx(X(38)+16,132,w('stool','selles'),'start','lbi')
+        +tx(X(23.5),200,w('about 29 h','environ 29 h'),'middle','lbi'); }
+   case 6: return tube()+fuelDot(118,88,4)+fuelDot(128,86,4)+fuelDot(124,94,4)
+      +`<path d="M142 98 Q174 122 152 150" fill="none" stroke="${C.msg}" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#ar)"/>`
+      +`<ellipse cx="144" cy="160" rx="4" ry="7" fill="${S2}"/><ellipse cx="144" cy="178" rx="4" ry="7" fill="${S2}"/><ellipse cx="124" cy="196" rx="7" ry="4" fill="${S2}"/>`
+      +arr(154,164,154,192,C.ink2,1.8)
+      +lead(182,86,134,90)+tx(186,80,w('new meal','nouveau repas'),'start','lbi')+tx(186,96,w('still in the stomach','encore dans l’estomac'),'start')
+      +tx(186,132,w('signal','signal'),'start','lbi')+tx(186,148,w('within minutes','en quelques minutes'),'start')
+      +lead(182,186,150,180)+tx(186,180,w('older food','nourriture plus vieille'),'start','lbi')+tx(186,196,w('moves on','avance'),'start');
+   case 7: { const cup=(x,col,op)=>`<path d="M${x-16} 40 h32 v20 a12 12 0 0 1 -12 12 h-8 a12 12 0 0 1 -12 -12 Z" fill="${col}" fill-opacity="${op}" stroke="${C.ink2}" stroke-width="1.5"/><path d="M${x+16} 45 a7 7 0 0 1 0 14" fill="none" stroke="${C.ink2}" stroke-width="1.5"/>`;
+      const wig=(x,a)=>`<path d="M${x-28} 122 ${[...Array(8)].map((_,i)=>`L${x-28+(i+1)*7} ${122+(i%2?a:-a)}`).join(' ')}" fill="none" stroke="${C.ink2}" stroke-width="1.8" stroke-linejoin="round"/>`;
+      return tx(62,20,w('felt the urge','sentaient l’envie'),'middle','lbi')+GRID(20,34,29,C.drug)+tx(62,134,w('29 in 100','29 sur 100'))
+        +tx(250,20,w('in those who felt it','chez ceux qui la sentaient'),'middle','lbi')
+        +cup(170,C.drug,0.9)+cup(250,C.drug,0.35)+cup(330,'#E4E1D8',1)
+        +tx(170,90,w('coffee','café'))+tx(250,90,w('decaf','déca'))+tx(330,90,w('hot water','eau chaude'))
+        +wig(170,8)+wig(250,8)+wig(330,0.6)
+        +tx(170,150,w('busier','plus actif'),'middle','lbi')+tx(250,150,w('busier','plus actif'),'middle','lbi')+tx(330,150,w('no change','aucun effet'),'middle','lbi')
+        +tx(250,180,w('within 4 minutes','en 4 minutes')); }
+   case 8: { const X=[60,150,240,330];
+      return `<line x1="40" y1="44" x2="340" y2="44" stroke="${C.ink2}" stroke-width="1.6" marker-start="url(#ar)" marker-end="url(#ar)"/>`
+        +tx(40,24,w('slow trip','trajet lent'),'start','lbi')+tx(340,24,w('fast trip','trajet rapide'),'end','lbi')
+        +`<circle cx="46" cy="98" r="8" fill="${S1}"/><circle cx="62" cy="91" r="8" fill="${S1}"/><circle cx="76" cy="102" r="8" fill="${S1}"/>`
+        +`<rect x="122" y="88" width="56" height="18" rx="9" fill="${S2}"/>`
+        +`<ellipse cx="226" cy="98" rx="12" ry="8" fill="${S3}"/><ellipse cx="244" cy="91" rx="10" ry="7" fill="${S3}"/><ellipse cx="256" cy="102" rx="11" ry="7" fill="${S3}"/>`
+        +`<ellipse cx="330" cy="100" rx="30" ry="9" fill="${S4}" opacity="0.85"/><ellipse cx="330" cy="100" rx="17" ry="4.5" fill="none" stroke="#fff" stroke-opacity="0.75"/>`
+        +X.map((x,i)=>tx(x,134,[w('hard','dures'),w('formed','moulées'),w('mushy','pâteuses'),w('watery','aqueuses')][i],'middle','lbi')).join('')
+        +tx(60,154,w('over 5 days','plus de 5 jours'))+tx(240,154,w('about 1 day','environ 1 jour'))
+        +tx(190,196,w('the longer it stays, the more water comes out','plus elles restent, plus l’eau en sort')); }
+   case 9: { const lane=y=>`<rect x="24" y="${y-16}" width="320" height="32" rx="16" fill="${C.gut}" fill-opacity="0.12" stroke="${C.gut}" stroke-width="2"/>`;
+      return tx(24,22,w('without bran','sans son'),'start','lbi')+lane(54)+`<circle cx="56" cy="54" r="6" fill="${S1}"/><circle cx="70" cy="52" r="6" fill="${S1}"/>`+arr(86,54,140,54,C.ink2,2)
+        +tx(24,98,w('with wheat bran','avec du son de blé'),'start','lbi')+lane(130)+`<ellipse cx="70" cy="130" rx="26" ry="11" fill="${S2}"/>`+arr(104,130,300,130,C.ink2,2)
+        +tx(190,164,w('heavier stools, shorter trip','selles plus lourdes, trajet plus court'))
+        +tx(190,186,w('trips over 48 h: about 45 min shorter','trajets de plus de 48 h\u00a0: environ 45 min de moins'),'middle','lbi')
+        +tx(190,204,w('per extra gram of wheat fibre a day','par gramme de plus de fibres de blé par jour')); }
+   case 10: { const muffin=(x,y)=>`<path d="M${x-16} ${y} L${x-12} ${y+18} H${x+12} L${x+16} ${y} Z" fill="${C.cell}"/><path d="M${x-20} ${y} A20 16 0 0 1 ${x+20} ${y} Z" fill="${BLUE}"/>`;
+      return muffin(80,52)+tx(80,92,w('blue-dyed food','aliment teint en bleu'),'middle','lbi')+tx(80,108,w('eaten','mangé'))
+        +arr(126,58,252,58,C.ink2,2)+tx(189,44,w('the trip','le trajet'))
+        +`<ellipse cx="300" cy="60" rx="22" ry="10" fill="${S2}"/><path d="M286 58 q7 -5 14 0 q7 5 14 0" stroke="${BLUE}" stroke-width="3" fill="none" stroke-linecap="round"/>`
+        +tx(300,92,w('first blue','premier bleu'),'middle','lbi')+tx(300,108,w('in the stool','dans les selles'))
+        +tx(24,144,w('the same person','la même personne'),'start','lbi')
+        +tx(24,170,w('test 1','test 1'),'start')+`<rect x="90" y="164" width="190" height="12" rx="6" fill="${C.ink2}" opacity="0.5"/>`
+        +tx(24,194,w('test 2','test 2'),'start')+`<rect x="90" y="188" width="120" height="12" rx="6" fill="${C.ink2}" opacity="0.5"/>`; }
+   default: { const col=(x,h,items)=>tx(x,44,h,'middle','lbi')+items.map((s,i)=>`<circle cx="${x-80}" cy="${74+i*28}" r="3" fill="${C.heart}"/>`+tx(x-72,74+i*28,s,'start')).join('');
+      return tx(190,14,w('NIDDK: see a doctor right away','NIDDK\u00a0: voir un médecin tout de suite'),'middle','lbi')
+        +col(98,w('with constipation','avec la constipation'),[w('blood','du sang'),w('constant belly pain','douleur constante au ventre'),w('vomiting, fever','vomissements, fièvre'),w('weight loss without trying','perte de poids sans essayer')])
+        +col(300,w('with diarrhea','avec la diarrhée'),[w('more than 2 days','plus de 2 jours'),w('high fever','forte fièvre'),w('six or more a day','six ou plus par jour'),w('losing too much water','manque d’eau')]); }
   } }
 /* ==== end of CARDS ==== */
 
