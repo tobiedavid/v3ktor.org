@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<!--
+    The Library — how the body works, one picture at a time. Part of the V3KTOR Project.
+    Copyright (C) 2026  Tobie David
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+    SPDX-License-Identifier: AGPL-3.0-or-later
+    Source code: https://github.com/tobiedavid/v3ktor.org
+
+    Additional terms under section 7 of the GNU AGPL, for this file and every
+    copy or changed version of it:
+      (b) Keep this attribution, word for word, in the About screen (the
+          Appropriate Legal Notices) of every copy and changed version:
+            "Made by Tobie and Claude. Free version at v3ktor.org/library/app."
+      (c) Don't present a changed version as the original Library.
+          A changed version must also show, right next to the attribution
+          above, who changed it and when:
+            "Changed by [name] on [date]. Not checked by the original authors."
+    In plain words: you can sell a copy, but the app has to say where the free
+    version is, and a changed copy has to say who changed it.
+
+    Look (colours, type, top bar, sheets, the door, install) copied from the Threshold Log (v3ktor.org/threshold).
+
+    One file, both languages. English and French sit side by side in the code as L('English','Français'),
+    and in the cards as ['English','Français'] pairs.
+
+    How a card is written (the plan is in the project's library-plan.md):
+      - one idea per picture; each picture changes one thing from the one before;
+      - the plain word first, the specialist's term after it in {braces} (shown grey, in brackets);
+      - card text in the third person (about the body, not "you"); « tu » only in the buttons;
+      - every picture carries how sure the science is (g: 'solid' or 'likely'), and every card its sources (SRC);
+      - report, never advise: none of the words in tests/library/cards.test.js FORBIDDEN.
+    The visual alphabet (the same colour means the same thing on every card) is in COLOURS below.
+-->
+<html lang="en-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Library</title>
+<meta name="description" content="How the body works, one picture at a time. Free and private: nothing leaves your phone.">
+<meta name="theme-color" content="#c8481f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>
+/* The look is the Threshold Log's (itself the Food Trial Log's): its colours, type, cards, buttons, top bar, sheets and bars. */
+:root{--bg:#f7f4ee;--card:#fff;--ink:#1c1b19;--muted:#6b665d;--line:#e6e0d4;--accent:#c8481f;--teal:#0f6b6b;--teal-soft:#e3f0ef;--warn:#b3261e;--chip:#f1ede4;--shadow:0 1px 2px rgba(0,0,0,.05),0 6px 20px -10px rgba(0,0,0,.15)}
+@media (prefers-color-scheme:dark){:root{--bg:#15161a;--card:#1e2026;--ink:#ececea;--muted:#a19d95;--line:#2d3038;--accent:#e3633a;--teal:#5fb3b3;--teal-soft:#1c2c2c;--warn:#ff7b6e;--chip:#2a2d35;--shadow:0 1px 2px rgba(0,0,0,.4),0 6px 20px -10px rgba(0,0,0,.6)}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:17px;line-height:1.5;-webkit-text-size-adjust:100%}
+body{padding-bottom:calc(env(safe-area-inset-bottom) + 90px)}
+.wrap{max-width:600px;margin:0 auto;padding:14px 18px 24px}
+h1,h2,h3{font-family:ui-serif,Georgia,'Times New Roman',serif;line-height:1.15;margin:0 0 .4em}
+h2{font-size:1.5rem;font-weight:800}
+h3{font-size:1.15rem;font-weight:700;margin-top:0}
+p{margin:.35em 0 .8em}
+.muted{color:var(--muted)} .small{font-size:.9rem}
+.eyebrow{text-transform:uppercase;letter-spacing:.08em;font-size:0.875rem;font-weight:700;color:var(--muted);margin-bottom:6px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 18px;margin:12px 0;box-shadow:var(--shadow)}
+.card.soft{background:var(--teal-soft);border-color:transparent}
+.card.gate{border:2px solid var(--accent)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:14px;padding:14px 20px;font:inherit;font-weight:700;cursor:pointer;background:var(--ink);color:var(--bg);text-decoration:none}
+.btn.primary{background:var(--accent);color:#fff}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.sm{padding:9px 14px;font-size:.92rem;border-radius:11px;min-height:44px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.topbar{position:sticky;top:0;z-index:30;background:var(--bg);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
+.topbar .in{max-width:600px;margin:0 auto;display:flex;align-items:center;gap:6px;padding:8px 12px}
+.topbar .sp{flex:1}
+.tb{border:0;background:transparent;color:var(--ink);font:inherit;cursor:pointer;padding:8px 10px;border-radius:10px;font-weight:700;min-height:44px;min-width:44px}
+.tb:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+#menuBtn{font-size:1.25rem;line-height:1}
+.tb.ttl{font-family:ui-serif,Georgia,'Times New Roman',serif;font-weight:800;font-size:1.1rem;padding:6px 4px;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.menu{display:grid;gap:6px;margin-top:6px}
+.menu button,.menu a{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:12px 14px;font:inherit;font-weight:600;cursor:pointer;text-decoration:none;min-height:48px}
+.menu .cmore{display:flex;justify-content:space-between;align-items:center;gap:8px} .cmore .muted{font-weight:400}
+html.locked,html.locked body{overflow:hidden}
+.lang{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;flex:none}
+.lang button{border:0;background:transparent;color:var(--muted);font:inherit;font-size:0.875rem;font-weight:700;padding:6px 14px;cursor:pointer;min-height:44px;min-width:44px}
+.lang button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.btn:focus-visible,.lnk:focus-visible,.menu button:focus-visible,.stop:focus-visible,.cardrow:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--card);border-top:1px solid var(--line);padding:10px 18px calc(10px + env(safe-area-inset-bottom))}
+.bar .in{max-width:600px;margin:0 auto;display:flex;gap:10px;align-items:center;justify-content:space-between}
+.bar.hidden{display:none}
+#bar .in .btn{white-space:nowrap;flex:none;min-width:112px}
+#bar .in > span.small{flex:1;min-width:0;text-align:center;line-height:1.2;font-variant-numeric:tabular-nums}
+.bar .hide{visibility:hidden}
+ul{padding-left:1.1em;margin:.3em 0 .6em} li{margin:.3em 0}
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .18s;z-index:40}
+.sheet-bg.on{opacity:1;pointer-events:auto}
+.sheet{overscroll-behavior:contain;position:fixed;left:0;right:0;bottom:0;max-width:640px;margin:0 auto;background:var(--card);border-radius:22px 22px 0 0;padding:18px 20px calc(24px + env(safe-area-inset-bottom));max-height:78vh;overflow:auto;transform:translateY(105%);visibility:hidden;transition:transform .22s,visibility 0s linear .22s;z-index:50;box-shadow:0 -10px 40px rgba(0,0,0,.25)}
+.sheet.on{transform:translateY(0);visibility:visible;transition:transform .22s,visibility 0s}
+.sheet .handle{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 14px}
+.sheet h3{font-size:1.25rem}
+.sheet a:not(.btn),.wrap p a{color:var(--teal);text-underline-offset:3px}
+.toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s;z-index:60;max-width:calc(100vw - 24px)}
+.toast.show{opacity:1}
+[hidden]{display:none!important}
+.tagline{font-size:1.2rem;font-weight:700;line-height:1.3;margin:6px 0 10px}
+.lnk{background:none;border:0;padding:4px 0;font:inherit;font-size:.9rem;font-weight:700;color:var(--teal);cursor:pointer;text-decoration:underline;text-underline-offset:3px;min-height:44px}
+.mine{font-size:.82rem;color:var(--muted);text-align:center;margin:10px 0 0}
+.instbig>button{display:block;width:100%;box-sizing:border-box;min-height:64px;padding:14px 18px;font:inherit;font-size:1.12rem;font-weight:800;letter-spacing:.02em;border:2px solid currentColor;border-radius:14px;background:transparent;color:inherit;cursor:pointer}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+html.noinst .inst,html.noinst #installPill,html.locked #installPill{display:none!important}
+body:has(.bar:not(.hidden)) #installPill,body:has(.instbig) #installPill{display:none}
+#installPill{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));z-index:20;display:flex;gap:6px;align-items:center;width:max-content;max-width:calc(100vw - 24px);box-sizing:border-box;background:var(--ink);color:var(--bg);border-radius:22px;padding:6px 6px 6px 16px;box-shadow:0 6px 20px -8px rgba(0,0,0,.45);font-weight:600;font-size:.94rem;line-height:1.25}
+#installPill button{border:0;font:inherit;cursor:pointer;min-height:42px;flex:none} #installPill .ipy{background:var(--accent);color:#fff;border-radius:999px;padding:9px 16px} #installPill .ipn{background:transparent;color:inherit;padding:8px 10px}
+ol.inst{margin:4px 0 14px;padding-left:1.4em} ol.inst li{margin:0 0 9px} .ico{display:inline-block;vertical-align:-4px}
+@media (prefers-color-scheme:dark){.btn.primary,#installPill .ipy{color:#1a0c06}}
+@media (prefers-reduced-motion:reduce){.sheet,.sheet.on,.sheet-bg,.toast{transition:none}}
+@media (max-width:380px){.tb.ttl{font-size:1rem} .topbar .in{gap:4px;padding:8px 10px} .lang button{padding:6px 10px}}
+@media (max-width:340px){.topbar .in{gap:2px;padding:8px 6px} .tb.ttl{font-size:.9rem;padding:6px 2px} .tb{padding:8px 6px} .bar{padding-left:10px;padding-right:10px} #bar .in{gap:6px} #bar .in .btn{padding:9px 10px;min-width:92px}}
+
+/* ---- the Library's own pieces ---- */
+.pic{display:block;width:100%;height:auto;margin:4px 0 2px;touch-action:pan-y}
+.pic .lb{fill:var(--muted);font:13px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+.pic .lbi{fill:var(--ink);font:600 13px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+.pic .lead{stroke:var(--muted);stroke-opacity:.6;stroke-width:.75;stroke-dasharray:3 3;fill:none}
+.pic .axis{stroke:var(--muted);stroke-opacity:.5;stroke-width:1;fill:none}
+.pic .road{stroke:var(--line);stroke-width:10;fill:none;stroke-linecap:round}
+.cap{font-size:1.05rem;line-height:1.55;margin:6px 0 4px;min-height:6.4em}
+.sci{color:var(--muted);font-size:.92em}
+.grade{font-size:.85rem;color:var(--muted);margin:0 0 6px}
+.dots{display:flex;justify-content:center;gap:7px;margin:10px 0 2px}
+.dots span{width:9px;height:9px;border-radius:50%;background:var(--line)}
+.dots span.on{background:var(--accent)}
+.ftitle{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:10px 0 0}
+.ftitle h3{margin:0}
+.stop{cursor:pointer}
+.stop:focus{outline:none}
+.stop:focus-visible circle{stroke:var(--accent);stroke-width:3}
+.cardrow{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;width:100%;text-align:left;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:14px;padding:12px 14px;font:inherit;cursor:pointer;margin:0 0 8px;box-shadow:var(--shadow);min-height:56px}
+.cardrow b{font-family:ui-serif,Georgia,'Times New Roman',serif;font-size:1.05rem}
+.cardrow small{grid-column:1;color:var(--muted);font-size:.88rem;line-height:1.35}
+.cardrow .n{grid-row:1 / span 2;grid-column:2;color:var(--muted);font-size:.85rem;white-space:nowrap}
+.cardrow.soon{opacity:.62;cursor:pointer;box-shadow:none}
+.sw{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:8px}
+ul.cols{list-style:none;padding:0;margin:6px 0 10px} ul.cols li{margin:0 0 8px;font-size:.95rem}
+ol.srcs{padding-left:1.3em;font-size:.9rem} ol.srcs li{margin:0 0 6px}
+</style>
+</head>
+<body>
+<header class="topbar" id="topbar"></header>
+<main class="wrap" id="app"><noscript><p>The Library needs JavaScript to run. Rien ne s’affiche sans JavaScript.</p></noscript></main>
+<div class="bar hidden" id="bar"></div>
+<div class="sheet-bg" id="sheetBg"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" tabindex="-1" aria-hidden="true"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+const VER='0.1.0', CONSENT=1, KEY='v3k.library.v1';
+const FRAMED=(()=>{ try{ return window.self!==window.top; }catch(e){ return true; } })();
+const STANDALONE=(()=>{ try{ return !!(navigator.standalone||matchMedia('(display-mode: standalone)').matches); }catch(e){ return false; } })();
+const UA=navigator.userAgent||'', IOS=/iPad|iPhone|iPod/.test(UA)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1), ANDROID=/Android/.test(UA), SAFARI=IOS&&/Safari\//.test(UA)&&!/CriOS|FxiOS|EdgiOS|OPiOS|FBAN|FBAV|Instagram/.test(UA), CHROME=ANDROID&&/Chrome\//.test(UA)&&!/SamsungBrowser|EdgA|OPR\/|Firefox|; wv\)|FBAN|FBAV|Instagram/.test(UA);
+
+/* what the app keeps on the phone: the language, the agreement, and which cards were read to the end. Nothing about the body. */
+function S0(){ return {v:1,lang:null,ack:false,ackAt:null,cv:null,seen:{}}; }
+let S=S0(), STORE='ok';
+{ let raw=null; try{ raw=localStorage.getItem(KEY); }catch(e){ STORE='none'; }
+  if(raw){ try{ const o=JSON.parse(raw); if(o&&o.v===1){ S=Object.assign(S0(),o); if(!S.seen||typeof S.seen!=='object'||Array.isArray(S.seen)) S.seen={}; if(S.cv!==CONSENT) S.ack=false; if(S.lang!=='fr'&&S.lang!=='en') S.lang=null; } }catch(e){} } }
+if(!S.lang){ let fp=null; try{ fp=localStorage.getItem('v3ktor-lang'); }catch(e){}   /* the language picked on the v3ktor.org front page, if there is one */
+  S.lang=(fp==='fr'||fp==='en')?fp:(navigator.language||'en').toLowerCase().startsWith('fr')?'fr':'en'; }
+const L=(en,fr)=>S.lang==='fr'?fr:en, P=p=>p[S.lang==='fr'?1:0];
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); if(STORE==='none') STORE='ok'; }catch(e){ STORE='none'; } }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+/* a card line: the {specialist's term} shows grey, in brackets */
+const rich=s=>esc(s).replace(/\{([^}]+)\}/g,'<span class="sci">($1)</span>');
+const plain=s=>String(s).replace(/\s*\{([^}]+)\}/g,' ($1)');
+function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toast.h); toast.h=setTimeout(()=>t.classList.remove('show'),2200); }
+
+/* ==== COLOURS: the visual alphabet. The same colour means the same thing on every card. ==== */
+const C={cell:'#B4B2A9',ink2:'#5F5E5A',grey:'#888780',machine:'#1D9E75',msg:'#7F77DD',drug:'#D85A30',heart:'#D4537E',fuel:'#EF9F27',fat:'#FAC775',gut:'#378ADD',oxy:'#85B7EB'};
+const COLOURS=[['cell',['Cells and the body','Les cellules et le corps']],['machine',['The body’s machines: cups, vacuums, power plants {proteins}','Les machines du corps\u00a0: bols, aspirateurs, centrales {protéines}']],['msg',['Messengers {hormones, neurotransmitters}','Les messagers {hormones, neurotransmetteurs}']],['fuel',['Fuel: sugar, fat, ketones','Le carburant\u00a0: sucre, gras, cétones']],['oxy',['Oxygen','L’oxygène']],['ink2',['Helpers {vitamins, minerals}','Les aides {vitamines, minéraux}']],['drug',['Drugs, caffeine included','Les médicaments et drogues, caféine comprise']],['heart',['The heart and the blood','Le cœur et le sang']],['gut',['Digestion','La digestion']]];
+
+/* ==== SRC: every source a card cites, checked against the source itself (2026-11-17) ==== */
+const PM=n=>'https://pubmed.ncbi.nlm.nih.gov/'+n+'/';
+const SRC={
+  openstaxAP:{l:['OpenStax Anatomy and Physiology 2e, 15.1 — the autonomic nervous system','OpenStax Anatomy and Physiology 2e, 15.1 — le système nerveux autonome'],u:'https://openstax.org/books/anatomy-and-physiology-2e/pages/15-1-divisions-of-the-autonomic-nervous-system'},
+  mph:{l:['StatPearls — Methylphenidate (2024)','StatPearls — Méthylphénidate (2024)'],u:'https://www.ncbi.nlm.nih.gov/books/NBK482451/'},
+  amph:{l:['StatPearls — Amphetamine','StatPearls — Amphétamine'],u:'https://www.ncbi.nlm.nih.gov/books/NBK556103/'},
+  carlson03:{l:['Carlson & Kelly 2003 — stimulant rebound in 149 children','Carlson et Kelly 2003 — l’effet rebond des stimulants chez 149 enfants'],u:'https://doi.org/10.1089/104454603322163853'},
+  tornroth08:{l:['Törnroth-Horsefield & Neutze 2008 — a body turns over its weight in ATP each day','Törnroth-Horsefield et Neutze 2008 — un corps renouvelle son poids en ATP chaque jour'],u:PM(19073922)},
+  debaaij15:{l:['de Baaij 2015 — Magnesium in man (review)','de Baaij 2015 — Le magnésium chez l’humain (revue)'],u:PM(25540137)},
+  nihMg:{l:['NIH — magnesium fact sheet','NIH — fiche magnésium'],u:'https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/'},
+  nihB1:{l:['NIH — thiamin fact sheet','NIH — fiche thiamine'],u:'https://ods.od.nih.gov/factsheets/Thiamin-HealthProfessional/'},
+  nihB2:{l:['NIH — riboflavin fact sheet','NIH — fiche riboflavine'],u:'https://ods.od.nih.gov/factsheets/Riboflavin-HealthProfessional/'},
+  nihB3:{l:['NIH — niacin fact sheet','NIH — fiche niacine'],u:'https://ods.od.nih.gov/factsheets/Niacin-HealthProfessional/'},
+  nihFe:{l:['NIH — iron fact sheet','NIH — fiche fer'],u:'https://ods.od.nih.gov/factsheets/Iron-HealthProfessional/'},
+  vaucher:{l:['Vaucher 2012 — iron and fatigue without anemia (trial, n=198)','Vaucher 2012 — fer et fatigue sans anémie (essai, n=198)'],u:PM(22777991)},
+  raichle02:{l:['Raichle & Gusnard 2002 — the brain’s energy budget','Raichle et Gusnard 2002 — le budget énergétique du cerveau'],u:PM(12149485)},
+  mergenthaler13:{l:['Mergenthaler 2013 — Sugar for the brain (review)','Mergenthaler 2013 — Du sucre pour le cerveau (revue)'],u:PM(23968694)},
+  schonfeld13:{l:['Schönfeld & Reiser 2013 — why the brain barely burns fatty acids','Schönfeld et Reiser 2013 — pourquoi le cerveau brûle peu d’acides gras'],u:PM(23921897)},
+  owen67:{l:['Owen 1967 — brain fuel during 5–6 weeks of fasting in hospital','Owen 1967 — le carburant du cerveau pendant 5 à 6 semaines de jeûne à l’hôpital'],u:PM(6061736)},
+  cryer07:{l:['Cryer 2007 — low blood sugar and the brain','Cryer 2007 — l’hypoglycémie et le cerveau'],u:PM(17404614)},
+  ninds:{l:['NINDS — Brain basics: understanding sleep','NINDS — Le sommeil, les bases'],u:'https://www.ninds.nih.gov/health-information/public-education/brain-basics/brain-basics-understanding-sleep'},
+  fredholm99:{l:['Fredholm 1999 — the actions of caffeine in the brain (review)','Fredholm 1999 — les effets de la caféine dans le cerveau (revue)'],u:PM(10049999)},
+  efsa:{l:['EFSA 2015 — scientific opinion on caffeine','EFSA 2015 — avis scientifique sur la caféine'],u:'https://www.efsa.europa.eu/en/efsajournal/pub/4102'},
+  drake:{l:['Drake 2013 — caffeine 0, 3 or 6 hours before bed (trial)','Drake 2013 — caféine 0, 3 ou 6 heures avant le coucher (essai)'],u:PM(24235903)},
+  juliano:{l:['Juliano & Griffiths 2004 — caffeine withdrawal (66 studies)','Juliano et Griffiths 2004 — le sevrage de caféine (66 études)'],u:'https://doi.org/10.1007/s00213-004-2000-x'}
+};
+/* the fixed line on every card that talks about a medicine */
+const RX=['Any change to a medicine goes through whoever prescribed it.','Tout changement à un médicament passe par la personne qui l’a prescrit.'];
+const GRADE={solid:['solid','solide'],likely:['likely','probable']};
+const GRADEL={solid:['Solid evidence: many good studies agree.','Preuves solides\u00a0: beaucoup de bonnes études concordent.'],likely:['Likely: good evidence, not airtight.','Probable\u00a0: de bonnes données, pas absolues.']};
+
+/* ==== drawing: every picture is drawn from these pieces, on a 380 × 220 grid. Labels come from the card's own words. ==== */
+const W=380, H=220;
+const tx=(x,y,s,a,cl)=>`<text x="${x}" y="${y}" class="${cl||'lb'}" text-anchor="${a||'middle'}" dominant-baseline="central">${esc(s)}</text>`;
+const lead=(x1,y1,x2,y2)=>`<line class="lead" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
+const arr=(x1,y1,x2,y2,col,w)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col||C.grey}" stroke-width="${w||1.5}" marker-end="url(#ar)"/>`;
+const ball=(x,y,r)=>`<circle cx="${x}" cy="${y}" r="${r||7}" fill="${C.msg}"/>`;
+const cupAt=(x,y)=>`<path d="M${x-14} ${y} A14 14 0 0 0 ${x+14} ${y} Z" fill="${C.machine}"/>`;
+const plug=(x,y)=>`<rect x="${x-8}" y="${y-8}" width="16" height="14" rx="3" fill="${C.drug}"/>`;
+const heartP=(cx,cy,s,c)=>`<path d="M${cx} ${cy+s} L${cx-s} ${cy-s*0.15} A${s*0.5} ${s*0.5} 0 0 1 ${cx} ${cy-s*0.55} A${s*0.5} ${s*0.5} 0 0 1 ${cx+s} ${cy-s*0.15} Z" fill="${c||C.heart}"/>`;
+const cellBox=(x,y,w,h,r)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r==null?14:r}" fill="${C.cell}" opacity="0.35"/>`;
+const body=(x,y,s)=>`<g transform="translate(${x} ${y}) scale(${s||1})"><circle cx="20" cy="16" r="16" fill="${C.cell}" opacity="0.45"/><rect x="0" y="36" width="40" height="86" rx="16" fill="${C.cell}" opacity="0.45"/></g>`;
+const brainIn=(cx,cy,r)=>`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${C.cell}" opacity="0.4"/><path d="M${cx-r*0.62} ${cy+r*0.12} Q${cx-r*0.7} ${cy-r*0.55} ${cx-r*0.12} ${cy-r*0.58} Q${cx+r*0.1} ${cy-r*0.8} ${cx+r*0.42} ${cy-r*0.5} Q${cx+r*0.78} ${cy-r*0.3} ${cx+r*0.62} ${cy+r*0.15} Q${cx+r*0.55} ${cy+r*0.48} ${cx} ${cy+r*0.42} Q${cx-r*0.55} ${cy+r*0.5} ${cx-r*0.62} ${cy+r*0.12} Z" fill="${C.ink2}" opacity="0.55"/>`;
+function battery(x,y,f,s){ const w=26,h=14; s=s||1; return `<g transform="translate(${x} ${y}) scale(${s})"><rect x="0" y="0" width="${w}" height="${h}" rx="3" fill="none" stroke="${C.ink2}" stroke-width="${1.6/s+0.4}"/><rect x="${w}" y="4" width="3" height="6" rx="1" fill="${C.ink2}"/>${f>0?`<rect x="2" y="2" width="${(w-4)*f}" height="${h-4}" rx="1.5" fill="${C.fuel}"/>`:''}</g>`; }
+const fuelDot=(x,y,r)=>`<circle cx="${x}" cy="${y}" r="${r||5}" fill="${C.fuel}"/>`;
+const ketone=(x,y)=>`<rect x="${x-5}" y="${y-5}" width="10" height="10" fill="${C.fuel}" transform="rotate(45 ${x} ${y})"/>`;
+const oxy=(x,y)=>`<circle cx="${x}" cy="${y}" r="9" fill="none" stroke="${C.oxy}" stroke-width="2.5"/>`;
+const helper=(x,y,s,faded)=>`<g opacity="${faded?0.28:1}"><circle cx="${x}" cy="${y}" r="13" fill="${C.ink2}"${faded?' stroke-dasharray="3 3" stroke="'+C.ink2+'" fill-opacity="0.2"':''}/><text x="${x}" y="${y}" fill="#fff" font-size="12" font-weight="700" text-anchor="middle" dominant-baseline="central" font-family="system-ui,sans-serif">${esc(s)}</text></g>`;
+const moon=(cx,cy,r)=>`<path d="M${cx} ${cy-r} A${r} ${r} 0 1 0 ${cx} ${cy+r} A${r*0.72} ${r} 0 1 1 ${cx} ${cy-r} Z" fill="${C.grey}"/>`;
+const svg=(inner,label)=>`<svg class="pic" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(label)}"><defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>${inner}</svg>`;
+
+/* ==== CARDS: the six stops of a meal through the body, and the cards written so far. ==== */
+const SECTIONS=[
+  {id:'gut',n:1,t:['The gut','L’intestin'],d:['Where food goes in, and what gets through.','Par où la nourriture entre, et ce qui passe.']},
+  {id:'fuel',n:2,t:['Fuel','Le carburant'],d:['What each vitamin and mineral is for.','À quoi sert chaque vitamine et chaque minéral.']},
+  {id:'energy',n:3,t:['Energy','L’énergie'],d:['How the body turns food into power, and what spends it.','Comment le corps change la nourriture en énergie, et ce qui la dépense.']},
+  {id:'sleep',n:4,t:['Sleep','Le sommeil'],d:['What the night repairs, and what cuts it short.','Ce que la nuit répare, et ce qui l’écourte.']},
+  {id:'signals',n:5,t:['Signals','Les signaux'],d:['The messengers that run the body.','Les messagers qui font marcher le corps.']},
+  {id:'wear',n:6,t:['Wear','L’usure'],d:['Repair that stays switched on, and damage that adds up.','La réparation qui reste allumée, et les dommages qui s’accumulent.']}
+];
+/* a card's pictures: f = [title, caption, grade, draw]. A draw gets W(en,fr) for its labels. */
+const CARDS=[
+{ id:'tiny-batteries', sec:'energy', t:['Tiny batteries','Les petites piles'], d:['What every cell runs on, and what recharges it.','Ce qui fait marcher chaque cellule, et ce qui la recharge.'],
+  src:['tornroth08','nihMg','debaaij15','nihB1','nihB2','nihB3','nihFe','vaucher'],
+  more:[['ATP (adenosine triphosphate) gives off energy when it loses one of its three phosphates and becomes ADP. Most of it is made again inside the mitochondria, by a chain of proteins that uses oxygen {oxidative phosphorylation}. The body holds only a little ATP at any moment and remakes roughly its own weight in it every day.','L’ATP (adénosine triphosphate) libère de l’énergie quand elle perd un de ses trois phosphates et devient de l’ADP. La plus grande partie est refaite dans les mitochondries, par une chaîne de protéines qui utilise l’oxygène {phosphorylation oxydative}. Le corps n’a qu’un peu d’ATP à la fois, et il en refait à peu près son propre poids chaque jour.'],
+        ['In cells, ATP is mostly held by magnesium {Mg-ATP}, and the enzymes that make or use it need magnesium. Thiamine (B1), riboflavin (B2) and niacin (B3) become the helpers that carry the fuel’s energy along the chain {TPP, FAD, NAD}. Iron sits inside the chain’s proteins {cytochromes}, and in the red blood cells’ hemoglobin, which brings the oxygen.','Dans les cellules, l’ATP est surtout tenue par le magnésium {Mg-ATP}, et les enzymes qui la fabriquent ou l’utilisent ont besoin de magnésium. La thiamine (B1), la riboflavine (B2) et la niacine (B3) deviennent les aides qui transportent l’énergie du carburant le long de la chaîne {TPP, FAD, NAD}. Le fer se trouve dans les protéines de la chaîne {cytochromes}, et dans l’hémoglobine des globules rouges, qui apporte l’oxygène.'],
+        ['Fatigue and weakness are among the early signs of low magnesium, and tiredness is a main sign of low iron. In one trial, iron eased fatigue in women with low ferritin and no anemia.','La fatigue et la faiblesse sont parmi les premiers signes d’un manque de magnésium, et la fatigue est un signe principal d’un manque de fer. Dans un essai, le fer a diminué la fatigue chez des femmes avec une ferritine basse et sans anémie.']],
+  f:[
+   [['The body runs on tiny batteries','Le corps marche avec de petites piles'],['Muscles, the heart and the brain are all built from tiny pieces called cells. Each cell runs on tiny batteries {ATP}.','Les muscles, le cœur et le cerveau sont tous faits de tout petits morceaux appelés cellules. Chaque cellule marche avec de petites piles {ATP}.'],'solid',
+    w=>body(40,26)+`<circle cx="74" cy="104" r="11" fill="none" stroke="${C.grey}" stroke-dasharray="3 3"/>`+lead(85,98,140,58)+lead(85,110,140,168)+cellBox(140,26,210,150,40)+tx(245,46,w('Cell','Cellule'),'middle','lbi')+battery(170,72,1)+battery(230,72,1)+battery(290,72,1)+battery(170,114,1)+battery(230,114,1)+battery(290,114,1)+lead(245,192,246,131)+tx(245,204,w('batteries','piles'))+tx(60,170,w('Body','Corps'))],
+   [['Spending a battery','Une pile se vide'],['When a muscle moves or the heart beats, a full battery gets spent and becomes an empty one {ATP becomes ADP}.','Quand un muscle bouge ou que le cœur bat, une pile pleine se vide {l’ATP devient de l’ADP}.'],'solid',
+    w=>battery(46,80,1,2.4)+arr(130,97,226,97,C.grey,2)+`<polyline points="172,62 182,74 175,76 186,90" fill="none" stroke="${C.fuel}" stroke-width="3" stroke-linejoin="round"/>`+battery(238,80,0,2.4)+tx(88,136,w('full','pleine'))+tx(280,136,w('empty','vide'))+tx(178,136,w('energy used','énergie utilisée'))],
+   [['The recharger','Le rechargeur'],['Inside each cell, small power plants {mitochondria} recharge the empty batteries, over and over. A body recharges about its own weight in batteries every day.','Dans chaque cellule, de petites centrales {mitochondries} rechargent les piles vides, encore et encore. Un corps recharge à peu près son propre poids en piles chaque jour.'],'solid',
+    w=>PLANT(w,0)],
+   [['Fuel goes in','Le carburant entre'],['To recharge, the power plant burns fuel from food: sugar or fat {glucose, fatty acids}.','Pour recharger, la centrale brûle du carburant qui vient de la nourriture\u00a0: du sucre ou du gras {glucose, acides gras}.'],'solid',
+    w=>PLANT(w,1)],
+   [['Oxygen goes in','L’oxygène entre'],['It also needs oxygen. The blood brings it, held by iron {hemoglobin}.','Elle a aussi besoin d’oxygène. Le sang l’apporte, tenu par du fer {hémoglobine}.'],'solid',
+    w=>PLANT(w,2)],
+   [['The helpers','Les aides'],['And it needs helpers. Magnesium {Mg} holds each battery so it can be used. B vitamins {B} keep the machine turning. Iron {Fe} works inside the power plant too.','Et elle a besoin d’aides. Le magnésium {Mg} tient chaque pile pour qu’elle serve. Les vitamines B {B} font tourner la machine. Le fer {Fe} travaille aussi dans la centrale.'],'solid',
+    w=>PLANT(w,3)],
+   [['A helper runs low','Une aide vient à manquer'],['When one helper runs low, fewer batteries get recharged. Tiredness is one of the first signs.','Quand une aide vient à manquer, moins de piles sont rechargées. La fatigue est un des premiers signes.'],'solid',
+    w=>PLANT(w,4)]
+  ]},
+{ id:'brain-fuel', sec:'energy', t:['What the brain runs on','Ce que brûle le cerveau'], d:['A hungry organ with almost no tank.','Un organe affamé, presque sans réservoir.'],
+  src:['raichle02','mergenthaler13','schonfeld13','owen67','cryer07'],
+  more:[['At rest, the adult brain takes about a fifth of the body’s energy while weighing about a fiftieth. Glucose enters it through transporters and is its main fuel; nerve cells and the cells around them {glia} share the work.','Au repos, le cerveau adulte prend environ le cinquième de l’énergie du corps, pour à peu près le cinquantième de son poids. Le glucose y entre par des transporteurs et c’est son carburant principal; les cellules nerveuses et les cellules autour d’elles {glie} se partagent le travail.'],
+        ['Long fatty acids reach the brain but are hardly burned there. One review proposes why: burning them would use more oxygen, make more oxidative stress, and give energy more slowly than glucose.','Les longs acides gras se rendent au cerveau, mais y sont très peu brûlés. Une revue propose pourquoi\u00a0: les brûler prendrait plus d’oxygène, ferait plus de stress oxydatif et donnerait l’énergie plus lentement que le glucose.'],
+        ['During fasting, the liver makes ketone bodies {β-hydroxybutyrate, acetoacetate}. In a 1967 study of three people fasting 5 to 6 weeks in hospital, they replaced glucose as the brain’s main fuel. When blood glucose falls, hormones defend it first; if it keeps falling, thinking and coordination fail, and they come back once glucose is raised.','Pendant un jeûne, le foie fabrique des corps cétoniques {bêta-hydroxybutyrate, acétoacétate}. Dans une étude de 1967 auprès de trois personnes qui jeûnaient de 5 à 6 semaines à l’hôpital, ils ont remplacé le glucose comme carburant principal du cerveau. Quand le glucose du sang baisse, des hormones le défendent d’abord; s’il continue de baisser, la pensée et la coordination flanchent, et elles reviennent quand le glucose remonte.']],
+  f:[
+   [['A hungry organ','Un organe affamé'],['The brain is about 2\u00a0% of the body’s weight, but it uses about 20\u00a0% of its energy at rest. Each square below is 1\u00a0%.','Le cerveau, c’est environ 2\u00a0% du poids du corps, mais il utilise environ 20\u00a0% de son énergie au repos. Chaque carré ci-dessous vaut 1\u00a0%.'],'solid',
+    w=>body(30,40)+`<circle cx="50" cy="56" r="9" fill="${C.ink2}" opacity="0.6"/>`+GRID(130,52,2,C.ink2)+GRID(248,52,20,C.fuel)+tx(170,34,w('weight','poids'))+tx(288,34,w('energy at rest','énergie au repos'))+tx(170,160,'2\u00a0%','middle','lbi')+tx(288,160,'20\u00a0%','middle','lbi')+tx(76,22,w('Brain','Cerveau'),'start')+lead(74,26,58,48)],
+   [['Its main fuel: sugar','Son carburant principal\u00a0: le sucre'],['Its main fuel is sugar carried by the blood {glucose}. It needs a steady supply, day and night.','Son carburant principal, c’est le sucre transporté par le sang {glucose}. Il lui en faut sans arrêt, jour et nuit.'],'solid',
+    w=>BRAIN(w,3,0)],
+   [['Fat stays out','Le gras reste dehors'],['The body stores a lot of fat, but the brain barely burns it directly {fatty acids}.','Le corps garde beaucoup de gras en réserve, mais le cerveau en brûle très peu directement {acides gras}.'],'solid',
+    w=>BRAIN(w,3,1)],
+   [['Plan B: ketones','Le plan B\u00a0: les cétones'],['When food brings little sugar for days, the liver turns fat into a fuel the brain can use {ketones}. In a study of people fasting for weeks in hospital, ketones became the brain’s main fuel.','Quand la nourriture apporte peu de sucre pendant des jours, le foie change du gras en un carburant que le cerveau peut utiliser {cétones}. Dans une étude auprès de personnes qui jeûnaient depuis des semaines à l’hôpital, les cétones sont devenues le carburant principal du cerveau.'],'solid',
+    w=>BRAIN(w,1,2)],
+   [['When sugar drops','Quand le sucre baisse'],['When blood sugar drops too low, the brain is the first to feel it: shaky, foggy, hard to think {hypoglycemia}. It comes back when sugar comes back.','Quand le sucre du sang baisse trop, le cerveau est le premier à le sentir\u00a0: tremblements, brouillard, difficulté à penser {hypoglycémie}. Ça revient quand le sucre revient.'],'solid',
+    w=>BRAIN(w,1,3)]
+  ]},
+{ id:'caffeine-clock', sec:'energy', t:['Caffeine’s clock','L’horloge de la caféine'], d:['Why it wakes, how long it stays, what it costs.','Pourquoi elle réveille, combien de temps elle reste, ce qu’elle coûte.'],
+  src:['ninds','fredholm99','efsa','drake','juliano'],
+  more:[['Adenosine is made when cells use their batteries {ATP}. Its signal through its receptors {A1, A2A} is part of the pull to sleep, which grows every hour awake. Caffeine blocks those receptors {antagonist}: it gives no energy of its own.','L’adénosine se forme quand les cellules utilisent leurs piles {ATP}. Son signal par ses récepteurs {A1, A2A} fait partie du besoin de dormir, qui grandit à chaque heure d’éveil. La caféine bloque ces récepteurs {antagoniste}\u00a0: elle ne donne aucune énergie par elle-même.'],
+        ['Its half-life is about 5 hours in most adults, from about 2 to 8. Smoking shortens it; pregnancy and some medicines lengthen it. In a 2013 trial, 400 mg taken 0, 3 or 6 hours before bed all disturbed sleep; at 6 hours, total sleep still fell by more than an hour.','Sa demi-vie est d’environ 5 heures chez la plupart des adultes, de 2 à 8 environ. Fumer la raccourcit; la grossesse et certains médicaments l’allongent. Dans un essai de 2013, 400 mg pris 0, 3 ou 6 heures avant le coucher ont tous dérangé le sommeil; à 6 heures, le sommeil total a quand même baissé de plus d’une heure.'],
+        ['People who take caffeine every day often get withdrawal 12 to 24 hours after a missed dose: headache, tiredness, low mood, foggy thinking, lasting 2 to 9 days. The crash as one dose wears off is widely reported, but less well measured than withdrawal.','Les personnes qui prennent de la caféine tous les jours ont souvent un sevrage de 12 à 24 heures après une dose manquée\u00a0: mal de tête, fatigue, moral bas, pensée brouillée, pendant 2 à 9 jours. La chute quand une dose s’en va est souvent rapportée, mais moins bien mesurée que le sevrage.']],
+  f:[
+   [['The pull to sleep','Le besoin de dormir'],['While a person is awake, the pull to sleep grows every hour. The brain builds it with a messenger {adenosine}.','Pendant qu’une personne est éveillée, le besoin de dormir grandit à chaque heure. Le cerveau le fabrique avec un messager {adénosine}.'],'solid',
+    w=>brainIn(70,80,42)+tx(70,140,w('Brain','Cerveau'))+`<path class="axis" d="M150 180 H350"/>`+`<path d="M150 172 Q250 165 350 64" fill="none" stroke="${C.msg}" stroke-width="3"/>`+ball(205,166,5)+ball(265,148,5)+ball(315,112,5)+ball(345,72,5)+tx(226,122,w('messengers','messagers'),'start')+tx(152,196,w('morning','matin'),'start')+tx(350,196,w('night','soir'),'end')+tx(330,44,w('pull to sleep','besoin de dormir'),'end')],
+   [['Cups in the brain','Des bols dans le cerveau'],['When the messenger lands in its cups {receptors}, the brain gets the message: slow down, get sleepy.','Quand le messager tombe dans ses bols {récepteurs}, le cerveau reçoit le message\u00a0: ralentis, il est temps de dormir.'],'solid',
+    w=>CAF(w,0)],
+   [['Caffeine sits in the cups','La caféine s’assoit dans les bols'],['Caffeine fits the same cups but gives no message {antagonist}. The sleepy message can’t land, so the person feels awake.','La caféine entre dans les mêmes bols, mais ne donne aucun message {antagoniste}. Le message de sommeil ne peut pas se poser, alors la personne se sent éveillée.'],'solid',
+    w=>CAF(w,1)],
+   [['The pull keeps growing','Le besoin continue de grandir'],['Caffeine doesn’t take the pull to sleep away. The messengers keep coming while it sits in the cups.','La caféine n’enlève pas le besoin de dormir. Les messagers continuent d’arriver pendant qu’elle occupe les bols.'],'solid',
+    w=>CAF(w,2)],
+   [['The clock','L’horloge'],['The body clears caffeine slowly. In most adults, half of it is gone after about 5 hours {half-life}. For some people it’s 2 hours, for others 8.','Le corps élimine la caféine lentement. Chez la plupart des adultes, la moitié est partie après environ 5 heures {demi-vie}. Pour certaines personnes, c’est 2 heures; pour d’autres, 8.'],'solid',
+    w=>CLOCK(w,0)],
+   [['At bedtime','Au coucher'],['A coffee at 1 p.m. still has a quarter left at 11 p.m. At bedtime, that caffeine still sits in some cups. In one study, caffeine taken 6 hours before bed still cut more than an hour of sleep.','Un café à 13 h en a encore le quart à 23 h. Au coucher, cette caféine occupe encore des bols. Dans une étude, de la caféine prise 6 heures avant le coucher a quand même enlevé plus d’une heure de sommeil.'],'solid',
+    w=>CLOCK(w,1)],
+   [['When it wears off','Quand elle s’en va'],['When caffeine leaves the cups, the messengers that piled up can land all at once: the crash. In people who have it every day, a missed dose brings headache and fog for a day or more {withdrawal}.','Quand la caféine quitte les bols, les messagers accumulés peuvent tous se poser d’un coup\u00a0: la chute. Chez les personnes qui en prennent tous les jours, une dose manquée amène mal de tête et brouillard pendant un jour ou plus {sevrage}.'],'likely',
+    w=>CAF(w,3)]
+  ]},
+{ id:'heart-scare', sec:'energy', drug:true, t:['The heart and a scare','Le cœur et la peur'], d:['One messenger, three states: normal, a scare, a stimulant.','Un messager, trois états\u00a0: normal, une peur, un stimulant.'],
+  src:['openstaxAP','mph','amph','carlson03'],
+  more:[['The nerve is a sympathetic nerve: it runs from the brain, through the spinal cord, to the heart, and it is part of the fight-or-flight system. Its endings release norepinephrine, which binds to receptors on heart cells {beta-1 adrenergic} and raises the heart rate. During a scare, the adrenal glands also release adrenaline into the blood. Between a nerve and an organ, the gap is called a junction; between two nerve cells, the same kind of gap is a synapse.','Le nerf est un nerf sympathique\u00a0: il part du cerveau, passe par la moelle épinière et se rend au cœur, et il fait partie du système de combat ou de fuite. Ses bouts libèrent de la noradrénaline, qui se fixe à des récepteurs des cellules du cœur {bêta-1 adrénergiques} et fait monter le rythme cardiaque. Pendant une peur, les glandes surrénales libèrent aussi de l’adrénaline dans le sang. Entre un nerf et un organe, l’espace s’appelle une jonction; entre deux cellules nerveuses, le même genre d’espace est une synapse.'],
+        ['A transporter on the nerve end {norepinephrine transporter} pulls most of the messengers back in, which ends the signal. Methylphenidate blocks that transporter. Amphetamines block it too, and also push more messengers out of the nerve end, so the picture of a plug is a simplification for them.','Un transporteur sur le bout du nerf {transporteur de la noradrénaline} reprend la plupart des messagers, ce qui termine le signal. Le méthylphénidate bloque ce transporteur. Les amphétamines le bloquent aussi, et poussent en plus des messagers hors du bout du nerf\u00a0: pour elles, l’image du bouchon est une simplification.'],
+        ['As a stimulant wears off, some people have hours of irritability, low mood or tiredness {rebound}. In a study of 149 children treated in hospital, it was seen in 30\u00a0% of them on at least one dose.','Quand un stimulant s’en va, certaines personnes ont quelques heures d’irritabilité, de moral bas ou de fatigue {effet rebond}. Dans une étude auprès de 149 enfants traités à l’hôpital, l’effet a été observé chez 30\u00a0% d’entre eux après au moins une dose.']],
+  f:[
+   [['The body’s wires','Les fils du corps'],['The body has wires called nerves. One of them {a sympathetic nerve} runs from the brain to the heart and carries messages. Next: a close look where the nerve touches the heart.','Le corps a des fils qui s’appellent des nerfs. L’un d’eux {un nerf sympathique} va du cerveau jusqu’au cœur et transporte des messages. Ensuite\u00a0: un gros plan là où le nerf touche le cœur.'],'solid',w=>NE(w,0)],
+   [['Up close','De près'],['Up close, the nerve doesn’t quite touch the heart. There’s a tiny gap {junction} between the nerve end and the heart, and the message has to cross it.','De près, le nerf ne touche pas tout à fait le cœur. Il y a un tout petit espace {jonction} entre le bout du nerf et le cœur, et le message doit le traverser.'],'solid',w=>NE(w,1)],
+   [['Messengers','Les messagers'],['To cross the gap, the nerve end drops tiny balls. They’re called messengers {neurotransmitters}.','Pour traverser l’espace, le bout du nerf laisse tomber de toutes petites billes. Ces billes, ce sont des messagers {neurotransmetteurs}.'],'solid',w=>NE(w,2)],
+   [['Cups','Les bols'],['The heart has cups {receptors}. When a messenger lands in a cup, the heart gets the message: beat a little faster.','Le cœur a de petits bols {récepteurs}. Quand un messager tombe dans un bol, le cœur reçoit le message\u00a0: battre un peu plus vite.'],'solid',w=>NE(w,3)],
+   [['The vacuum','L’aspirateur'],['Then a vacuum {transporter} on the nerve end pulls the messengers back up. The cups empty, the message stops, and the messengers are ready for next time.','Ensuite, un aspirateur {transporteur} sur le bout du nerf reprend les messagers. Les bols se vident, le message s’arrête, et les messagers sont prêts pour la prochaine fois.'],'solid',w=>NE(w,4)],
+   [['A scare','Une peur'],['During a scare, the nerve end drops lots of messengers at once. Every cup fills and the heart beats fast. When the scare is over, the vacuum pulls them back and the heart slows down. These messengers have a name: norepinephrine {also called noradrenaline}.','Pendant une peur, le bout du nerf laisse tomber plein de messagers d’un coup. Tous les bols se remplissent et le cœur bat vite. Quand la peur est passée, l’aspirateur les reprend et le cœur ralentit. Ces messagers ont un nom\u00a0: la noradrénaline {aussi appelée norépinéphrine}.'],'solid',w=>NE(w,5)],
+   [['A stimulant','Un stimulant'],['A stimulant plugs the vacuum. The messengers can’t go back up, so the cups stay full and the heart beats faster than normal, with nothing scary happening.','Un stimulant bouche l’aspirateur. Les messagers ne peuvent plus remonter, alors les bols restent pleins et le cœur bat plus vite que d’habitude, sans que rien d’épeurant ne se passe.'],'solid',w=>NE(w,6)],
+   [['When it wears off','Quand l’effet passe'],['When the stimulant wears off, the vacuum works again and the gap empties. After hours of full cups, some people feel flat for a while {rebound}.','Quand l’effet du stimulant passe, l’aspirateur se remet à marcher et l’espace se vide. Après des heures de bols pleins, certaines personnes se sentent à plat pendant un bout de temps {effet rebond}.'],'likely',w=>NE(w,7)]
+  ]}
+];
+/* ---- the pictures that several frames share ---- */
+function GRID(x,y,n,col){ let s=''; for(let i=0;i<100;i++){ const r=Math.floor(i/10), c=i%10, on=i>=100-n; s+=`<rect x="${x+c*8.4}" y="${y+r*8.4}" width="7" height="7" rx="1.2" fill="${on?col:C.cell}" opacity="${on?1:0.35}"/>`; } return s; }
+/* the power plant: k = 0 plain, 1 fuel, 2 + oxygen, 3 + helpers, 4 one helper low */
+function PLANT(w,k){ const low=k>=4; let s=`<rect x="130" y="58" width="120" height="88" rx="24" fill="${C.machine}" fill-opacity="0.18" stroke="${C.machine}" stroke-width="2"/>`
+    +tx(190,k>=3?76:102,w('power plant','centrale'),'middle','lbi')
+    +battery(34,94,0,1.6)+arr(84,105,126,105)+arr(254,105,292,105)+battery(298,94,low?0.35:1,1.6)
+    +tx(56,132,w('empty','vide'))+tx(320,132,low?w('fewer full','moins pleines'):w('full','pleines'))
+    +`<path d="M318 148 Q190 212 56 148" fill="none" stroke="${C.grey}" stroke-width="1.2" stroke-dasharray="4 4" marker-end="url(#ar)"/>`;
+  if(k>=1) s+=fuelDot(176,14)+fuelDot(192,24)+fuelDot(208,12)+arr(192,32,192,54,C.fuel)+tx(222,20,w('sugar or fat','sucre ou gras'),'start');
+  if(k>=2) s+=oxy(104,26)+oxy(122,40)+arr(128,48,142,58,C.oxy)+tx(92,14,w('oxygen','oxygène'),'end');
+  if(k>=3) s+=helper(160,116,'Mg')+helper(190,116,'B')+helper(220,116,'Fe',low)+tx(190,166,w(low?'iron low':'helpers',low?'fer bas':'aides'),'middle');
+  return s; }
+/* the brain fed by the blood: n = sugar dots coming up, k = 0 sugar, 1 + fat beside it, 2 ketones from the liver, 3 low sugar */
+function BRAIN(w,n,k){ let s=brainIn(200,62,44)+tx(270,40,w('Brain','Cerveau'),'start')+lead(266,42,240,52)
+    +`<path d="M200 214 V108" stroke="${C.heart}" stroke-width="10" stroke-opacity="0.35" stroke-linecap="round"/>`+tx(214,204,w('blood','sang'),'start');
+  const ys=[184,156,128].slice(0,n); for(const y of ys) s+=fuelDot(200,y); if(n) s+=arr(220,170,220,120,C.fuel)+tx(228,146,k===3?w('little sugar','peu de sucre'):w('sugar','sucre'),'start');
+  if(k===1) s+=`<ellipse cx="74" cy="150" rx="40" ry="28" fill="${C.fat}"/>`+tx(74,150,w('fat','gras'),'middle','lbi')+`<path d="M116 136 Q140 118 156 104" fill="none" stroke="${C.grey}" stroke-width="1.5" stroke-dasharray="3 4"/>`+tx(74,196,w('barely used','très peu utilisé'));
+  if(k===2) s+=`<ellipse cx="62" cy="186" rx="34" ry="20" fill="${C.fat}"/>`+tx(62,186,w('fat','gras'),'middle','lbi')+`<rect x="40" y="96" width="70" height="46" rx="20" fill="${C.cell}" opacity="0.6"/>`+tx(75,119,w('liver','foie'),'middle','lbi')+arr(62,164,66,146)+ketone(130,110)+ketone(152,98)+arr(114,118,170,90,C.fuel)+tx(130,76,w('ketones','cétones'),'middle');
+  if(k===3) s+=`<path d="M146 24 l6 6 -6 6 6 6 M254 24 l-6 6 6 6 -6 6" fill="none" stroke="${C.grey}" stroke-width="2" stroke-linecap="round"/>`+tx(92,92,w('shaky, foggy,','tremblements, brouillard,'),'middle')+tx(92,110,w('hard to think','difficile de penser'),'middle');
+  return s; }
+/* the sleepy messenger and caffeine, in a brain cell: k = 0 normal, 1 caffeine in the cups, 2 piling up, 3 the crash */
+function CAF(w,k){ let s=cellBox(20,140,270,58)+tx(70,182,w('Brain cell','Cellule du cerveau'))+cupAt(120,140)+cupAt(180,140)+cupAt(240,140);
+  if(k===0) s+=ball(180,133)+ball(110,90)+arr(110,62,110,80,C.msg)+ball(250,104)+arr(250,76,250,94,C.msg)+arr(180,158,180,174)+tx(214,184,w('sleepy','sommeil'),'start')+tx(30,118,w('messengers','messagers'),'start')+tx(268,152,w('cups','bols'),'start');
+  if(k>=1&&k<=2) s+=plug(120,138)+plug(180,138)+plug(240,138)+tx(268,152,w('caffeine','caféine'),'start')+ball(100,96)+ball(150,104)+ball(212,92)+tx(140,182,w('no sleepy message','aucun message de sommeil'),'start');
+  if(k===2) s+=ball(66,80)+ball(124,70)+ball(176,82)+ball(240,72)+ball(270,100)+ball(84,116)+ball(232,112)+tx(30,40,w('still piling up','ils s’accumulent encore'),'start');
+  if(k===3) s+=ball(120,133)+ball(180,133)+ball(240,133)+[[96,92],[146,78],[204,96],[262,84],[124,112],[230,112]].map(([x,y])=>ball(x,y)+arr(x,y+10,x+((x<180)?10:-10),y+24,C.msg)).join('')+arr(180,158,180,176,C.grey,3)+tx(214,184,w('the crash','la chute'),'start');
+  return s; }
+/* caffeine's clock: k = 0 the halving, 1 bedtime */
+function CLOCK(w,k){ const X=[70,150,230,310], N=[8,4,2,1], T=[w('8 a.m.','8 h'),w('1 p.m.','13 h'),w('6 p.m.','18 h'),w('11 p.m.','23 h')], F=['100\u00a0%','½','¼','⅛'];
+  let s=`<path class="axis" d="M30 172 H350"/>`+tx(190,18,w('caffeine still in the body','caféine encore dans le corps'));
+  X.forEach((x,i)=>{ for(let j=0;j<N[i];j++) s+=`<rect x="${x-9}" y="${158-j*16}" width="18" height="12" rx="3" fill="${C.drug}"/>`; s+=tx(x,188,T[i])+tx(x,206,F[i],'middle','lbi'); });
+  if(k===0) s+=`<path d="M86 110 Q110 92 134 118" fill="none" stroke="${C.grey}" stroke-dasharray="3 3"/>`+tx(110,86,w('5 h','5 h'));
+  if(k===1){ s=`<path class="axis" d="M30 172 H350"/>`+tx(190,18,w('a coffee at 1 p.m.','un café à 13 h'));
+    [[150,4],[230,2],[310,1]].forEach(([x,n],i)=>{ for(let j=0;j<n;j++) s+=`<rect x="${x-9}" y="${158-j*16}" width="18" height="12" rx="3" fill="${C.drug}"/>`; s+=tx(x,188,[w('1 p.m.','13 h'),w('6 p.m.','18 h'),w('11 p.m.','23 h')][i])+tx(x,206,['100\u00a0%','½','¼'][i],'middle','lbi'); });
+    s+=moon(310,112,16)+tx(310,84,w('bedtime','coucher')); }
+  return s; }
+/* norepinephrine and the heart: k = 0 … 7 */
+function NE(w,k){ const top=()=>cellBox(20,16,270,58)+tx(80,45,w('Nerve end','Bout du nerf'));
+  const bot=()=>cellBox(20,140,270,58)+tx(150,182,w('Heart','Cœur'));
+  const vac=()=>`<polygon points="222,74 268,74 258,58 232,58" fill="${C.machine}"/>`;
+  const cups=()=>cupAt(90,140)+cupAt(150,140)+cupAt(210,140);
+  const dn=(x,y)=>arr(x,y-28,x,y-12,C.msg), up=x=>arr(x,128,x,104,C.machine);
+  const hs=(n,c,lab)=>{ let p=heartP(330,165,16,c||C.heart); for(let i=0;i<n;i++){ const x=352+6*i; p+=`<path d="M${x} 157 Q${x+5} 165 ${x} 173" fill="none" stroke="${C.heart}" stroke-width="1.5"/>`; } return p+tx(335,200,lab||w('heartbeat','battements')); };
+  const full=()=>ball(90,133)+ball(150,133)+ball(210,133), crowd=()=>ball(60,96)+ball(96,114)+ball(126,92)+ball(162,108)+ball(196,94)+ball(230,116)+ball(118,124);
+  switch(k){
+   case 0: return body(90,24)+`<path d="M110 52 L110 92 L114 100" fill="none" stroke="${C.grey}" stroke-width="3" stroke-linecap="round"/>`+heartP(116,113,11)+`<circle cx="114" cy="104" r="13" fill="none" stroke="${C.grey}" stroke-dasharray="3 3"/>`+lead(196,40,134,40)+tx(200,40,w('Brain','Cerveau'),'start')+lead(196,76,113,76)+tx(200,76,w('Nerve','Nerf'),'start')+lead(196,116,129,116)+tx(200,116,w('Heart','Cœur'),'start')+lead(196,150,124,113)+tx(200,150,w('Close look here','Gros plan ici'),'start');
+   case 1: return top()+bot()+tx(150,107,w('gap','espace'));
+   case 2: return top()+bot()+ball(120,104)+dn(120,104)+ball(150,118)+dn(150,118)+ball(180,98)+dn(180,98)+tx(215,107,w('messengers','messagers'),'start');
+   case 3: return top()+bot()+cups()+ball(150,133)+ball(110,100)+dn(110,100)+ball(190,108)+dn(190,108)+tx(240,152,w('cups','bols'),'start')+hs(1);
+   case 4: return top()+bot()+cups()+vac()+tx(245,44,w('vacuum','aspirateur'))+ball(245,90)+up(245)+hs(0);
+   case 5: return top()+bot()+cups()+vac()+full()+crowd()+ball(262,98)+dn(126,92)+dn(196,94)+hs(3);
+   case 6: return top()+bot()+cups()+vac()+`<rect x="220" y="68" width="50" height="16" rx="3" fill="${C.drug}"/>`+tx(214,58,w('stimulant','stimulant'),'end')+full()+crowd()+ball(234,94)+ball(256,94)+ball(245,108)+hs(2);
+   default: return top()+bot()+cups()+vac()+ball(245,90)+up(245)+hs(0,C.grey,w('flat','à plat'));
+  } }
+/* ==== end of CARDS ==== */
+
+/* ---------- the frame: top bar, screens, bottom bar ---------- */
+const app=document.getElementById('app'), bar=document.getElementById('bar');
+let V={v:'home'};   /* the screen: home, a section, or a card at a picture */
+const cardById=id=>CARDS.find(c=>c.id===id), secById=id=>SECTIONS.find(s=>s.id===id);
+function fromHash(){ const h=(location.hash||'').slice(1); const c=cardById(h); if(c) return {v:'card',id:c.id,i:0}; const s=secById(h); if(s) return {v:'sec',id:s.id}; return {v:'home'}; }
+function go(nv){ V=nv; const h=V.v==='card'?V.id:V.v==='sec'?V.id:''; if((location.hash||'').slice(1)!==h){ try{ history.pushState(null,'',h?'#'+h:location.pathname+location.search); }catch(e){} } render(); }
+function renderTop(){ document.documentElement.lang=S.lang==='fr'?'fr-CA':'en-CA'; document.title=L('The Library','La Bibliothèque');
+  document.getElementById('topbar').innerHTML=`<div class="in"><button type="button" class="tb" id="menuBtn" data-act="menu" aria-haspopup="dialog" aria-label="Menu"><span aria-hidden="true">☰</span></button><button type="button" class="tb ttl" data-act="home">${L('The Library','La Bibliothèque')}</button><span class="sp"></span><span class="lang"><button type="button" data-act="lang" data-v="fr" aria-pressed="${S.lang==='fr'}">FR</button><button type="button" data-act="lang" data-v="en" aria-pressed="${S.lang==='en'}">EN</button></span></div>`; }
+function render(){ save(); renderTop(); const door=!S.ack;
+  app.innerHTML=(STORE==='ok'?'':`<div class="card" style="border-color:var(--warn)"><p class="small" style="margin:0">${L('<b>Not saved.</b> This browser is blocking storage (private mode?). The cards still work.','<b>Pas enregistré.</b> Ce navigateur bloque la mémoire (mode privé?). Les cartes fonctionnent quand même.')}</p></div>`)
+    +(door?vDoor():V.v==='card'?vCard():V.v==='sec'?vSec():vHome());
+  renderBar(door?null:V); { const pill=document.getElementById('installPill'); if(pill) pill.innerHTML=pillHTML(); } window.scrollTo(0,0); }
+
+/* ---------- the door ---------- */
+const AGREE=()=>[L('I am 18 or older.','J’ai 18 ans ou plus.'),
+  L('This is education about how bodies work. It isn’t medical, dietitian or pharmacist advice.','C’est de l’éducation sur le fonctionnement du corps. Ce n’est pas un avis médical, de diététiste ou de pharmacien.'),
+  L('It describes bodies in general, not mine. If something worries me, I get care.','Elle décrit les corps en général, pas le mien. Si quelque chose m’inquiète, je vais chercher des soins.'),
+  L('I won’t change a medicine, a dose or a diet that a doctor or dietitian gave me because of something I read here.','Je ne changerai pas un médicament, une dose ou un régime donné par un médecin ou une diététiste à cause de quelque chose que j’ai lu ici.'),
+  L('I don’t have an eating disorder and I’m not recovering from one.','Je n’ai pas de trouble alimentaire et je ne suis pas en rétablissement d’un trouble alimentaire.')];
+function instBig(){ if(FRAMED||STANDALONE) return ''; try{ if(localStorage.getItem(KEY+'.noinst')) return ''; }catch(e){ return ''; }
+  return `<div class="instbig inst" style="margin:14px 0"><button type="button" data-act="install">↓ ${L('Install the Library','Installer la Bibliothèque')}</button><p style="margin:6px 0 0;text-align:center;font-size:.85rem;opacity:.72">${L('Home-screen icon · full screen · works offline','Icône d’accueil · plein écran · fonctionne hors ligne')}</p><p style="margin:0;text-align:center"><button type="button" class="lnk" data-act="instno">${L('Not now','Pas maintenant')}</button></p></div>`; }
+function vDoor(){ return `<p class="tagline">${L('How the body works, one picture at a time.','Comment le corps fonctionne, une image à la fois.')}</p>
+  <p>${L('Each card follows one idea in pictures and plain words, with the specialist’s term beside it. Every picture says how sure the science is, and every card where it comes from.','Chaque carte suit une idée en images et en mots simples, avec le terme du spécialiste à côté. Chaque image dit à quel point la science est sûre, et chaque carte d’où elle vient.')}</p>
+  <p class="small muted">${L('The cards describe how bodies work in general. They don’t say what is happening in yours. The other V3KTOR apps measure that: <a href="https://v3ktor.org/">v3ktor.org</a>.','Les cartes décrivent comment les corps fonctionnent en général. Elles ne disent pas ce qui se passe dans le tien. Les autres apps V3KTOR mesurent ça\u00a0: <a href="https://v3ktor.org/">v3ktor.org</a>.')}</p>
+  <div class="card gate"><p class="small" style="margin:0 0 6px"><b>${L('Tapping “Enter” means I agree:','Appuyer sur «\u00a0Entrer\u00a0» signifie que j’accepte\u00a0:')}</b></p><ol class="small" style="margin:0;padding-left:1.3em">${AGREE().map(l=>`<li>${l}</li>`).join('')}</ol>
+  <button type="button" class="btn primary" style="width:100%;margin-top:12px" data-act="enter">${L('Enter','Entrer')}</button></div>
+  ${instBig()}<p class="small muted" style="margin-top:16px">${L('Everything stays on this phone. No account, no tracking.','Tout reste sur ce téléphone. Pas de compte, pas de suivi.')} v${VER} · <button type="button" class="lnk" data-act="about">${L('About and privacy','À propos et confidentialité')}</button></p>`; }
+
+/* ---------- home: a meal's path through the body, six stops ---------- */
+const STOPS=[[70,46],[300,78],[80,126],[300,164],[80,206],[300,246]];
+function homePic(){ const d='M70 46 C190 40 290 50 300 78 S80 100 80 126 S300 140 300 164 S80 180 80 206 S300 220 300 246';
+  let s=`<path class="road" d="${d}"/>`;
+  SECTIONS.forEach((sec,i)=>{ const [x,y]=STOPS[i], open=CARDS.some(c=>c.sec===sec.id), right=x<190;
+    s+=`<g class="stop" role="button" tabindex="0" data-act="sec" data-v="${sec.id}" aria-label="${esc(sec.n+'. '+P(sec.t))}"><circle cx="${x}" cy="${y}" r="17" style="fill:${open?'var(--accent)':'var(--card)'};stroke:${open?'var(--accent)':'var(--muted)'}" stroke-width="2"/><text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-weight="800" font-size="15" style="fill:${open?'#fff':'var(--muted)'}" font-family="system-ui,sans-serif">${sec.n}</text>${tx(right?x+26:x-26,y,P(sec.t),right?'start':'end',open?'lbi':'lb')}</g>`; });
+  return `<svg class="pic" viewBox="0 0 380 266" role="img" aria-label="${esc(L('A meal’s path through the body, six stops','Le chemin d’un repas dans le corps, six arrêts'))}">${s}</svg>`; }
+function vHome(){ const done=CARDS.filter(c=>S.seen[c.id]).length;
+  return `<p class="tagline">${L('Follow a meal through the body: six stops.','Suis un repas dans le corps\u00a0: six arrêts.')}</p>
+  ${homePic()}
+  <div style="margin-top:10px">${SECTIONS.map(sec=>{ const n=CARDS.filter(c=>c.sec===sec.id).length;
+    return `<button type="button" class="cardrow${n?'':' soon'}" data-act="sec" data-v="${sec.id}"><b>${sec.n}. ${esc(P(sec.t))}</b><span class="n">${n?L(`${n} cards`,`${n} cartes`):L('soon','bientôt')}</span><small>${esc(P(sec.d))}</small></button>`; }).join('')}</div>
+  <p class="mine">${done?L(`${done} of ${CARDS.length} cards read to the end.`,`${done} carte${done>1?'s':''} sur ${CARDS.length} lue${done>1?'s':''} jusqu’au bout.`):L('One picture at a time. Tap Next when it’s clear.','Une image à la fois. Appuie sur Suivant quand c’est clair.')}</p>`; }
+
+/* ---------- a section: its cards ---------- */
+function vSec(){ const sec=secById(V.id), list=CARDS.filter(c=>c.sec===sec.id);
+  return `<div class="eyebrow">${L('Stop','Arrêt')} ${sec.n}</div><h2>${esc(P(sec.t))}</h2><p class="muted">${esc(P(sec.d))}</p>
+  ${list.length?list.map(c=>`<button type="button" class="cardrow" data-act="card" data-v="${c.id}"><b>${esc(P(c.t))}</b><span class="n">${S.seen[c.id]?'✓ ':''}${L(`${c.f.length} pictures`,`${c.f.length} images`)}</span><small>${esc(P(c.d))}</small></button>`).join('')
+    :`<div class="card soft"><p class="small" style="margin:0">${L('Being written. Energy comes first, because the energy app will link to it.','En cours d’écriture. L’énergie vient en premier, parce que l’app sur l’énergie va y renvoyer.')}</p></div>`}
+  <p style="margin-top:14px"><button type="button" class="lnk" data-act="home">← ${L('All six stops','Les six arrêts')}</button></p>`; }
+
+/* ---------- a card: one picture at a time ---------- */
+function vCard(){ const c=cardById(V.id), sec=secById(c.sec), n=c.f.length, i=Math.min(V.i,n-1), [ft,fc,g,draw]=c.f[i];
+  return `<div class="eyebrow"><button type="button" class="lnk" style="font-size:inherit;text-transform:inherit;letter-spacing:inherit;color:var(--muted);min-height:0;padding:0" data-act="sec" data-v="${sec.id}">${esc(P(sec.t))}</button></div>
+  <h2>${esc(P(c.t))}</h2>
+  <div class="ftitle"><h3 id="ftitle">${esc(P(ft))}</h3><span class="small muted">${i+1}\u00a0/\u00a0${n}</span></div>
+  <div id="pic">${svg(draw((en,fr)=>S.lang==='fr'?fr:en),P(ft)+'. '+plain(P(fc)))}</div>
+  <p class="cap" aria-live="polite">${rich(P(fc))}</p>
+  <p class="grade">${L('How sure:','Degré de certitude\u00a0:')} ${P(GRADE[g])}</p>
+  <div class="dots" aria-hidden="true">${c.f.map((_,k)=>`<span class="${k===i?'on':''}"></span>`).join('')}</div>
+  <p style="text-align:center;margin:8px 0 0"><button type="button" class="lnk" data-act="more">${L('The precise version and the sources','La version précise et les sources')}</button></p>
+  ${c.drug?`<p class="mine">${P(RX)}</p>`:''}`; }
+function renderBar(v){ if(!v||v.v!=='card'){ bar.innerHTML=''; bar.classList.add('hidden'); return; }
+  const c=cardById(v.id), n=c.f.length, last=v.i>=n-1; bar.classList.remove('hidden');
+  bar.innerHTML=`<div class="in"><button type="button" class="btn ghost sm${v.i?'':' hide'}" data-act="prev" ${v.i?'':'tabindex="-1" aria-hidden="true"'}>← ${L('Back','Retour')}</button><span class="small muted">${L('Picture','Image')} ${v.i+1}\u00a0/\u00a0${n}</span><button type="button" class="btn primary sm" data-act="next">${last?L('Done','Terminé')+' ✓':L('Next','Suivant')+' →'}</button></div>`; }
+function step(d){ if(V.v!=='card') return; const c=cardById(V.id), n=c.f.length;
+  if(d>0&&V.i>=n-1){ S.seen[c.id]=true; go({v:'sec',id:c.sec}); toast(L('Read to the end','Lue jusqu’au bout')); return; }
+  V.i=Math.max(0,Math.min(n-1,V.i+d)); render(); }
+
+/* ---------- sheets ---------- */
+const sheet=document.getElementById('sheet'), sheetBg=document.getElementById('sheetBg'); let sheetOpener=null;
+function showSheet(html){ if(!sheet.classList.contains('on')) sheetOpener=document.activeElement;
+  sheet.innerHTML='<div class="handle"></div>'+html+`<div class="row" style="margin-top:12px"><button type="button" class="btn ghost sm" data-act="close">${L('Close','Fermer')}</button></div>`;
+  sheet.classList.add('on'); sheetBg.classList.add('on'); sheet.setAttribute('aria-hidden','false'); document.documentElement.classList.add('locked'); sheet.scrollTop=0; try{ sheet.focus({preventScroll:true}); }catch(e){} }
+function closeSheet(){ if(!sheet.classList.contains('on')) return; sheet.classList.remove('on'); sheetBg.classList.remove('on'); sheet.setAttribute('aria-hidden','true'); document.documentElement.classList.remove('locked'); const o=sheetOpener; sheetOpener=null; if(o&&document.body.contains(o)){ try{ o.focus({preventScroll:true}); }catch(e){} } }
+const A=(href,txt)=>`<a href="${href}" target="_blank" rel="noopener">${txt}</a>`;
+function moreSheet(){ const c=cardById(V.id);
+  showSheet(`<h3 id="sheetTitle">${esc(P(c.t))}\u00a0: ${L('the precise version','la version précise')}</h3>${c.more.map(p=>`<p class="small">${rich(P(p))}</p>`).join('')}
+  <p class="small"><b>${L('How sure, picture by picture','Degré de certitude, image par image')}</b></p><ul class="small">${c.f.map((f,k)=>`<li>${k+1}. ${esc(P(f[0]))}\u00a0: ${P(GRADE[f[2]])}</li>`).join('')}</ul>
+  <p class="small"><b>${L('Sources','Sources')}</b></p><ol class="srcs">${c.src.map(k=>`<li>${A(SRC[k].u,esc(P(SRC[k].l)))}</li>`).join('')}</ol>
+  ${c.drug?`<p class="small"><b>${P(RX)}</b></p>`:''}<p class="mine">${L('Bodies in general, not yours. Not advice.','Les corps en général, pas le tien. Pas un conseil.')}</p>`); }
+function menuSheet(){ const b=(act,l,cls)=>`<button type="button" data-act="${act}"${cls?` class="${cls}"`:''}>${l}</button>`;
+  showSheet(`<h3 id="sheetTitle">Menu</h3><div class="menu">${b('home',L('The six stops','Les six arrêts'))}${b('help',L('How to read a card','Comment lire une carte'))}${b('colours',L('What the colours mean','Ce que veulent dire les couleurs'))}${b('install',L('Install on this phone','Installer sur ce téléphone'),'inst')}${b('about',L('About and privacy','À propos et confidentialité'))}</div><p class="small muted" style="margin:12px 0 0">v${VER}</p>`); }
+function helpSheet(){ const H2=(a,b)=>`<p class="small"><b>${a}</b> ${b}</p>`;
+  showSheet(`<h3 id="sheetTitle">${L('How to read a card','Comment lire une carte')}</h3>`
+  +H2(L('One idea per picture.','Une idée par image.'),L('Each picture changes one thing from the one before. Tap Next when it’s clear, Back to see it again. A swipe works too.','Chaque image change une seule chose par rapport à la précédente. Appuie sur Suivant quand c’est clair, sur Retour pour la revoir. Glisser le doigt marche aussi.'))
+  +H2(L('Plain words first.','Les mots simples d’abord.'),L('The specialist’s term follows in grey brackets, the first time a word comes up, so it’s familiar if a specialist ever uses it.','Le terme du spécialiste suit entre parenthèses grises, la première fois qu’un mot apparaît, pour le reconnaître si un spécialiste l’utilise un jour.'))
+  +H2(L('How sure.','Degré de certitude.'),P(GRADEL.solid)+' '+P(GRADEL.likely))
+  +H2(L('The precise version.','La version précise.'),L('Under each card: what the pictures simplify, and every source, to open and check.','Sous chaque carte\u00a0: ce que les images simplifient, et chaque source, à ouvrir et à vérifier.'))
+  +H2(L('Bodies in general.','Les corps en général.'),L('The cards describe how bodies work. They don’t say what is happening in yours.','Les cartes décrivent comment les corps fonctionnent. Elles ne disent pas ce qui se passe dans le tien.'))); }
+function coloursSheet(){ showSheet(`<h3 id="sheetTitle">${L('What the colours mean','Ce que veulent dire les couleurs')}</h3><p class="small">${L('The same colour means the same thing on every card.','La même couleur veut dire la même chose sur chaque carte.')}</p><ul class="cols">${COLOURS.map(([k,p])=>`<li><span class="sw" style="background:${C[k]}"></span>${rich(P(p))}</li>`).join('')}</ul>`); }
+function aboutSheet(){ showSheet(`<h3 id="sheetTitle">${L('About and privacy','À propos et confidentialité')}</h3>
+  <p class="small">${L('<b>Made by Tobie and Claude.</b> Free version at ','<b>Créé par Tobie et Claude.</b> Version gratuite à ')}${A('https://v3ktor.org/library/app/','v3ktor.org/library/app')}. © 2026 Tobie David.</p>
+  <p class="small">${L('Part of the V3KTOR Project. It teaches how bodies work in general, in pictures. It isn’t medical, dietitian or pharmacist advice, and no clinician has reviewed it. Every card lists its sources and says how sure each picture is.','Fait partie du V3KTOR Project. Elle explique en images comment les corps fonctionnent en général. Ce n’est pas un avis médical, diététique ou de pharmacien, et aucun clinicien ne l’a examinée. Chaque carte donne ses sources et dit à quel point chaque image est sûre.')}</p>
+  <p class="small">${L('Provided as-is, without warranty of any kind. The app keeps three things in this browser’s storage on this phone: your language, that you agreed, and which cards you read to the end. Nothing is sent anywhere.','Fourni tel quel, sans garantie d’aucune sorte. L’app garde trois choses dans le stockage de ce navigateur sur ce téléphone\u00a0: ta langue, ton accord, et les cartes lues jusqu’au bout. Rien n’est envoyé nulle part.')}</p>
+  <p class="small">${L('Free software under the ','Logiciel libre sous la ')}${A('https://github.com/tobiedavid/v3ktor.org/blob/main/LICENSE',L('GNU Affero General Public License','licence publique générale GNU Affero'))}${L(', version 3 or later. Source code: ',', version 3 ou ultérieure. Code source\u00a0: ')}${A('https://github.com/tobiedavid/v3ktor.org','github.com/tobiedavid/v3ktor.org')}</p>
+  <p class="small">${L('Look copied from the Threshold Log and the Food Trial Log.','Apparence tirée du Threshold Log et du Food Trial Log.')}</p><p class="small muted">v${VER}</p>`); }
+
+/* ---------- install: the same pill, button and steps as the other apps ---------- */
+const SHARE='<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M7 11H5v10h14V11h-2"/></svg>';
+const pillHTML=()=>`<span>${L('Install the Library on this phone','Installer la Bibliothèque sur ce téléphone')}</span><button type="button" class="ipy" data-act="install">${L('Install','Installer')}</button><button type="button" class="ipn" data-act="instno" aria-label="${L('No thanks','Non merci')}">✕</button>`;
+function installPill(){ if(FRAMED||STANDALONE||document.getElementById('installPill')) return; try{ if(localStorage.getItem(KEY+'.noinst')) return; }catch(e){ return; }
+  const b=document.createElement('div'); b.id='installPill'; b.innerHTML=pillHTML(); document.body.appendChild(b); }
+function installSheet(){ const icon=`<li>${L('From now on, open the app from its icon.','À partir de maintenant, ouvre l’app par son icône.')}</li>`;
+  const iph=`<ol class="inst">${SAFARI?'':`<li>${L('Open this page in <b>Safari</b>.','Ouvre cette page dans <b>Safari</b>.')}</li>`}<li>${L('Tap <b>⋯</b> beside the address bar, then <b>Share</b>. No <b>⋯</b>? Tap the Share button','Appuie sur <b>⋯</b> à côté de la barre d’adresse, puis sur <b>Partager</b>. Pas de <b>⋯</b>? Appuie sur le bouton Partager')} ${SHARE}.</li><li>${L('Scroll down the list and tap <b>Add to Home Screen</b>.','Descends dans la liste et choisis <b>Sur l’écran d’accueil</b>.')}</li><li>${L('Tap <b>Add</b>.','Appuie sur <b>Ajouter</b>.')}</li>${icon}</ol>`;
+  const and=`<ol class="inst">${CHROME?'':`<li>${L('Open this page in <b>Chrome</b>.','Ouvre cette page dans <b>Chrome</b>.')}</li>`}<li>${L('Tap the <b>⋮</b> menu at the top right.','Appuie sur le menu <b>⋮</b> en haut à droite.')}</li><li>${L('Tap <b>Add to Home screen</b>. On some phones it says <b>Install app</b>.','Appuie sur <b>Ajouter à l’écran d’accueil</b>. Sur certains téléphones, c’est écrit <b>Installer l’application</b>.')}</li><li>${L('Tap <b>Install</b>.','Appuie sur <b>Installer</b>.')}</li>${icon}</ol>`;
+  showSheet(`<h3 id="sheetTitle">${L('Install on this phone','Installer sur ce téléphone')}</h3><p class="small">${L('The app gets its own icon on your phone and opens without a connection. There is no store and no account.','L’app a sa propre icône sur ton téléphone et s’ouvre sans connexion. Pas de boutique d’applications, pas de compte.')}</p>${IOS?iph:ANDROID?and:`<p><b>iPhone</b></p>${iph}<p><b>Android</b></p>${and}`}`); }
+
+/* ---------- actions: one delegated handler ---------- */
+const ACT={
+  close:()=>closeSheet(), menu:()=>menuSheet(), about:()=>aboutSheet(), help:()=>helpSheet(), colours:()=>coloursSheet(), more:()=>moreSheet(),
+  home:()=>{ closeSheet(); go({v:'home'}); },
+  lang:b=>{ S.lang=b.dataset.v; const was=sheet.classList.contains('on'); closeSheet(); render(); if(was) toast(L('Language changed','Langue changée')); },
+  enter:()=>{ S.ack=true; S.ackAt=new Date().toISOString(); S.cv=CONSENT; render(); },
+  sec:b=>{ closeSheet(); go({v:'sec',id:b.dataset.v}); },
+  card:b=>{ closeSheet(); go({v:'card',id:b.dataset.v,i:0}); },
+  next:()=>step(1), prev:()=>step(-1),
+  install:()=>{ closeSheet(); const p=window.INSTALL; if(p){ p.prompt(); p.userChoice.then(()=>{ window.INSTALL=null; }).catch(()=>{}); } else installSheet(); },
+  instno:()=>{ try{ localStorage.setItem(KEY+'.noinst','1'); }catch(e){} const pill=document.getElementById('installPill'); if(pill) pill.remove(); render(); }
+};
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-act]'); if(!b||b.disabled) return; const f=ACT[b.dataset.act]; if(!f) return; e.preventDefault(); f(b,e); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeSheet(); return; }
+  const st=e.target.closest&&e.target.closest('.stop'); if(st&&(e.key==='Enter'||e.key===' ')){ e.preventDefault(); ACT.sec(st); return; }
+  if(sheet.classList.contains('on')||!S.ack||V.v!=='card') return; if(e.target.closest('input,textarea,select')) return;
+  if(e.key==='ArrowRight'){ e.preventDefault(); step(1); } if(e.key==='ArrowLeft'){ e.preventDefault(); step(-1); } });
+sheetBg.addEventListener('click',closeSheet);
+/* a swipe on the picture moves one picture */
+let sx=null, sy=null;
+app.addEventListener('touchstart',e=>{ if(!e.target.closest('.pic')) return; sx=e.touches[0].clientX; sy=e.touches[0].clientY; },{passive:true});
+app.addEventListener('touchend',e=>{ if(sx===null) return; const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy; sx=null; if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5) step(dx<0?1:-1); });
+/* the browser's Back button follows the screens: a card's address is #its-name, so the other apps can link straight to one */
+window.addEventListener('popstate',()=>{ closeSheet(); V=fromHash(); render(); });
+V=fromHash(); render(); installPill();
+</script>
+<script>
+/* installed-app layer */
+(function(){
+  try{ if('serviceWorker' in navigator && (location.protocol==='https:' || location.hostname==='localhost')){ navigator.serviceWorker.register('sw.js').catch(function(){}); } }catch(e){ /* a sandboxed preview has no service worker */ }
+  window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.INSTALL=e; installPill(); });
+  window.addEventListener('appinstalled',function(){ window.INSTALL=null; document.documentElement.classList.add('noinst'); });
+})();
+</script>
+</body>
+</html>

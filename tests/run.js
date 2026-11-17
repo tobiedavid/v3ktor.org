@@ -10,6 +10,7 @@ const TESTS = [
   ['../tools/foods/pack.js', false, 'The Patch and the Food Trial Log hold the foods in data/foods.csv'],
   ['../tools/shared.js', false, 'every app holds the current copy of shared/ (the Nutrition rules)'],
   ['../tools/stamp_cache.js', false, 'every app’s offline cache carries its file’s name', ['--check']],
+  ['library/cards.test.js', false, 'The Library: every card in both languages, its grades, its sources, and the words and voice it keeps'],
   ['apps/load.test.js', true, 'every page and app loads, with no script error and no request to another site'],
   ['patch/needs.test.js', true, 'The Patch: the daily needs of 131 made-up people, unchanged'],
   ['patch/wrench.test.js', true, 'The Patch: the wrench above the Nutrition bars, and the answers shared on the phone'],
@@ -19,6 +20,7 @@ const TESTS = [
   ['threshold/import.test.js', true, 'Threshold Log: the import equals the Food Trial Log’s own lists'],
   ['threshold/screens.test.js', true, 'Threshold Log: every screen, both languages, 320 pixels, keyboard, offline'],
   ['threshold/people.test.js', true, 'Threshold Log: two made-up people, six weeks each, every count recounted'],
+  ['library/screens.test.js', true, 'The Library: every picture, both languages, 320 pixels, labels inside, keyboard, swipe, addresses'],
 ];
 const only = process.argv.includes('--no-browser') ? false : process.argv.includes('--browser') ? true : null; let failed = 0;
 for (const [file, browser, what, args] of TESTS) { if (only !== null && browser !== only) continue;
