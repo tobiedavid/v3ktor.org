@@ -158,12 +158,12 @@ function dotSvg(r,label){ const X=x=>dotX(r,x); let a='', b='';
 function markTxt(b,s){ if(s.at==null) return ''; const at=amtTxt(b,s.at);
   const hi=L(`From ${at} up`,`À partir de ${at}`), lo=L(`Under ${at}`,`Sous ${at}`), wi=L(`${s.hitIn} of ${s.nHit} with`,`${s.hitIn} sur ${s.nHit} avec`), wo=L(`${s.restIn} of ${s.nRest} without`,`${s.restIn} sur ${s.nRest} sans`);
   return s.dir==='down'?`${lo}${COL()}${wi}. ${hi}${COL()}${wo}.`:`${hi}${COL()}${wi}. ${lo}${COL()}${wo}.`; }
-/* the mark in the person's own foods: for the two foods that held it on the most of their meals or days, how many servings come to its amount.
-   Only where a row is in grams or milligrams; a row in portions already reads in portions. */
+/* the mark in the person's own foods: for the food that held it on the most of their meals or days, how many servings come to its amount,
+   written as the meal list writes a food ("2 × Wine, red"). Only where a row is in grams or milligrams; a row in portions already reads in portions. */
 const half=n=>n<2?Math.max(.5,Math.round(n*2)/2):Math.round(n), qn=n=>(n%1?(Math.floor(n)?Math.floor(n):'')+'½':String(n));
-function inFoods(r){ if(r.s.at==null||isP(r.b)) return ''; const F=lineFoods({b:r.b,mode:S.tmode,units:r.units}).map(a=>{ const p=E.amounts(food(a.key),1)[r.b]; return p>E.ZEPS?{f:food(a.key),n:r.s.at/p}:null; }).filter(a=>a&&a.n>=.25&&a.n<=30).slice(0,2);
-  if(!F.length) return ''; const one=a=>`${qn(half(a.n))} × ${fname(a.f)}${fserv(a.f)?' ('+fserv(a.f)+')':''}`;
-  return L('That’s about ','C’est environ ')+F.map(one).join(L(', or ',', ou '))+'.'; }
+function inFoods(r){ if(r.s.at==null||isP(r.b)) return ''; const F=lineFoods({b:r.b,mode:S.tmode,units:r.units}).map(a=>{ const p=E.amounts(food(a.key),1)[r.b]; return p>E.ZEPS?{f:food(a.key),n:r.s.at/p}:null; }).filter(a=>a&&a.n>=.25&&a.n<=30).slice(0,1);
+  if(!F.length) return '';
+  return L('That’s about ','C’est environ ')+`${qn(half(F[0].n))} × ${fname(F[0].f)}.`; }
 function dotRow(r,kid){ const s=r.s, nm=L(BARN[r.b][0],BARN[r.b][1]), at=s.at==null?null:amtTxt(r.b,s.at), pc=s.at==null?0:100*markX(r)/DW, txt=markTxt(r.b,s), inf=inFoods(r);
   const label=nm+L(': ',' : ')+L(`${s.nHit} with, ${s.nRest} without, by amount.`,`${s.nHit} avec, ${s.nRest} sans, selon la quantité.`)+(txt?' '+txt:'');
   return `<li class="drow${kid?' kid':''}" data-k="${r.b}" data-hit="${s.nHit}" data-rest="${s.nRest}"${s.at==null?'':` data-at="${s.at}" data-dir="${s.dir}" data-hitin="${s.hitIn}" data-restin="${s.restIn}"`}><button type="button" class="rowb" data-act="rowsheet" data-k="${r.b}">${nm}</button>
