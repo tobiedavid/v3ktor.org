@@ -260,13 +260,17 @@ eq('the reading rules hold nothing that works out a luck number', ['luck', 'step
   eq('an empty plate has no pie', E.pie(E.ZERO()).slices.length, 0); }
 for (const am of [{ fat: 1, prot: 1, cplx: 1 }, { fat: 33.3, prot: 33.3, cplx: 33.4, fib: 0.2 }, { fat: 7, prot: 2, lact: 3, sugo: 1, fib: 0.1, unk: 5, alc: 9 }]) eq('always 100: ' + JSON.stringify(am), E.pie(am).slices.reduce((s, x) => s + x.pct, 0), 100);
 
-// ---- Health Canada's reference amounts ----
-{ const m = E.reference({ sex: 'm', age: 'a2', life: [] }), f = E.reference({ sex: 'f', age: 'a1', life: [] }), pg = E.reference({ sex: 'f', age: 'a2', life: ['preg'] }), hi = E.reference({}), vg = E.reference({ sex: 'm', age: 'a2', life: ['veg'] });
+// ---- Health Canada's reference amounts: shared/nutrition.js since 0.5.2, read out of the same shipped file ----
+{ const html = fs.readFileSync(path.join(__dirname, '..', '..', 'threshold', 'app', 'index.html'), 'utf8'), a = html.indexOf('/* ==== shared/nutrition.js'), b = html.indexOf('/* ==== end of shared/nutrition.js ==== */');
+  const nb = { module: { exports: {} } }; vm.runInNewContext(html.slice(a, b) + '\n;module.exports=NUTRI;', nb); const N = nb.module.exports;
+  const m = N.needs({ sex: 'm', age: 'a2' }), f = N.needs({ sex: 'f', age: 'a1' }), pg = N.needs({ sex: 'f', age: 'a2', preg: true }), hi = N.needs({}), vg = N.needs({ sex: 'm', age: 'a2', veg: true });
   eq('a man of 31 to 50', [m.ca, m.fe, m.fib, m.prot], [1000, 8, 38, 56]);
-  eq('a woman of 18 to 30', [f.ca, f.fe, f.fib, f.prot], [1000, 18, 25, 46]);
+  eq('a woman of 19 to 30', [f.ca, f.fe, f.fib, f.prot], [1000, 18, 25, 46]);
   eq('pregnant', [pg.fe, pg.fol, pg.prot], [27, 600, 71]);
   eq('skipped: the higher of the two', [hi.fe, hi.mg], [18, 420]);
-  eq('vegetarian: iron 1.8 times', vg.fe, 14); }
+  eq('vegetarian: iron 1.8 times', vg.fe, 14);
+  eq('with a weight, protein is 0.8 g per kg', N.needs({ sex: 'm', age: 'a2', kg: 90 }).prot, 72);
+  eq('the engine has no reference table of its own any more', 'reference' in E, false); }
 
 // ---- the import from the Food Trial Log ----
 { const o = { v: 4, route: 'fast', roll: 4, p: { sex: 'm', age: 'a2', life: ['veg'] }, amt: { rice: 2 }, ev: [], fast: { start: '2026-10-01' }, base0: ['steak', 'rice', 'milk'],
