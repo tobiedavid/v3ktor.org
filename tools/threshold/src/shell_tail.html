@@ -1,0 +1,12 @@
+</script>
+<script>
+/* installed-app layer */
+(function(){
+  try{ if('serviceWorker' in navigator && (location.protocol==='https:' || location.hostname==='localhost')){ navigator.serviceWorker.register('sw.js').catch(function(){}); } }catch(e){ /* a sandboxed preview has no service worker */ }
+  /* the install bar appears when the browser offers its prompt (Android, desktop); Install uses that prompt, or shows the steps when there is none */
+  window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.INSTALL=e; installPill(); });
+  window.addEventListener('appinstalled',function(){ window.INSTALL=null; document.documentElement.classList.add('noinst'); });
+})();
+</script>
+</body>
+</html>
