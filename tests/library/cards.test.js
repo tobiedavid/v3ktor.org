@@ -18,8 +18,9 @@ ok('the card block is marked in the app file', a > 0 && b > a);
 const S = { lang: 'en' };
 const ctx = { S, esc: s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) };
 vm.createContext(ctx);
-vm.runInContext(html.slice(a, b) + '\n;this.out={C,COLOURS,SRC,GRADE,SECTIONS,CARDS};', ctx);
-const { C, COLOURS, SRC, GRADE, SECTIONS, CARDS } = ctx.out;
+vm.runInContext(html.slice(a, b) + '\n;this.out={C,COLOURS,SRC,GRADE,SECTIONS,CARDS,RX};', ctx);
+const { C, COLOURS, SRC, GRADE, SECTIONS, CARDS, RX } = ctx.out;
+ok('a card about stimulants carries the fixed line on medicines', CARDS.filter(c => /stimulant/i.test(JSON.stringify(c.f.map(f => f[1])))).every(c => c.drug === true));
 
 // words the apps never use (report, never advise)
 const FORBIDDEN = { en: /\b(safe|safely|unsafe|avoid|avoids|avoided|should|trigger|triggers|triggered|healthy|unhealthy)\b/i,
@@ -48,6 +49,7 @@ function textRules(where, pair, cardText) {
     ok(`${where}: no « on » in French card text`, !ON.test(fr), fr);
   } }
 
+textRules('the fixed line on medicine cards', RX, false);
 ok('six sections', SECTIONS.length === 6 && SECTIONS.map(s => s.n).join('') === '123456');
 for (const s of SECTIONS) { textRules(`section ${s.id} name`, s.t, true); textRules(`section ${s.id} line`, s.d, true); }
 for (const [k, p] of COLOURS) { ok(`colour ${k} exists`, !!C[k]); textRules(`colour ${k}`, p, true); }

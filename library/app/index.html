@@ -210,6 +210,8 @@ const SRC={
   drake:{l:['Drake 2013 — caffeine 0, 3 or 6 hours before bed (trial)','Drake 2013 — caféine 0, 3 ou 6 heures avant le coucher (essai)'],u:PM(24235903)},
   juliano:{l:['Juliano & Griffiths 2004 — caffeine withdrawal (66 studies)','Juliano et Griffiths 2004 — le sevrage de caféine (66 études)'],u:'https://doi.org/10.1007/s00213-004-2000-x'}
 };
+/* the fixed line on every card that talks about a medicine */
+const RX=['Any change to a medicine goes through whoever prescribed it.','Tout changement à un médicament passe par la personne qui l’a prescrit.'];
 const GRADE={solid:['solid','solide'],likely:['likely','probable']};
 const GRADEL={solid:['Solid evidence: many good studies agree.','Preuves solides\u00a0: beaucoup de bonnes études concordent.'],likely:['Likely: good evidence, not airtight.','Probable\u00a0: de bonnes données, pas absolues.']};
 
@@ -303,7 +305,7 @@ const CARDS=[
    [['When it wears off','Quand elle s’en va'],['When caffeine leaves the cups, the messengers that piled up can land all at once: the crash. In people who have it every day, a missed dose brings headache and fog for a day or more {withdrawal}.','Quand la caféine quitte les bols, les messagers accumulés peuvent tous se poser d’un coup\u00a0: la chute. Chez les personnes qui en prennent tous les jours, une dose manquée amène mal de tête et brouillard pendant un jour ou plus {sevrage}.'],'likely',
     w=>CAF(w,3)]
   ]},
-{ id:'heart-scare', sec:'energy', t:['The heart and a scare','Le cœur et la peur'], d:['One messenger, three states: normal, a scare, a stimulant.','Un messager, trois états\u00a0: normal, une peur, un stimulant.'],
+{ id:'heart-scare', sec:'energy', drug:true, t:['The heart and a scare','Le cœur et la peur'], d:['One messenger, three states: normal, a scare, a stimulant.','Un messager, trois états\u00a0: normal, une peur, un stimulant.'],
   src:['openstaxAP','mph','amph','carlson03'],
   more:[['The nerve is a sympathetic nerve: it runs from the brain, through the spinal cord, to the heart, and it is part of the fight-or-flight system. Its endings release norepinephrine, which binds to receptors on heart cells {beta-1 adrenergic} and raises the heart rate. During a scare, the adrenal glands also release adrenaline into the blood. Between a nerve and an organ, the gap is called a junction; between two nerve cells, the same kind of gap is a synapse.','Le nerf est un nerf sympathique\u00a0: il part du cerveau, passe par la moelle épinière et se rend au cœur, et il fait partie du système de combat ou de fuite. Ses bouts libèrent de la noradrénaline, qui se fixe à des récepteurs des cellules du cœur {bêta-1 adrénergiques} et fait monter le rythme cardiaque. Pendant une peur, les glandes surrénales libèrent aussi de l’adrénaline dans le sang. Entre un nerf et un organe, l’espace s’appelle une jonction; entre deux cellules nerveuses, le même genre d’espace est une synapse.'],
         ['A transporter on the nerve end {norepinephrine transporter} pulls most of the messengers back in, which ends the signal. Methylphenidate blocks that transporter. Amphetamines block it too, and also push more messengers out of the nerve end, so the picture of a plug is a simplification for them.','Un transporteur sur le bout du nerf {transporteur de la noradrénaline} reprend la plupart des messagers, ce qui termine le signal. Le méthylphénidate bloque ce transporteur. Les amphétamines le bloquent aussi, et poussent en plus des messagers hors du bout du nerf\u00a0: pour elles, l’image du bouchon est une simplification.'],
@@ -433,7 +435,8 @@ function vCard(){ const c=cardById(V.id), sec=secById(c.sec), n=c.f.length, i=Ma
   <p class="cap" aria-live="polite">${rich(P(fc))}</p>
   <p class="grade">${L('How sure:','Degré de certitude\u00a0:')} ${P(GRADE[g])}</p>
   <div class="dots" aria-hidden="true">${c.f.map((_,k)=>`<span class="${k===i?'on':''}"></span>`).join('')}</div>
-  <p style="text-align:center;margin:8px 0 0"><button type="button" class="lnk" data-act="more">${L('The precise version and the sources','La version précise et les sources')}</button></p>`; }
+  <p style="text-align:center;margin:8px 0 0"><button type="button" class="lnk" data-act="more">${L('The precise version and the sources','La version précise et les sources')}</button></p>
+  ${c.drug?`<p class="mine">${P(RX)}</p>`:''}`; }
 function renderBar(v){ if(!v||v.v!=='card'){ bar.innerHTML=''; bar.classList.add('hidden'); return; }
   const c=cardById(v.id), n=c.f.length, last=v.i>=n-1; bar.classList.remove('hidden');
   bar.innerHTML=`<div class="in"><button type="button" class="btn ghost sm${v.i?'':' hide'}" data-act="prev" ${v.i?'':'tabindex="-1" aria-hidden="true"'}>← ${L('Back','Retour')}</button><span class="small muted">${L('Picture','Image')} ${v.i+1}\u00a0/\u00a0${n}</span><button type="button" class="btn primary sm" data-act="next">${last?L('Done','Terminé')+' ✓':L('Next','Suivant')+' →'}</button></div>`; }
@@ -452,7 +455,7 @@ function moreSheet(){ const c=cardById(V.id);
   showSheet(`<h3 id="sheetTitle">${esc(P(c.t))}\u00a0: ${L('the precise version','la version précise')}</h3>${c.more.map(p=>`<p class="small">${rich(P(p))}</p>`).join('')}
   <p class="small"><b>${L('How sure, picture by picture','Degré de certitude, image par image')}</b></p><ul class="small">${c.f.map((f,k)=>`<li>${k+1}. ${esc(P(f[0]))}\u00a0: ${P(GRADE[f[2]])}</li>`).join('')}</ul>
   <p class="small"><b>${L('Sources','Sources')}</b></p><ol class="srcs">${c.src.map(k=>`<li>${A(SRC[k].u,esc(P(SRC[k].l)))}</li>`).join('')}</ol>
-  <p class="mine">${L('Bodies in general, not yours. Not advice.','Les corps en général, pas le tien. Pas un conseil.')}</p>`); }
+  ${c.drug?`<p class="small"><b>${P(RX)}</b></p>`:''}<p class="mine">${L('Bodies in general, not yours. Not advice.','Les corps en général, pas le tien. Pas un conseil.')}</p>`); }
 function menuSheet(){ const b=(act,l,cls)=>`<button type="button" data-act="${act}"${cls?` class="${cls}"`:''}>${l}</button>`;
   showSheet(`<h3 id="sheetTitle">Menu</h3><div class="menu">${b('home',L('The six stops','Les six arrêts'))}${b('help',L('How to read a card','Comment lire une carte'))}${b('colours',L('What the colours mean','Ce que veulent dire les couleurs'))}${b('install',L('Install on this phone','Installer sur ce téléphone'),'inst')}${b('about',L('About and privacy','À propos et confidentialité'))}</div><p class="small muted" style="margin:12px 0 0">v${VER}</p>`); }
 function helpSheet(){ const H2=(a,b)=>`<p class="small"><b>${a}</b> ${b}</p>`;
