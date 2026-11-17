@@ -5,13 +5,14 @@
 'use strict';
 const fs = require('fs'), path = require('path');
 const R = path.join(__dirname, '..');
-const USES = { 'patch/app/index.html': ['nutrition.js'] };
+const USES = { 'patch/app/index.html': ['nutrition.css', 'nutrition.js'], 'gut/app/index.html': ['nutrition.css', 'nutrition.js'], 'gut/fr/app/index.html': ['nutrition.css', 'nutrition.js'] };
 let off = 0;
-for (const [app, pieces] of Object.entries(USES)) { const file = path.join(R, app); let src = fs.readFileSync(file, 'utf8'); const was = src;
+for (const [app, pieces] of Object.entries(USES)) { const file = path.join(R, app); let src = fs.readFileSync(file, 'utf8'); const was = src; let missing = false;
   for (const piece of pieces) { const text = fs.readFileSync(path.join(R, 'shared', piece), 'utf8').replace(/\n+$/, '');
     const head = `/* ==== shared/${piece}`, tail = `/* ==== end of shared/${piece} ==== */`, a = src.indexOf(head), b = src.indexOf(tail);
-    if (a < 0 || b < a || src.indexOf(head, a + 1) >= 0) { console.log(`${app}: no single place for shared/${piece} (its first and last comment lines)`); off++; continue; }
+    if (a < 0 || b < a || src.indexOf(head, a + 1) >= 0) { console.log(`${app}: no single place for shared/${piece} (its first and last comment lines)`); off++; missing = true; continue; }
     src = src.slice(0, a) + text + src.slice(b + tail.length); }
+  if (missing) continue;
   if (src === was) { console.log(`${app}: holds the current ${pieces.join(', ')}`); continue; }
   if (process.argv.includes('--write')) { fs.writeFileSync(file, src); console.log(`${app}: written`); } else { console.log(`${app}: holds an old copy of shared/; run node tools/shared.js --write`); off++; } }
 process.exit(off ? 1 : 0);

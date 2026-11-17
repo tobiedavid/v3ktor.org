@@ -33,10 +33,10 @@ const NUTRI=(()=>{
      breastfeeding; 1.6 with a muscle goal). Calories: kg × 28, 32 or 36 by the kind of day, + 340 pregnant or 350 breastfeeding: rough, not a DRI.
      The person (every answer can be missing):
        sex 'm' | 'f' (missing: the higher of the two)   age 'a1' 19–30 | 'a2' 31–50 | 'a3' 51–70 | 'a4' 71+ | 'minor' under 19
-       kg  a number (missing: 70)   work 'sit' | 'feet' | 'heavy' (missing: 'feet')
+       kg  a number (missing: no calories, and the protein RDA in place of 0.8 g per kg)   work 'sit' | 'feet' | 'heavy' (missing: 'feet')
        smoke, preg, bf, veg, muscle  true or false (muscle: the goal is muscle, and nothing rules out more protein) */
   function needs(p){ p=p||{};
-    const sex=p.sex||'hi'; const age=p.age==='minor'?'a1':(p.age||'a2'); const kg=(Number.isFinite(+p.kg)&&+p.kg>0)?+p.kg:70; const work=p.work||'feet';
+    const sex=p.sex||'hi'; const age=p.age==='minor'?'a1':(p.age||'a2'); const kg=(Number.isFinite(+p.kg)&&+p.kg>0)?+p.kg:null; const work=p.work||'feet';
     const M={ca:age==='a4'?1200:1000, fe:8, mg:age==='a1'?400:420, k:3400, zn:11, c:90, b1:1.2, fol:400, b12:2.4, d:age==='a4'?800:600, vk:120, va:900, mn:2.3, cu:0.9, fib:(age==='a3'||age==='a4')?30:38, e:15, b2:1.3, b3:16, b6:(age==='a3'||age==='a4')?1.7:1.3, se:55};
     const F={ca:(age==='a3'||age==='a4')?1200:1000, fe:(age==='a1'||age==='a2')?18:8, mg:age==='a1'?310:320, k:2600, zn:8, c:75, b1:1.1, fol:400, b12:2.4, d:age==='a4'?800:600, vk:90, va:700, mn:1.8, cu:0.9, fib:(age==='a3'||age==='a4')?21:25, e:15, b2:1.1, b3:14, b6:(age==='a3'||age==='a4')?1.5:1.3, se:55};
     let T={}; for(const k of Object.keys(M)) T[k]= sex==='m'?M[k] : sex==='f'?F[k] : Math.max(M[k],F[k]);
@@ -52,11 +52,14 @@ const NUTRI=(()=>{
     /* upper limits (Health Canada DRI tables): D 4,000 IU, iron 45 mg, zinc 40 mg, vitamin C 2,000 mg, calcium 2,500 mg (2,000 over 50).
        Vitamin E's ceiling counts supplements only: 1,100 IU, the synthetic form's, so it holds for either form. */
     T.ul={d:4000, fe:45, zn:40, c:2000, ca:(age==='a3'||age==='a4')?2000:2500, mn:11, cu:10, e:1100, b6:100, se:400};
-    /* caffeine: Health Canada maximums: 400 mg adults, 300 pregnant or breastfeeding, 2.5 mg/kg under 18 */
-    T.caf = p.age==='minor' ? Math.round(2.5*kg) : (p.preg||p.bf) ? 300 : 400;
+    /* caffeine: Health Canada maximums: 400 mg adults, 300 pregnant or breastfeeding, 2.5 mg/kg under 18 (70 kg when the weight isn't given) */
+    T.caf = p.age==='minor' ? Math.round(2.5*(kg||70)) : (p.preg||p.bf) ? 300 : 400;
     /* alcohol: Canada's Guidance on Alcohol and Health (2023): no more than 2 on any day; none in pregnancy, while breastfeeding, or under 18 */
     T.sd = (p.preg||p.bf||p.age==='minor') ? 0 : 2;
-    T.na=2300; T.prot=Math.round((p.muscle?Math.max(1.6,p.bf?1.3:p.preg?1.1:0.8):(p.bf?1.3:p.preg?1.1:0.8))*kg); T.kcal=Math.round(kg*(work==='sit'?28:work==='feet'?32:36))+(p.bf?350:p.preg?340:0);
+    T.na=2300;
+    /* with no weight: the protein RDA for an average adult (46 g women, 56 g men, 71 g pregnant or breastfeeding), and no calories */
+    if(kg){ T.prot=Math.round((p.muscle?Math.max(1.6,p.bf?1.3:p.preg?1.1:0.8):(p.bf?1.3:p.preg?1.1:0.8))*kg); T.kcal=Math.round(kg*(work==='sit'?28:work==='feet'?32:36))+(p.bf?350:p.preg?340:0); }
+    else T.prot=(p.preg||p.bf)?71:sex==='f'?46:56;
     return T;
   }
   /* a total against its need: a limit (sodium, caffeine, alcohol) is only over or not; calories are fine from 85% to 130% */
@@ -84,15 +87,22 @@ const NUTRI=(()=>{
       else { const o=q.opts.find(x=>x.v===val); out.push(o?o.s[i]:q.n[i]+(fr?' non précisé':' not given')); } }
     return out.join(' · '); }
   /* the answers as buttons, for a sheet: data-pw is the question, data-v the answer */
-  function askHTML(p,fr,hide){ p=p||{}; hide=hide||[]; const i=fr?1:0, esc=t=>String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+  function askHTML(p,fr,hide){ p=p||{}; hide=hide||[]; const i=fr?1:0;
     return ASK.filter(q=>!hide.includes(q.id)).map(q=>{ const val=p[q.id], on=v=>q.multi?(Array.isArray(val)&&val.includes(v)):val===v;
       return `<fieldset class="pw"><legend><b>${esc(q.t[i])}</b></legend>${q.h?`<p class="small muted" style="margin:2px 0 0">${esc(q.h[i])}</p>`:''}<div class="chips ${q.multi?'pickn':'pick1'}">${q.opts.filter(o=>!hide.includes(o.v)).map(o=>`<button type="button" class="chip" data-pw="${q.id}" data-v="${o.v}" aria-pressed="${on(o.v)}"><span>${esc(o.l[i])}</span></button>`).join('')}</div></fieldset>`; }).join(''); }
+  const esc=t=>String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const WRENCH='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M22.7 19.3l-8.6-8.6c.9-2.3.4-5-1.5-6.9C10.6 1.8 7.6 1.4 5.2 2.5l4.1 4.1-2.8 2.8-4.2-4.1C1.2 7.7 1.7 10.7 3.6 12.6c1.9 1.9 4.6 2.4 6.9 1.5l8.6 8.6c.4.4 1 .4 1.4 0l2.2-2.2c.4-.4.4-1 0-1.2z"/></svg>';
+  /* the line above the bars, with the wrench (data-act="nprof": the app opens the sheet) */
+  function lineHTML(p,fr,hide){ return `<div class="nprof"><p class="small muted">${fr?'Besoins calculés pour :':'Needs worked out for:'} ${esc(summary(p,fr,hide))}</p><button type="button" class="wrench" data-act="nprof" aria-label="${fr?'Changer ce qui sert à calculer les besoins':'Change what the needs are worked out from'}">${WRENCH}</button></div>`; }
+  /* the wrench's sheet, without its close button (each app frames its sheets). alone: the app's name when its sharing is off. */
+  function sheetHTML(p,fr,hide,alone){ return `<h3 id="sheetTitle">${fr?'Ce qui sert à calculer tes besoins':'What your needs are worked out from'}</h3><p class="small muted" style="margin:0">${alone?(fr?`Le partage avec les autres applis v3ktor.org est désactivé dans le menu, alors elles restent dans ${alone}.`:`Sharing with the other v3ktor.org apps is off in the menu, so these stay in ${alone}.`):(fr?'Les mêmes réponses dans chaque appli v3ktor.org sur ce téléphone : change-en une ici et les autres suivent. Rien ne quitte le téléphone.':'The same answers in every v3ktor.org app on this phone: change one here and the others follow. Nothing leaves the phone.')}</p>${askHTML(p,fr,hide)}`; }
   /* shared by every V3KTOR app on this phone, in its browser storage (nothing leaves the phone): the answers and when they last changed.
      Each app keeps its own copy too; the newer one wins. */
   const SHARE='v3k.profile.v1';
   function shared(){ try{ const o=JSON.parse(localStorage.getItem(SHARE)||'null'); return o&&o.p&&typeof o.p==='object'&&typeof o.t==='number'?o:null; }catch(e){ return null; } }
-  function share(p){ const t=Date.now(); try{ localStorage.setItem(SHARE,JSON.stringify({v:1,t,p})); }catch(e){} return t; }
+  /* a write keeps what another app wrote and this one doesn't ask (an answer is changed, never taken away) */
+  function share(p){ const t=Date.now(), old=shared(); try{ localStorage.setItem(SHARE,JSON.stringify({v:1,t,p:Object.assign({},old?old.p:{},p)})); }catch(e){} return t; }
   function unshare(){ try{ localStorage.removeItem(SHARE); }catch(e){} }
-  return {NUT, needs, band, BAND, ASK, pick, summary, askHTML, SHARE, shared, share, unshare};
+  return {NUT, needs, band, BAND, ASK, pick, summary, askHTML, lineHTML, sheetHTML, SHARE, shared, share, unshare};
 })();
 /* ==== end of shared/nutrition.js ==== */
