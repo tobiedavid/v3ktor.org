@@ -73,4 +73,4 @@ Each food in the Food Trial Log carries gut groups (`ftl_gut_groups`) and a mark
 
 ## A figure that looks wrong
 
-Every figure and every rule above is here to be checked. If a figure looks wrong, or a source has a better one, open an issue at [github.com/tobiedavid/v3ktor.org/issues](https://github.com/tobiedavid/v3ktor.org/issues), in English or French, and say which food and which source. A rule that isn't a measurement (plain animal foods counting as no oxalate; water, sugar and oils counting as none) is marked as a rule.
+Every figure and every rule above is here to be checked. If a figure looks wrong, or a source has a better one, write to hello@v3ktor.app or open an issue at [github.com/tobiedavid/v3ktor.org/issues](https://github.com/tobiedavid/v3ktor.org/issues), in English or French, and say which food and which source. A rule that isn't a measurement (plain animal foods counting as no oxalate; water, sugar and oils counting as none) is marked as a rule.
