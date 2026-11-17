@@ -22,6 +22,8 @@ const NUT = ['kcal', 'prot', 'ca', 'fe', 'mg', 'k', 'na', 'zn', 'd', 'c', 'b1', 
 const NK = ['prot', 'fib', 'fe', 'mg', 'k', 'b1', 'b2', 'b3', 'b6', 'b12', 'fol', 'zn', 'se', 'cu', 'ca', 'c', 'e', 'd', 'va', 'ret', 'mn', 'vk'];
 const GROUPS = ['dairy', 'meat', 'grain', 'proc', 'drink', 'energy', 'alc', 'fruit', 'veg', 'sea', 'sup'], TAGS = ['hist', 'glu', 'swt'];
 const plain = s => s.replace(/ /g, ' '), list = s => s.trim() ? s.trim().split(/\s+/) : [];
+const GUTMK = { alc: 4, caf: 4, proc: 4, swt: 4, sup: 4, dairy: 3, fat: 3, sugar: 3, rawsea: 3, gluten: 2, fibre: 2, legume: 2, onion: 2, spicy: 2, hist: 2, veg: 1, fruit: 1, nuts: 1 };
+const MARK_SET = ['920101'];   // psyllium: its mark is set by hand, below its groups'
 const THR_MEAS = ['theo', 'nit', 'tyr', 'ox', 'pur', 'sat', 'mono', 'poly', 'frs', 'gluc', 'sucr', 'malt', 'gal', 'fruc', 'sorb', 'mann'];
 const THR_PORT = ['ga', 'cap', 'fru', 'gos', 'sulph', 'nitr', 'swt', 'flav', 'glu'], THR_NOFIG = THR_MEAS.concat(THR_PORT, ['caf', 'na']);
 const HIST_TYPES = ['beer', 'wine_red', 'wine_white', 'fish', 'sausage', 'ripened_meat', 'meat', 'cheese', 'hard_cheese', 'dairy_other', 'sauce_other', 'veg_fermented'];
@@ -38,6 +40,13 @@ function check(f, n) { const where = `foods.csv, ${f.name_en || 'line ' + (n + 2
   if (!['', '1'].includes(f.label)) throw new Error(`${where}: label is 1 (values from a product label) or blank`);
   for (const t of list(f.tags)) if (!TAGS.includes(t)) throw new Error(`${where}: tag "${t}" is not one of ${TAGS.join(', ')}`);
   for (const k of list(f.lack)) if (!NUT.includes(k)) throw new Error(`${where}: lack lists "${k}", which is not a nutrient column`);
+  // the Food Trial Log's gut groups and mark (data/README.md): the mark is the highest of the groups' marks; fibre is 4.9 g or more;
+  // 15 g of fat or more is in the fat group (fried food, oily fish and oils are too, below that)
+  if (f.in_ftl === '1') { const g = list(f.ftl_gut_groups);
+    for (const x of g) if (!(x in GUTMK)) throw new Error(`${where}: gut group "${x}" is not one of ${Object.keys(GUTMK).join(', ')}`);
+    if (!MARK_SET.includes(f.id) && +f.ftl_mark !== Math.max(0, ...g.map(x => GUTMK[x]))) throw new Error(`${where}: the mark is the highest mark of its gut groups, ${Math.max(0, ...g.map(x => GUTMK[x]))}`);
+    if (f.group !== 'sup' && f.fib !== '' && (+f.fib >= 4.9) !== g.includes('fibre')) throw new Error(`${where}: the fibre group is 4.9 g of fibre or more`);
+    if (+f.fat >= 15 && !g.includes('fat')) throw new Error(`${where}: 15 g of fat or more is in the fat group`); }
   // the Threshold Log's columns (in_threshold): amounts per serving, as for the rest
   if (!['0', '1'].includes(f.in_threshold)) throw new Error(`${where}: in_threshold must be 1 or 0`);
   for (const k of ['carb', 'sug', 'alc', 'hist'].concat(THR_MEAS)) if (f[k] !== '' && !(isFinite(+f[k]) && +f[k] >= 0)) throw new Error(`${where}: ${k} must be a number, 0 or more, or blank`);
