@@ -566,7 +566,7 @@ async function open(browser, base, o) {
       ok('[french] a message that sends to the menu names the menu item as the menu writes it', named.length >= 2 && named.every(n => items.some(t => t.trim() === n)), JSON.stringify([named, items]));
       await page.evaluate(() => closeSheet());
       // a serving's adjective agrees with its food: these twelve are feminine, or a size
-      const want = { 1704: '1 moyenne', 1696: '1 moyenne', 1722: '1 moyenne', 1731: '1 moyenne', 2506: '1 moyenne', 2380: '1 moyenne', 2460: '1 moyenne', 2241: '1 moyenne', 2225: '½ moyenne', 4049: '1 grosse', 2501: '2 petites', 2185: '1 format moyen' };
+      const want = { 1704: '1 moyenne', 1696: '1 moyenne', 1722: '1 moyenne', 1731: '1 moyenne', 2506: '1 moyenne', 2380: '1 moyenne', 2460: '1 moyenne', 2241: '1 moyenne', 2225: '½ moyenne', 4049: '1 grande', 2501: '2 petites', 2185: '1 format moyen' };
       same('[french] the serving agrees with the food', await page.evaluate(ids => { const o = {}; for (const id of ids) o[id] = FB['f' + id].s[1]; return o; }, Object.keys(want).map(Number)), want);
       same('[french] and their English servings are as they were', await page.evaluate(() => [FB.f1704.s[0], FB.f4049.s[0], FB.f2501.s[0], FB.f2185.s[0]]), ['1 medium', '1 large', '2 small', '1 medium']);
       same('[french] a day the app counts is « une journée », and what is left out agrees with it', await page.evaluate(() => [unitWord('day', 1), unitWord('day', 3), unitWord('meal', 3), /laissé\$\{mode==='day'\?'e':''\}/.test(vThr.toString()), /laissé\$\{B\.mode==='day'\?'e':''\}/.test(rowSheet.toString())]), ['journée', 'journées', 'repas', true, true]);
