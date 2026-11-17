@@ -21,11 +21,10 @@ The app ships as one file, but it is written in parts, in `tools/threshold/src/`
 | Part | What it is |
 |---|---|
 | `shell_head.html`, `style.css`, `shell_mid.html`, `shell_tail.html` | the page around the app, and its styles |
-| `data.json` | the food table, made by the three steps below |
 | `engine.js` | the reading rules: no screen, no storage; the tests run it on plain Node |
 | `app_a.js`, `app_b.js`, `app_c.js` | the screens |
 
-`node tools/threshold/build.js --write` puts them together into `app/index.html`, with the shared Nutrition pieces from `shared/`. Run alone, it checks that `app/index.html` is exactly what the parts build; the test run does the same, so a change made only in the built file fails. Inside `app/index.html`, the food table sits between `/* DATA:START */` and `/* DATA:END */`, and the reading rules between `/* ENGINE:START */` and `/* ENGINE:END */`. The tests read both straight out of the file.
+`node tools/threshold/build.js --write` puts them together into `app/index.html`, with the food table from `data/foods.csv` and the shared Nutrition pieces from `shared/`. Run alone, it checks that `app/index.html` is exactly what the parts build; the test run does the same, so a change made only in the built file fails. Inside `app/index.html`, the food table sits between `/* DATA:START */` and `/* DATA:END */`, and the reading rules between `/* ENGINE:START */` and `/* ENGINE:END */`. The tests read both straight out of the file.
 
 After building, run `node tools/stamp_cache.js` so the offline copy gets a new name and phones fetch the new file.
 
@@ -33,19 +32,8 @@ The page's pictures: `node tools/threshold/pictures.js <folder>` takes them from
 
 ## Where the numbers come from
 
-- **Names, servings, groups, vitamins and minerals:** the Food Trial Log's table (205 foods), itself from The Patch. The Threshold Log adds three entries of its own, from Health Canada's file: water ("Water, municipal"), plain sparkling water and flavoured sparkling water (both "Water, mineral, carbonated, bottled"). Sparkling water's minerals carry no figure, because a mineral water and carbonated tap water differ many times over.
-- **Energy, protein, fat, carbohydrate, sugars, fibre, alcohol:** Health Canada's Canadian Nutrient File, 2015, per serving, for the 186 foods that carry its FoodID. Contains information licensed under the [Open Government Licence – Canada](https://open.canada.ca/en/open-government-licence-canada). Fourteen foods come from a label or a typical value; their sugars are "not listed".
-- **Lactose:** The Patch's table.
-- **Histamine, estimated:** the serving's weight times the average for its food type in Table 10 of EFSA Journal 2011;9(10):2393 (EFSA Panel on Biological Hazards, *Scientific Opinion on risk based control of biogenic amine formation in fermented foods*). An average by food type, not a measurement of any food. Four histamine foods fit no category and carry no figure.
-- **Caffeine, theobromine:** Health Canada's Canadian Nutrient File, 2015, per serving. Branded cans carry the figure on their label, as The Patch's table has it. A caffeine pill has no figure.
-- **Nitrate, estimated:** the serving's weight times the median for the vegetable in EFSA Journal 2008;689, Tables 2 to 10.
-- **The kinds of fat and sugar, sodium, excess fructose (since 0.5.0):** Health Canada's file, per serving: saturated, monounsaturated and polyunsaturated fat; fructose, glucose, sucrose, maltose and galactose (lactose stays The Patch's); sodium; excess fructose is fructose minus glucose, where fructose is the larger. Below half a gram of fat, or below 2 g of sugars whose kinds aren't listed, a blank kind counts as none; above that the food has no figure and a meal holding it sits out of that row, as a meal with a caffeine pill sits out of caffeine. Trans fat is left out: Health Canada gives it for 88 of the 186 foods. A label food's sodium is The Patch's figure; sparkling water's sodium has no figure, like its other minerals. **Selenium:** the table's own figure, the one the Nutrition tab shows.
-- **Sorbitol, mannitol (since 0.5.0):** measured, grams per 100 g, times the serving's weight: Muir et al., J Agric Food Chem 2009;57:554, and Yao et al., J Hum Nutr Diet 2014;27 Suppl 2:263, as listed in Liljebo et al., BMC Nutrition 2020;6:47, Additional file 1 (CC BY 4.0); Chumpitazi et al., J Pediatr 2018;199:252, Table 1, where not detected counts as none. Avocado and bell peppers have no figure for either: the source gives their polyols together.
-- **Tyramine, estimated (since 0.5.0):** the serving's weight times the average for its food type in Table 11 of the same EFSA opinion, with the same food types as histamine.
-- **Oxalate (since 0.5.1):** measured, mg per household serving, in the Harvard oxalate list, Kidney Stone Diet (Jill Harris), version 2.3.1: its 2023 revised list where it names the food, else the original list in the same file. The list's serving is brought to the app's by weight: an ounce is 28.35 g; a US cup, fluid ounce or tablespoon is weighed with Health Canada's own measure of the same food; "one", "a slice" or "1 tbsp" counts as the app's own unit. 38 foods the list doesn't name have no figure, and a meal with one sits out of the row (instant coffee: the list has instant decaf only; almond, cashew or oat milk: the list's almond milk and its other plant milks differ a hundredfold; watermelon: its slice has no weight).
-- **Purines (since 0.5.1):** measured, mg per 100 g, times the serving's weight, in the USDA and ODS-NIH Database for the Purine Content of Foods, 2023: the total of the four purine bases. Table 1 (North American samples) where it has the food, else Table 2; beer, wine and whiskey from Table 3, mg per 100 ml, where the regular beer's blank total is its four bases added up. Two rows for one food: their mean. The raw figure where the database has no cooked one; bacon is counted on its raw weight. Peanut butter takes the peanut figure and tahini the sesame figure. 99 foods the database doesn't name have no figure, coffee, tea, colas and most fruit among them.
-- **Water, sugar and oils** (water, sparkling water, sugar, coconut oil, fish oil) count as no oxalate and no purines where the source has no row for them: the list gives water and sugar as 0, the database gives butter as not detected, and none of the five holds plant or animal cells.
-- **Counted in portions, with no figure per serving:** potato glycoalkaloids (EFSA Journal 2020;18(8):6222), capsaicin, fructans and galacto-oligosaccharides (Monash University's list of where FODMAPs are found; green peas from Biesiekierski et al. 2011 via Liljebo et al. 2020), sulphites (Health Canada's list of foods that often contain them), added nitrites (cured meats), sweeteners and gluten (the Food Trial Log's own tags), and flavourings (tagged by the kind of drink, not from a label: colas, energy drinks, the ready-to-drink protein shake and flavoured sparkling water; Health Canada's file has no ingredient lists, so other foods that can list a flavour are not tagged). `tools/threshold/add_compounds.py` holds each list.
+Every food figure is in `data/foods.csv`, the food file the three apps share (since 0.5.2 the Threshold Log reads it too, when it is built). `data/README.md` says what each column holds and where each figure comes from: Health Canada's Canadian Nutrient File, the EFSA estimates, the measured polyols, the Harvard oxalate list, the USDA purine database, and the lists counted in portions.
+
 - **What a flavouring can hold** (the Flavourings sheet): Food and Drug Regulations, section B.01.009(2) and (3): a label may name a flavouring preparation without its components, and salt, glutamic acid or its salts, hydrolyzed plant protein, aspartame, potassium chloride and any component that has an effect on the food are still shown. Health Canada, List of Permitted Solvents, as modified on 2025-10-20, for the carrier solvents permitted in flavours. Canadian Food Inspection Agency, *List of ingredients and allergens on food labels*, for what is still declared inside a flavouring: priority allergens, gluten sources and added sulphites at 10 parts per million or more. The sheet says what a flavouring can hold and nothing about what any of it does.
 - **A food added from its label** carries what the person ticks on its form: a flavour, a sweetener, sulphites, nitrites.
 - **Left out:** phenethylamine, salicylates, lectins and phytates. No source read for this version gives them food by food.
@@ -53,14 +41,11 @@ The page's pictures: `node tools/threshold/pictures.js <folder>` takes them from
 
 Nothing is guessed: a value with no source stays "not listed" or "no figure", and a meal that holds one stays out of the line it would have fed.
 
-To rebuild the table (Health Canada's CSV files are not in this repository; the download address is at the top of `build_data.py`):
+To change a food: edit its row in `data/foods.csv`, then
 
 ```
-node tools/threshold/dump_tables.js . tables.json
-python3 -I tools/threshold/build_data.py tables.json <folder with Health Canada's CSV files> data.json
-python3 -I tools/threshold/add_compounds.py data.json <folder with Health Canada's CSV files> tables.json
-cp data.json tools/threshold/src/data.json
-node tools/threshold/build.js --write
+node tools/foods/pack.js --write      # The Patch and the Food Trial Log
+node tools/threshold/build.js --write # the Threshold Log
 node tools/stamp_cache.js
 ```
 
