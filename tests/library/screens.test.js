@@ -67,6 +67,19 @@ const NEVER = /\b(safe|avoid|should|trigger|healthy|unhealthy)\b|sécuritaire|é
         ok(T(`${c.id}: Done goes back to the section and marks the card`), (await page.locator(`.cardrow[data-v="${c.id}"] .n`).innerText()).includes('✓'));
       }
       }
+      // the Fuel stop opens on its map: every token opens a real card at a real picture, labels stay inside, Enter works
+      await page.click('.topbar [data-act="home"]'); await page.waitForTimeout(60);
+      await page.locator('svg .stop[data-v="fuel"]').click(); await page.waitForTimeout(60);
+      const toks = await page.evaluate(() => [...document.querySelectorAll('svg.map .mtok')].map(g => ({ id: g.dataset.v, i: +g.dataset.i, ok: !!CARDS.find(c => c.id === g.dataset.v && +g.dataset.i < c.f.length) && !!g.getAttribute('aria-label') })));
+      ok(T('fuel: the map has a token for each helper and fuel'), toks.length >= 20, String(toks.length));
+      ok(T('fuel: every map token opens a real card at a real picture, and has a name'), toks.every(t => t.ok), toks.filter(t => !t.ok).map(t => t.id + ' ' + t.i).join(' '));
+      const mout = await page.evaluate(() => { const s = document.querySelector('svg.map'), vb = s.viewBox.baseVal, bad = [];
+        for (const t of s.querySelectorAll('text')) { const b = t.getBBox(); if (b.x < -0.5 || b.y < -0.5 || b.x + b.width > vb.width + 0.5 || b.y + b.height > vb.height + 0.5) bad.push(t.textContent); }
+        return bad; });
+      ok(T('fuel: every map label inside the map'), !mout.length, mout.join(' | '));
+      ok(T('fuel: the map fits the screen'), await fits()); await words('the Fuel map');
+      await page.locator('svg.map .mtok[data-v="magnesium"][data-i="1"]').focus(); await page.keyboard.press('Enter'); await page.waitForTimeout(60);
+      ok(T('fuel: Enter on a map token opens its card at that picture'), (await page.locator('#bar .small').innerText()).replace(/\s+/g, ' ').includes('2 / 13'));
       // a stop with one card says « 1 card », not « 1 cards »
       await page.click('.topbar [data-act="home"]'); await page.waitForTimeout(60);
       ok(T('home: one card is singular'), !/\b1 (cards|cartes)\b/.test(await page.locator('.cardrow').allInnerTexts().then(a => a.join(' '))));
