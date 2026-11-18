@@ -141,7 +141,7 @@ ol.inst{margin:4px 0 14px;padding-left:1.4em} ol.inst li{margin:0 0 9px} .ico{di
 .ftitle h3{margin:0}
 .stop{cursor:pointer}
 .stop:focus{outline:none}
-.stop:focus-visible circle{stroke:var(--accent);stroke-width:3}
+.stop:focus-visible circle{stroke:var(--accent);stroke-width:3} .mtok{cursor:pointer} .mtok:focus{outline:none} .mtok:focus-visible .hit{stroke:var(--accent);stroke-width:3} .map{margin:8px 0 4px}
 .cardrow{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;width:100%;text-align:left;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:14px;padding:12px 14px;font:inherit;cursor:pointer;margin:0 0 8px;box-shadow:var(--shadow);min-height:56px}
 .cardrow b{font-family:ui-serif,Georgia,'Times New Roman',serif;font-size:1.05rem}
 .cardrow small{grid-column:1;color:var(--muted);font-size:.88rem;line-height:1.35}
@@ -160,7 +160,7 @@ ol.srcs{padding-left:1.3em;font-size:.9rem} ol.srcs li{margin:0 0 6px}
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" tabindex="-1" aria-hidden="true"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
-const VER='0.26.0', CONSENT=1, KEY='v3k.library.v1';
+const VER='0.27.0', CONSENT=1, KEY='v3k.library.v1';
 const FRAMED=(()=>{ try{ return window.self!==window.top; }catch(e){ return true; } })();
 const STANDALONE=(()=>{ try{ return !!(navigator.standalone||matchMedia('(display-mode: standalone)').matches); }catch(e){ return false; } })();
 const UA=navigator.userAgent||'', IOS=/iPad|iPhone|iPod/.test(UA)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1), ANDROID=/Android/.test(UA), SAFARI=IOS&&/Safari\//.test(UA)&&!/CriOS|FxiOS|EdgiOS|OPiOS|FBAN|FBAV|Instagram/.test(UA), CHROME=ANDROID&&/Chrome\//.test(UA)&&!/SamsungBrowser|EdgA|OPR\/|Firefox|; wv\)|FBAN|FBAV|Instagram/.test(UA);
@@ -3366,9 +3366,37 @@ function vHome(){ const done=CARDS.filter(c=>S.seen[c.id]).length;
     return `<button type="button" class="cardrow${n?'':' soon'}" data-act="sec" data-v="${sec.id}"><b>${sec.n}. ${esc(P(sec.t))}</b><span class="n">${n?(n===1?L('1 card','1 carte'):L(`${n} cards`,`${n} cartes`)):L('soon','bientôt')}</span><small>${esc(P(sec.d))}</small></button>`; }).join('')}</div>
   <p class="mine">${done?L(`${done} of ${CARDS.length} cards read to the end.`,`${done} carte${done>1?'s':''} sur ${CARDS.length} lue${done>1?'s':''} jusqu’au bout.`):L('One picture at a time. Tap Next when it’s clear.','Une image à la fois. Appuie sur Suivant quand c’est clair.')}</p>`; }
 
+/* ---------- the Fuel stop's map ----------
+   Each helper sits in every group whose job it does, as the cards already show it; a tap opens the card at the picture
+   that shows that job. A helper in more than one group gets an amber ring. Every placement is sourced on the card it
+   opens: bones (Calcium, vitamin D and vitamin K 1, 5, 6; Magnesium 8), blood and oxygen (Iron 1, 5; B12 and folate 4),
+   energy (Magnesium 2; What slows the power plant 6; Tiny batteries 6), fluids and nerves (Water and salt 2; Magnesium 9;
+   Calcium, vitamin D and vitamin K 2), with fat (Where each nutrient gets in 5), stored fuel (The body's fuel tanks 1, 3, 8).
+   Picture numbers here count from 1; the code's indexes count from 0. */
+const MAPN={Ca:['Calcium','Calcium'],P:['Phosphorus','Phosphore'],D:['Vitamin D','Vitamine D'],K:['Vitamin K','Vitamine K'],Mg:['Magnesium','Magnésium'],Fe:['Iron','Fer'],B12:['Vitamin B12','Vitamine B12'],B9:['Folate (vitamin B9)','Folate (vitamine B9)'],C:['Vitamin C','Vitamine C'],B:['B vitamins','Vitamines B'],Cu:['Copper','Cuivre'],Na:['Sodium','Sodium'],'K+':['Potassium','Potassium'],A:['Vitamin A','Vitamine A'],E:['Vitamin E','Vitamine E']};
+const MAP=[
+  [['Bones','Os'],'cell',0.3,[['Ca','calcium-d-k',0],['P','calcium-d-k',0],['D','calcium-d-k',4],['K','calcium-d-k',5],['Mg','magnesium',7]]],
+  [['Blood, oxygen','Sang, oxygène'],'heart',0.14,[['Fe','iron',0],['B12','b12-folate',3],['B9','b12-folate',3],['C','iron',4]]],
+  [['Energy (ATP)','Énergie (ATP)'],'fuel',0.16,[['Mg','magnesium',1],['B','slow-plant',5],['Fe','tiny-batteries',5],['Cu','slow-plant',5]]],
+  [['Fluids, nerves','Liquides, nerfs'],'oxy',0.25,[['Na','water-salt',1],['K+','water-salt',1],['Mg','magnesium',8],['Ca','calcium-d-k',1]]],
+  [['With fat','Avec le gras'],'fat',0.4,[['A','where-in',4],['D','where-in',4],['E','where-in',4],['K','where-in',4]]],
+  [['Stored fuel','Réserves'],'cell',0.15,[[['sugar','sucre'],'fuel-tanks',2,'fuel'],[['fat','gras'],'fuel-tanks',0,'fat'],[['protein','protéines'],'fuel-tanks',7,'cell']]]];
+function fuelMap(){ const cnt={}; MAP.forEach(g=>g[3].forEach(t=>{ if(typeof t[0]==='string') cnt[t[0]]=(cnt[t[0]]||0)+1; }));
+  const tok=(inner,id,i,name)=>{ const c=cardById(id); return `<g class="mtok" role="link" tabindex="0" data-act="card" data-v="${id}" data-i="${i}" aria-label="${esc(name+': '+P(c.t)+', '+L('picture','image')+' '+(i+1))}">${inner}</g>`; };
+  let s='';
+  MAP.forEach(([t,col,o,toks],gi)=>{ const x=6+(gi%3)*122, y=4+Math.floor(gi/3)*108;
+    s+=`<rect x="${x}" y="${y}" width="116" height="102" rx="12" fill="${C[col]}" fill-opacity="${o}"/>`+tx(x+58,y+15,P(t),'middle','lbi');
+    toks.forEach((tk,i)=>{
+      if(typeof tk[0]==='string'){ const [code,id,pi]=tk, cx=x+24+(i%3)*34, cy=y+46+Math.floor(i/3)*34;
+        s+=tok(`<circle class="hit" cx="${cx}" cy="${cy}" r="17" fill="transparent"/>`+(cnt[code]>1?`<circle cx="${cx}" cy="${cy}" r="16" fill="none" stroke="${C.fuel}" stroke-width="2.4"/>`:'')+helper(cx,cy,code),id,pi,P(MAPN[code])); }
+      else { const [nm,id,pi,fc]=tk, yy=y+30+i*23;
+        s+=tok(`<rect class="hit" x="${x+14}" y="${yy}" width="88" height="19" rx="9.5" fill="${C[fc]}" fill-opacity="${fc==='cell'?0.7:0.85}"/>`+tx(x+58,yy+10,P(nm),'middle','lbi'),id,pi,P(nm)); } }); });
+  return `<h3 style="margin:14px 0 2px">${L('How the helpers connect','Comment les aides se relient')}</h3>
+  <svg class="pic map" viewBox="0 0 380 216" role="group" aria-label="${esc(L('How the helpers connect: tap a helper or a fuel to open the picture that shows its job','Comment les aides se relient\u00a0: touche une aide ou un carburant pour ouvrir l’image qui montre son rôle'))}">${s}</svg>
+  <p class="small muted" style="margin:2px 0 10px">${L('Tap a helper or a fuel to open the picture that shows its job. A ringed helper works in more than one group. K is vitamin K; K+ is potassium.','Touche une aide ou un carburant pour ouvrir l’image qui montre son rôle. Une aide encerclée travaille dans plus d’un groupe. K, c’est la vitamine K; K+, le potassium.')}</p>`; }
 /* ---------- a section: its cards ---------- */
 function vSec(){ const sec=secById(V.id), list=CARDS.filter(c=>c.sec===sec.id);
-  return `<div class="eyebrow">${L('Stop','Arrêt')} ${sec.n}</div><h2>${esc(P(sec.t))}</h2><p class="muted">${esc(P(sec.d))}</p>
+  return `<div class="eyebrow">${L('Stop','Arrêt')} ${sec.n}</div><h2>${esc(P(sec.t))}</h2><p class="muted">${esc(P(sec.d))}</p>${sec.id==='fuel'?fuelMap():''}
   ${list.length?list.map(c=>`<button type="button" class="cardrow" data-act="card" data-v="${c.id}"><b>${esc(P(c.t))}</b><span class="n">${S.seen[c.id]?'✓ ':''}${L(`${c.f.length} pictures`,`${c.f.length} images`)}</span><small>${esc(P(c.d))}</small></button>`).join('')
     :`<div class="card soft"><p class="small" style="margin:0">${L('Being written. Energy comes first, because the energy app will link to it.','En cours d’écriture. L’énergie vient en premier, parce que l’app sur l’énergie va y renvoyer.')}</p></div>`}
   <p style="margin-top:14px"><button type="button" class="lnk" data-act="home">← ${L('All six stops','Les six arrêts')}</button></p>`; }
@@ -3437,7 +3465,7 @@ const ACT={
   lang:b=>{ S.lang=b.dataset.v; const was=sheet.classList.contains('on'); closeSheet(); render(); if(was) toast(L('Language changed','Langue changée')); },
   enter:()=>{ S.ack=true; S.ackAt=new Date().toISOString(); S.cv=CONSENT; render(); },
   sec:b=>{ closeSheet(); go({v:'sec',id:b.dataset.v}); },
-  card:b=>{ closeSheet(); go({v:'card',id:b.dataset.v,i:0}); },
+  card:b=>{ closeSheet(); go({v:'card',id:b.dataset.v,i:+(b.dataset.i||0)}); },
   next:()=>step(1), prev:()=>step(-1),
   install:()=>{ closeSheet(); const p=window.INSTALL; if(p){ p.prompt(); p.userChoice.then(()=>{ window.INSTALL=null; }).catch(()=>{}); } else installSheet(); },
   instno:()=>{ try{ localStorage.setItem(KEY+'.noinst','1'); }catch(e){} const pill=document.getElementById('installPill'); if(pill) pill.remove(); render(); }
@@ -3445,6 +3473,7 @@ const ACT={
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-act]'); if(!b||b.disabled) return; const f=ACT[b.dataset.act]; if(!f) return; e.preventDefault(); f(b,e); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeSheet(); return; }
   const st=e.target.closest&&e.target.closest('.stop'); if(st&&(e.key==='Enter'||e.key===' ')){ e.preventDefault(); ACT.sec(st); return; }
+  const mt=e.target.closest&&e.target.closest('.mtok'); if(mt&&(e.key==='Enter'||e.key===' ')){ e.preventDefault(); ACT.card(mt); return; }
   if(sheet.classList.contains('on')||!S.ack||V.v!=='card') return; if(e.target.closest('input,textarea,select')) return;
   if(e.key==='ArrowRight'){ e.preventDefault(); step(1); } if(e.key==='ArrowLeft'){ e.preventDefault(); step(-1); } });
 sheetBg.addEventListener('click',closeSheet);
