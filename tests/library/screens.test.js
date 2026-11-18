@@ -80,6 +80,11 @@ const NEVER = /\b(safe|avoid|should|trigger|healthy|unhealthy)\b|sécuritaire|é
       ok(T('fuel: the map fits the screen'), await fits()); await words('the Fuel map');
       await page.locator('svg.map .mtok[data-v="magnesium"][data-i="1"]').focus(); await page.keyboard.press('Enter'); await page.waitForTimeout(60);
       ok(T('fuel: Enter on a map token opens its card at that picture'), (await page.locator('#bar .small').innerText()).replace(/\s+/g, ' ').includes('2 / 13'));
+      // under the map, a link opens the card on what trials measured
+      await page.click('.topbar [data-act="home"]'); await page.waitForTimeout(60);
+      await page.locator('svg .stop[data-v="fuel"]').click(); await page.waitForTimeout(60);
+      await page.locator('.lnk[data-act="card"][data-v="helper-trials"]').click(); await page.waitForTimeout(60);
+      ok(T('fuel: the link under the map opens Helpers put to the test'), (await page.locator('#bar .small').innerText()).replace(/\s+/g, ' ').includes('1 / 9'));
       // a stop with one card says « 1 card », not « 1 cards »
       await page.click('.topbar [data-act="home"]'); await page.waitForTimeout(60);
       ok(T('home: one card is singular'), !/\b1 (cards|cartes)\b/.test(await page.locator('.cardrow').allInnerTexts().then(a => a.join(' '))));
