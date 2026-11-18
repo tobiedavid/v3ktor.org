@@ -77,6 +77,12 @@ for (const c of CARDS) {
   ok(`card ${c.id}: the last picture is graded`, !!GRADE[c.f[c.f.length - 1][2]]);
 }
 for (const k of Object.keys(SRC)) { ok(`source ${k} is cited by a card`, cited.has(k)); ok(`source ${k}: https link and both names`, /^https:\/\//.test(SRC[k].u) && SRC[k].l[0] && SRC[k].l[1]); }
+// a key written twice in SRC silently keeps only the last one, so the check reads the source text, not the object
+{ const s = html.indexOf('const SRC={'), e = html.indexOf('/* the fixed line on every card');
+  const keys = (html.slice(s, e).match(/^\s+([A-Za-z0-9_]+)\s*:\s*\{\s*l\s*:/gm) || []).map(m => m.trim().split(/\s*:/)[0]);
+  const dup = keys.filter((k, i) => keys.indexOf(k) !== i);
+  ok('the source list is found', s > 0 && e > s && keys.length === Object.keys(SRC).length, keys.length + ' written, ' + Object.keys(SRC).length + ' kept');
+  ok('no source key is written twice', !dup.length, dup.join(', ')); }
 
 console.log(fail ? `${fail} failed, ${pass} passed` : `ok ${pass} checks, ${CARDS.length} cards, ${CARDS.reduce((n, c) => n + c.f.length, 0)} pictures`);
 process.exit(fail ? 1 : 0);
