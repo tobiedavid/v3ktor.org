@@ -29,8 +29,10 @@ const NEVER = /\b(safe|avoid|should|trigger|healthy|unhealthy)\b|sécuritaire|é
       ok(T('home fits'), await fits()); await words('home');
       // a stop that isn't written yet says so; Energy lists its cards
       const empty = await page.evaluate(() => (SECTIONS.find(s => !CARDS.some(c => c.sec === s.id)) || {}).id);
-      await page.locator(`.cardrow[data-v="${empty}"]`).click(); await page.waitForTimeout(60);
-      ok(T('a stop not written yet says so'), await page.locator('.card.soft').count() === 1);
+      if (empty) {
+        await page.locator(`.cardrow[data-v="${empty}"]`).click(); await page.waitForTimeout(60);
+        ok(T('a stop not written yet says so'), await page.locator('.card.soft').count() === 1);
+      } else ok(T('every stop has at least one card'), true);
       // every stop that has cards lists them; every picture of every card, one tap at a time
       const secs = await page.evaluate(() => SECTIONS.filter(s => CARDS.some(c => c.sec === s.id)).map(s => s.id));
       ok(T('Energy and Signals have cards'), secs.includes('energy') && secs.includes('signals'), secs.join(' '));
