@@ -19,6 +19,9 @@ const NEVER = /\b(safe|avoid|should|trigger|healthy|unhealthy)\b|sécuritaire|é
       const words = async where => { const t = await page.evaluate(() => document.body.innerText); ok(T(where + ': none of the words the apps never use'), !NEVER.test(t), (t.match(NEVER) || [])[0]); };
       // a card opened from its address before the door: the door first, then that card
       await page.goto(base + '#brain-fuel'); await page.waitForTimeout(150);
+      // the app's own font, in its three weights, before any label is measured
+      const fontsIn = await page.evaluate(() => Promise.all(['400 13px Inter', '600 13px Inter', '700 13px Inter'].map(f => document.fonts.load(f))).then(r => r.map(x => x.length), e => ['not loaded: ' + e.message]));
+      ok(T('the app draws in its own copy of Inter (400, 600, 700)'), fontsIn.every(n => n === 1) && await page.evaluate(() => getComputedStyle(document.body).fontFamily.startsWith('Inter')), fontsIn.join(','));
       ok(T('the door comes first, with its five statements'), await page.locator('.gate ol li').count() === 5);
       ok(T('the door fits a 320-pixel screen'), await fits()); await words('the door');
       await page.click('[data-act="enter"]'); await page.waitForTimeout(80);

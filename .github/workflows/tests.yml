@@ -25,23 +25,5 @@ jobs:
         run: |
           npm install --no-save --no-package-lock playwright@1.63.0
           npx playwright install --with-deps chromium
-      - name: Draw text in Inter, the font the label checks were written against
-        # On the runner, system-ui falls back to DejaVu Sans, about 8 % wider than Inter, so Library labels that fit
-        # in local runs (and in phone fonts of Inter's width) failed "every label inside the picture" here.
-        run: |
-          sudo apt-get install -y fonts-inter
-          sudo tee /etc/fonts/conf.d/56-prefer-inter.conf > /dev/null <<'EOF'
-          <?xml version="1.0"?>
-          <!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
-          <fontconfig>
-            <alias><family>system-ui</family><prefer><family>Inter</family></prefer></alias>
-            <alias><family>ui-sans-serif</family><prefer><family>Inter</family></prefer></alias>
-            <alias><family>-apple-system</family><prefer><family>Inter</family></prefer></alias>
-            <alias><family>Segoe UI</family><prefer><family>Inter</family></prefer></alias>
-            <alias><family>sans-serif</family><prefer><family>Inter</family></prefer></alias>
-          </fontconfig>
-          EOF
-          fc-cache -f
-          echo "system-ui is now: $(fc-match system-ui)"
       - name: Every screen, both languages, and the six-week walkthroughs
         run: node tests/run.js --browser

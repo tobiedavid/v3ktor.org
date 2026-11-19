@@ -19,3 +19,4 @@ How the body works, one picture at a time. The other V3KTOR apps measure what ha
 - The cards sit between `/* ==== COLOURS` and `/* ==== end of CARDS ==== */`; the tests read them from there.
 - After changing the app: `node tools/stamp_cache.js`, then `node tests/run.js`.
 - `tools/library/make_icons.js` draws the icons (an open book on the family's orange square).
+- **Its own font.** `library/app/fonts/` holds a subset of Inter 4.0 (three weights, about 155 KB in all, SIL Open Font License, `fonts/OFL.txt`), cached for offline use like the rest of the app. Every screen draws its words and the labels in its pictures in the same letters the screen test measures, whatever font the reader's system would pick. `python3 tools/library_font.py` rebuilds it from the Inter OTF files (from the `fonts-inter` package); run it again if a card brings a character outside the ranges it lists.
