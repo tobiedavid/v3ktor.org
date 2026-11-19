@@ -81,8 +81,9 @@ const NEVER = /\b(safe|avoid|should|trigger|healthy|unhealthy)\b|sécuritaire|é
         return bad; });
       ok(T('fuel: every map label inside the map'), !mout.length, mout.join(' | '));
       ok(T('fuel: the map fits the screen'), await fits()); await words('the Fuel map');
-      await page.locator('svg.map .mtok[data-v="magnesium"][data-i="1"]').focus(); await page.keyboard.press('Enter'); await page.waitForTimeout(60);
-      ok(T('fuel: Enter on a map token opens its card at that picture'), (await page.locator('#bar .small').innerText()).replace(/\s+/g, ' ').includes('2 / 13'));
+      const mgTok = page.locator('svg.map .mtok[data-v="magnesium"]').first(), mgI = +(await mgTok.getAttribute('data-i')), mgN = await page.evaluate(() => CARDS.find(c => c.id === 'magnesium').f.length);
+      await mgTok.focus(); await page.keyboard.press('Enter'); await page.waitForTimeout(60);
+      ok(T('fuel: Enter on a map token opens its card at that picture'), (await page.locator('#bar .small').innerText()).replace(/\s+/g, ' ').includes(`${mgI + 1} / ${mgN}`));
       // under the map, a link opens the card on what trials measured
       await page.click('.topbar [data-act="home"]'); await page.waitForTimeout(60);
       await page.locator('svg .stop[data-v="fuel"]').click(); await page.waitForTimeout(60);
