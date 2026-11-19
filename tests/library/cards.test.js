@@ -20,6 +20,7 @@ const ctx = { S, esc: s => String(s == null ? '' : s).replace(/[&<>"']/g, c => (
 vm.createContext(ctx);
 vm.runInContext(html.slice(a, b) + '\n;this.out={C,COLOURS,SRC,GRADE,SECTIONS,CARDS,RX};', ctx);
 const { C, COLOURS, SRC, GRADE, SECTIONS, CARDS, RX } = ctx.out;
+ok('a card that marks where its basics end keeps at least 3 basics and some details after', CARDS.filter(c => 'basics' in c).every(c => Number.isInteger(c.basics) && c.basics >= 3 && c.basics < c.f.length));
 ok('a card about stimulants carries the fixed line on medicines', CARDS.filter(c => /stimulant/i.test(JSON.stringify(c.f.map(f => f[1])))).every(c => c.drug === true));
 
 // words the apps never use (report, never advise)
