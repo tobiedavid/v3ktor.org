@@ -1,7 +1,7 @@
 /* The Library — offline cache. A new app version changes CACHE, so phones pick it up on the next open with a connection.
    Copyright (C) 2026  Tobie David · SPDX-License-Identifier: AGPL-3.0-or-later, with two terms under its section 7 (see the notice
    at the top of index.html) · https://github.com/tobiedavid/v3ktor.org */
-const CACHE='library-0.35.1-b1141e6c';
+const CACHE='library-0.35.1-6d2b5efe';
 const SHELL=['./','index.html','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','icons/maskable-512.png','icons/apple-touch-icon.png','icons/favicon-32.png','fonts/Inter-Regular.woff','fonts/Inter-SemiBold.woff','fonts/Inter-Bold.woff'];
 self.addEventListener('install',e=>{ e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())); });
 self.addEventListener('activate',e=>{ e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k.startsWith('library-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())); });
